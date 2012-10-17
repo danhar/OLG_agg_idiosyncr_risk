@@ -1,0 +1,62 @@
+
+--------------------------------------------------------------------------------
+Naming conventions
+--------------------------------------------------------------------------------
+- See http://fortranwiki.org/fortran/show/Source+conventions
+- everything small cap, only exception: procedures, when they are not internal to the caller
+- no implicit typing
+- attach c for counters
+- attach p for prime, indicating a value next period
+- attach m for minus, indicating a value last period
+- these will frequently be combined: xpc is a counter for xp, i.e. x tomorrow
+- optional variables have _o
+- derived types are preceded by t, e.g. tAggGrids, tPolicies
+- attach ge for general equilibrium, pe for partial equilibrium
+- ms for mean shock
+- lc for life-cycle
+- if (print_progress) print*,'- xxx ', precede the message with - 
+- Naming of projects: new number whenever changes that can't reproduce previous results (eg epss vs epss2 vs epss3)
+- Naming of versions: attach _iiai to project name
+
+--------------------------------------------------------------------------------
+Coding conventions
+--------------------------------------------------------------------------------
+- Verbose naming style. Self-documenting code through object orientation, intent specification
+- Object orientation: derived types, information hiding
+- Implicit none
+- Everything in modules
+- pure procedures whereever possible (with explicit pure keyword)
+- If sensible, store multi-dimensional arrays in Fortan's natural memory allocation 
+	order, which is column-major. E.g. the fastest-changing variables in
+	do-loops should be in the first dimension. For policies, the ordering
+	(nx,nz,nj,nk,nmu) seems most efficient. This also helps a lot when writing 
+	results to file.
+- Explicit about intrinsic types and kinds. Since integers have an exact real representation on almost all systems, I write 1.0 instead of 1.0_dp
+
+--------------------------------------------------------------------------------
+Compiler
+--------------------------------------------------------------------------------
+Requires F2003 compliant compiler. Only tested with Intel Fortran Composer XE (ifort 2011).
+To compile with latest Gfortran, need to change in main.f90 the line
+'use ifport ,only: system  ! Intel Fortran portability library'
+
+--------------------------------------------------------------------------------
+External libraries
+--------------------------------------------------------------------------------
+Required libraries
+- LAPACK 95 (included in Intel MKL)
+- OpenMP (not yet implemented)
+
+Optional libraries
+- plotting tools (Gnuplot)
+
+Other (not used) libraries
+- VNI IMSL Fortran Numerical Library, Version 6.0
+Just for reference, here are the names of some routines that might be helpful.
+On how to use IMSL, see /home/isildur/work/Tech/Linux/Fortran on Linux/setting_up_IMSL_Linux.txt .
+Pages refer to the User's Guide PDF.
+
+bs3in   ! IMSL Math p. 725ff: return B-spline-coeffs of 3d tensor-product spline
+bsnak   ! IMSL Math p. 715ff: get spline knot sequence
+zreal   ! IMSL Math p. 1195f: Mullers Method to find roots (like secant but quadratic)
+rlse    ! IMSL Stat p. 107ff: multiple linear regression using least squares

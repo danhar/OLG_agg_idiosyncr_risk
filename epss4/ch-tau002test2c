@@ -1,0 +1,47 @@
+#!/bin/sh -l
+
+# #PBS -q devel
+#PBS -l nodes=1:ppn=1
+#PBS -l mem=4gb
+#PBS -l walltime=8:59:00
+#PBS -A AG-Ludwig
+#PBS -m e
+#PBS -j oe
+#PBS -o qsub_output.txt
+
+echo `cat $PBS_NODEFILE`
+export NCORES=`cat $PBS_NODEFILE | wc -l`
+export NNODES=`uniq $PBS_NODEFILE | wc -l`
+
+module load intel/12.1
+module load mkl/10.3
+module load matlab
+
+cd $PBS_O_WORKDIR
+
+thisrun="${PWD##*/}"
+
+cd Build_Optim
+make clean
+make all &>../shell_output.txt
+cd ..
+
+./Build_Optim/epss3_01b >>shell_output.txt 2>&1
+
+mv shell_output.txt ./model_output/shell_output.txt
+tar -cjf results.tar.bz2 model_output model_input
+# ssh frbw.grid.uni-mannheim.de "ssh isildur@makrowi7.vwl.uni-mannheim.de 'scp -r dharenbe@cheops.rrz.uni-koeln.de:~/$thisrun/model_output dharenbe@cheops.rrz.uni-koeln.de:~/$thisrun/model_input ~/Tempdh/Cheops/$thisrun'"
+
+
+
+
+
+
+
+################### Alternatives #####################
+# Get the name (without .txt) of the current calibration_file used
+# calib_id = "${EPSSDIR%%/*}" 
+
+# Run multiple times with different calibration files as input
+# ./Build_Optim/ calib_ep/STY-IR03.txt >>shell_output.txt 2>&1
+# ./Build_Optim/ calib_ep/STY2noir.txt >>shell_output.txt 2>&1

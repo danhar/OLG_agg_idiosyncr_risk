@@ -1,0 +1,121 @@
+!!!!!! **** This is fully functional and numerically correct code. **** !!!!!!
+!!!!!! **** But I figured it doesn't make much economic sense:     **** !!!!!!
+!!!!!! **** for the mean shock equilibrium, don't need simulations **** !!!!!!
+
+module sub_simulate_mspe
+    implicit none
+contains
+
+pure subroutine s_simulate_mspe(policies, value, simvars, Phi, lc)
+    use mod_kinds,       only: dp, d0, d1
+    use mod_types,       only: tPolicies, tAggGrids, tSimvars, tLifecycle
+    use ParamsMod,      only: n_eta,nx,nj,nz,nt,n,g,L_N_ratio,pi_z,nugrid,etagrid,t_scrap
+    use mod_income,      only: f_netwage, f_pensions, f_netreturn, f_tau, zeta, delta
+    use Distribution, only: TransitionPhi
+    use Distribution, only: CheckPhi
+    use fun_aggregate_diff
+
+    type(tPolicies),  intent(in)    :: policies
+    real(dp), intent(in)            :: value(:,:,:,:,:)
+    type(tSimvars),   intent(inout) :: simvars      ! (zt, kt, mut, bt,...), first element contains starting values
+    real(dp),         intent(inout) :: Phi(:,:,:)    ! distribution
+    type(tLifecycle), intent(out)   :: lc   ! lifecycle profiles
+    real(dp), dimension(nx,nj,nz)   :: apgrid, kappa, xgrid    ! policies with nz in last position
+    real(dp), dimension(nx,nj)      :: eta_Phi ! eta*Phi in t
+    real(dp), dimension(n_eta,nx,nj):: Phi_avg
+    real(dp), dimension(nj)         :: ap_lct, stocks_lct
+    real(dp)  :: Kt, rt, netwaget, penst, Erp, bequests
+    integer   :: tc, jc, zt, zc
+
+    Phi_avg         = d0
+    lc              = tLifecycle(d0,d0,d0,d0)
+    simvars%err_K   = .false.
+    simvars%err_mu  = .false.
+
+    call set_policies(apgrid, kappa, xgrid)
+
+    Kt = simvars%K(1)
+    simvars%rf(1) = f_netreturn(Kt, d1, sum(delta)/nz)-simvars%mu(1)
+
+    do tc=1,nt
+        zt       = simvars%z(tc)
+
+        ! Prices
+        netwaget = f_netwage(Kt, zeta(zt))
+        penst    = f_pensions(Kt, zeta(zt))
+        rt       = f_netreturn(Kt, zeta(zt), delta(zt))
+
+        if (tc == 1) then ! do a very crude approximation which *only* affects first aggregate error
+        bequests = f_bequests(simvars%rf(tc), rt, kappa(:,:,simvars%z(tc)), apgrid(:,:,simvars%z(tc)), sum(Phi,1))
+        else
+        bequests = f_bequests(simvars%rf(tc), rt, kappa(:,:,simvars%z(tc-1)), apgrid(:,:,simvars%z(tc-1)), eta_Phi)
+        endif
+
+        ! Get distribution
+        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgrid(:,:,zt),apgrid(:,:,zt),kappa(:,:,zt),nugrid(:,zt), Phi)
+
+        do jc=1,nj
+            eta_Phi(:,jc) = matmul(etagrid(:,jc),Phi(:,:,jc))
+        enddo
+
+        call CheckPhi(Phi, simvars%Phi_1(tc), simvars%Phi_nx(tc))
+
+        ! Aggregate and write into simvars
+        simvars%K(tc+1) = sum(apgrid(:,:,zt)*kappa(:,:,zt)*eta_Phi)/(L_N_ratio*(d1+n)*(d1+g))
+        simvars%C(tc) = sum((xgrid(:,:,zt)-apgrid(:,:,zt))*eta_Phi)/L_N_ratio
+        simvars%B(tc) = sum(apgrid(:,:,zt)*(d1-kappa(:,:,zt))*eta_Phi)/L_N_ratio         ! These are 'per worker' variables
+        simvars%r(tc)   = rt
+        simvars%wage(tc)= netwaget
+        simvars%pens(tc)= penst
+        simvars%tau (tc)= f_tau(Kt, zeta(zt))
+        simvars%welf(tc)= dot_product(value(:,zt,1,1,1), sum(Phi(:,:,1),1))
+        simvars%err_aggr(tc) = f_aggregate_diff(simvars%K(tc), simvars%C(tc), bequests, apgrid(:,:,zt), &
+                                                      kappa(:,:,zt), zeta(zt), delta(zt), eta_Phi)
+        simvars%err_income(tc) = f_income_diff(simvars%K(tc), zeta(zt), simvars%r(tc), delta(zt))
+
+        ! Expected risky return
+        Erp = d0
+        do zc = 1,nz
+            Erp = Erp + pi_z(zt,zc)*f_netreturn(simvars%K(1), zeta(zc), delta(zc))
+        enddo
+        simvars%rf(tc+1)  = Erp - simvars%mu(1)
+        simvars%mu(tc)  = simvars%mu(1)
+
+        ! Average life cycle profiles and average Phi
+        if (tc > t_scrap) then ! 'Throw away' first t_scrap
+            ap_lct     = sum(apgrid(:,:,zt) * eta_Phi,1)
+            stocks_lct = sum(apgrid(:,:,zt) * eta_Phi * kappa(:,:,zt),1)
+	        lc%ap      = lc%ap    + ap_lct/(nt-t_scrap)
+	        lc%cons    = lc%cons  + sum((xgrid(:,:,zt)-apgrid(:,:,zt)) * eta_Phi,1)/(nt-t_scrap)
+	        lc%stock   = lc%stock + stocks_lct/(nt-t_scrap)
+	        !lc%kappa(:nj-1)   = lc%kappa(:nj-1) + stocks_lct(:nj-1)/ap_lct(:nj-1)/(nt-t_scrap) ! since apgrid(:,nj) =0
+	        Phi_avg    = Phi_avg  + Phi
+        endif
+    enddo
+    where (lc%ap .ne. d0)
+        lc%kappa = lc%stock/lc%ap
+    elsewhere
+        lc%kappa = d0
+    end where
+
+    Phi                = Phi_avg/(nt-t_scrap) ! In contrast to GE this makes sense, because all Phi defined on same xgrid
+
+contains
+!-------------------------------------------------------------------------------
+! Internal procedures in order:
+! - pure subroutine set_policies(apgrid, kappa, xgrid)
+!-------------------------------------------------------------------------------
+
+    pure subroutine set_policies(apgrid, kappa, xgrid)
+    ! Assign shorter names for better readability, AND put nz in last position (contiguous memory for each zt)
+    ! Should think whether I want to store policies in different order from beginning
+        real(dp), dimension(nx,nj,nz), intent(out)     :: apgrid,kappa,xgrid
+
+        apgrid = reshape(policies%apgrid(:,:,:,1,1), [nx,nj,nz], order=[1,3,2])
+        kappa  = reshape(policies%kappa(:,:,:,1,1),  [nx,nj,nz], order=[1,3,2])
+        xgrid  = reshape(policies%xgrid(:,:,:,1,1),  [nx,nj,nz], order=[1,3,2])
+
+    end subroutine set_policies
+
+end subroutine s_simulate_mspe
+end module sub_simulate_mspe

@@ -1,0 +1,38 @@
+module fun_cubspleval
+contains
+
+function f_cubspleval(xvec,breaks,coeffs)
+! evaluate a cubic spline and extrapolate linearly using exact derivative
+! I think (but not sure) that linear extrapolation is best (better than IMSL)
+
+    use mod_kinds, dp1 => d1
+    use csval_int		! IMSL Math.pdf, p. 699f: Cubic spline evaluation
+    use csder_int      	! IMSL Math.pdf, p. 700f: Cubic spline derivatives
+
+    implicit none
+    real(dp),dimension(:),intent(in) 		:: xvec	! values to be interpolated
+    real(dp),dimension(:),intent(in) 		:: breaks
+    real(dp),dimension(:,:),intent(in) 	:: coeffs
+    real(dp),dimension(size(xvec))			:: f_cubspleval
+    real(dp)                           		:: d1, f1
+    integer                            		:: i, nxd
+
+	! Is this correct when breaks are given by cscon?
+	! can't do where construct because IMSL procedures want scalar first argument
+    do i=1,size(xvec,1)
+        if (xvec(i)<breaks(1)) then
+        	f1=csval(breaks(1),breaks,coeffs)
+            d1=csder(1,breaks(1),breaks,coeffs)
+            f_cubspleval(i)=f1+(xvec(i)-breaks(1))*d1    ! higher degree Taylor would be easy but not necessarily better
+        elseif (xvec(i)>breaks(ubound(breaks,1))) then
+            nxd=ubound(breaks,1)
+            f1=csval(breaks(nxd),breaks,coeffs)
+            d1=csder(1,breaks(nxd),breaks,coeffs)
+            f_cubspleval(i)=f1+(xvec(i)-breaks(nxd))*d1
+        else
+            f_cubspleval(i)=csval(xvec(i),breaks,coeffs)
+        endif
+    enddo
+
+end function f_cubspleval
+end module fun_cubspleval

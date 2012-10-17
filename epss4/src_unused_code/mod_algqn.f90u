@@ -1,0 +1,92 @@
+module mod_algqn
+
+	use mod_kinds
+
+    implicit none
+
+    real(dp),allocatable			:: xvars(:)				! input to function fname
+    integer	,private				:: ng, rstit0			! number of equations, number of iterations before Broyden is restarted
+    integer,private				:: MaxLns, max_it 		! max no of line searches, max no of iterations
+    real(dp),private				:: weight
+	real(dp),private,allocatable	:: f_vals(:)			! output of function fname
+	real(dp),private,allocatable	:: Rmat(:,:),Qmat(:,:),diagRmat(:)	! Q-R-decomposition of Jacobian
+	logical	,private				:: intlj				! true: Jacobian and Q-R-decomp are computed in iteration 1, false: input Q and R
+	logical	,private				:: reevalj				! true: reevaulate Jacobian if line-search fails
+	real(dp),private 				:: tol_f, stpmax		! tolerance for f(x); scale maximum Newton step to stepmax
+	logical,private				:: check				! true if nonconvergent
+
+
+    contains
+
+	    subroutine modsub_set_algqn_opt(string)
+	    	use mod_params, only: nt
+	    	use mod_nrutils, only: put_diag
+
+			character (len = *), intent(in)		:: string
+
+			if (string=='msp') then	! taken from Params.f90 -> GSQN steady state
+				ng=2
+				weight= .3
+				rstit0 = 5
+				MaxLns = 20
+				tol_f= 1e-006
+				stpmax = 100.0
+				max_it = 20
+				reevalj=.true.
+				intlj=.true.
+
+			elseif (string=='transition') then		! taken from Params.f90 -> GSQN transition
+				ng=2*nt
+				weight=.05
+				rstit0 = 5
+				MaxLns = 5
+				tol_f= 1e-03
+				stpmax = .01
+				max_it = 50
+				intlj=.false.
+				reevalj=.false.
+			else
+				print *,'need to set variables for sub_alg_qn, see mod_algqn_opt'
+			endif
+
+			call modsub_allocate_vars()
+
+			! Initial diagonal iterational matrix
+			Rmat=0.0
+			diagRmat(:)=weight
+			diagRmat=d1/diagRmat
+			call put_diag(diagRmat,Rmat)
+
+	    end subroutine modsub_set_algqn_opt
+
+		subroutine modsub_algqn(fname)
+			external fname
+			external sub_alg_qn
+
+			call sub_alg_qn(fname,f_vals,xvars,ng,Qmat,Rmat,intlj,reevalj,check,rstit0,MaxLns,max_it,stpmax,tol_f)
+
+			if (check) then
+				print*, 'QN FAILURE'
+			else
+				print*, 'QN SUCCESS'
+			endif
+
+		end subroutine
+
+	    subroutine modsub_allocate_vars()
+			allocate(f_vals(ng))
+			allocate(xvars(ng))
+			allocate(Rmat(ng,ng))
+			allocate(Qmat(ng,ng))
+			allocate(diagRmat(ng))
+	    end subroutine
+
+	    subroutine modsub_deallocate_vars()
+			deallocate(f_vals)
+			deallocate(xvars)
+			deallocate(Rmat)
+			deallocate(Qmat)
+			deallocate(diagRmat)
+	    end subroutine
+
+end module mod_algqn

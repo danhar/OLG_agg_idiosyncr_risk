@@ -1,0 +1,97 @@
+! Calibration file Equity Premium Project. Change values but not format.
+! Short description of this specific calibration:
+! FD1: finite difference spec 1, see Table 2 of epsocsec_09Oct11.pdf
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Preferences and technology
+!----------------------------------------------------------------------------------------------------------------------------/ 
+theta           8.0     coefficient of relative risk aversion
+psi             1.5     elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
+beta            0.97    discount factor
+alpha           0.32    capital share
+g               0.018   growth rate of technology
+de_ratio        0.66    debt-equity-ratio. Alternatives: 2.0/3.0
+zeta_mean       1.00    mean of productivity shocks
+zeta_std        0.029   standard deviation of productivity shocks
+del_mean        0.06    mean of depreciation shocks
+del_std         0.11    std of depreciation shocks
+pi1_zeta        0.941   first element in transition matrix for zeta, pi_zeta(1,1). Alternatives: 2.0/3.0
+pi1_delta       0.86    first element in transition matrix for delta, pi_delta(1,1)
+nu_sigma_h      0.13    standard deviation of idiosyncratic risk in recession (CANNOT BE CHANGED, discrete etagrid hard-coded)
+nu_sigma_l      0.07    standard deviation of idiosyncratic risk in upswing   (CANNOT BE CHANGED, discrete etagrid hard-coded)
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Demographics    
+!----------------------------------------------------------------------------------------------------------------------------/
+nj              70      maximal age of cohorts
+jr              45      retirement age
+econ_life_start 21      biological age at j1
+n               0.011   population growth rate
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Model options and experiments
+!----------------------------------------------------------------------------------------------------------------------------/
+tau             0.00    tax rate. Alternatives: .12 , 0.0
+idiosync_risk   ccv     values: ccv, noccv, no_ir (no idiosyncr risk)
+scale_AR        1.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*scale_AR, same for delta_std
+scale_IR        1.0     scaling factor for idiosyncratic risk, i.e. etagrid(ec,:) = etagrid(ec,:)*scale_IR +(1.0-scale_IR)
+surv_rates      .true.  false = no survival rates
+def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)
+partial_equilibrium     .false.     If true, no GE computed, GE values read from file
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Grids (number of discrete grid points)
+!----------------------------------------------------------------------------------------------------------------------------/
+nap             20      exogenous grid for savings (ap= 'a prime')
+n_eta           2       grid for idiosyncratic stochastic state eta
+n_zeta          2       aggregate productivity shocks
+n_delta         2       depreciations shocks
+! Note: Number of aggregate states nz = n_zeta*n_delta 
+nk              10      grid for aggregate capital (per capita) k
+nmu             8       grid for ex-ante expected equity premium (mu)
+n_coeffs        3       coefficients in law of motion, for every state z
+nt              5000    simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         500     In simulations, throw away the first t_scrap.
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Numerical options and parameters
+!----------------------------------------------------------------------------------------------------------------------------/
+loms_in_logs            .false.     Takes logs of KS regressors to update coeffs of loms
+pooled_regression       .false.     one lom for all z
+estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
+opt_initial_ms_guess    1           select which guesses for mean shock r and mu to use (0,1,2). 0: use previous ms equilibrium values saved in ./input/guesses/last_ms_values.txt; 1: use parameter-sensitive hard-coded guesses; 2: use user-supplied guess in this calibration file
+exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations)
+save_all_iterations     .false.     during KS iteratins, save all results
+detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
+opt_zbren               .true.      true: use Brent's method (IMSL or NR, need outcomment), false: use Mueller's method (IMSL zreal)
+opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
+
+factor_k        1.66        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
+factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
+cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
+cover_mu        0.80        same. Alteratives .3, .4
+apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+
+cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
+kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
+apmax_curv      1.0         determines spacing over generations of apmax in apgrid
+! ap_numzero gives the min(apgrid) both in positive and negative in policyfunctions, and when to enter eulerasset
+ap_numzero      0.01 cmin   first value for j<=jr-1, second for j>jr-1
+
+! Tolerances (stopping criteria)
+tol_coeffs      1e-4        convergence criterion for coeffs
+tol_asset_eul   1e-8        policyfunctions: convergence criterion for kappa in asset_allocation
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Initial guesses
+!----------------------------------------------------------------------------------------------------------------------------/
+r_ms_guess      6.3e-2      OPTIONAL (only used if opt_initial_ms_guess=1) initial guess for risky return in 'mean shock equilibrium'
+mu_ms_guess     4.3e-2      OPTIONAL (only used if opt_initial_ms_guess=1) initial guess for equity premium in 'mean shock equilibrium'
+
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Annotations:
+! 1. The forward slash indicates end of record. It is is needed whenever there are less then 2 words after the !, 
+!    e.g. after the !--- , because there are no spaces or other separators to separate words.
+! 2. ap_numzero can be given the string 'cmin' instead of a real, because cmin is read first.
+!----------------------------------------------------------------------------------------------------------------------------/

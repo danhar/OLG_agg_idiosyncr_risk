@@ -1,0 +1,25 @@
+subroutine sub_myinterp1(x,f_x,xp,length_x,interp_value)
+
+	use mod_types
+	implicit none
+
+	integer, intent(in) :: length_x
+	real(dp), dimension(length_x), intent(in) :: x, f_x, xp
+	real(dp), dimension(length_x), intent(out) :: interp_value
+	integer, dimension(1) :: x_min
+	integer :: index_k, x_index
+	real (dp) :: t
+
+	do index_k = 1,length_x
+		x_min = minloc(abs(x-xp(index_k)))
+		x_index = x_min(1)
+
+		if (xp(index_k)<x(x_index)) x_index = x_index-1
+		x_index = max(x_index,1)
+		x_index = min(x_index,length_x-1)
+		t = (f_x(x_index+1)-f_x(x_index))/(x(x_index+1)-x(x_index))
+		interp_value(index_k) = t*(xp(index_k)-x(x_index))+f_x(x_index)
+	enddo
+
+end subroutine sub_myinterp1
+

@@ -1,0 +1,40 @@
+!module incomplete
+
+    interface f_projection ! So that I can extend this generic
+        module procedure f_projection_policy
+    end interface
+
+
+
+    pure function f_projection_policy_1D(policy, agg_grid, var, dimens) result(new_pol)
+        use fun_locate
+
+        type(tPolicies)                    :: new_pol
+        type(tPolicies), intent(in)        :: policy
+        real(dp), dimension(:), intent(in) :: agg_grid
+        real(dp), intent(in) :: var
+        integer, intent(in) :: dimens
+        real(dp):: w
+        integer :: i
+        
+        if (dimens == 4) then
+            nk  = 1
+            nmu = size(policy%apgrid,5)
+        elseif
+            nk  = size(policy%apgrid,4)
+            nmu = 1
+        endif
+
+        call M_allocate(new_pol, nk, nmu)
+        
+        i=f_locate(agg_grid,var)     ! In 'default', returns ju-1 if x>xgrid(ju-1) !
+    
+        ! Note that this also obtains for linear extrapolation at upper and lower bounds
+        w=(var-agg_grid(i))/(agg_grid(i+1)-agg_grid(i))
+        new_pol%xgrid=(1-w)*policy%xgrid(i)+w*fvals(i+1)
+
+
+        new_pol%xgrid = f_multilinear_interp(policy%xgrid,var,dimens)
+
+
+    end function f_projection_policy

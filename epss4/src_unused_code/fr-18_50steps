@@ -1,0 +1,37 @@
+#!/bin/sh
+
+
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=03:59:00
+#PBS -j oe
+#PBS -o qsub_output.txt
+
+# Ausgabe von Informationen:
+echo Running on host `hostname`
+echo This job runs on the following processors:
+echo `cat $PBS_NODEFILE`
+
+# Wechsle in das Verzeichnis, in dem das qsub Kommando ausgeführt wurde
+cd $PBS_O_WORKDIR
+echo Directory is `pwd`
+
+module load compiler/intel/12.0
+# module load mpi/openmpi/1.4.3-intel-12.0
+module load numlib/mkl/10.3.5
+module load math/matlab/R2012a
+
+# Start Ihrer Anwendung
+MKL_INC_DIR=$MKL_INC_DIR/intel64/lp64
+thisrun="${PWD##*/}"
+
+cd Debug_IA-32
+sed -i 's/-lmkl_lapack95 /-lmkl_lapack95_lp64 /g' objects.mk
+make clean
+make all &>../shell_output.txt
+cd ..
+
+./Debug_IA-32/epss2_18 >>shell_output.txt 2>&1
+
+mv shell_output.txt ./model_output/shell_output.txt
+
+scp -r model_output model_input isildur@makrowi7.vwl.uni-mannheim.de:~/Tempdh/frbw_output/$thisrun

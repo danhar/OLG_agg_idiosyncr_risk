@@ -1,0 +1,54 @@
+module sub_ols
+    implicit none
+
+    interface s_ols
+        module procedure s_multiple_ols, s_simple_ols
+    end interface s_ols
+
+contains
+
+pure subroutine s_multiple_ols()
+! rewrite the code provided by Philipp Eisenhauer
+! use mod_nrutils, only: inverse ! still need to put that there, take philipps mod.lin_algebra.f95
+end subroutine s_multiple_ols
+
+pure subroutine s_simple_ols(X,Y,a,b,d)
+! Simple linear least squares regression
+! Y = a + b X, and d, standard deviation of fit.
+    use mod_kinds, only: dp, d0
+
+    real(dp), dimension(:), intent(in) :: X, Y
+    real(dp), intent(out) ::   a,b,d
+    real(dp)              ::  a1,a2,b0,b1,d1
+    integer :: n, m
+    n = size(Y)
+    a1 = d0
+    a2 = d0
+    b0 = d0
+    b1 = d0
+    do m = 1, n
+        a1 = a1 + X(m)
+        a2 = a2 + X(m) * X(m)
+        b0 = b0 + Y(m)
+        b1 = b1 + Y(m) * X(m)
+    enddo
+    a1 = a1 / real(n,dp)
+    a2 = a2 / real(n,dp)
+    b0 = b0 / real(n,dp)
+    b1 = b1 / real(n,dp)
+    d = a1 * a1 - a2
+    a = a1 * b1 - a2 * b0
+    a = a / d
+    b = a1 * b0 - b1
+    b = b / d
+    !  Evaluation of standard deviation d (unbiased estimate)
+    d = d0
+    do m = 1, n
+        d1 = Y(m) - a - b * X(m)
+        d  = d + d1 * d1
+    enddo
+    d = sqrt(d / (real(n,dp) - 2.0_dp))
+
+end subroutine s_simple_ols
+
+end module sub_ols

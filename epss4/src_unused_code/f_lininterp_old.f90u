@@ -1,0 +1,40 @@
+! linear interpolation
+! compare to su_myinterp1.f90 of villaverde, maybe change!
+pure function f_lininterp(xgrid,fvals,x)
+
+    use mod_kinds
+    implicit none
+    real(dp),dimension(:),intent(in)   :: xgrid,fvals   ! x-values and function values at those x-values
+    real(dp),dimension(:),intent(in)   :: x             ! x values to interpolate
+    real(dp),dimension(size(x))        :: f_lininterp, weights1, weights2
+    integer ,dimension(size(x))        :: i, jl,ju,jm
+
+    jl=1
+    ju=size(xgrid)
+
+    do
+        if (all(ju-jl<=1)) exit
+        where (ju-jl>1)
+	        jm=(ju+jl)/2
+	        where (x>=xgrid(jm))
+	            jl=jm
+	        elsewhere
+	            ju=jm
+	        end where
+	    end where
+    end do
+
+    i=jl+1
+    where (x>xgrid(ju))     ! linear extrapolation on upper bound
+        weights2=(x-xgrid(i-1))/(xgrid(i)-xgrid(i-1))
+        f_lininterp=weights2*fvals(i)
+    elsewhere (x<xgrid(1))  ! linear extrapolation on lower bound
+        weights2=(x-xgrid(i-1))/(xgrid(i)-xgrid(i-1))
+        f_lininterp=fvals(i-1)+weights2*fvals(i-1)
+    elsewhere               ! interpolation (B-spline form)
+        weights2=(x-xgrid(i-1))/(xgrid(i)-xgrid(i-1))
+        weights1=(xgrid(i)-x)/(xgrid(i)-xgrid(i-1))
+        f_lininterp=weights1*fvals(i-1)+weights2*fvals(i)
+    end where
+
+end function f_lininterp

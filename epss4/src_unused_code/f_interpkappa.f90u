@@ -1,0 +1,40 @@
+! calculate optimal share kappa, complicated because of singularity when aprime=0
+function f_interpkappa(xgridj,kappaj,caht,jc,at)
+
+    use mod_kinds
+    use interfaces_num
+    use mod_params, only: nn, nx, opt_interpkappa
+    use mod_vars, only: apzero
+    implicit none
+    real(dp),dimension(nx),intent(in)           :: xgridj,kappaj
+    real(dp),dimension(nn),intent(in)           :: caht
+    real(dp),optional,dimension(nn),intent(in)  :: at
+    integer(i2),optional,intent(in)          :: jc
+    real(dp),dimension(nn)                      :: f_interpkappa
+    real(dp),dimension(:),allocatable           :: cah_t1, kappa_t1, cah_t2, kappa_t2
+    integer(i6)                               :: count_atn
+
+    if (opt_interpkappa==1) then ! cubic interpolation
+       if (.not. present(jc) .or. .not. present(at)) then
+           print*, 'Cubic interpolation of kappa needs both optional argumenst "jc" and "at"'
+           stop 'Program terminated by f_interpkappa()'
+       endif
+	   count_atn=count(at<0)
+	   allocate(cah_t1(count_atn),cah_t2(nn-count_atn),kappa_t1(count_atn),kappa_t2(nn-count_atn))
+	   where (at<0)
+	       cah_t1=caht
+	   elsewhere
+	       cah_t2=caht
+	   end where
+	   call sub_cubsplint(xgridj(1:apzero(jc)),kappaj(1:apzero(jc)),cah_t1,kappa_t1)
+	   call sub_cubsplint(xgridj(apzero(jc)+1:nx),kappaj(apzero(jc)+1:nx),cah_t2,kappa_t2)
+	   where (at<0)
+	       f_interpkappa=kappa_t1
+	   elsewhere
+	       f_interpkappa=kappa_t2
+	   end where
+	else                         ! linear interpolation
+	   f_interpkappa=f_lininterp(xgridj,kappaj,caht)
+	endif
+
+end function f_interpkappa

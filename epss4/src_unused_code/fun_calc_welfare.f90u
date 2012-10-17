@@ -1,0 +1,97 @@
+!!!!!! **** This is fully functional and numerically correct code. **** !!!!!!
+!!!!!! **** But I figured it doesn't make much economic sense:     **** !!!!!!
+!!!!!! **** we calc welfare directly whenever we have an equil     **** !!!!!!
+
+
+module fun_calc_welfare
+    implicit none
+    private
+    public f_calc_welfare
+
+    interface f_calc_welfare
+        module procedure f_calc_welfare_ms !, f_calc_welfare_ge
+    end interface
+
+contains
+
+	pure function f_calc_welfare_ms(value, xgrid, Phi_tilde_j1,xgrid_ms_old) result(welfare)
+	    use mod_kinds
+	    use ParamsMod, 	only: nx, nz, nj, stat_dist_z
+	    use fun_lininterp
+
+	    real(dp)    :: welfare
+	    real(dp), intent(in)  :: Phi_tilde_j1(nx), xgrid_ms_old(nx,nj) ! 'small' distribution of generation 1
+	    real(dp), dimension(:,:,:,:,:), intent(in)       :: xgrid, value
+        real(dp), dimension(nx) :: value_j1_ms, xgrid_j1_ms, Phi_tilde_j1_ms
+        real(dp) :: wz, wd
+        integer :: zc
+
+        value_j1_ms = d0
+        xgrid_j1_ms = d0
+        !!! ATTENTION THIS IS AGAIN ONLY FOR SPECIAL CASES
+        wd=0.5_dp
+        wz=0.5_dp
+        do zc = 1, nz
+            value_j1_ms     = value_j1_ms + wz*wd*value(:,zc,1,1,1)
+            xgrid_j1_ms     = xgrid_j1_ms + wz*wd*xgrid(:,zc,1,1,1)
+        enddo
+        Phi_tilde_j1_ms = f_lininterp(xgrid_ms_old(:,1),Phi_tilde_j1, xgrid_j1_ms)
+	    welfare = dot_product(Phi_tilde_j1_ms,value_j1_ms)
+
+	end function f_calc_welfare_ms
+!-------------------------------------------------------------------------------
+
+!	pure function f_calc_welfare_ge(policies, value, agg_grid, K_mean, mu_mean) result(welfare)
+!
+!	    use mod_kinds
+!	    use ParamsMod,     only: nx, nz, nj, stat_dist_z
+!
+!	    real(dp)    :: welfare
+!	    real(dp), dimension(:,:,:,:,:), intent(in)       :: value
+!        real(dp), intent(in) :: K_mean, mu_mean
+!        real(dp) :: wK, wmu
+!        integer :: iK, imu, zc
+!
+!        iK         = f_locate(agg_grid%K, K_mean)     ! In 'default', returns ju-1 if x>xgrid(ju-1) !
+!        wK         = (K_mean - agg_grid%K(iK)) / (agg_grid%K(iK+1) - agg_grid%K(iK))
+!        imu        = f_locate(agg_grid%mu, mu_mean)
+!        wmu        = (mu_mean - agg_grid%mu(imu)) / (agg_grid%mu(imu+1) - agg_grid%mu(imu))
+!
+!
+!
+!        apgridt = (1-wK)*(1-wmu)*policies%apgrid(:,:,:,iK  ,imu  ) + &
+!                     wK *(1-wmu)*policies%apgrid(:,:,:,iK+1,imu  ) + &
+!                  (1-wK)*   wmu *policies%apgrid(:,:,:,iK  ,imu+1) + &
+!                     wK *   wmu *policies%apgrid(:,:,:,iK+1,imu+1)
+!
+!        stockst = (1-wK)*(1-wmu)*policies%kappa(:,:,:,iK  ,imu  )*policies%apgrid(:,:,:,iK  ,imu  ) + &
+!                     wK *(1-wmu)*policies%kappa(:,:,:,iK+1,imu  )*policies%apgrid(:,:,:,iK+1,imu  ) + &
+!                  (1-wK)*   wmu *policies%kappa(:,:,:,iK  ,imu+1)*policies%apgrid(:,:,:,iK  ,imu+1) + &
+!                     wK *   wmu *policies%kappa(:,:,:,iK+1,imu+1)*policies%apgrid(:,:,:,iK+1,imu+1)
+!
+!        where (apgridt .ne. d0)
+!            kappat = stockst/apgridt
+!        elsewhere
+!            kappat = d0
+!        end where
+!
+!        Er0        = d0
+!        do zc=1,nz
+!            rt       = f_netreturn(K_mean, zeta(zt), delta(zt))
+!            Er0 = Er0 + stat_dist_z(zc)*f_netreturn(K_mean, zeta(zc), delta(zc))
+!        enddo
+!        rf  = Er0 - mu_mean
+!
+!        do zc=1,nz
+!	        netwaget = f_netwage(Kt, zeta(zt))
+!	        penst    = f_pensions(Kt, zeta(zt))
+!	        rt       = f_netreturn(Kt, zeta(zt), delta(zt))
+!            Phi      = TransitionPhi(rf,rt,netwaget,penst,xgridt,apgridt,kappat,nugrid(:,zt), Phi)
+!
+!
+!	    welfare = dot_product(stat_dist_z, matmul(Phi_tilde_j1,value(:,:,1,1,1)))
+!
+!	end function f_calc_welfare_ge
+
+
+end module fun_calc_welfare

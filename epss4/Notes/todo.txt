@@ -1,0 +1,128 @@
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (A) Next steps 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+epss2_
+- interpolate on stocks and bonds instead of kappa
+
+epss2_
+- one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
+    this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
+       At the moment very hackish to distinguish forecasting mu' from k'. 
+- in save_results_mod, write regressors (k, k**2, etc) on top of each separately (for k' and mu')
+- clean up initialize_coeffs, remove agg_grid_o
+
+epss2_
+start   -03-12
+end     -03-12
+- add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
+
+epss2_
+- remove calc of kappa where not necessary, use stocks directly, and bondst = apgridt - stockst
+    - probably also remove ap_numzero, instead rely on the if (ap==0.0) in calc_policyfunctions:asset_allocation
+
+epss2_
+- paralellize household solution (first try with do concurrent, if that doesnt work maybe also try openmp)
+
+epss2_
+- rewrite unformatted IO to use form='unformatted', access='stream' for better portability
+    (first only change the unformatted write, then run all calibrations, then change the unformatted read)
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (B) To do
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- bequests to the young
+- simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
+- have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
+    This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
+    But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
+- implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
+- use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
+        -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
+- arithmetic operations on tPolicies?
+- pol_zk = Interpolate(pol,dim=3,w)
+- splines to interpolate stocks and bonds? and consumption in euler equations?
+- record and report stats for gross wages (important when def benefits) (in simulations and save_results)
+- correct eigenvalue calc of stationary distribution (in module markov_station_distr, see also params_mod:CheckParams), check codes/Fortran/Bewley_by_Karibzhanov/source/toolbox   
+- remove a lot of the use params_mod, in particular in the specification part of a module (e.g. krusell_smith.f90). Instead, use sourced allocation and the like.
+- remove many allocate(some_array(n)) to use automatic allocation on assignment (compiler option -assume realloc_lhs)
+- maybe remove apmax_factor from the calibration files, and put it as a parameter when creating the apmax for ms. It's not needed later (for GE)
+- maybe allow for fractions in calibration files (e.g. 1/3). For this, in ReadCalib, put '(3(a,:))' (: being a stop rule), then scan for \ and make the 
+    division, if \ is found. Hoever, this doesnt allow 1/theta directly. Also, prob need to remove the / in the separator lines.
+- clean up files: merge rootfinders into one module rootfinder and tools (like linesearch, fdjac); merge the 3 markov*.f90 files and the twostate_exact.f90;
+    merge tools like fun_kronprod.f90 and numrec_utils into utils. Clean up all the usage of these, e.g. of markov* in params_mod   
+- check why opt_zbrak=.true. takes so much longer (might just be curse of dimensionality)
+
+Object orientation:
+- put the write and reads (formatted and unformatted) into the types. This avoids cirularities, e.g. in subroutine SetRemainingParams() can call ReadUnformatted(ms_guess).
+  Do this both for unformatted_IO.f90, as well as for save_results_mod.f90
+- make aggregate grids with type-bound procedures. Maybe just call it grid? And put makegrid in there? and use it also for apgrid?
+- lifecycles_mod with calculation of lifecycles, consistent both with mean shock and simulations
+- for lifecycles, make 'sub'type with avg and std_dev, and record for all; maybe also avg_cond std_dev_cond (conditional on survival). 
+    Also make a write statement similar to the aggregate stats.  put pop_frac in lifecycles
+- in simulations, use a tLifecycle 'lc_t' to record in t, and define an operator (+) to add that to the lifecylce 
+- put type policyfunctions in policyfunctions.f90 and make solution a method 'solve'
+- Make type params and have a method that distributes the params to the objects that need them, e.g. policyfunctions. No more need for all the use statements
+    Then I can have an allocatable type params in main, see how many runs we have (depends on experiment / number of calibs), then allocate and have a params
+    for each, which I then pass by argument to start_solution, which has a scalar type params as input.
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (C) To do later/ ideas
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- If any(apmin_exog <0) and (kappa_in_01), then it can happen that agents use the stock for borrowing.
+    In particular, this can happen if (read_apmin).
+    Similarly, if apmin_exog<0 and (collateral_constraint) then policyfunctions:consumption:446 sets 
+    cons_out = cmin/100.0 which is only true for apmin_exog = 0.
+    Overall, the case  apmin_exog<0 is a bit buggy.
+
+- make finer grid for distribution as proposed by Rios-Rull (in Marimon/Scott) and Heer/Maussner ?
+
+- allow for subfolders in model_input/ep_calib (and other calbration directories). For this, maybe want to keep the subdirectory as part of the calib_name.
+    In that case, need to check that the mkdir command creates all necessary parent directories. Also need to ensure that cal_id keeps the subdir (search for the
+    first /).
+
+- maybe: put start_solution(.,ms) and start_solution(.,ge) in main, then distinguish the two cases in start_solution_mod with if statements,
+    because tehre is some redundancy. In a similar spirit, I could move some of the steps into meanshock_wrapper and create an analogous
+    krusell_smith_wrapper (which contains the current internal_subroutine_krusellsmith()). In a similar spirit, I could move the pseudo-simulation step
+    from meanshock_wrapper to meanshock_equilib to keep it analogous to krusell_smith.f90. Actually, regarding the last sentence, I would prefer to
+    just call the simulate_economy from meanshock_wrapper, because then the statistics are more comparable to the ge case. 
+     
+- at the very beginning of (the new) main, read the unformatted simvars from the subdirectory with the corresponding calib_id, if it exists,
+    else read from model_input/last_results. Subsequent runs will use the previously calculated output, and subsequent calibs can be specified to use
+    their own or the last results.
+
+- replace Intel's system(string) subroutine, which is a non-portable extension, with the F2008 execute_command_line(string),
+    which is already supported by Gfortran. It is not yet supported by the Intel Fortran compiler. Don't forget to remove the use ifport
+
+- errors_mod: either initialize err%cons and err%asset with xp in first dimensioon, or save to file with explicit format. At the moment the
+files written to disk are quite unusable. Also, setting detailed_euler_errs=.true. should write to file, not to stdout, because it's too much for stdout.
+- move "if (errs%not_converged) call errs%write2file(fvals, output_path)" 
+  from meanshock_wrapper and main:internal_subroutine_krusellsmith())
+  to save_results_mod. For this need to put fvals into err, make allocatable.
+  This helps to make the procedures pure, and alos more logical: all saving to file is done in save_results_mod
+  See whether can clean up krusell_smith:get_krusellsmith and meanshock_equilib:ms_equilib_get; they are a bit messy because of
+  the errs%not_converged (This should not be a prob once errs is passed as an object in the rootfinder... alternatively could overload the assignment operator) 
+
+- put mod_errors into sub_policyfunctions, and treat like print_errors(simvars) in sub_simulate_ge??
+Not so sure, coz need type errors also in sub_saveresults
+maybe do as a submodule, coz sub_policyfunctions becomes too large
+anyway, the printing of errors should come right after call s_policyfunctions
+and should treat err_cons and err_asset the same as err_kp and err_mup.
+also should make err_mup(nz), allocate accordingly.
+Remove the optional on errors (everywhere!)
+
+- move value into policies
+
+- in fun_eulerasset I do Taylor approx IFF xp<x(1,j+1). Should also do for upper bound? And also for consumption-Euler?!
+- create derived types for  loms (has types coeffs and grids), prices (wages etc)?
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (D) Only maybe
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- change depreciation to have its own dimension? affects probabilities, and ups_grid, ups_sigma
+
+- maybe mod_demographics.f90?
+ 
+- Copyleft: http://www.gnu.org/copyleft/gpl-howto.html

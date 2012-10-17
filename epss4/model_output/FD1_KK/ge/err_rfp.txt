@@ -1,0 +1,8 @@
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F F
+ T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F
+ T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F
+ T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F T T F F

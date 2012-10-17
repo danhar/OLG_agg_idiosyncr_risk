@@ -1,0 +1,19 @@
+module sub_visualcheck
+
+contains
+subroutine s_visualcheck(kappa_st,a_st)
+
+    use ifport, only: system
+    use mod_kinds
+    use sub_var2file
+
+    implicit none
+    real(dp),dimension(:,:),intent(in)   :: a_st, kappa_st
+    integer             :: err_matl
+
+    call s_var2file(kappa_st,'kappa_st')
+    call s_var2file(a_st,'a_st')
+    err_matl=system('cd ~/Documents/work/Research/SocSecReform/EPSocSec/code/epss_v4/Matlab && matlab -nodesktop -nosplash -r plot_stationary')
+
+end subroutine s_visualcheck
+end module sub_visualcheck

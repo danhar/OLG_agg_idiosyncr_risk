@@ -1,0 +1,50 @@
+module fun_setapmax
+    use kinds
+    use params_mod, only: nj, jr
+    implicit none
+    private
+    public f_setapmax
+
+    interface f_setapmax
+        module procedure f_setapmax_all, f_setapmax_j
+    end interface
+
+contains
+
+	pure function f_setapmax_all(k, mu, factor, curv_o) result(apmax)
+    ! This is a very adhoc function, based on trials
+	    use makegrid_mod
+	    real(dp), dimension(nj) :: apmax
+	    real(dp), intent(in)    :: k, mu, factor
+	    real(dp), intent(in), optional :: curv_o
+	    real(dp)                :: curv, guess   ! guess a constant as basis for min and max of grid
+	    integer                 :: jmax
+
+	    if (present(curv_o)) then
+	        curv = curv_o
+	    else
+	        curv = 1.0
+	    endif
+
+	    jmax =jr-1
+
+	    guess         = k*(1.0+mu)
+	    apmax(1)      = guess/2.0_dp    ! calc wage?
+	    apmax(nj)     = guess*2.0_dp    ! determins max cons of nj, and apmax(:,nj-1)
+	    apmax(jmax)   = guess*factor
+	    apmax(jmax:1:-1)     = -MakeGrid(-apmax(jmax),-apmax(1),jmax, 1.0/curv)
+	    ! apmax(zc,1:jmax)      = MakeGrid(apmax(zc,1),apmax(zc,jmax),jmax,1.0) !0.5_dp
+	    apmax(jmax+1:nj-1)   = MakeGrid(apmax(jmax),apmax(nj),nj-jmax-1, curv) !2.0_dp
+	end function f_setapmax_all
+
+	pure function f_setapmax_j(k, mu, j, factor, curv_o) result(apmax)
+        real(dp)   :: apmax
+        real(dp), intent(in)    :: k, mu, factor
+        integer, intent(in)     :: j
+        real(dp), intent(in), optional :: curv_o
+        real(dp), dimension(nj) :: apmax_all
+        apmax_all = f_setapmax_all(k, mu, factor, curv_o)
+        apmax = apmax_all(j)
+	end function f_setapmax_j
+
+end module fun_setapmax

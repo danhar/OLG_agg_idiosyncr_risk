@@ -1,0 +1,553 @@
+
+- simvars should read and write output unformatted also, see  subroutine SaveUnformatted_ksvars in unformatted_io.f90 and laws_of_motion.f90:ReadUnformatted
+
+epss4
+- moving to git versioning system
+
+epss3_01b  start 011012 end 031012
+- move to 64bit
+- move to latest Intel Fortran compiler (Composer XE 2013)
+- move to latest Eclipse / Photran (Juno / 8.02)
+- move to ETH's Brutus cluster
+- replicate old results
+- isolate denormal numbers that might create wrong results on local machine
+- initialize rpf_med, rpf_kapm (at least for mean shock)
+- in laws_of_motion.f90:Regression, change LAPACK function gels to gelsy, because the former seemed to be buggy on Composer XE 2013 / MKL 11.0. Also, gelsy more robust.
+
+
+------------------------------------------------------------------------------------
+
+epss2_18f2
+start  -06-12   ---   end  -06-12
+- remove simvars%r_pf_kappa_med everywhere
+- clean up run_model_mod:inverted_average_mpk. Where / how should I compute the cases?
+
+epss2_18f
+start  12-06-12   ---   end  -06-12
+- calculate median portfolio return and returns of median pf
+
+epss2_18e
+start  09-06-12   ---   end  11-06-12
+- use mean shock code for scale_AR = -1, i.e. the no AR economy
+- different calculations of interest rate to be used in no AR economy
+
+epss2_18d
+start  09-06-12   ---   end  11-06-12
+- twosided experiments. both increase and decrease risk around baseline
+
+epss2_18c
+start  07-06-12   ---   end  09-06-12
+- save both welfare numbers and cev in one file if tau_experiment and scale
+- Matlab program cev_regressions
+- implement no AR economy (i.e. scale_AR==-1)
+
+epss2_18 based on 17e2
+start  06-06-12   ---   end  06-06-12
+- run regression experiments to identify LCI etc.
+- replicate old results    
+
+epss2_17g - discontinued!
+start   21-04-12
+end     -04-12
+- introduced apmin_exog - but is still a bit buggy, see todo.txt (C)
+- introduced hidden option read_apmin
+- first, need to write apmin.unformatted
+
+epss2_17f works, but disontinued!
+start   15-04-12
+end     15-04-12
+- introduce tau_steps
+
+epss2_17e2
+start   15-04-12
+end     15-04-12
+- improve scale_IR==-1 case
+- recalibrate
+
+epss2_17e
+start   13-04-12
+end     15-04-12
+- renamed start_solution to run_model
+- better export/printing of graphs (axes were autmotatically adjustes badly)
+- GMnoIR experiments
+
+epss2_17d
+start   10-04-12
+end     12-04-12
+- run updated FD1_KK calibration, test experiment 
+- put on dropbox
+
+epss2_17c
+start   10-04-12
+end     12-04-12
+- make n_eta=5 work (eta mean not equal one). For this, corrected the calc of etagrid in params_mod
+- introduced testsuite (so far only for discretization of idiosyncratic risk)
+- run experiments
+
+epss2_17b2
+start   08-04-12
+end     10-04-12
+- try to get scaleIR to converge: attnt: undo modifications in main and start_solution_mod
+- improvements to policyfunctions:asset_allocation
+- removed NaNs in mean shock equilibrium_short.txt
+- policyfunctions:consumption if (collateral_constraint .and. xc ==1) then  cons_out = cmin_/100.0_!!!
+- introduced run_counter_start in main (and params.mod)
+
+epss2_17b
+start   07-04-12
+end     08-04-12
+- updated job and shell file for frbw
+- compute covariances instead of correlations
+- experiments
+
+epss2_17
+start   04-04-12
+end     06-04-12
+- experiments
+
+epss2_16d2
+start   03-04-12
+end     04-04-12
+- Gini coefficients code included in statistics, but not linked to scalapack (needs different linking options)
+- cleaned up unused_code, todo.txt, version_history.txt.
+
+epss2_16d
+start   02-04-12
+end     03-04-12
+- save investment over simulations
+- write correlations with output
+
+epss2_16c3b
+start   01-04-12
+end     02-04-12
+- correct errors from 16c3
+
+epss2_16c3 -erroneous
+start   29-03-12
+end     31-03-12
+- return welfare number to main and save
+- implement socsec experiment (+2 %), save CEVs, do this also for reduce AR stepwise 
+
+epss2_16c2
+start   30-03-12
+end     30-03-12
+- just do one loop in main
+
+epss2_16c - this version has two loops (one for IR, one for AR)
+start   30-03-12
+end     29-03-12
+- implement experiment reduce IR stepwise
+- implement experiment reduce AR stepwise 
+- changed cheops.sh to only copy the necessary files (it took too long)
+
+epss2_16b2
+start   28-03-12
+end     29-03-12
+- corrections of 16b, which still was erroneous
+- default values in params_mod
+- needed to introduce a random seed for the markov chain to remain the same
+
+epss2_16b
+start   28-03-12
+end     28-03-12
+- allow multiple calibrations in select_calibration_here.txt
+- remove command_argument_count (i.e. passing the calibration file as an argument)
+
+epss2_16 
+start   28-03-12
+end     28-03-12
+- new main which controls the experiments then calls the 'old main'
+
+epss2_15c2
+start   27-03-12
+end     27-03-12
+- change idiosyncratic_risk to ccv = true false and scaleIR=0.0
+
+epss2_15c
+start   26-03-12
+end     27-03-12
+- implement rho, nu_sigma_h, nu_sigma_l for n_eta=2
+
+epss2_15b2 
+start   25-03-12
+end     26-03-12
+- separate no-short-selling constraint: kappa_in_01 
+- spontaneously changed a lot about mod_error, made proper type with methods
+- put not_converged in error, write into equilibrium.txt if not_converged
+- rename mod_errors to error_class
+
+epss2_15b 
+start   25-03-12
+end     25-03-12
+- zero-borrowing-constraint (aprime = 0). actually, I'll call it collateral_constraint 
+
+epss2_15 
+start   19-03-12
+end     24-03-12
+- clean up all the STY experiments (remove calibs,
+   undo  apmax(n_eta,nz,nj)= guess*4.0   in params_mod! )
+- try STY with 'our' correlation
+ 
+epss2_14b3 
+start   15-03-12
+end     16-03-12
+- check regression in logs
+    Result: in particular do not log() or exp() mu (mup).
+- try to get STY_noir
+
+epss2_14b2 
+start   15-03-12
+end     15-03-12
+- check err_mup in policyfunctions
+    Result: modified Forecast of loms for mean shock and STY case
+
+epss2_14b 
+start   13-03-12
+end     15-03-12
+- make STY converge
+- implemented nu_sigma_h, nu_sigma_l for n_eta>2
+- added rho
+
+epss2_14 
+start   12-03-12
+end     13-03-12
+- Added many old calibrations
+- psi can be given value 1/theta
+- introduce scale_IR
+- Try shutting down agg risk
+
+epss2_12g (no changes wrt 12f)
+start   12-03-12
+end     12-03-12
+- check R_portf and its variance
+    Answer: seems to be fine, it changes with apmax coz xgrid changes and therefore kappa changes (very sensitive close to zero)
+    Solution: should put upper bound on kappa...
+
+epss2_12f
+start   10-03-12
+end     12-03-12
+- make plotting of graphs automatic (save to pdf, do not open), using figure('visible','off') or something
+- param checks on apmax
+
+epss2_12e
+start   10-03-12
+end     10-03-12
+- make apmax depend on agg shock (didnt help much either)
+
+epss2_12d
+start   10-03-12
+end     10-03-12
+- revert to 12b version of creating apmax, because using ms_results (Phi and apgrid) to generate apmax for ge didnt help
+    Removed subroutine set_apmax_ge(phi, ap_meanshock, factor) entirley (overloaded set_apmax)
+- make apmax depend on idiosync shock
+- This might mean that previous results are not exactly reproducible!
+
+epss2_12c
+start   08-03-12
+end     10-03-12
+- use ms_results (Phi and apgrid) to generate apmax for ge
+- checked LOMs
+- changed  a bit Matlab plot code (adjusted for new model_output path)
+
+epss2_12b ! previous results might not be exactly reproducible!
+start   08-03-12
+end     08-03-12
+- rewrite fun_set_apmax. This might mean that previous results are not exactly reproducible!
+    But it is *much* more stable now.
+
+epss2_12
+start   07-03-12
+end     08-03-12
+- save calibrations in subdirs of model_output - needed lots of changes (introduce variable path everywhere)
+- corrected opt_initial_ms_guess=2 in params_mod
+- in save_results_mod and statistics.f90, changed max to max(abs())
+- have cheops run multiple calibrations
+
+epss2_11d2
+start   06-03-12
+end     07-03-12
+- make subfolders model_input/calib_ep and model_input/calib_ss
+- minor modifications in params_mod and main for reading calib
+
+epss2_11d
+start   06-03-12
+end     06-03-12
+- In save_results_mod:write_stats make subsections for Aggregate Statistics, Correlations, Laws of Motion, Lifecycle Statistics, Error checks 
+- report lc%cons, lc%cons_var
+
+epss2_11c6
+start   05-03-12
+end     05-03-12
+- correct calc of lc%return and lc%return_var
+- corrected lifecycle plots in Matlab: remove the bias from a shrinking population, 
+    plot for agent surviving to max age
+- check Intel Eclipse support
+
+epss2_11c5
+start   28-02-12
+end     28-02-12
+- remove some unnecessary allocate, e.g. in main:line66 allocate(value(nx,n_eta,nz,nj,1,1), Phi(nx,n_eta,nj)),
+    call AllocateType(err,1,1)
+- move  coeffs = Initialize('msge',n_coeffs,nz) into meanshock wrapper and make intent out
+
+epss2_11c4
+start   28-02-12
+end     28-02-12
+- model_input: make folders data, last_results (./previous) 
+- implement opt_initial_ms_guess= 0 in params.mod
+
+epss2_11c3
+start   27-02-12
+end     27-02-12
+- write all derived parameters into params.txt
+- remove folder src_parameters
+
+epss2_11c2 !MAJOR MODIFICATIONS!
+start   21-02-12
+end     26-02-12
+- switch to text-based input files for parameters
+- check that input file are read correctly with iostat
+
+epss2_11c
+start   21-02-12
+end     21-02-12
+- reference run, no debug, all optimizations, old starting guesses
+
+epss2_11b3
+start   20-02-12
+end     21-02-12
+- write more stuff in one line in equilibrium.txt, in particular in error section
+- calc and report cv
+
+epss2_11b2
+start   16-02-12
+end     20-02-12
+- make a type stats which has avg, std, min, max, cv (maybe all with and without the pack error condition)
+
+epss2_11b
+start   16-02-12
+end     19-02-12
+- clean up save_results: in calc_stats() move calculations out of if construct
+
+epss2_11
+start   09-02-12
+end     18-02-12
+- get going, clean up todos
+- script for cheops
+- check compiler options, set for  -no-prec-div -xHost -ip
+
+epss2_10f4  FINAL VERSION FOR JOB MARKET
+start   20-10-11
+end     -10-11
+-continue calib from 10f3: FD1, KK experiment
+
+epss2_10f3
+start   17-10-11
+end     17-10-11
+-continue calib from 10f2: now FD-2
+
+epss2_10f2
+start   14-10-11
+end     -10-11
+- calc error stats by excluding values the period AFTER simvars%err_mu=.true.
+- policyfunctions:calc_vars_tomorrow: if(rfp < rp(1)*1.0001_dp) rfp = rp(1)*1.0001_dp  
+- continue calibration from 10f: stochastic trend, see write-up table 2, p. 27, FD-1
+
+epss2_10f
+start   12-10-11
+end     14-10-11
+- calibration: stochastic trend, see write-up table 2, p. 27, FD-1
+
+epss2_10e   DISCONTINUED
+start   11-10-11
+end     11-10-11
+- compile and link without OpenMP, to run on Tims Server
+
+epss2_10d
+start   10-10-11
+end     12-10-11
+- calibration: linear trend, see write-up table 2, p. 27, LT
+
+epss2_10c DISCONTINUED
+start   30-09-11
+end     30-09-11
+- this continues from _10
+- increase aggregate risk further
+
+epss2_10b
+start   30-09-11
+end     05-10-11
+- continue KK calibration: try to reduce corr(r,w)
+
+epss2_10
+start   29-09-11
+end     30-09-11
+- go to KK calibration
+
+epss2_09b
+start   28-09-11
+end     29-09-11
+- reduce aggregate risk
+
+epss2_09
+start   27-09-11
+end     28-09-11
+- save average, max, min bequests
+- save average portfolio return over life and its variance
+
+epss2_08d
+start   15-09-11
+end     15-09-11
+- merge 08c and 08b, continue Mannheim talk
+
+epss2_08c
+start   15-09-11
+end     15-09-11
+- do final calibration for Mannheim talk
+
+epss2_08b only intermediate
+start   15-09-11
+end     15-09-11
+- implement variance of consumption over life cycle
+
+epss2_08
+start   11-09-11
+end     15-09-11
+- check welfare, try various calibrations
+
+epss2_07b
+start   09-09-11
+end     12-09-11
+- try better xgrid for neta5
+- changed a lot of small things in policyfunctions:f_apgrid_j, interp_policies, asset_allocation, consumption
+- also changed asseteuler to not use Taylor-expansion
+
+epss2_07
+start   08-09-11
+end     09-09-11
+- exogenous bond supply
+- calibrate new
+
+epss2_06b
+start   08-09-11
+end     08-09-11
+- add different covariates for n_coeffs=3
+
+epss2_06
+start   08-09-11
+end     08-09-11
+- implement alex' proposal for loms
+
+epss2_05c
+start   07-09-11
+end     07-09-11
+- in Regression: if n_coeffs=2 then have regressor K for both! Like STY, GM. Also makes it nicer 
+
+epss2_05b
+start   07-09-11
+end     07-09-11
+- condition lom for mu on z': now also major change in Regression
+
+epss2_05 - incorrect
+start   07-09-11
+end     07-09-11
+- condition lom for mu on z': only major change in policyfunctions
+
+epss2_04
+start   06-09-11
+end     06-09-11
+- add option to load simvars and estimate the loms for the initial guess
+
+epss2_03i
+start   28-08-11
+end     31-08-11
+- prepare Zurich
+
+epss2_03h
+start   24-08-11
+end     28-08-11
+- played around massively with params
+- removed extrapolation of mu in simulate_economy
+- added factor_k, factor_mu: multiplied with grids_ms when generating agg_grids
+
+epss2_03g
+start   19-08-11
+end     22-08-11
+- many tests, back to good calibration
+
+epss2_03f
+start   19-08-11
+end     19-08-11
+- again look at aggregation error for n_eta=5
+
+epss2_03e
+start   16-08-11
+end     16-08-11
+- in simulate_economy, remove the extrapolation for kp when we hit the bound
+- intoduce a check for Phi where .not. agg_err
+
+epss2_03d
+start   15-08-11
+end     16-08-11
+- try to calibrate to get hump-shaped lifecycle consumption (beta and IES). No succsess
+- try again different xgrids: onegrid no good, make 2 grids, curv 1.0 - 1.5
+
+epss2_03c
+start   14-08-11
+end     15-08-11
+- try to understand aggregation error
+
+epss2_03b
+start   14-08-11
+end     14-08-11
+- tried to recover from _03 after data loss
+
+MASSIVE DATA LOSS
+lost epss2_02b last version, epss2_02c but luckily saved most of epss2_03
+
+epss2_02b
+start   10-08-11
+end     10-08-11
+- still try to remove large errors in lower bound of distribution
+- in f_apgrid_j, check apmin for all z. Didnt help much.
+- in f_apgrid_j, make grid finer at lower bound
+
+epss2_02
+start   09-08-11
+end     10-08-11
+- try to remove large errors in lower bound of distribution
+- introduce grid of chebyshev extrema for aprime. Didnt work well.
+
+epss2_01b
+start   08-08-11
+end     09-08-11
+- save full Phi, remove Phi_tilde where not needed
+- corrected apmin in policyfunctions
+
+epss2_01 works
+start   04-08-11
+end     08-08-11
+- Introduce eta as state: policies, value. In second position (after x, before z)!
+- Introduce loop over eta in policyfunctions, add dimensions for all other variables
+- remove n_nu, nu, nupgrid (in euler equations, rtilde), instead use eta in income, etagrid,...
+- create pi_eta
+- remove nu_prob, instead use pi_eta
+- remove eta_Phi, instead aggregate over eta, change sequence of arguments!
+- check that there is no exp(eta), only eta, and that logs are in the right place (any logs?)
+- search for other files with value, policies, or any derivates! eg. interpolate_xgrid
+- distribution!
+- check everywhere that etagrid not the old one
+
+--------------------------------------------------------------------------------
+The epss2 series (with a trailing 2) has a stationary (as opposed to non-stationary) income process.
+Specifically, autocorrelation rho<1, whereas in epss rho =1. The attached paper reflects all changes.
+It builds on the 'final' version of epss:
+
+epss_30 FINAL VERSION WITH PERMANENT SHOCKS
+start   03-08-11
+end     03-08-11
+Things that would need to be worked on:
+- laws_of_motion: no initialization for n_coeffs >(=) 3. The whole initialization section is a bit messy.
+- apgrid: upper and lower bounds for each generation are quite arbitrary
+- kappa: could have bounds, and drop ap_numzero (apgrid can have zero and we just set kappa to kappamax)
+
