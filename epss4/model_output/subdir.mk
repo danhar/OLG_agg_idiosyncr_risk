@@ -44,7 +44,7 @@ OBJS += \
 %.o: ../%.f90
 	@echo 'Building file: $<'
 	@echo 'Invoking: Intel(R) Intel(R) 64 Fortran Compiler'
-	ifort -O3 -I"${MKLROOT}/include" -I"${MKLROOT}/include/intel64/lp64" -check none -c -assume realloc_lhs -no-prec-div -xHost -o "$@" "$<"
+	ifort -O3 -I"${MKLROOT}/include/intel64/lp64" -I"${MKLROOT}/include" -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -ipo-c -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

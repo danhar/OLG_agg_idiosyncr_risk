@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='test4b'
+thisrun='test_kappa'
 BUILD=Build_Optimmax
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

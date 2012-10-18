@@ -1,5 +1,7 @@
 .metadata
 Build*
-model_output
+bin
+/model_output
 model_input/last_results/*.unformatted
 model_input/last_results/previous
+Matlab/cl_output.txt

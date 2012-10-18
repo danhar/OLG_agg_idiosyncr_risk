@@ -1,6 +1,5 @@
 epss4
 - moving to git versioning system
-- simvars should read and write output unformatted also, see  subroutine SaveUnformatted_ksvars in unformatted_io.f90 and laws_of_motion.f90:ReadUnformatted
 
 epss3_01b  start 011012 end 031012
 - move to 64bit

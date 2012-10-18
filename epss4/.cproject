@@ -109,9 +109,10 @@
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
-								<option id="intel.linux.fortran.compiler.cmdline.addlopts.299906648" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs" valueType="string"/>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.299906648" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs -no-prec-div -xHost" valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1712832827" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speedHLO" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.fp.fpmodel.1528339913" name="Floating Point Model" superClass="intel.linux.fortran.compiler.fp.fpmodel" value="fpmodel.fast.2" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.1631426328" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.none" valueType="enumerated"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.1669393175" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.729217329" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">
@@ -135,6 +136,73 @@
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.764324438" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.546600466" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+		<cconfiguration id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.2142483975">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.2142483975" moduleId="org.eclipse.cdt.core.settings" name="Build_IPO">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO64" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.MachO" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.SOM" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.Cygwin_PE" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.XCOFF32" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.photran.core.intel.IntelCompilerErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildProperties="" description="Interprocedural optimization" id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.2142483975" name="Build_IPO" parent="org.eclipse.cdt.build.core.emptycfg">
+					<folderInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.2142483975." name="/" resourcePath="">
+						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1349536413" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
+							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.XCOFF32;org.eclipse.cdt.core.SOM;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.MachO64" id="photran.managedbuild.target.intel.platform.x86_64.base.942556263" name="Intel(R) 64 Platform" osList="linux" superClass="photran.managedbuild.target.intel.platform.x86_64.base"/>
+							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.20209289" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base"/>
+							<tool id="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.452864267" name="GCC C Compiler" superClass="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base">
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.509615344" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base.1598481672" name="Intel(R) Intel(R) 64 Fortran Compiler" superClass="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base">
+								<option id="intel.linux.fortran.compiler.preprocessor.includedirectories.462603805" name="Additional Include Directories (-I)" superClass="intel.linux.fortran.compiler.preprocessor.includedirectories" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
+								</option>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.882963739" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs -no-prec-div -xHost -ip" valueType="string"/>
+								<option id="intel.linux.fortran.compiler.general.optimization.1774948207" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speedHLO" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.fp.fpmodel.752654701" name="Floating Point Model" superClass="intel.linux.fortran.compiler.fp.fpmodel" value="fpmodel.fast.2" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.272753701" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.none" valueType="enumerated"/>
+								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.728858037" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.257469546" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">
+								<option id="intel.fortran.link.option.libpath.179584473" name="Search Directory for Libraries (-L)" superClass="intel.fortran.link.option.libpath" valueType="stringList">
+									<listOptionValue builtIn="false" value="$(MKLROOT)/lib/intel64"/>
+								</option>
+								<option id="intel.fortran.link.option.l.997015073" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l" valueType="libs">
+									<listOptionValue builtIn="false" value="mkl_intel_lp64"/>
+									<listOptionValue builtIn="false" value="mkl_sequential"/>
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="m"/>
+									<listOptionValue builtIn="false" value="mkl_core"/>
+								</option>
+								<option id="intel.fortran.link.cmdline.addlopts.126867303" name="Additional Options" superClass="intel.fortran.link.cmdline.addlopts" value="$(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a" valueType="string"/>
+								<inputType id="photran.managedbuild.tool.intel.fortran.linker.input.969548330" superClass="photran.managedbuild.tool.intel.fortran.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base.871075152" name="GCC Assembler" superClass="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.988647160" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.460926585" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
 						</toolChain>
 					</folderInfo>
 				</configuration>
@@ -167,4 +235,5 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

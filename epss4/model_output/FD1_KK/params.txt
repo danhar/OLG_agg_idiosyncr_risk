@@ -1,4 +1,4 @@
- Project epss3_01b, calibration calib_ss/FD1_KK.txt
+ Project epss4, calibration calib_ss/FD1_KK.txt
  -------------------------- Prefs and Tech --------------------------
  theta        = 8.0000
  psi          = 1.5000
