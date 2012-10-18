@@ -10,12 +10,12 @@
 
 thisrun="${PWD##*/}"
 
-cd Build_Optim
+cd $BUILD
 make clean
 make all >../shell_output.txt 2>&1
 cd ..
 
-./Build_Optim/epss3_01b >>shell_output.txt 2>&1
+./$BUILD/epss4 >>shell_output.txt 2>&1
 
 mv shell_output.txt ./model_output/shell_output.txt
 tar -cjf results.tar.bz2 model_output model_input
@@ -33,5 +33,5 @@ ssh isildur@82.130.121.29 "cd ~/Tempdh/Brutus/$thisrun; tar -xjf results.tar.bz2
 # calib_id = "${EPSSDIR%%/*}" 
 
 # Run multiple times with different calibration files as input
-# ./Build_Optim/ calib_ep/STY-IR03.txt >>shell_output.txt 2>&1
-# ./Build_Optim/ calib_ep/STY2noir.txt >>shell_output.txt 2>&1
+# ./$BUILD/ calib_ep/STY-IR03.txt >>shell_output.txt 2>&1
+# ./$BUILD/ calib_ep/STY2noir.txt >>shell_output.txt 2>&1
