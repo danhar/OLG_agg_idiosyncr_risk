@@ -2,7 +2,7 @@ module meanshock_equilib
 
     use kinds
     use params_mod      ,only: n_eta, nx, nj, nz
-    use types           ,only: tPolicies
+    use policyfunctions ,only: tPolicies
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class      ,only: tErrors
@@ -48,7 +48,7 @@ function ms_equilib(msvars) result(distance)
     grid%k  = msvars(1)
     grid%mu = msvars(2)
 
-    call calc_policyfunctions(coeffs, grid, policies, value, errs_o)
+    call policies%solve(coeffs, grid, value, errs_o)
 
 	! Projection of policies / grids on mean shock
     xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0

@@ -7,7 +7,7 @@ module interpolate_xgrid
 contains
     pure subroutine InterpolateXgrid(policies, value, polx, valx)
         use kinds      ,only: dp
-        use types      ,only: tPolicies, AllocateType
+        use policyfunctions
         use fun_lininterp
 
         type(tPolicies) ,intent(in)    :: policies
@@ -17,7 +17,7 @@ contains
         integer                        :: muc, kc, jc, zc, ec, nk, nmu
 
         nk = size(value,5); nmu=size(value,6)
-        call AllocateType(polx,nk,nmu)
+        call polx%allocate(nk,nmu)
         valx = value
         do muc = 1, nmu
             ! mean of first and last mu seems good, coz small aggregate grid and policies linear in that dimension

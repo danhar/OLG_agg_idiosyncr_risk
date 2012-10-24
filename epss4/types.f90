@@ -4,12 +4,7 @@ module types
     use kinds      ,only: dp
     implicit none
 
-    private allocate_simvars, allocate_policies
-    private deallocate_simvars, deallocate_policies
-
-    type tPolicies
-        real(dp), allocatable, dimension(:,:,:,:,:,:) :: apgrid, kappa, stocks, xgrid ! policies /grids
-    end type tPolicies
+    private allocate_simvars, deallocate_simvars
 
     type tSimvars
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
@@ -30,11 +25,11 @@ module types
 	end interface set_number
 
     interface AllocateType
-        module procedure allocate_simvars, allocate_policies, allocate_lifecycle
+        module procedure allocate_simvars, allocate_lifecycle
     end interface AllocateType
 
     interface DeallocateType
-        module procedure deallocate_simvars, deallocate_policies, deallocate_lifecycle
+        module procedure deallocate_simvars, deallocate_lifecycle
     end interface DeallocateType
 
 contains
@@ -83,33 +78,6 @@ contains
         if (allocated(simvars%err_mu)) deallocate(simvars%err_mu)
 
     end subroutine deallocate_simvars
-
-    pure subroutine allocate_policies(p,nk,nmu)
-        use params_mod, only: nx, n_eta, nz, nj
-        type(tPolicies), intent(inout)  :: p
-        integer,    intent(in)      :: nk,nmu
-        call deallocate_policies(p)
-        allocate(p%apgrid(nx,n_eta,nz,nj,nk,nmu),p%kappa(nx,n_eta,nz,nj,nk,nmu),p%stocks(nx,n_eta,nz,nj,nk,nmu),p%xgrid(nx,n_eta,nz,nj,nk,nmu))
-    end subroutine allocate_policies
-
-    pure subroutine deallocate_policies(p)
-        type(tPolicies), intent(inout)  :: p
-        ! deallocating in reverse order to allocation for memory purposes
-        if (allocated(p%xgrid)) deallocate(p%xgrid)
-        if (allocated(p%stocks)) deallocate(p%stocks)
-        if (allocated(p%kappa)) deallocate(p%kappa)
-        if (allocated(p%apgrid)) deallocate(p%apgrid)
-    end subroutine deallocate_policies
-
-    pure subroutine calc_kappa(p)
-        type(tPolicies), intent(inout)  :: p
-        ! deallocating in reverse order to allocation for memory purposes
-        where (p%apgrid .ne. 0.0)
-            p%kappa = p%stocks/p%apgrid
-        elsewhere
-            p%kappa = 0.0
-        end where
-    end subroutine calc_kappa
 
     pure subroutine allocate_lifecycle(lc,nj)
         class(tLifecycle), intent(inout)  :: lc

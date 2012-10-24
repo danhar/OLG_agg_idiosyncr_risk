@@ -4,6 +4,7 @@ contains
 
 subroutine run_model(projectname, calib_name, welfare)
     use types
+    use policyfunctions
     use error_class
     use ifport            ,only: system  ! Intel Fortran portability library
     use unformatted_io    ,only: SaveUnformatted, ReadUnformatted

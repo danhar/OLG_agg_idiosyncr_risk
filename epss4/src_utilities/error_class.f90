@@ -4,7 +4,7 @@ module error_class
 
     type tErrors
 	    logical(1) ,dimension(:,:,:,:,:,:)   ,allocatable :: asset
-	    logical(1) ,dimension(:,:,:,:,:,:,:) ,allocatable :: cons    ! true if xp(= cah tomorrow) < xgrid(1,1,1,jc+1) in sub_policyfunctions
+	    logical(1) ,dimension(:,:,:,:,:,:,:) ,allocatable :: cons    ! true if xp(= cah tomorrow) < xgrid(1,1,1,jc+1) in policyfunctions:solve_policyfunctions
         logical(1) ,dimension(:,:,:)         ,allocatable :: kp, mup, rfp ! true if forecast out of grid
         logical :: not_converged
     contains

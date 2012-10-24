@@ -2,6 +2,7 @@ module krusell_smith
 
     use kinds
     use types
+    use policyfunctions
     use aggregate_grids,only: tAggGrids
     use laws_of_motion ,only: tCoeffs, MakeType, MakeVector, Regression
     use params_mod     ,only: exogenous_xgrid, save_all_iterations, normalize_coeffs
@@ -44,7 +45,7 @@ contains
 	    it = it+1
 
 	    print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
-	    call calc_policyfunctions(coeffs, grids, policies, value, err)
+	    call policies%solve(coeffs, grids, value, err)
 	    call err%print2stderr
 
 	    print *,'- krusell_smith: simulating'

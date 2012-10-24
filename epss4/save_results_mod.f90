@@ -11,6 +11,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
     use kinds
     use types
+    use policyfunctions
     use statistics      ,only: tStats, covariance
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs

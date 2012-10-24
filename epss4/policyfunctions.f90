@@ -1,21 +1,40 @@
 module policyfunctions
-    implicit none
-contains
-
-subroutine calc_policyfunctions(coeffs, grids, p, value, err_o)
-! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use kinds
+    implicit none
+    private
+
+    public tPolicies
+
+    type tPolicies
+        real(dp), allocatable, dimension(:,:,:,:,:,:) :: apgrid, kappa, stocks, xgrid ! policies /grids
+    contains
+        procedure :: solve => solve_policyfunctions
+        procedure :: allocate => allocate_policies
+        procedure :: deallocate => deallocate_policies
+        procedure :: calc_kappa
+    end type tPolicies
+
+contains
+!-------------------------------------------------------------------------------
+! Module procedures in order:
+! - subroutine solve_policyfunctions(coeffs, grids, p, value, err_o)
+! - pure subroutine allocate_policies(p,nk,nmu)
+! - pure subroutine deallocate_policies(p)
+! - pure subroutine calc_kappa(p)
+!-------------------------------------------------------------------------------
+
+subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
+! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
-    use types           ,only: tPolicies, AllocateType
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class
     use makegrid_mod
     use asseteuler     ,only: asseteuler_set
 
+    class(tPolicies)                 ,intent(out) :: p      ! policies
     type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
     type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
-    type(tPolicies)                  ,intent(out) :: p      ! policies
     real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
     type(tErrors)        ,optional   ,intent(out) :: err_o
     real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
@@ -29,7 +48,7 @@ subroutine calc_policyfunctions(coeffs, grids, p, value, err_o)
 
     nk = size(grids%k)
     nmu= size(grids%mu)
-    call AllocateType(p,nk,nmu)
+    call p%allocate(nk,nmu)
     allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
     if (present(err_o)) call err_o%allocate(nk,nmu)
 
@@ -496,10 +515,37 @@ CC:     if (collateral_constraint) then
             print '(t8,a9,l1,a12,l1,a14,l1,a14,<nz>(l1,x))', 'err_kp = ', err_kp, ' ,err_mup = ', err_mup, ' ,err_asset = ',err_asset,',  err_cons = ', err_cons
         endif
     end subroutine error_handling
-
-!-------------------------------------------------------------------------------
-! End of internal procedures and of main subroutine
+end subroutine solve_policyfunctions
 !-------------------------------------------------------------------------------
 
-end subroutine calc_policyfunctions
+pure subroutine allocate_policies(this,nk,nmu)
+    use params_mod, only: nx, n_eta, nz, nj
+    class(tPolicies), intent(inout)  :: this
+    integer,    intent(in)      :: nk,nmu
+    call deallocate_policies(this)
+    allocate(this%apgrid(nx,n_eta,nz,nj,nk,nmu),this%kappa(nx,n_eta,nz,nj,nk,nmu),this%stocks(nx,n_eta,nz,nj,nk,nmu),this%xgrid(nx,n_eta,nz,nj,nk,nmu))
+end subroutine allocate_policies
+!-------------------------------------------------------------------------------
+
+pure subroutine deallocate_policies(this)
+    class(tPolicies), intent(inout)  :: this
+    ! deallocating in reverse order to allocation for memory purposes
+    if (allocated(this%xgrid)) deallocate(this%xgrid)
+    if (allocated(this%stocks)) deallocate(this%stocks)
+    if (allocated(this%kappa)) deallocate(this%kappa)
+    if (allocated(this%apgrid)) deallocate(this%apgrid)
+end subroutine deallocate_policies
+!-------------------------------------------------------------------------------
+
+pure subroutine calc_kappa(this)
+    class(tPolicies), intent(inout)  :: this
+    ! deallocating in reverse order to allocation for memory purposes
+    where (this%apgrid .ne. 0.0)
+        this%kappa = this%stocks/this%apgrid
+    elsewhere
+        this%kappa = 0.0
+    end where
+end subroutine calc_kappa
+!-------------------------------------------------------------------------------
+
 end module policyfunctions
