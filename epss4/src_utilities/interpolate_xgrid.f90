@@ -14,10 +14,10 @@ contains
         real(dp)        ,intent(in)    :: value(:,:,:,:,:,:)
         type(tPolicies) ,intent(out)   :: polx
         real(dp) ,allocatable ,intent(out)   :: valx(:,:,:,:,:,:)
-        integer                        :: muc, kc, jc, zc, ec, nk, nmu
+        integer                        :: muc, kc, jc, zc, ec, nz, nk, nmu
 
-        nk = size(value,5); nmu=size(value,6)
-        call polx%allocate(nk,nmu)
+        nz = size(value,3); nk = size(value,5); nmu=size(value,6)
+        call polx%allocate(nz, nk,nmu)
         valx = value
         do muc = 1, nmu
             ! mean of first and last mu seems good, coz small aggregate grid and policies linear in that dimension
@@ -29,15 +29,11 @@ contains
 	                        valx(:,ec,zc,jc,kc,muc)        = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), value(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
 	                        polx%apgrid(:,ec,zc,jc,kc,muc) = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), policies%apgrid(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
 	                        polx%stocks(:,ec,zc,jc,kc,muc) = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), policies%stocks(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
-	                        where (polx%apgrid(:,ec,zc,jc,kc,muc) .ne. 0.0)
-	                            polx%kappa(:,ec,zc,jc,kc,muc) = polx%stocks(:,ec,zc,jc,kc,muc)/ polx%apgrid(:,ec,zc,jc,kc,muc)
-	                        elsewhere ! includes apgrid(:,nj) =0
-	                            polx%kappa(:,ec,zc,jc,kc,muc) = 0.0
-	                        end where
                         enddo
                     enddo
                 enddo
             enddo
         enddo
+        call polx%calc_kappa
     end subroutine InterpolateXgrid
 end module interpolate_xgrid
