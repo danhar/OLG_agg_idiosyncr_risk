@@ -15,6 +15,7 @@ plot_bonds = 0;
 cd(['../model_output/',dir])
 apgrid=dlmread('apgrid_mean.txt');
 kappa = dlmread('kappa_mean.txt');
+stocks=dlmread('stocks_mean.txt');
 xgridM=dlmread('xgrid_mean.txt');
 %cons = dlmread('cons_mean.txt');
 cons = xgridM - apgrid;
@@ -67,20 +68,21 @@ for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57]
     %title(['ap^{',gen_str,'}(x), ',dir]);
     
     subplot(2,2,4)
-    plot(xgrid,apgrid(j,:).*kappa(j,:),'LineWidth',linewidth);
+    plot(xgrid,stocks(j,:),'LineWidth',linewidth);
     h=legend(['stocks^{',gen_str,'}(x)'],'Location','SouthEast');
     %xlabel('x','FontSize',fontsize); ylabel(['stocks^{',gen_str,'}(x)'],'FontSize',fontsize);
     set(gca,'FontSize',fontsize);
-    axis([xgrid(1) xgrid(end) min(apgrid(j,:).*kappa(j,:)) max(apgrid(j,:).*kappa(j,:))])
+    axis([xgrid(1) xgrid(end) min(stocks(j,:)) max(stocks(j,:))])
     %title(['stocks^{',gen_str,'}(x), ',dir]);
     
-    if (plot_bonds) 
+    if (plot_bonds)
+        bonds=apgrid(j,:)-stocks(j,:);
         figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/4 scrsz(4)/2])
-        plot(xgrid,apgrid(j,:).*(1-kappa(j,:)),'LineWidth',linewidth);
+        plot(xgrid,bonds,'LineWidth',linewidth);
         h=legend(['bonds^{',gen_str,'}(x)'],'Location','SouthEast');
      %   xlabel('x','FontSize',fontsize); ylabel(['stocks^{',gen_str,'}(x)'],'FontSize',fontsize);
         set(gca,'FontSize',fontsize);
-        axis([xgrid(1) xgrid(end) min(apgrid(j,:).*(1-kappa(j,:))) max(apgrid(j,:).*(1-kappa(j,:)))])
+        axis([xgrid(1) xgrid(end) min(bonds) max(bonds)])
 %        title(['bonds^{',gen_str,'}(x), ',dir]);
     end
     

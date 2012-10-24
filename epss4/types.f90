@@ -8,7 +8,7 @@ module types
     private deallocate_simvars, deallocate_policies
 
     type tPolicies
-        real(dp), allocatable, dimension(:,:,:,:,:,:) :: apgrid, kappa, xgrid ! policies /grids
+        real(dp), allocatable, dimension(:,:,:,:,:,:) :: apgrid, kappa, stocks, xgrid ! policies /grids
     end type tPolicies
 
     type tSimvars
@@ -89,16 +89,27 @@ contains
         type(tPolicies), intent(inout)  :: p
         integer,    intent(in)      :: nk,nmu
         call deallocate_policies(p)
-        allocate(p%apgrid(nx,n_eta,nz,nj,nk,nmu),p%kappa(nx,n_eta,nz,nj,nk,nmu),p%xgrid(nx,n_eta,nz,nj,nk,nmu))
+        allocate(p%apgrid(nx,n_eta,nz,nj,nk,nmu),p%kappa(nx,n_eta,nz,nj,nk,nmu),p%stocks(nx,n_eta,nz,nj,nk,nmu),p%xgrid(nx,n_eta,nz,nj,nk,nmu))
     end subroutine allocate_policies
 
     pure subroutine deallocate_policies(p)
         type(tPolicies), intent(inout)  :: p
         ! deallocating in reverse order to allocation for memory purposes
-        if (allocated(p%kappa)) deallocate(p%kappa)
         if (allocated(p%xgrid)) deallocate(p%xgrid)
+        if (allocated(p%stocks)) deallocate(p%stocks)
+        if (allocated(p%kappa)) deallocate(p%kappa)
         if (allocated(p%apgrid)) deallocate(p%apgrid)
     end subroutine deallocate_policies
+
+    pure subroutine calc_kappa(p)
+        type(tPolicies), intent(inout)  :: p
+        ! deallocating in reverse order to allocation for memory purposes
+        where (p%apgrid .ne. 0.0)
+            p%kappa = p%stocks/p%apgrid
+        elsewhere
+            p%kappa = 0.0
+        end where
+    end subroutine calc_kappa
 
     pure subroutine allocate_lifecycle(lc,nj)
         class(tLifecycle), intent(inout)  :: lc

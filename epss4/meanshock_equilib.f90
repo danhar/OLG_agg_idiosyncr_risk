@@ -40,7 +40,7 @@ function ms_equilib(msvars) result(distance)
     implicit none
     real(dp) ,dimension(:),intent(in) :: msvars 			! k_ms, mu_ms
     real(dp) ,dimension(size(msvars)) :: distance           ! excess demands
-    real(dp) ,dimension(nx,n_eta,nj)  :: apgrid_ms, stock_ms, kappa_ms, xgrid_ms	! policies /grids mean shock projection
+    real(dp) ,dimension(nx,n_eta,nj)  :: apgrid_ms, stocks_ms, xgrid_ms	! policies /grids mean shock projection
     real(dp)						  :: kp_ms, agg_bond_demand
     real(dp)						  :: netwage_ms, pens_ms, r_ms, rf_ms
 	integer 						  :: i
@@ -51,17 +51,12 @@ function ms_equilib(msvars) result(distance)
     call calc_policyfunctions(coeffs, grid, policies, value, errs_o)
 
 	! Projection of policies / grids on mean shock
-    xgrid_ms =0.0; apgrid_ms =0.0; stock_ms =0.0
+    xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
 	do i=1,nz
 		xgrid_ms  = xgrid_ms  + w(i)* policies%xgrid (:,:,i,:,1,1)
 		apgrid_ms = apgrid_ms + w(i)* policies%apgrid(:,:,i,:,1,1)
-		stock_ms  = stock_ms  + w(i)* policies%apgrid(:,:,i,:,1,1)* policies%kappa(:,:,i,:,1,1)
+		stocks_ms = stocks_ms + w(i)* policies%stocks(:,:,i,:,1,1)
 	enddo
-    where (apgrid_ms .ne. 0.0)
-        kappa_ms  = stock_ms/apgrid_ms
-    elsewhere
-        kappa_ms  = 0.0
-    end where
 
 	! Prices in mean shock path
 	netwage_ms	  = f_netwage (msvars(1), mean_zeta)
@@ -70,12 +65,12 @@ function ms_equilib(msvars) result(distance)
 	r_ms		  = f_stock_return(msvars(1), mean_zeta, mean_delta, rf_ms)
 
 	! Get distribution in mean shock path
-	Phi	= TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,xgrid_ms,apgrid_ms,kappa_ms,etagrid)
+	Phi	= TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,xgrid_ms,apgrid_ms,stocks_ms,etagrid)
 
     ! Aggregate
 
 	kp_ms           = sum(apgrid_ms *Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
-	agg_bond_demand = sum((apgrid_ms-stock_ms)*Phi)
+	agg_bond_demand = sum((apgrid_ms-stocks_ms)*Phi)
 	! Exess demands
 	distance(1)     = kp_ms - msvars(1)
 	distance(2)     = kp_ms * de_ratio/(1.0 + de_ratio) - agg_bond_demand/(L_N_ratio*(1.0+n)*(1.0+g))

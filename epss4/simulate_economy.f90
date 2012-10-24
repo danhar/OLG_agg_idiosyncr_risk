@@ -46,7 +46,7 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     Knew(1)   = simvars%K(1)    ! This is only interesting for PE
 
     ! Initialize rf and policies for 'previous' period (i.e. t=0) by setting them to mean-shock value
-    call get_initial_values(apgridt, kappat, simvars%rf(1))
+    call get_initial_values(apgridt, stockst, simvars%rf(1))
 
     do tc=1,nt
         zt = simvars%z(tc)
@@ -58,7 +58,7 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
         penst    = f_pensions(Kt, zeta(zt))
         rt       = f_stock_return(Kt, zeta(zt), delta(zt), simvars%rf(tc))
 
-        simvars%bequests(tc) = f_bequests(simvars%rf(tc), rt, kappat, apgridt, Phi)
+        simvars%bequests(tc) = f_bequests(simvars%rf(tc), rt, stockst, apgridt, Phi)
 
         ! Projection of policies on Kt
         i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
@@ -66,8 +66,7 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
         ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
         xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
         apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
-        stocks_zk= (1-w)*policies%kappa (:,:,zt,:,i,:)   *policies%apgrid(:,:,zt,:,i,:) &
-                     +w *policies%kappa (:,:,zt,:,i+1,:) *policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
         val_j1_zk= (1-w)*value(:,:,zt,1,i,:) +w*value(:,:,zt,1,i+1,:)
 
         where (apgrid_zk .ne. 0.0)
@@ -79,10 +78,10 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
             ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,kappat,etagrid(:,zt), Phi)
-            call set_excessbondsvars(apgrid_zk, kappa_zk, agg_grid ,Phi)
+            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+            call set_excessbondsvars(apgrid_zk, stocks_zk, agg_grid ,Phi)
         else
-            call set_excessbondsvars(netwaget,penst,rt,simvars%rf(tc),apgridt,kappat,apgrid_zk,kappa_zk,xgrid_zk,agg_grid,Phi, etagrid(:,zt))
+            call set_excessbondsvars(netwaget,penst,rt,simvars%rf(tc),apgridt,stockst,apgrid_zk,stocks_zk,xgrid_zk,agg_grid,Phi, etagrid(:,zt))
         endif ex
 
 mu:     if (partial_equilibrium) then
@@ -109,12 +108,12 @@ mu:     if (partial_equilibrium) then
 	        if (.not. exogenous_xgrid) then
 		        xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
 		        ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,kappat,etagrid(:,zt), Phi)
+		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
 	        endif
 
 	        apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
-	        stockst  = (1-w)*apgrid_zk(:,:,:,i)*kappa_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)*kappa_zk(:,:,:,i+1)
-	        val_j1_t = (1-w)*val_j1_zk(:,:,i) + w*val_j1_zk(:,:,i+1)
+	        stockst  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
+	        val_j1_t = (1-w)*val_j1_zk(:,:,i)   + w*val_j1_zk(:,:,i+1)
 	        where (apgridt .ne. 0.0)
 	            kappat = stockst/ apgridt
 	        elsewhere ! includes apgrid(:,nj) =0
@@ -122,7 +121,7 @@ mu:     if (partial_equilibrium) then
 	        end where
         else
             apgridt  = apgrid_zk(:,:,:,1)
-            stockst  = apgrid_zk(:,:,:,1)*kappa_zk(:,:,:,1)
+            stockst  = stocks_zk(:,:,:,1)
             val_j1_t = val_j1_zk(:,:,1)
             kappat   = kappa_zk (:,:,:,1)
         endif
@@ -141,8 +140,8 @@ mu:     if (partial_equilibrium) then
         if (.not. partial_equilibrium) simvars%K(tc+1) = Knew(tc+1)
 
         simvars%output(tc)= zeta(zt)*simvars%K(tc)**alpha
-        simvars%stock(tc) = sum(kappat*apgridt*Phi)/L_N_ratio ! different from K(t+1) since it is in today's per capita terms! Thus no (1+g)(1+n) in denominator.
-        simvars%bonds(tc) = sum((1.0-kappat)*apgridt*Phi)/L_N_ratio
+        simvars%stock(tc) = sum(stockst*Phi)/L_N_ratio ! different from K(t+1) since it is in today's per capita terms! Thus no (1+g)(1+n) in denominator.
+        simvars%bonds(tc) = sum((apgridt-stockst)*Phi)/L_N_ratio
         simvars%invest(tc)   = simvars%stock(tc) + simvars%bonds(tc) -simvars%K(tc)*(1.0-delta(zt))
         simvars%C(tc)     = sum((xgridt-apgridt)*Phi) / L_N_ratio ! in units of efficient labor
         simvars%r(tc)     = rt
@@ -169,7 +168,7 @@ mu:     if (partial_equilibrium) then
         ! Average life cycle profiles and average Phi
         if (tc > t_scrap) then ! 'Throw away' first t_scrap
             ap_lct      = sum(sum(apgridt * Phi,1),1)
-            stocks_lct  = sum(sum(apgridt * Phi * kappat,1),1)
+            stocks_lct  = sum(sum(stockst * Phi,1),1)
             cons_lct    = sum(sum((xgridt-apgridt) * Phi,1),1)
             return_lct  = sum(sum(Phi*r_pf,1),1)
             lc%ap       = lc%ap    + ap_lct    /(nt-t_scrap)
@@ -197,16 +196,15 @@ mu:     if (partial_equilibrium) then
 contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
-! - pure subroutine get_initial_values(apgridt, kappat, rf1)
+! - pure subroutine get_initial_values(apgridt, stockst, rf1)
 !-------------------------------------------------------------------------------
 
-    pure subroutine get_initial_values(apgridt, kappat, rf1)
+    pure subroutine get_initial_values(apgridt, stockst, rf1)
     ! Calculate policies for mean shock, which correspond to initial (=mean shock) distribution, K, mu
 
         use params_mod ,only: stat_dist_z
-	    real(dp) ,dimension(nx,n_eta,nj) ,intent(out) :: apgridt, kappat
+	    real(dp) ,dimension(nx,n_eta,nj) ,intent(out) :: apgridt, stockst
 	    real(dp)                         ,intent(out) :: rf1
-	    real(dp) ,dimension(nx,n_eta,nj)        :: stockst
 	    real(dp) :: K0, mu0, wK, wmu, w_ms
 	    integer  :: iK, imu, zc, jc
 
@@ -230,24 +228,17 @@ contains
 	                                 wK *   wmu *policies%apgrid(:,:,zc,:,iK+1,imu+1) )
 
 	            stockst = stockst + w_ms*( &
-	                              (1-wK)*(1-wmu)*policies%kappa(:,:,zc,:,iK  ,imu  )*policies%apgrid(:,:,zc,:,iK  ,imu  ) + &
-	                                 wK *(1-wmu)*policies%kappa(:,:,zc,:,iK+1,imu  )*policies%apgrid(:,:,zc,:,iK+1,imu  ) + &
-	                              (1-wK)*   wmu *policies%kappa(:,:,zc,:,iK  ,imu+1)*policies%apgrid(:,:,zc,:,iK  ,imu+1) + &
-	                                 wK *   wmu *policies%kappa(:,:,zc,:,iK+1,imu+1)*policies%apgrid(:,:,zc,:,iK+1,imu+1) )
+	                              (1-wK)*(1-wmu)*policies%stocks(:,:,zc,:,iK  ,imu  ) + &
+	                                 wK *(1-wmu)*policies%stocks(:,:,zc,:,iK+1,imu  ) + &
+	                              (1-wK)*   wmu *policies%stocks(:,:,zc,:,iK  ,imu+1) + &
+	                                 wK *   wmu *policies%stocks(:,:,zc,:,iK+1,imu+1) )
 			enddo
         else
             do zc=1,nz
                 apgridt = apgridt + w_ms*((1-wK)*policies%apgrid(:,:,zc,:,iK,1) + wK*policies%apgrid(:,:,zc,:,iK+1,1))
-                stockst = stockst + w_ms*((1-wK)*policies%kappa (:,:,zc,:,iK,1)     *policies%apgrid(:,:,zc,:,iK  ,1) &
-                                        +    wK *policies%kappa (:,:,zc,:,iK+1,1)   *policies%apgrid(:,:,zc,:,iK+1,1))
+                stockst = stockst + w_ms*((1-wK)*policies%stocks(:,:,zc,:,iK,1) + wK*policies%stocks(:,:,zc,:,iK+1,1))
             enddo
         endif
-
-        where (apgridt .ne. 0.0)
-            kappat  = stockst/apgridt
-        elsewhere
-            kappat  = 0.0
-        end where
 
         rf1     = f_riskfree_rate(simvars%K(1),mu0,stat_dist_z)
 

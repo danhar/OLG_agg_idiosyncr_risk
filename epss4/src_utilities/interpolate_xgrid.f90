@@ -14,7 +14,6 @@ contains
         real(dp)        ,intent(in)    :: value(:,:,:,:,:,:)
         type(tPolicies) ,intent(out)   :: polx
         real(dp) ,allocatable ,intent(out)   :: valx(:,:,:,:,:,:)
-        real(dp)                       :: stocks(size(policies%kappa,1))
         integer                        :: muc, kc, jc, zc, ec, nk, nmu
 
         nk = size(value,5); nmu=size(value,6)
@@ -29,10 +28,9 @@ contains
                         do ec = 1,size(value,2)
 	                        valx(:,ec,zc,jc,kc,muc)        = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), value(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
 	                        polx%apgrid(:,ec,zc,jc,kc,muc) = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), policies%apgrid(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
-	                        stocks = policies%kappa(:,ec,zc,jc,kc,muc)*policies%apgrid(:,ec,zc,jc,kc,muc)
-	                        stocks = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), stocks, polx%xgrid(:,ec,zc,jc,kc,muc))
+	                        polx%stocks(:,ec,zc,jc,kc,muc) = f_lininterp(policies%xgrid(:,ec,zc,jc,kc,muc), policies%stocks(:,ec,zc,jc,kc,muc), polx%xgrid(:,ec,zc,jc,kc,muc))
 	                        where (polx%apgrid(:,ec,zc,jc,kc,muc) .ne. 0.0)
-	                            polx%kappa(:,ec,zc,jc,kc,muc) = stocks/ polx%apgrid(:,ec,zc,jc,kc,muc)
+	                            polx%kappa(:,ec,zc,jc,kc,muc) = polx%stocks(:,ec,zc,jc,kc,muc)/ polx%apgrid(:,ec,zc,jc,kc,muc)
 	                        elsewhere ! includes apgrid(:,nj) =0
 	                            polx%kappa(:,ec,zc,jc,kc,muc) = 0.0
 	                        end where

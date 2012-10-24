@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='test_kappa'
-BUILD=Build_Optimmax
+thisrun='kappa_debug'
+BUILD=Build_Debugmax #Optimmax
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
 

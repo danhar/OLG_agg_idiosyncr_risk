@@ -28,7 +28,7 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
 	real(dp) ,dimension(n_eta)     :: m_etagrid
 	real(dp)                       :: mean_zeta, mean_delta ! mean shocks
 	real(dp)					   :: wz, wd, w(nz)	! weights (distance to mean zeta, mean delta)
-	real(dp) ,dimension(nx,n_eta,nj) :: apgrid_ms, stock_ms, kappa_ms, xgrid_ms, value_ms ! mean shock projections
+	real(dp) ,dimension(nx,n_eta,nj) :: apgrid_ms, stocks_ms, kappa_ms, xgrid_ms, value_ms ! mean shock projections
 	integer         	           :: i		        ! index
 
     coeffs          = Initialize('msge',n_coeffs,nz)
@@ -68,15 +68,15 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
     call err%print2stderr
 
     ! Calc mean shock policies for lc profiles and for saving
-    xgrid_ms =0.0; apgrid_ms =0.0; stock_ms =0.0; value_ms = 0.0
+    xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0; value_ms = 0.0
     do i=1,nz
         xgrid_ms    = xgrid_ms  + w(i)* policies%xgrid(:,:,i,:,1,1)
         apgrid_ms   = apgrid_ms + w(i)* policies%apgrid(:,:,i,:,1,1)
-        stock_ms    = stock_ms  + w(i)* policies%apgrid(:,:,i,:,1,1)*policies%kappa(:,:,i,:,1,1)
+        stocks_ms   = stocks_ms + w(i)* policies%stocks(:,:,i,:,1,1)
         value_ms    = value_ms  + w(i)* value(:,:,i,:,1,1)
     enddo
     where (apgrid_ms .ne. 0.0)
-        kappa_ms = stock_ms/apgrid_ms
+        kappa_ms = stocks_ms/apgrid_ms
     elsewhere
         kappa_ms = 0.0
     end where
@@ -113,8 +113,8 @@ contains
         simvars%mu(1)   = xvars(2)
 
         simvars%output(1)= mean_zeta*simvars%K(1)**alpha
-        simvars%stock(1) = sum(stock_ms*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.
-        simvars%bonds(1) = sum((apgrid_ms-stock_ms)*Phi)/ L_N_ratio
+        simvars%stock(1) = sum(stocks_ms*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.
+        simvars%bonds(1) = sum((apgrid_ms-stocks_ms)*Phi)/ L_N_ratio
         simvars%invest(1)= simvars%stock(1) + simvars%bonds(1) -simvars%K(1)*(1.0-mean_delta)
         simvars%C(1)    = sum((xgrid_ms-apgrid_ms)*Phi)/L_N_ratio       ! Consumption per worker
         simvars%rf(1)   = f_riskfree_rate(simvars%K(1),simvars%mu(1),stat_dist_z)
@@ -129,7 +129,7 @@ contains
         simvars%welf(1) = sum(value_ms(:,:,1)*Phi(:,:,1))
 
         call CheckPhi(Phi, simvars%Phi_1(1), simvars%Phi_nx(1))
-        simvars%bequests(1)   = f_bequests(simvars%rf(1), simvars%r(1), kappa_ms, apgrid_ms, Phi)
+        simvars%bequests(1)   = f_bequests(simvars%rf(1), simvars%r(1), stocks_ms, apgrid_ms, Phi)
         simvars%err_aggr(1)   = f_aggregate_diff(simvars%output(1), simvars%invest(1), simvars%C(1), simvars%bequests(1))
         simvars%B(1)          = fvals(2)
         simvars%err_income(1) = f_income_diff(simvars%K(1), mean_zeta, simvars%r(1), simvars%rf(1), mean_delta)
@@ -139,8 +139,8 @@ contains
             simvars%K(i+1)     = sum(policies%apgrid(:,:,i,:,1,1)*Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
             simvars%mu(i+1)    = simvars%mu(1)            ! Keep mu constant, could keep rf constant instead
 	        simvars%output(i+1)= zeta(i)*simvars%K(i+1)**alpha
-	        simvars%stock(i+1) = sum((policies%kappa(:,:,i,:,1,1)*policies%apgrid(:,:,i,:,1,1))*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.
-	        simvars%bonds(i+1) = sum(((1.0-policies%kappa(:,:,i,:,1,1))*policies%apgrid(:,:,i,:,1,1))*Phi)/ L_N_ratio
+	        simvars%stock(i+1) = sum(policies%stocks(:,:,i,:,1,1)*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.
+	        simvars%bonds(i+1) = sum((policies%apgrid(:,:,i,:,1,1)-policies%stocks(:,:,i,:,1,1))*Phi)/ L_N_ratio
 	        simvars%invest(i+1)   = simvars%stock(i+1) + simvars%bonds(i+1) -simvars%K(i+1)*(1.0-delta(i))
             simvars%C(i+1)     = sum((policies%xgrid(:,:,i,:,1,1)-policies%apgrid(:,:,i,:,1,1)) *Phi)/ L_N_ratio
             simvars%rf(i+1)    = f_riskfree_rate(simvars%K(i+1),simvars%mu(i+1),pi_z(i,:))
@@ -156,7 +156,7 @@ contains
 
             simvars%Phi_1(i+1)      = simvars%Phi_1(1)
             simvars%Phi_nx(i+1)     = simvars%Phi_nx(1)
-	        simvars%bequests(i+1)   = f_bequests(simvars%rf(i+1), simvars%r(i+1), policies%kappa(:,:,i,:,1,1), policies%apgrid(:,:,i,:,1,1), Phi)
+	        simvars%bequests(i+1)   = f_bequests(simvars%rf(i+1), simvars%r(i+1), policies%stocks(:,:,i,:,1,1), policies%apgrid(:,:,i,:,1,1), Phi)
             simvars%err_aggr(i+1)   = f_aggregate_diff(simvars%output(i+1), simvars%invest(i+1), simvars%C(i+1), simvars%bequests(i+1))
 	        simvars%B(i+1)          = simvars%K(i+1) * de_ratio/(1.0 + de_ratio) - simvars%bonds(i+1)
 	        simvars%err_income(i+1) = f_income_diff(simvars%K(i+1), zeta(i), simvars%r(i+1), simvars%rf(i+1), delta(i))
@@ -175,8 +175,8 @@ contains
 
         lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
         lifecycles%cons    = sum(sum((xgrid_ms-apgrid_ms) * Phi,1),1)
-        lifecycles%stock   = sum(sum(stock_ms * Phi,1),1)
-        lifecycles%return  = sum(sum(Phi*apgrid_ms*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
+        lifecycles%stock   = sum(sum(stocks_ms * Phi,1),1)
+        lifecycles%return  = sum(sum(Phi*sign(1.0,apgrid_ms)*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
         do jc=1,nj
             lifecycles%cons_var(jc)  = sum((((xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%cons(jc)))**2 * Phi(:,:,jc))
             lifecycles%return_var(jc)= sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * Phi(:,:,jc))

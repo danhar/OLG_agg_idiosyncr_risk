@@ -9,15 +9,15 @@ contains
         f_aggregate_diff = (output - C - invest - bequests)/output
     end function f_aggregate_diff
 
-    pure function f_bequests(rf, r, kappa, ap, Phi)
+    pure function f_bequests(rf, r, stocks, ap, Phi)
         use params_mod, only: nx,n_eta, nj, L_N_ratio, surv, g, n
         real(dp)                                       :: f_bequests
         real(dp)                           ,intent(in) :: rf, r
-        real(dp) ,dimension(nx, n_eta, nj) ,intent(in) :: ap, kappa, Phi
-        real(dp) ,dimension(nx, n_eta, nj)             :: R_beq
+        real(dp) ,dimension(nx, n_eta, nj) ,intent(in) :: ap, stocks, Phi
+        real(dp) ,dimension(nx, n_eta, nj)             :: assets_cum !asset cum returns
 
-        R_beq      = 1.0+rf+kappa*(r-rf)
-        f_bequests = sum((1.0-surv(2:))* sum(sum(ap(:,:,:nj-1)*R_beq(:,:,:nj-1)*Phi(:,:,:nj-1),1),1))/(L_N_ratio*(1.0+g)*(1.0+n))
+        assets_cum = ap*(1.0+rf)+stocks*(r-rf)
+        f_bequests = sum((1.0-surv(2:))* sum(sum(assets_cum(:,:,:nj-1)*Phi(:,:,:nj-1),1),1))/(L_N_ratio*(1.0+g)*(1.0+n))
 
     end function f_bequests
 

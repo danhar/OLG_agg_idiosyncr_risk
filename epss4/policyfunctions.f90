@@ -48,6 +48,7 @@ subroutine calc_policyfunctions(coeffs, grids, p, value, err_o)
     ! Final period policy functions and value function
     p%apgrid(:,:,:,:,:,:) = 0.0
     p%kappa(:,:,:,:,:,:)  = 0.0
+    p%stocks(:,:,:,:,:,:) = 0.0
     cons(:,:,:,nj,:,:)    = p%xgrid(:,:,:,nj,:,:)
     value(:,:,:,nj,:,:)   = cons(:,:,:,nj,:,:)
 
@@ -83,6 +84,7 @@ xloop:                  do xc=1,nx
 					        call asseteuler_set(p%apgrid(xc,ec,zc,jc,kc,muc))
 					        ! Asset allocation problem, see internal subroutine below
 							call asset_allocation(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), err_asset)
+							p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
 
 							! Consumption problem, see internal subroutine below. Also returns evp.
 							call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), cons(xc,ec,zc,jc,kc,muc), evp, err_cons)

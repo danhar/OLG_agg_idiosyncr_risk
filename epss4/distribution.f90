@@ -10,24 +10,24 @@ module distribution
 
 contains
 !-------------------------------------------------------------------------------
-! - pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,kappa,etagrid, Phitm_o) result(Phi)
+! - pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
 ! - pure subroutine check_Phi_pure(Phi_full, bound_Phi_1, bound_Phi_2)
 ! - subroutine check_Phi_full(Phi_full,dir)
 ! - subroutine check_Phi_small(Phi,dir)
 !-------------------------------------------------------------------------------
 
-pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,kappa,etagrid, Phitm_o) result(Phi)
+pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
 ! Calculate the transition of Phi
     use fun_locate
 
     real(dp) ,dimension(nx,n_eta,nj) ,target     :: Phi                  ! new distribution
     real(dp) ,dimension(nx,n_eta,nj) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
     real(dp)                         ,intent(in) :: rf, r, netwage, pens ! today's risk-free rate, risky return, net wage, pensions
-    real(dp) ,dimension(nx,n_eta,nj) ,intent(in) :: apgrid, kappa, xgrid ! optimal policies/ grids at today's aggregate state
+    real(dp) ,dimension(nx,n_eta,nj) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
     real(dp) ,dimension(n_eta)       ,intent(in) :: etagrid              ! idiosyncratic income shocks today
     real(dp) ,dimension(:,:,:)       ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
     real(dp) ,dimension(size(etagrid)) :: y ! income
-    real(dp) :: wx, x, rtilde ! weight, cash at hand, weighted return
+    real(dp) :: wx, x ! weight, cash at hand
     integer  :: ix, jc, ec, xmc, emc   ! xmc,emc: x/eta previous period or generation
 
     if (present(Phitm_o)) then
@@ -60,8 +60,7 @@ pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,kappa,etagrid, Phitm_
             do ec = 1,n_eta
                 do xmc = 1, nx ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
 		            if (Phitm(xmc,emc,jc-1)==0.0) cycle
-		            rtilde      = (1.0+rf+kappa(xmc,emc,jc-1)*(r-rf))/(1.0+g)
-		            x           = y(ec)+rtilde*apgrid(xmc,emc,jc-1)
+		            x           = y(ec)+ (apgrid(xmc,emc,jc-1)*(1.0+rf) +stocks(xmc,emc,jc-1)*(r-rf))/(1.0+g) ! no need to calc rtilde first using kappa
 		            ix          = f_locate(xgrid(:,ec, jc),x)
 		            wx          = (x-xgrid(ix,ec,jc))/(xgrid(ix+1,ec,jc)-xgrid(ix,ec,jc))
 		            wx          = max(min(wx,1.0),0.0)

@@ -35,7 +35,7 @@
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
-								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1127285709" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs" valueType="string"/>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1127285709" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -standard-semantics" valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1009820391" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.none" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.general.debug.1881458818" name="Include Debug Information (-g)" superClass="intel.linux.fortran.compiler.general.debug" value="true" valueType="boolean"/>
 								<option id="intel.linux.fortran.compiler.general.warninglevel.1120050792" name="Warning Level" superClass="intel.linux.fortran.compiler.general.warninglevel" value="general.warninglevel.all" valueType="enumerated"/>

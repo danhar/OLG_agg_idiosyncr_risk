@@ -30,7 +30,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     character(len=*) :: dir, projectname, calib_name
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
-    real(dp), dimension(nx,nj) :: apgrid_mean, stock_mean, kappa_mean, xgrid_mean !, cons_mean
+    real(dp), dimension(nx,nj) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
     type(tStats) :: K, mu, output, stock, bonds, invest, cons, cg, netwage, pens, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
     real(dp) :: percent_err_K, percent_err_mu, cov_w_r, cov_zeta_r, cov_zeta_w, cov_output_r, cov_output_w, cov_output_zeta, cov_inv_r, cov_inv_w, cov_inv_zeta, cov_inv_output, &
@@ -152,13 +152,13 @@ contains
         do jc=1,nj
             do xc =1,nx
                 apgrid_mean(xc,jc) = sum(pol%apgrid(xc,:,:,jc,:,:))/(nk*nmu*nz*n_eta)
-                stock_mean(xc,jc)  = sum(pol%apgrid(xc,:,:,jc,:,:)*pol%kappa(xc,:,:,jc,:,:))/(nk*nmu*nz*n_eta)
+                stocks_mean(xc,jc) = sum(pol%stocks(xc,:,:,jc,:,:))/(nk*nmu*nz*n_eta)
                 xgrid_mean(xc,jc)  = sum(pol%xgrid(xc,:,:,jc,:,:)) /(nk*nmu*nz*n_eta)
 !               cons_mean(xc,jc)   = sum(cons(xc,:,:,jc,:,:))  /(nk*nmu*nz*n_eta)
             enddo
         enddo
         where (apgrid_mean .ne. 0.0)
-            kappa_mean = stock_mean/apgrid_mean
+            kappa_mean = stocks_mean/apgrid_mean
         elsewhere
             kappa_mean = 0.0
         end where
@@ -343,6 +343,10 @@ contains
 
     open(60, file=path//'/kappa_mean.txt',   status = 'replace')
     write(60,160) kappa_mean
+    close(60)
+
+    open(60, file=path//'/stocks_mean.txt',   status = 'replace')
+    write(60,160) stocks_mean
     close(60)
 
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')

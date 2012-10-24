@@ -6,8 +6,8 @@ module fun_excessbonds
     private
     type(tAggGrids)                  :: agg_grid
     real(dp)                         :: nwaget, penst, rt, rft
-    real(dp) ,dimension(:,:,:,:), allocatable :: apgrid_zk, kappa_zk, xgrid_zk  ! policies for given z and K
-    real(dp) ,dimension(:,:,:), allocatable   :: apgridm, kappam  ! policies for given z, K, and mu last period (minus)
+    real(dp) ,dimension(:,:,:,:), allocatable :: apgrid_zk, stocks_zk, xgrid_zk  ! policies for given z and K
+    real(dp) ,dimension(:,:,:), allocatable   :: apgridm, stocksm  ! policies for given z, K, and mu last period (minus)
     real(dp) ,dimension(:,:,:), allocatable   :: Phim             ! distribution
     real(dp) ,dimension(:), allocatable       :: etagridt
 
@@ -21,8 +21,8 @@ contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
 ! - pure function f_excessbonds(mut)
-! - subroutine set_excessbondsvars(wage,pens,r,rf,apgrid_minus, kappa_minus, apgrid, kappa ,xgrid, aggr ,Ph, etagri)
-! - pure subroutine get_excessbondsvars(apgrid, kappa, aggr ,Ph)
+! - subroutine set_excessbondsvars(wage,pens,r,rf,apgrid_minus, stocks_minus, apgrid, stocks ,xgrid, aggr ,Ph, etagri)
+! - pure subroutine get_excessbondsvars(apgrid, stocks, aggr ,Ph)
 !-------------------------------------------------------------------------------
 
 	pure real(dp) function f_excessbonds(mut)
@@ -44,18 +44,18 @@ contains
 
 	        if (.not. exogenous_xgrid) then
 		        xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
-		        Phi      = TransitionPhi(rft,rt,nwaget,penst,xgridt,apgridm,kappam,etagridt, Phim)
+		        Phi      = TransitionPhi(rft,rt,nwaget,penst,xgridt,apgridm,stocksm,etagridt, Phim)
 	        else
 	            Phi = Phim
 	        endif
 
 		    apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
-		    stockst  = (1-w)*apgrid_zk(:,:,:,i)* kappa_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)* kappa_zk(:,:,:,i+1)
+		    stockst  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
 
         else
             Phi = Phim
             apgridt  = apgrid_zk(:,:,:,1)
-            stockst  = apgrid_zk(:,:,:,1)* kappa_zk(:,:,:,1)
+            stockst  = stocks_zk(:,:,:,1)
         endif
 
         bond_supply   = de_ratio * sum(stockst*Phi)/L_N_ratio
@@ -64,11 +64,11 @@ contains
 	end function f_excessbonds
 !-------------------------------------------------------------------------------
 
-    subroutine set_excessbondsvars_end_xgrid(wage,pens,r,rf,apgrid_minus, kappa_minus, apgrid, kappa ,xgrid, aggr ,Ph, etagri)
+    subroutine set_excessbondsvars_end_xgrid(wage,pens,r,rf,apgrid_minus, stocks_minus, apgrid, stocks ,xgrid, aggr ,Ph, etagri)
     ! this one is called if (.not. exogenous_xgrid)
         real(dp)                     ,intent(in) :: wage, pens, r, rf
-        real(dp), dimension(:,:,:)   ,intent(in) :: apgrid_minus, kappa_minus ! policies for given z, K, and mu last period
-        real(dp), dimension(:,:,:,:) ,intent(in) :: apgrid, kappa, xgrid      ! policies for given z and K
+        real(dp), dimension(:,:,:)   ,intent(in) :: apgrid_minus, stocks_minus ! policies for given z, K, and mu last period
+        real(dp), dimension(:,:,:,:) ,intent(in) :: apgrid, stocks, xgrid      ! policies for given z and K
         type(tAggGrids)              ,intent(in) :: aggr
         real(dp), dimension(:,:,:)   ,intent(in) :: Ph
         real(dp), dimension(:)       ,intent(in) :: etagri
@@ -78,9 +78,9 @@ contains
         rt        = r
         rft       = rf
         apgridm   = apgrid_minus
-        kappam    = kappa_minus
+        stocksm    = stocks_minus
         apgrid_zk = apgrid
-        kappa_zk  = kappa
+        stocks_zk  = stocks
         xgrid_zk  = xgrid
         agg_grid  = aggr
         Phim      = Ph
@@ -89,26 +89,26 @@ contains
     end subroutine set_excessbondsvars_end_xgrid
 !-------------------------------------------------------------------------------
 
-    subroutine set_excessbondsvars_ex_xgrid(apgrid, kappa, aggr ,Ph)
+    subroutine set_excessbondsvars_ex_xgrid(apgrid, stocks, aggr ,Ph)
     ! this one is called if (exogenous_xgrid)
-        real(dp), dimension(:,:,:,:) ,intent(in) :: apgrid, kappa   ! policies for given z and K
+        real(dp), dimension(:,:,:,:) ,intent(in) :: apgrid, stocks   ! policies for given z and K
         type(tAggGrids)              ,intent(in) :: aggr
         real(dp), dimension(:,:,:)   ,intent(in) :: Ph
         apgrid_zk = apgrid
-        kappa_zk  = kappa
+        stocks_zk  = stocks
         agg_grid  = aggr
         Phim      = Ph
     end subroutine set_excessbondsvars_ex_xgrid
 !-------------------------------------------------------------------------------
 
-    pure subroutine get_excessbondsvars(apgrid, kappa, aggr ,Ph)
+    pure subroutine get_excessbondsvars(apgrid, stocks, aggr ,Ph)
         ! This getter method might be superfluous.
-        real(dp) ,dimension(:,:,:,:) ,intent(out) :: apgrid, kappa    ! policies for given z and K
+        real(dp) ,dimension(:,:,:,:) ,intent(out) :: apgrid, stocks    ! policies for given z and K
         type(tAggGrids)              ,intent(out) :: aggr
         real(dp) ,dimension(:,:,:)   ,intent(out) :: Ph
 
         apgrid = apgrid_zk
-        kappa  = kappa_zk
+        stocks  = stocks_zk
         aggr   = agg_grid
         Ph     = Phim
 
