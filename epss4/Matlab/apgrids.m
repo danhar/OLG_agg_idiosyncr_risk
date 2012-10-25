@@ -12,9 +12,7 @@ else
 end
 
 cd('../model_output/')
-% ap_numzero =dlmread('params.txt',' ', [33 19 33 35]);
 % jr = dlmread('params.txt','', [40 11 40 13]);
-ap_numzero =  [.010000, .000001];
 jr =43;
 cd(dir)
 apgrid=dlmread('apgrid_mean.txt');
@@ -25,9 +23,7 @@ for j=[1,35]
     gen_str=num2str(j);
     i= floor((j+1)/jr)+1;
     figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
-    plot(apgrid(j,:),0,'x'), hold;
-    line([ap_numzero(i),ap_numzero(i)],[-.5,.5]);
-    line([-ap_numzero(i),-ap_numzero(i)],[-.5,.5]), hold;
+    plot(apgrid(j,:),0,'x');
     set(gca,'FontSize',16);
     title(['apgrid for generation ',gen_str,', ',dir]);
     xlabel('ap','FontSize',16);

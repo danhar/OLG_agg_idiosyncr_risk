@@ -192,12 +192,11 @@ contains
     ! Create savings grid for generation j, apgrid(:,zc,jc,kc,muc)
     !---------------------------------------------------------------------------
     pure function f_apgrid_j(rfp,yp, xgridp, app_min)
-        use params_mod , only: nap, ap_numzero, collateral_constraint
+        use params_mod , only: nap, collateral_constraint
 
         real(dp), dimension(nap) :: f_apgrid_j
         real(dp), intent(in)     :: rfp, yp(n_eta,nz), xgridp(nx,n_eta,nz), app_min
         real(dp)                 :: rtildemax_debt, apmin, xp_min
-        integer                  :: nap1    ! number of of points below zero.
 
 CC:     if (collateral_constraint) then
             f_apgrid_j(1) = 0.0 ! a'=0, but I can still borrow and invest in stock
@@ -213,28 +212,10 @@ CC:     if (collateral_constraint) then
 	            apmin = xp_min*.8_dp
 	        endif
 
-	        if (apmin <= -ap_numzero((jc+1)/jr+1)/2.0) then
-	            nap1    = ceiling(abs(apmin)/(apmax(ec,zc,jc)-apmin)*real(nap,dp)) !+1
-	            if (nap-nap1 <2) nap1=nap-2
-	            nap1 =nap/2 !nap*2/3 !
-	        else
-	            nap1    = 0
-	        endif
+            f_apgrid_j= MakeGrid(apmin,apmax(ec,zc,jc),nap,1.5_dp) !2.0 !,'chebyshev'
 
-	        ! Create apgrid so that more points around ap_numzero
-	        ! At the moment asymmetric around zero, but could make symmetric:
-	        ! Closest point to zero from left is half the distance as the one from right
-	        if (nap1==1) then
-	            f_apgrid_j(1)=apmin !min(apmin, -ap_numzero((jc+1)/jr+1)))
-	        elseif (nap1>1) then
-	            f_apgrid_j(1:nap1)= MakeGrid(apmin,-ap_numzero((jc+1)/jr+1)/2.0,nap1,1.5_dp) !2.0 !,'chebyshev'
-	        endif
-	        if (nap-nap1<1) then
-	            nap1 = nap1
-	        endif
-	        f_apgrid_j(nap1+1:nap)   =  MakeGrid(ap_numzero((jc+1)/jr+1), apmax(ec,zc,jc),nap-nap1,1.5_dp) !,'chebyshev'
-	        !f_apgrid_j =  MakeGrid(apmin, apmax(jc),nap,1.0_dp) !,'chebyshev'
         endif CC
+
     end function f_apgrid_j
 
     !---------------------------------------------------------------------------
@@ -348,7 +329,7 @@ CC:     if (collateral_constraint) then
             return
         endif
         if (ap==0.0) then       ! this happens if (collateral_constraint), because then ap(1) == 0.0 and ap(2) == 0.0
-            kappa_out = 0.0     ! it can also catch the (coincidental, unintended) case where apgrid contains zero (should not happen with ap_numzero>0)
+            kappa_out = 0.0     ! it can also catch the (coincidental, unintended) case where apgrid contains zero
             return
         endif
 

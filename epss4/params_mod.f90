@@ -11,7 +11,7 @@ module params_mod
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
 	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, rho, n, tau, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, apmax_factor, cmin, kappamax, &
-	                      apmax_curv, ap_numzero(2), tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
+	                      apmax_curv, tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           n_coeffs, nt, t_scrap, opt_initial_ms_guess, run_n_times, run_counter_start
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
@@ -83,7 +83,7 @@ subroutine SetDefaultValues()
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
-    apmax_curv=1.0; ap_numzero=[0.01_dp, cmin]; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
+    apmax_curv=1.0; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
     nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1
@@ -229,17 +229,6 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) kappamax
             case ('apmax_curv')
                 read (parval,*) apmax_curv
-            case ('ap_numzero')
-                if (trim(adjustl(parval)) == 'cmin') then
-                    ap_numzero(1)=cmin
-                else
-                    read (parval,*) ap_numzero(1)
-                endif
-                if (trim(adjustl(parval2)) == 'cmin') then
-                    ap_numzero(2)=cmin
-                else
-                    read (parval,*) ap_numzero(2)
-                endif
             case ('tol_coeffs')
                 read (parval,*) tol_coeffs
             case ('tol_asset_eul')
@@ -1028,7 +1017,6 @@ subroutine SaveParams(projectname, calib_name)
     write(21,218) ' tscrap       = ', t_scrap
     write(21,217) ' cover_k      = ', cover_k
     write(21,217) ' cover_mu     = ', cover_mu
-    write(21,217) ' ap_numzero   = ', ap_numzero
 217 format(a16, 2(f0.6,x))
     write(21,219) ' cmin         = ', cmin
 219 format(a16, es8.2)
