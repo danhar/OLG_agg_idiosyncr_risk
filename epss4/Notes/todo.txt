@@ -2,11 +2,6 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- remove calc of kappa where not necessary, use stocks directly, and bondst = apgridt - stockst
-    - probably also remove ap_numzero, instead rely on the if (ap==0.0) in calc_policyfunctions:asset_allocation
-
-- interpolate on stocks and bonds instead of kappa
-
 - paralellize household solution (first try with do concurrent, if that doesnt work maybe also try openmp)
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -34,9 +29,12 @@ For example, simvars should read and write output unformatted also, see  subrout
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
 - implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
 - use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
-        -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
-- arithmetic operations on tPolicies?
-- pol_zk = Interpolate(pol,dim=3,w)
+    -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
+        Allocating tPolicies with extent 1 in that dimension introduces a lot of cumbersome notation with brackets like (:,:,1,:,:,:) .
+        Instead, could have an extended derived type extra with less dimensions - but what happens to all the type-bound procedures?    
+    -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
+- arithmetic operations on tPolicies? Maybe not needed.
+- pol_zk = Interpolate(pol,dim=3,w) is already started. Should unify with the external interpolation in interplate_xgrid.
 - splines to interpolate stocks and bonds? and consumption in euler equations?
 - record and report stats for gross wages (important when def benefits) (in simulations and save_results)
 - correct eigenvalue calc of stationary distribution (in module markov_station_distr, see also params_mod:CheckParams), check codes/Fortran/Bewley_by_Karibzhanov/source/toolbox   

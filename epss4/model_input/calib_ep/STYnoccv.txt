@@ -76,8 +76,6 @@ apmax_factor    18.0        used in fun_setapmax: apmax=k*apmax_factor. Alternat
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
-! ap_numzero gives the min(apgrid) both in positive and negative in policyfunctions, and when to enter eulerasset
-ap_numzero      0.01 cmin   first value for j<=jr-1, second for j>jr-1
 
 ! Tolerances (stopping criteria)
 tol_coeffs      1e-4        convergence criterion for coeffs
@@ -94,5 +92,4 @@ mu_ms_guess     1.5e-2      OPTIONAL (only used if opt_initial_ms_guess=1) initi
 ! Annotations:
 ! 1. The forward slash indicates end of record. It is is needed whenever there are less then 2 words after the !, 
 !    e.g. after the !--- , because there are no spaces or other separators to separate words.
-! 2. ap_numzero can be given the string 'cmin' instead of a real, because cmin is read first.
 !----------------------------------------------------------------------------------------------------------------------------/

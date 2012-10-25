@@ -82,8 +82,6 @@ apmax_factor    20.0        used in fun_setapmax: apmax=k*apmax_factor. Alternat
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
-! ap_numzero gives the min(apgrid) both in positive and negative in policyfunctions, and when to enter eulerasset
-ap_numzero      0.01 cmin   first value for j<=jr-1, second for j>jr-1
 
 ! Tolerances (stopping criteria)
 tol_coeffs      1e-4        convergence criterion for coeffs
@@ -102,9 +100,8 @@ mu_ms_guess     1.9e-2      OPTIONAL (only used if opt_initial_ms_guess=1) initi
 ! (00) All variables are lower case. Upper case will yield unknown variable.
 ! (1) The forward slash indicates end of record. It is is needed whenever there are less then 2 words after the !, 
 !    e.g. after the !--- , because there are no spaces or other separators to separate words.
-! (2) ap_numzero can be given the string 'cmin' instead of a real, because cmin is read first.
-! (3) The 'collateral constraint' uses today's prices for both assets (it does not include the risk-free rate)
-! (4) If collateral_constraint == .false and kappa_in_01 == .true. then the agent can borrow for consumption (but not for investing in stock).
-! (5) tau_experiment = .true. increases tau +2% after first run, sets partial_equilibrium=.true., runs again, computes consumption equivalent variation (CEV).
+! (2) The 'collateral constraint' uses today's prices for both assets (it does not include the risk-free rate)
+! (3) If collateral_constraint == .false and kappa_in_01 == .true. then the agent can borrow for consumption (but not for investing in stock).
+! (4) tau_experiment = .true. increases tau +2% after first run, sets partial_equilibrium=.true., runs again, computes consumption equivalent variation (CEV).
 !     If combined with run_n_times, then each run will perform this experiment (e.g. with different scale_AR). Only first run is GE. 
 !----------------------------------------------------------------------------------------------------------------------------/
