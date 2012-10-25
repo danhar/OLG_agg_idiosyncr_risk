@@ -254,16 +254,17 @@ subroutine print_error_msg(simvars)
     type(tSimvars) ,intent(in) :: simvars
     integer                    :: count_err
     real(dp)                   :: perc_err
+
     if (any(simvars%err_K)) then
         count_err = count(simvars%err_K(t_scrap+1:))
         perc_err  = count_err/real((nt-t_scrap),dp)*100_dp
-        print 214, ' Warning: simulate_economy: # K  not in grid = ', count_err,'  (',perc_err,'%)'
+        print 214, ' Warning: simulate_economy: # K  not in grid =', count_err,'  (',perc_err,'%)'
     endif
 
     if (any(simvars%err_mu)) then
         count_err = count(simvars%err_mu(t_scrap+1:))
         perc_err  = real(count_err,dp)/real((nt-t_scrap),dp)*100_dp
-        print 214, ' Warning: simulate_economy: # mu not in grid = ', count_err,'  (',perc_err,'%)'
+        print 214, ' Warning: simulate_economy: # mu not in grid =', count_err,'  (',perc_err,'%)'
     endif
 
 214 format((a,i6,a3,f5.1,a2))
