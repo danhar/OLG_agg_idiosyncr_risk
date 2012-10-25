@@ -575,10 +575,14 @@ end function mean
 pure function interpolate(this,dim_x, gridx, x) result(pol_int)
     ! linear interpolation for one value in one dimension
     ! At the moment, I am not using this anywhere, because typically I want the result to have one dimension less, which is not the case here
+    ! For this, would need another type tPolicies5 (or Policies_d5) and
+    ! class(tPolicies),allocatable  :: pol_int ! allocate later
+    ! or
+    ! type(Policies_d5)  :: pol_int
     use fun_locate      ,only: f_locate
 
     class(tPolicies), intent(in)  :: this
-    type(tPolicies)               :: pol_int
+    class(tPolicies),allocatable  :: pol_int
     integer, intent(in)           :: dim_x
     real(dp), intent(in) :: x, gridx(:)
     integer :: i
