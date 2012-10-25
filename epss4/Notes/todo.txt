@@ -24,6 +24,7 @@ For example, simvars should read and write output unformatted also, see  subrout
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - bequests to the young
 - simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
+- use workshare directive to parallelize transition of Phi in the simulations?
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
