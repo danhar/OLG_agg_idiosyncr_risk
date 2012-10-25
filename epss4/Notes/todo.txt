@@ -32,7 +32,8 @@ For example, simvars should read and write output unformatted also, see  subrout
     -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
         Allocating tPolicies with extent 1 in that dimension introduces a lot of cumbersome notation with brackets like (:,:,1,:,:,:) .
         Instead, could have an extended derived type extra with less dimensions - but what happens to all the type-bound procedures?
-        See my comment in policyfunctions:interpolate, and the correspondence on CLF    
+        See my comment in policyfunctions:interpolate, and the correspondence on CLF
+    -- could put the errors only in the 'normal' type and call later from there (and not have them in the smaller types)    
     -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
 - arithmetic operations on tPolicies? Maybe not needed.
 - pol_zk = Interpolate(pol,dim=3,w) is already started. Should unify with the external interpolation in interplate_xgrid.

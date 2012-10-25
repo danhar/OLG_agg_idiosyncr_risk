@@ -71,8 +71,9 @@
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.909615977" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1673895078" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="asseteuler.f90u|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -141,8 +142,9 @@
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.546600466" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1522841654" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="asseteuler.f90u|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -211,8 +213,9 @@
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.460926585" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.2142483975.683295182" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="asseteuler.f90u|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -230,6 +233,7 @@
 		<configuration configurationName="Build_Optimmax">
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>
 		</configuration>
+		<configuration configurationName="Build_IPO"/>
 		<configuration configurationName="Build_Debugmax">
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>
 		</configuration>

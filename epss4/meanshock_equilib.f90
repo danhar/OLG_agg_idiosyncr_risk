@@ -25,7 +25,7 @@ module meanshock_equilib
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - pure function ms_equilib(msvars)
+! - function ms_equilib(msvars) result(distance)
 ! - subroutine ms_equilib_set(co, ag_gr, m_z, m_d, s_w, eta)
 ! - pure subroutine ms_equilib_get(P, pol, v, e_o)
 !-------------------------------------------------------------------------------

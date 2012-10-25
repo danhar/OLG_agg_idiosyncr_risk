@@ -19,7 +19,7 @@ module policyfunctions
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - subroutine solve_policyfunctions(coeffs, grids, p, value, err_o)
+! - pure subroutine solve_policyfunctions(coeffs, grids, p, value, err_o)
 ! - pure subroutine allocate_policies(p,nk,nmu)
 ! - pure subroutine deallocate_policies(p)
 ! - pure function mean(this,dimension_o,weight_o) result(mean_policy)
@@ -27,14 +27,13 @@ contains
 ! - pure subroutine calc_kappa(p)
 !-------------------------------------------------------------------------------
 
-subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
+pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class
     use makegrid_mod
-    use asseteuler     ,only: asseteuler_set
 
     class(tPolicies)                 ,intent(out) :: p      ! policies
     type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
@@ -95,16 +94,10 @@ zloop: 			do zc=1,nz
                     call interp_policies(kp, mup, grids, p, consp, xgridp, vp, app_min)
 
 etaloop:            do ec=1,n_eta
-
 	                    ! Create savings grid apgrid
 	                    p%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min)
 
-						call asseteuler_set(yp, rp, rfp, pi_z(zc,:), pi_eta(ec,:), consp, xgridp, vp)
-
 xloop:                  do xc=1,nx
-
-					        ! Set last euler variable
-					        call asseteuler_set(p%apgrid(xc,ec,zc,jc,kc,muc))
 					        ! Asset allocation problem, see internal subroutine below
 							call asset_allocation(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), err_asset)
 							p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
@@ -134,8 +127,10 @@ contains
 ! - pure function f_apgrid_j(kp, mup, rfp,yp, xgridp)
 ! - pure subroutine interp_policies(kp, mup, grid, p, consp, xgridp, vp)
 ! - pure subroutine asset_allocation(ap, kappa_out, error)
+! - pure function asseteuler_f(kappa)
+! - pure function taylor_expansion(cons_in, vp_in)
 ! - pure subroutine consumption(ap, kappa, cons_out, evp, error)
-! - subroutine error_handling(err, err_asset, err_cons)
+! - (pure) subroutine error_handling(err, err_asset, err_cons)
 !-------------------------------------------------------------------------------
 
 
@@ -303,7 +298,6 @@ CC:     if (collateral_constraint) then
     !---------------------------------------------------------------------------
     pure subroutine asset_allocation(ap, kappa_out, error)
         use params_mod ,only: opt_zbren, tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio
-        use asseteuler ,only: asseteuler_f
 !       use zreal_int      ! IMSL Math.pdf, p. 1195f: Mullers Method to find roots (like secant but quadratic).
                            ! expects array as input (i.e. define scalar as dimension(1)).
 !       use zbren_int      ! IMSL Math.pdf, p. 1192f: Brent's method to find roots
@@ -320,7 +314,7 @@ CC:     if (collateral_constraint) then
         integer  ,dimension(1)  :: zreal_its ! zreal: no of iterations to convergence. need to test convergence
         real(dp) ,dimension(:) ,allocatable :: kappal, kappau !sub_zbrak: lower and upper bounds of segment containing a root
         logical                 :: bracket_found
-        !real(dp), external     :: asseteuler_f ! function with asset euler equation, needs to be external for IMSL solvers
+        !real(dp), external     :: asseteuler_f ! function with asset euler equation, needs to be external for IMSL solvers (or can it be internal?)
 
         error = .false.
 
@@ -422,6 +416,82 @@ CC:     if (collateral_constraint) then
     end subroutine asset_allocation
 
     !---------------------------------------------------------------------------
+    ! Euler equation
+    !---------------------------------------------------------------------------
+
+	pure function asseteuler_f(kappa)
+    use params_mod         ,only: theta, gamm, g, cmin
+    use fun_lininterp
+
+    real(dp)                  :: asseteuler_f
+    real(dp) ,intent(in)      :: kappa
+    real(dp) :: aeez(nz)                 ! asset euler equation for each z
+    real(dp) ,dimension(1)    :: cons_interp, vp_interp, xp, aeetemp
+    real(dp) :: rtildep, ap     ! rtilde prime, aprime
+    integer                   :: zpc, epc
+
+    ap = p%apgrid(xc,ec,zc,jc,kc,muc)
+    aeez = 0.0
+    do zpc=1,nz
+        rtildep     = (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
+        do epc=1,n_eta
+            xp          = yp(epc,zpc)+rtildep*ap
+            cons_interp = f_lininterp(xgridp(:,epc,zpc), consp(:,epc,zpc), xp)
+            vp_interp   = f_lininterp(xgridp(:,epc,zpc), vp(:,epc,zpc), xp)
+
+
+            if (cons_interp(1) <=cmin) then
+                cons_interp = cmin
+                xp               = cmin + ap
+                vp_interp   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
+            endif
+            if (vp_interp(1) <=cmin) then
+                vp_interp(1)   = cmin
+            endif
+            aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
+!
+!           if (xp(1) < xgridp(1,epc,zpc)) then
+!               aeetemp = taylor_expansion(cons_interp, vp_interp,epc,zpc)  ! only works for theta\=1
+!           else
+!               aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
+!           endif
+
+            aeez(zpc) = aeez(zpc) + pi_eta(ec,epc)*aeetemp(1)
+        enddo
+    enddo
+
+    asseteuler_f    = dot_product(pi_z(zc,:),aeez*(rp-rfp))
+
+    end function asseteuler_f
+
+    !-------------------------------------------------------------------------------
+    ! Taylor expansion of Euler euqation (optional)
+    !-------------------------------------------------------------------------------
+
+    pure function taylor_expansion(cons_in, vp_in,epc,zpc)
+    ! only works for theta\=1
+        real(dp), dimension(:), intent(in) :: cons_in, vp_in
+        integer, intent(in)                :: epc, zpc
+        real(dp), dimension(size(vp_in))   :: taylor_expansion
+
+    taylor_expansion = vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm) &
+    ! First order Taylor expansion
+        + (vp_in-vp(1,epc,zpc))*((1.0-theta)*(gamm-1.0)/gamm)*vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm -1.0) &
+          *consp(1,epc,zpc)**((1.0-theta-gamm)/gamm) &
+        + vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm) &
+          *(cons_in-consp(1,epc,zpc))*((1.0-theta-gamm)/gamm)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm-1.0) &
+    ! Second order Taylor expansion
+        + 0.5_dp*(vp_in-vp(1,epc,zpc))**2.0*((1.0-theta)*(gamm-1.0)/gamm -1.0)*((1.0-theta)*(gamm-1.0)/gamm)*vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm-2.0) &
+          *consp(1,epc,zpc)**((1.0-theta-gamm)/gamm) &
+        + vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm) &
+          *0.5_dp*(cons_in-consp(1,epc,zpc))**2.0*((1.0-theta-gamm)/gamm)*((1.0-theta-gamm)/gamm-1.0)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm-2.0) &
+        + (vp_in-vp(1,epc,zpc))*((1.0-theta)*(gamm-1.0)/gamm)*vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm -1.0) &
+          *(cons_in-consp(1,epc,zpc))*((1.0-theta-gamm)/gamm)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm-1.0)
+
+    end function taylor_expansion
+
+
+    !---------------------------------------------------------------------------
     ! Consumption problem
     !---------------------------------------------------------------------------
     pure subroutine consumption(ap, kappa, cons_out, evp, error)
@@ -489,15 +559,15 @@ CC:     if (collateral_constraint) then
     !---------------------------------------------------------------------------
     ! Print errors
     !---------------------------------------------------------------------------
-    subroutine error_handling(err, err_asset, err_cons, err_kp, err_mup)
+    pure subroutine error_handling(err, err_asset, err_cons, err_kp, err_mup)
         use params_mod ,only: detailed_euler_errs
         type(tErrors)  ,intent(inout) :: err
         logical(1)     ,intent(in)    :: err_asset, err_cons(:), err_kp, err_mup
         err%asset(xc,ec,zc,jc,kc,muc)  = err_asset
 	    err%cons(:,xc,ec,zc,jc,kc,muc) = err_cons
-	    if (detailed_euler_errs) then
-            print '(a54,6i3)','ERROR: in policyfunctions at (xc,ec,zc,jc,kc,muc)=', xc,ec,zc,jc, kc, muc
-            print '(t8,a9,l1,a12,l1,a14,l1,a14,<nz>(l1,x))', 'err_kp = ', err_kp, ' ,err_mup = ', err_mup, ' ,err_asset = ',err_asset,',  err_cons = ', err_cons
+	    if (detailed_euler_errs) then ! the following is only for serious debugging. Outcommenting destroys pure!
+!            print '(a54,6i3)','ERROR: in policyfunctions at (xc,ec,zc,jc,kc,muc)=', xc,ec,zc,jc, kc, muc
+!            print '(t8,a9,l1,a12,l1,a14,l1,a14,<nz>(l1,x))', 'err_kp = ', err_kp, ' ,err_mup = ', err_mup, ' ,err_asset = ',err_asset,',  err_cons = ', err_cons
         endif
     end subroutine error_handling
 end subroutine solve_policyfunctions

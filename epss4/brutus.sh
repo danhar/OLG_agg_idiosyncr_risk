@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='no_ap_numzero'
+thisrun='internal_euler'
 BUILD=Build_Optimmax # Debugmax # 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

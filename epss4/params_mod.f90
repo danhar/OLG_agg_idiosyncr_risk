@@ -722,8 +722,7 @@ subroutine CheckParams()
     endif
 
     if (theta == 1.0) then
-        print*, 'ERROR: theta == 1.0, Taylor expansion in asseteuler doesnt work.'
-        call critical_stop
+        print*, 'WARNING: theta == 1.0, Taylor expansion in policyfunctions:asseteuler doesnt work!'
     endif
 
     if (nz /= 4) then
@@ -773,6 +772,8 @@ subroutine CheckParams()
         print*, 'ERROR: n_coeffs < 2'
         call critical_stop
     endif
+
+    if (detailed_euler_errs) print*, 'WARNING: detailed_euler_errors=.true., check that policyfunctions:solve_policyfunctions:error_handling is not outcommented and not pure'
 
     if (zeta_mean .ne. 1.0) print*, 'WARNING: zeta_mean .ne. 1.0'
     if (zeta_std > 0.1_dp) print*, 'WARNING: zeta_std > 0.1'
