@@ -77,7 +77,9 @@ pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     !---------------------------------------------------------------------------
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
-!$OMP PARALLEL DEFAULT(SHARED) PRIVATE(muc,kc,zc,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
+!$OMP PARALLEL DEFAULT(NONE) &
+!$OMP SHARED(p,value,cons,grids,coeffs,err_o,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv) &
+!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
