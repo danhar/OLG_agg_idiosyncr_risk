@@ -27,7 +27,7 @@ contains
 ! - pure subroutine calc_kappa(p)
 !-------------------------------------------------------------------------------
 
-pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
+subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use aggregate_grids ,only: tAggGrids
