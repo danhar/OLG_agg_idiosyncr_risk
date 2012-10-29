@@ -27,7 +27,7 @@ contains
 ! - pure subroutine calc_kappa(p)
 !-------------------------------------------------------------------------------
 
-pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
+subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use aggregate_grids ,only: tAggGrids
@@ -41,18 +41,26 @@ pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
     type(tErrors)        ,optional   ,intent(out) :: err_o
     real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
-    real(dp) ,dimension(nx,n_eta,nz)              :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
-    real(dp) ,dimension(n_eta,nz)                 :: yp      ! income tomorrow, for every idiosyncr & aggr state
-    real(dp) ,dimension(nz)                       :: rp, mup ! risky return AND equity premium for every aggr state tomorrow
-    real(dp)   :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
-    real(dp)   :: betatildej, evp                            ! modified discount factor, expected value tomorrow
-    logical(1) :: err_kp, err_mup, err_rfp, err_cons(nz), err_asset, err_present
-	integer    :: nk, nmu, jc, muc, kc, zc, xc, ec
+    real(dp) ,dimension(:,:,:) ,allocatable ,save        :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
+    real(dp) ,dimension(:,:) ,allocatable    ,save        :: yp      ! income tomorrow, for every idiosyncr & aggr state
+    real(dp) ,dimension(:)  ,allocatable        ,save        :: rp, mup ! risky return AND equity premium for every aggr state tomorrow
+    real(dp) ,save  :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
+    real(dp) ,save  :: betatildej, evp                            ! modified discount factor, expected value tomorrow
+    logical(1) ,save:: err_kp, err_mup, err_rfp, err_asset, err_present
+    logical(1), allocatable, save :: err_cons(:)
+	integer, save    :: nk, nmu, jc, muc, kc, zc, xc, ec
+	! The following are only auxiliary, because OpenMP 3.1 doesn't work with derived types with allocatable components
+	real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: apgrid, kappa, stocks, xgrid
+	real(dp) ,allocatable :: gridk(:), gridmu(:), coeffs_k(:,:), coeffs_mu(:,:)
+	logical(1), allocatable :: err_o_asset(:,:,:,:,:,:), err_o_cons(:,:,:,:,:,:,:), err_o_kp(:,:,:), err_o_mup(:,:,:), err_o_rfp(:,:,:)
+!$OMP THREADPRIVATE(jc,muc,kc,xc,zc,ec,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
 
     nk = size(grids%k)
     nmu= size(grids%mu)
     call p%allocate(nz,nk,nmu)
     allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
+    allocate(xgridp(nx,n_eta,nz), consp(nx,n_eta,nz), vp(nx,n_eta,nz), yp(n_eta,nz))
+    allocate(rp(nz), mup(nz), err_cons(nz))
     if (present(err_o)) then
         call err_o%allocate(nk,nmu)
         err_present = .true.
@@ -78,16 +86,15 @@ pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     p%stocks(:,:,:,:,:,:) = 0.0
     cons(:,:,:,nj,:,:)    = p%xgrid(:,:,:,nj,:,:)
     value(:,:,:,nj,:,:)   = cons(:,:,:,nj,:,:)
+    ! The next call is only to initialize the arrays, because OpenMP 3.1 doesn't support derived types with allocatable components
+    call initialize(apgrid,kappa,stocks,xgrid,gridk,gridmu,coeffs_k,coeffs_mu,err_o_asset,err_o_cons,err_o_kp,err_o_mup,err_o_rfp)
 
     !---------------------------------------------------------------------------
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
-    associate(apgrid=> p%apgrid, kappa=> p%kappa, stocks => p%stocks, xgrid => p%xgrid)
-    associate(gridk=> grids%k, gridmu=> grids%mu, coeffs_k => coeffs%k, coeffs_mu=> coeffs%mu)
-    if (err_present) associate(err_o_asset=> err_o%asset, err_o_cons=> err_o%cons, err_o_kp=> err_o%kp, err_o_mup=> err_o%mup, err_o_rfp=> err_o%rfp)
 !$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(apgrid,kappa,stocks,xgrid,gridk,gridmu,coeffs_k,coeffs_mu,value,cons,err_present, err_o_asset,err_o_cons,err_o_kp,err_o_mup,err_o_rfp,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv) &
-!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
+!$OMP SHARED(apgrid,kappa,stocks,xgrid,gridk,gridmu,coeffs_k,coeffs_mu,value,cons,err_present, err_o_asset,err_o_cons,err_o_kp,err_o_mup,err_o_rfp,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv) !&
+!!$OMP PRIVATE(betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
@@ -122,7 +129,7 @@ xloop:                  do xc=1,nx
 							! create new grid for cash at hand (xgrid)
 							xgrid(xc,ec,zc,jc,kc,muc)=apgrid(xc,ec,zc,jc,kc,muc)+cons(xc,ec,zc,jc,kc,muc)
 
-							if(err_present .and. (err_asset .or. any(err_cons))) call error_handling(err_asset, err_cons, err_kp, err_mup)
+							if(err_present .and. (err_asset .or. any(err_cons))) call error_handling(err_o_asset,err_o_cons,err_asset, err_cons, err_kp, err_mup)
 
 	                    end do xloop
                     enddo etaloop
@@ -132,9 +139,6 @@ xloop:                  do xc=1,nx
 !$OMP END DO
 	enddo jloop
 !$OMP END PARALLEL
-if (err_present) end associate
-end associate
-end associate
 
 contains
 !-------------------------------------------------------------------------------
@@ -241,13 +245,13 @@ CC:     if (collateral_constraint) then
 	    integer :: iK, imu, zpc
 	    real(dp) :: wK, wmu
 
-        if(size(grid_K)>1 .and. size(grid_mu)>1) then
+        if(size(gridk)>1 .and. size(gridmu)>1) then
 	        ! Projection of policies on Kt
-	        iK        = f_locate(grid_K, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-	        wK        = (kp - grid_k(iK)) / (grid_k(iK+1) - grid_k(iK))
+	        iK        = f_locate(gridk, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+	        wK        = (kp - gridk(iK)) / (gridk(iK+1) - gridk(iK))
             do zpc=1,nz
-		        imu        = f_locate(grid_mu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-		        wmu        = (mup(zpc) - grid_mu(imu)) / (grid_mu(imu+1) - grid_mu(imu))
+		        imu        = f_locate(gridmu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+		        wmu        = (mup(zpc) - gridmu(imu)) / (gridmu(imu+1) - gridmu(imu))
 
 		        ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
 		        consp(:,:,zpc) = (1-wK)*(1-wmu)*   cons(:,:,zpc,jc+1,iK  ,imu  ) + &
@@ -266,26 +270,26 @@ CC:     if (collateral_constraint) then
 				                    wK *   wmu *  value(:,:,zpc,jc+1,iK+1,imu+1)
             enddo
 
-            imu        = f_locate(grid_mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-            wmu        = (mup(1) - grid_mu(imu)) / (grid_mu(imu+1) - grid_mu(imu))
+            imu        = f_locate(gridmu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+            wmu        = (mup(1) - gridmu(imu)) / (gridmu(imu+1) - gridmu(imu))
             app_min= (1-wK)*(1-wmu)*apgrid(1,1,1,jc+1,iK  ,imu  ) + & ! This creates smallest aprime for forecasts
                         wK *(1-wmu)*apgrid(1,1,1,jc+1,iK+1,imu  ) + & ! I should move this into the loop and calc for all zpc
                      (1-wK)*   wmu *apgrid(1,1,1,jc+1,iK  ,imu+1) + & ! coz then better to understand.
                         wK *   wmu *apgrid(1,1,1,jc+1,iK+1,imu+1)
 
-        elseif (size(grid_K)>1) then
+        elseif (size(gridK)>1) then
             ! Projection of policies on Kt
-            iK        = f_locate(grid_K, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-            wK        = (kp - grid_k(iK)) / (grid_k(iK+1) - grid_k(iK))
+            iK        = f_locate(gridK, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+            wK        = (kp - gridk(iK)) / (gridk(iK+1) - gridk(iK))
             consp  = (1.0 -wK)*cons    (:,:,:,jc+1,iK,1) + wK*cons    (:,:,:,jc+1,iK+1,1)
             xgridp = (1.0 -wK)*xgrid (:,:,:,jc+1,iK,1) + wK*xgrid (:,:,:,jc+1,iK+1,1)
             vp     = (1.0 -wK)*value   (:,:,:,jc+1,iK,1) + wK*value   (:,:,:,jc+1,iK+1,1)
             app_min= (1.0 -wK)*apgrid(1,1,1,jc+1,iK,1) + wK*apgrid(1,1,1,jc+1,iK+1,1)
 
-        elseif (size(grid_mu)>1) then
+        elseif (size(gridmu)>1) then
             do zpc=1,nz
-                imu        = f_locate(grid_mu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-                wmu        = (mup(zpc) - grid_mu(imu)) / (grid_mu(imu+1) - grid_mu(imu))
+                imu        = f_locate(gridmu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+                wmu        = (mup(zpc) - gridmu(imu)) / (gridmu(imu+1) - gridmu(imu))
 
                 ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
                 consp(:,:,zpc) = (1.0-wmu)*   cons(:,:,zpc,jc+1,1,imu) + wmu*   cons(:,:,zpc,jc+1,1,imu+1)
@@ -293,8 +297,8 @@ CC:     if (collateral_constraint) then
                 vp(:,:,zpc)    = (1.0-wmu)*  value(:,:,zpc,jc+1,1,imu) + wmu*  value(:,:,zpc,jc+1,1,imu+1)
             enddo
 
-            imu        = f_locate(grid_mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
-            wmu        = (mup(1) - grid_mu(imu)) / (grid_mu(imu+1) - grid_mu(imu))
+            imu        = f_locate(gridmu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+            wmu        = (mup(1) - gridmu(imu)) / (gridmu(imu+1) - gridmu(imu))
             app_min= (1.0-wmu)*apgrid(1,1,1,jc+1,1,imu) + wmu*apgrid(1,1,1,jc+1,1,imu+1)
             ! This creates smallest aprime for forecasts. should move this into the loop and calc for all zpc coz then better to understand.
 
@@ -573,16 +577,44 @@ CC:     if (collateral_constraint) then
     !---------------------------------------------------------------------------
     ! Print errors
     !---------------------------------------------------------------------------
-    pure subroutine error_handling(err_asset, err_cons, err_kp, err_mup)
+    pure subroutine error_handling(err_o_asset,err_o_cons,err_asset, err_cons, err_kp, err_mup)
         use params_mod ,only: detailed_euler_errs
-        logical(1)     ,intent(in)    :: err_asset, err_cons(:), err_kp, err_mup
-        err_asset(xc,ec,zc,jc,kc,muc)  = err_asset
-	    err_cons(:,xc,ec,zc,jc,kc,muc) = err_cons
+        logical(1) ,intent(inout):: err_o_asset(:,:,:,:,:,:), err_o_cons(:,:,:,:,:,:,:)
+        logical(1) ,intent(in)    :: err_asset, err_cons(:), err_kp, err_mup
+        err_o_asset(  xc,ec,zc,jc,kc,muc) = err_asset
+	    err_o_cons (:,xc,ec,zc,jc,kc,muc) = err_cons
 	    if (detailed_euler_errs) then ! the following is only for serious debugging. Outcommenting destroys pure!
 !            print '(a54,6i3)','ERROR: in policyfunctions at (xc,ec,zc,jc,kc,muc)=', xc,ec,zc,jc, kc, muc
 !            print '(t8,a9,l1,a12,l1,a14,l1,a14,<nz>(l1,x))', 'err_kp = ', err_kp, ' ,err_mup = ', err_mup, ' ,err_asset = ',err_asset,',  err_cons = ', err_cons
         endif
     end subroutine error_handling
+
+    !---------------------------------------------------------------------------
+    ! Assign arrays to derived types so that OpenMP works
+    !---------------------------------------------------------------------------
+    ! This is only auxiliary, because OpenMP 3.1 doesn't work with derived types
+    pure subroutine initialize(apgrid,kappa,stocks,xgrid,gridk,gridmu,coeffs_k,coeffs_mu,err_o_asset,err_o_cons,err_o_kp,err_o_mup,err_o_rfp)
+        real(dp) ,dimension(:,:,:,:,:,:) ,allocatable ,intent(out) :: apgrid, kappa, stocks, xgrid
+        real(dp) ,allocatable ,intent(out):: gridk(:), gridmu(:), coeffs_k(:,:), coeffs_mu(:,:)
+        logical(1), allocatable ,intent(out):: err_o_asset(:,:,:,:,:,:), err_o_cons(:,:,:,:,:,:,:), err_o_kp(:,:,:), err_o_mup(:,:,:), err_o_rfp(:,:,:)
+
+        apgrid=p%apgrid
+        kappa=p%kappa
+        stocks=p%stocks
+        xgrid=p%xgrid
+        gridk=grids%k
+        gridmu=grids%mu
+        coeffs_k=coeffs%k
+        coeffs_mu=coeffs%mu
+        if(err_present) then
+            err_o_asset=err_o%asset
+            err_o_cons=err_o%cons
+            err_o_kp=err_o%kp
+            err_o_mup=err_o%mup
+            err_o_rfp=err_o%rfp
+        endif
+    end subroutine initialize
+
 end subroutine solve_policyfunctions
 !-------------------------------------------------------------------------------
 

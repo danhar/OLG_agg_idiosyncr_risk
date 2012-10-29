@@ -268,6 +268,7 @@
 								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.146501930" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.all" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.lang.openmp.1494370398" name="Process OpenMP Directives" superClass="intel.linux.fortran.compiler.lang.openmp" value="intel.lang.mpgenpar" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.diags.OpenMP.1932700474" name="OpenMP Report" superClass="intel.linux.fortran.compiler.diags.OpenMP" value="diags.openmp.2" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.runtime.chkbnds.1201443244" name="Check Array and String Bounds (-check bounds)" superClass="intel.linux.fortran.compiler.runtime.chkbnds" value="true" valueType="boolean"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.1538226918" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
 							</tool>
 							<tool command="ifort" commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.1351603986" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">
