@@ -77,8 +77,10 @@ pure subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     !---------------------------------------------------------------------------
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
+    associate(p2=>p, grids2=>grids, coeffs2=>coeffs)
+    if (present(err_o)) associate(err_o2=>err_o)
 !$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(p,value,cons,grids,coeffs,err_o,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv) &
+!$OMP SHARED(p2,value,cons,grids2,coeffs2,err_o2,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv) &
 !$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
@@ -88,33 +90,33 @@ kloop:      do kc=1,nk
 zloop: 			do zc=1,nz
 
                     call calc_vars_tomorrow(kp,mup,rp,rfp,yp, err_kp, err_mup, err_rfp)
-                    if (present(err_o) .and. (err_kp .or. err_mup .or. err_rfp)) then
-                        err_o%kp (zc,kc,muc) = err_kp
-                        err_o%mup(zc,kc,muc) = err_mup
-                        err_o%rfp(zc,kc,muc) = err_rfp
+                    if (present(err_o2) .and. (err_kp .or. err_mup .or. err_rfp)) then
+                        err_o2%kp (zc,kc,muc) = err_kp
+                        err_o2%mup(zc,kc,muc) = err_mup
+                        err_o2%rfp(zc,kc,muc) = err_rfp
                     endif
 
-                    call interp_policies(kp, mup, grids, p, consp, xgridp, vp, app_min)
+                    call interp_policies(kp, mup, grids2, p, consp, xgridp, vp, app_min)
 
 etaloop:            do ec=1,n_eta
 	                    ! Create savings grid apgrid
-	                    p%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min)
+	                    p2%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min)
 
 xloop:                  do xc=1,nx
 					        ! Asset allocation problem, see internal subroutine below
-							call asset_allocation(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), err_asset)
-							p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
+							call asset_allocation(p2%apgrid(xc,ec,zc,jc,kc,muc), p2%kappa(xc,ec,zc,jc,kc,muc), err_asset)
+							p2%stocks(xc,ec,zc,jc,kc,muc) = p2%apgrid(xc,ec,zc,jc,kc,muc) * p2%kappa(xc,ec,zc,jc,kc,muc)
 
 							! Consumption problem, see internal subroutine below. Also returns evp.
-							call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), cons(xc,ec,zc,jc,kc,muc), evp, err_cons)
+							call consumption(p2%apgrid(xc,ec,zc,jc,kc,muc), p2%kappa(xc,ec,zc,jc,kc,muc), cons(xc,ec,zc,jc,kc,muc), evp, err_cons)
 
 							! calculate new optimal value
 							value(xc,ec,zc,jc,kc,muc) = (cons(xc,ec,zc,jc,kc,muc)**((1.0-theta)/gamm) + betatildej*evp**(1.0/gamm))**(gamm/(1.0-theta))
 
 							! create new grid for cash at hand (xgrid)
-							p%xgrid(xc,ec,zc,jc,kc,muc)=p%apgrid(xc,ec,zc,jc,kc,muc)+cons(xc,ec,zc,jc,kc,muc)
+							p2%xgrid(xc,ec,zc,jc,kc,muc)=p2%apgrid(xc,ec,zc,jc,kc,muc)+cons(xc,ec,zc,jc,kc,muc)
 
-							if(present(err_o) .and. (err_asset .or. any(err_cons))) call error_handling(err_o, err_asset, err_cons, err_kp, err_mup)
+							if(present(err_o2) .and. (err_asset .or. any(err_cons))) call error_handling(err_o2, err_asset, err_cons, err_kp, err_mup)
 
 	                    end do xloop
                     enddo etaloop
@@ -124,6 +126,8 @@ xloop:                  do xc=1,nx
 !$OMP END DO
 	enddo jloop
 !$OMP END PARALLEL
+if (present(err_o2)) end associate
+end associate
 
 contains
 !-------------------------------------------------------------------------------
@@ -155,24 +159,24 @@ contains
         err_mu  = .false.
         err_rfp = .false.
 
-        kp  = Forecast(coeffs%k(:,zc), grids%k(kc))
-        if (kp  > grids%k(nk)) then
-            if (kp - grids%k(nk) > crit) err_k = .true.
-            kp  = grids%k(nk)
-        elseif (kp  < grids%k(1)) then
-            if (grids%k(1) - kp  > crit) err_k = .true.
-            kp  = grids%k(1)
+        kp  = Forecast(coeffs2%k(:,zc), grids2%k(kc))
+        if (kp  > grids2%k(nk)) then
+            if (kp - grids2%k(nk) > crit) err_k = .true.
+            kp  = grids2%k(nk)
+        elseif (kp  < grids2%k(1)) then
+            if (grids2%k(1) - kp  > crit) err_k = .true.
+            kp  = grids2%k(1)
         endif
 
         do zpc = 1,nz
-            mup(zpc) = Forecast(coeffs%mu(:,zpc), kp, grids%mu(muc)) !grids%mu(muc) is hackish to distinguish for ms and STY
+            mup(zpc) = Forecast(coeffs2%mu(:,zpc), kp, grids2%mu(muc)) !grids2%mu(muc) is hackish to distinguish for ms and STY
         enddo
-        if (any(mup - grids%mu(nmu) > crit) .or. any(grids%mu(1) - mup > crit)) err_mu = .true.
-        where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! obsolete comment: This takes care of the wrong forecasts in the mean shock equilibrium
-        where (mup < grids%mu(1))   mup = grids%mu(1)
+        if (any(mup - grids2%mu(nmu) > crit) .or. any(grids2%mu(1) - mup > crit)) err_mu = .true.
+        where (mup > grids2%mu(nmu)) mup = grids2%mu(nmu) ! obsolete comment: This takes care of the wrong forecasts in the mean shock equilibrium
+        where (mup < grids2%mu(1))   mup = grids2%mu(1)
 
         ! calculate tomorrow's risky returns and wage for given law of motion, for every zc today
-	    rfp = f_riskfree_rate(kp,grids%mu(muc),pi_z(zc,:))
+	    rfp = f_riskfree_rate(kp,grids2%mu(muc),pi_z(zc,:))
 	    do zpc= 1,nz
 	        rp(zpc) = f_stock_return(kp, zeta(zpc), delta(zpc), rfp)
             if (jc+1>=jr) then
@@ -181,7 +185,7 @@ contains
                 yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
             endif
 	    enddo
-        if (rfp < rp(1)*(1.0 + sign(0.0001_dp,rp(1))) .and. grids%mu(muc)>0.0 ) then
+        if (rfp < rp(1)*(1.0 + sign(0.0001_dp,rp(1))) .and. grids2%mu(muc)>0.0 ) then
             rfp = rp(1)*(1.0 + sign(0.0001_dp,rp(1)))
             err_rfp = .true.
         endif
@@ -225,7 +229,7 @@ CC:     if (collateral_constraint) then
         use fun_locate
 
 	    real(dp), intent(in) :: kp, mup(nz)
-	    type(tAggGrids), intent(in) :: grid
+	    type(tAgggrids2), intent(in) :: grid
 	    type(tPolicies), intent(in) :: p
 	    real(dp), dimension(nx,n_eta,nz) ,intent(out) :: consp, xgridp, vp
 	    real(dp)                         ,intent(out) :: app_min
@@ -246,10 +250,10 @@ CC:     if (collateral_constraint) then
 				                 (1-wK)*   wmu *   cons(:,:,zpc,jc+1,iK  ,imu+1) + &
 				                    wK *   wmu *   cons(:,:,zpc,jc+1,iK+1,imu+1)
 
-		        xgridp(:,:,zpc)= (1-wK)*(1-wmu)*p%xgrid(:,:,zpc,jc+1,iK  ,imu  ) + &
-				                    wK *(1-wmu)*p%xgrid(:,:,zpc,jc+1,iK+1,imu  ) + &
-				                 (1-wK)*   wmu *p%xgrid(:,:,zpc,jc+1,iK  ,imu+1) + &
-				                    wK *   wmu *p%xgrid(:,:,zpc,jc+1,iK+1,imu+1)
+		        xgridp(:,:,zpc)= (1-wK)*(1-wmu)*p2%xgrid(:,:,zpc,jc+1,iK  ,imu  ) + &
+				                    wK *(1-wmu)*p2%xgrid(:,:,zpc,jc+1,iK+1,imu  ) + &
+				                 (1-wK)*   wmu *p2%xgrid(:,:,zpc,jc+1,iK  ,imu+1) + &
+				                    wK *   wmu *p2%xgrid(:,:,zpc,jc+1,iK+1,imu+1)
 
 		        vp(:,:,zpc)    = (1-wK)*(1-wmu)*  value(:,:,zpc,jc+1,iK  ,imu  ) + &
 				                    wK *(1-wmu)*  value(:,:,zpc,jc+1,iK+1,imu  ) + &
@@ -259,19 +263,19 @@ CC:     if (collateral_constraint) then
 
             imu        = f_locate(grid%mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
             wmu        = (mup(1) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
-            app_min= (1-wK)*(1-wmu)*p%apgrid(1,1,1,jc+1,iK  ,imu  ) + & ! This creates smallest aprime for forecasts
-                        wK *(1-wmu)*p%apgrid(1,1,1,jc+1,iK+1,imu  ) + & ! I should move this into the loop and calc for all zpc
-                     (1-wK)*   wmu *p%apgrid(1,1,1,jc+1,iK  ,imu+1) + & ! coz then better to understand.
-                        wK *   wmu *p%apgrid(1,1,1,jc+1,iK+1,imu+1)
+            app_min= (1-wK)*(1-wmu)*p2%apgrid(1,1,1,jc+1,iK  ,imu  ) + & ! This creates smallest aprime for forecasts
+                        wK *(1-wmu)*p2%apgrid(1,1,1,jc+1,iK+1,imu  ) + & ! I should move this into the loop and calc for all zpc
+                     (1-wK)*   wmu *p2%apgrid(1,1,1,jc+1,iK  ,imu+1) + & ! coz then better to understand.
+                        wK *   wmu *p2%apgrid(1,1,1,jc+1,iK+1,imu+1)
 
         elseif (size(grid%K)>1) then
             ! Projection of policies on Kt
             iK        = f_locate(grid%K, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
             wK        = (kp - grid%k(iK)) / (grid%k(iK+1) - grid%k(iK))
             consp  = (1.0 -wK)*cons    (:,:,:,jc+1,iK,1) + wK*cons    (:,:,:,jc+1,iK+1,1)
-            xgridp = (1.0 -wK)*p%xgrid (:,:,:,jc+1,iK,1) + wK*p%xgrid (:,:,:,jc+1,iK+1,1)
+            xgridp = (1.0 -wK)*p2%xgrid (:,:,:,jc+1,iK,1) + wK*p2%xgrid (:,:,:,jc+1,iK+1,1)
             vp     = (1.0 -wK)*value   (:,:,:,jc+1,iK,1) + wK*value   (:,:,:,jc+1,iK+1,1)
-            app_min= (1.0 -wK)*p%apgrid(1,1,1,jc+1,iK,1) + wK*p%apgrid(1,1,1,jc+1,iK+1,1)
+            app_min= (1.0 -wK)*p2%apgrid(1,1,1,jc+1,iK,1) + wK*p2%apgrid(1,1,1,jc+1,iK+1,1)
 
         elseif (size(grid%mu)>1) then
             do zpc=1,nz
@@ -280,20 +284,20 @@ CC:     if (collateral_constraint) then
 
                 ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
                 consp(:,:,zpc) = (1.0-wmu)*   cons(:,:,zpc,jc+1,1,imu) + wmu*   cons(:,:,zpc,jc+1,1,imu+1)
-                xgridp(:,:,zpc)= (1.0-wmu)*p%xgrid(:,:,zpc,jc+1,1,imu) + wmu*p%xgrid(:,:,zpc,jc+1,1,imu+1)
+                xgridp(:,:,zpc)= (1.0-wmu)*p2%xgrid(:,:,zpc,jc+1,1,imu) + wmu*p2%xgrid(:,:,zpc,jc+1,1,imu+1)
                 vp(:,:,zpc)    = (1.0-wmu)*  value(:,:,zpc,jc+1,1,imu) + wmu*  value(:,:,zpc,jc+1,1,imu+1)
             enddo
 
             imu        = f_locate(grid%mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
             wmu        = (mup(1) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
-            app_min= (1.0-wmu)*p%apgrid(1,1,1,jc+1,1,imu) + wmu*p%apgrid(1,1,1,jc+1,1,imu+1)
+            app_min= (1.0-wmu)*p2%apgrid(1,1,1,jc+1,1,imu) + wmu*p2%apgrid(1,1,1,jc+1,1,imu+1)
             ! This creates smallest aprime for forecasts. should move this into the loop and calc for all zpc coz then better to understand.
 
         else    ! Mean shock
             consp  = cons    (:,:,:,jc+1,1,1)
-            xgridp = p%xgrid (:,:,:,jc+1,1,1)
+            xgridp = p2%xgrid (:,:,:,jc+1,1,1)
             vp     = value   (:,:,:,jc+1,1,1)
-            app_min= p%apgrid(1,1,1,jc+1,1,1)
+            app_min= p2%apgrid(1,1,1,jc+1,1,1)
         endif
 
     end subroutine interp_policies
@@ -397,8 +401,8 @@ CC:     if (collateral_constraint) then
                 f_test(3) = asseteuler_f(kappa_brack1)
                 kappa_test(4) = kappa_brack2
                 f_test(4) = asseteuler_f(kappa_brack2)
-                kappa_test(5) = p%kappa(xc,ec,zc,jc+1,kc,muc)
-                f_test(5) = asseteuler_f(p%kappa(xc,ec,zc,jc+1,kc,muc))
+                kappa_test(5) = p2%kappa(xc,ec,zc,jc+1,kc,muc)
+                f_test(5) = asseteuler_f(p2%kappa(xc,ec,zc,jc+1,kc,muc))
 
                 kappa_result = minloc(abs(f_test))
                 kappa_out= kappa_test(kappa_result(1))
@@ -411,7 +415,7 @@ CC:     if (collateral_constraint) then
             !call d_zreal(asseteuler_f,kappa_result,xguess=kappa_start,itmax=1000,info=zreal_its,errabs=tol_asset_eul,errrel=tol_asset_eul)
             if (zreal_its(1)>1000) then
                 error=.true.
-                kappa_out=p%kappa(xc-1,ec,zc,jc,kc,muc)
+                kappa_out=p2%kappa(xc-1,ec,zc,jc,kc,muc)
             else
                 kappa_out=kappa_result(1)
                 !kappa(xc,zc,jc)=min(max(kappa_result(1),kappa1),kappa2)
@@ -435,7 +439,7 @@ CC:     if (collateral_constraint) then
     real(dp) :: rtildep, ap     ! rtilde prime, aprime
     integer                   :: zpc, epc
 
-    ap = p%apgrid(xc,ec,zc,jc,kc,muc)
+    ap = p2%apgrid(xc,ec,zc,jc,kc,muc)
     aeez = 0.0
     do zpc=1,nz
         rtildep     = (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
