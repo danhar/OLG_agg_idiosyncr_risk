@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 
-thisrun='omp_opt2'
-BUILD=Build_Parallel_Optim # Optimmax # Debugmax #
-NTHREADS=8  # number of OpenMP threads 
+thisrun='br007-test'
+BUILD=Build_Optimmax # Debugmax # Parallel_Optim # 
+NTHREADS=1  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
 
