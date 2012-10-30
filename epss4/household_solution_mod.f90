@@ -9,7 +9,9 @@ contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
 ! - pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
+! - pure function f_apgrid_j(rfp,yp, xgridp, app_min)
 ! - pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
+! - pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
 !-------------------------------------------------------------------------------
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! Forecast kp, mup, and get corresonding prices
@@ -62,6 +64,37 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     endif
 
 end subroutine calc_vars_tomorrow
+!-------------------------------------------------------------------------------
+
+pure function f_apgrid_j(rfp,yp, xgridp, app_min, apmax, jc)
+! Create savings grid for generation j, apgrid(:,zc,jc,kc,muc)
+    use params_mod , only: nap, collateral_constraint, cmin, g
+    use makegrid_mod
+
+    real(dp) ,dimension(nap) :: f_apgrid_j
+    real(dp) ,intent(in)     :: rfp, yp(:,:), xgridp(:,:,:), app_min, apmax
+    integer  ,intent(in)     :: jc
+    real(dp)                 :: rtildemax_debt, apmin, xp_min
+
+CC: if (collateral_constraint) then
+        f_apgrid_j(1) = 0.0 ! a'=0, but I can still borrow and invest in stock
+        f_apgrid_j(2:nap) = MakeGrid(0.0_dp, apmax,nap-1,1.5_dp)
+
+    else    ! here comes the difficult part: need to determine maximum borrowing (natural borrowing limit)
+
+        ! need to check whether zpc=1 or zpc=nz gives the smaller apmin (in absolute terms)
+        rtildemax_debt  = (1.0+rfp)/(1.0+g)
+        xp_min          = min(cmin, cmin + app_min, xgridp(1,1,1))
+        apmin           = (xp_min-yp(1,1))/rtildemax_debt
+        if (jc < 6) then
+            apmin = xp_min*.8_dp
+        endif
+
+        f_apgrid_j= MakeGrid(apmin,apmax,nap,1.5_dp) !2.0 !,'chebyshev'
+
+    endif CC
+
+end function f_apgrid_j
 !-------------------------------------------------------------------------------
 
 pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
@@ -263,6 +296,70 @@ contains
     end function taylor_expansion
 
 end subroutine asset_allocation
+!-------------------------------------------------------------------------------
+
+pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
+    use fun_lininterp
+    use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
+
+    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)      ! apgrid(xc,ec,zc,jc), kappa(xc,ec,zc,jc)
+    integer                    ,intent(in)  :: zc, xc, ec
+    real(dp)                   ,intent(out) :: cons_out, evp  ! cons(xc,ec,zc,jc), evp
+    logical(1) ,dimension(nz)  ,intent(out) :: error
+    real(dp)   ,dimension(n_eta)            :: cons_interp, vp_interp ! interpolated values of cons, vp
+    real(dp)   ,dimension(nz)               :: evpz, rhs_temp ! temporary: cee_*: consumption euler eq.
+    real(dp)                                :: rtildep, xp    ! rtilde and cash-at-hand tomorrow
+    real(dp)                                :: cee_rhs, rhs_fac1, rhs_fac2 ! temporary: rhs of cee, factors 1 and 2
+    integer                                 :: zpc, epc       ! counters for shocks tomorrow
+
+    error = .false.
+
+    do zpc=1,nz
+        if (pi_z(zc,zpc) == 0.0) then
+            evpz(zpc)     = 0.0
+            rhs_temp(zpc) = 0.0
+            cycle
+        endif
+
+        ! Get cash-at-hand tomorrow for all states
+        rtildep= (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
+        do epc = 1,n_eta
+            xp = yp(epc,zpc)+rtildep*ap
+
+            ! Interpolate consumption and value function
+            cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc),consp(:,epc,zpc),xp)
+            vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
+            if (cons_interp(epc) <=cmin) then
+                error(zpc)       = .true.
+                cons_interp(epc) = cmin
+                xp               = cmin + ap
+                vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
+            endif
+            if (vp_interp(epc) <=cmin) then
+                error(zpc)       = .true.
+                vp_interp(epc)   = cmin
+            endif
+
+        enddo
+        ! Now different factors of consumption euler equation
+        evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
+        rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
+                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)*rtildep)
+    enddo
+
+    evp=dot_product(pi_z(zc,:),evpz)    ! Expected V'
+
+    if (collateral_constraint .and. xc ==1) then
+        cons_out = cmin/100.0
+    else
+        rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
+        rhs_fac2=dot_product(pi_z(zc,:),rhs_temp)
+        cee_rhs=rhs_fac1*rhs_fac2
+
+        cons_out=max(cee_rhs**(gamm/(1.0-theta-gamm)), cmin)
+    endif
+
+end subroutine consumption
 !-------------------------------------------------------------------------------
 
 end module household_solution_mod
