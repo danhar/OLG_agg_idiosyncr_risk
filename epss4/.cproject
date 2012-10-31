@@ -265,7 +265,7 @@
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
-								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs -openmp" valueType="string"/>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -assume realloc_lhs -no-prec-div -xHost" valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1962840659" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speed" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.fp.fpmodel.2002131156" name="Floating Point Model" superClass="intel.linux.fortran.compiler.fp.fpmodel" value="fpmodel.fast.2" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.193590100" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.none" valueType="enumerated"/>
@@ -316,6 +316,8 @@
 		<configuration configurationName="Build_Optimmax">
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>
 		</configuration>
+		<configuration configurationName="Build_Parallel_Debug"/>
+		<configuration configurationName="Build_Parallel_Optim"/>
 		<configuration configurationName="Build_IPO"/>
 		<configuration configurationName="Build_Debugmax">
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>

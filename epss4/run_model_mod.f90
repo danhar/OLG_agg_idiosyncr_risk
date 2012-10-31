@@ -26,12 +26,11 @@ subroutine run_model(projectname, calib_name, welfare)
     type(tSimvars)    :: simvars    ! simulation variables, e.g. zt, kt,...
     type(tErrors)     :: err
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:) ! value function and distribution
-	real(dp)          :: start_time
-	integer           :: it, syserr ! 'it' cointains total iterations of Krusell-Smith loop
+	integer           :: start_time, it, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	character(:),allocatable :: dir, output_path
 
 
-    call cpu_time(start_time)
+    call system_clock(start_time)
 !-------------------------------------------------------------------------------
 ! Mean Shock (partial or general) Equilibrium (to generate good initial guesses)
 !-------------------------------------------------------------------------------
@@ -194,11 +193,12 @@ contains
 	    character(len=*) ,intent(in)   :: dir
 	    type(tAggGrids)  ,intent(in)   :: grids
         type(tErrors)    ,intent(in)   :: err
-        real(dp) :: secs, end_time
+        real(dp) :: secs
+        integer  :: end_time, count_rate
 
         print*, '- main: Saving results and plots to folder ./model_output '
-        call cpu_time(end_time)
-        secs= end_time - start_time ! excludes time for saving and plotting results
+        call system_clock(end_time,count_rate)
+        secs= real(end_time-start_time,dp)/real(count_rate,dp) ! excludes time for saving and plotting results
 
         call save_results(Phi, simvars, coeffs, grids,lifecycles,&
                              policies, secs, it, projectname, calib_name, dir, err)

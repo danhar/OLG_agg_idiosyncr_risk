@@ -8,15 +8,15 @@ program EPSS
 	use run_model_mod
 
     implicit none
-	real(dp)                  :: start_time, end_time, secs
+	real(dp)                  :: secs
 	real(dp)     ,allocatable :: welfare(:,:), cev(:), risk_scale(:)
-	integer                   :: sys_error, rc, i
+	integer                   :: sys_error, rc, i, start_time, end_time, count_rate
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
 	character(len=7)          :: runchar
     real(dp), parameter       :: tau_increment =0.02_dp
 
-    call cpu_time(start_time)
+    call system_clock(start_time)
 !    sys_error = system('rm -fr model_output/*') ! Deletes existing output files
 
     call get_projectname(projectname)
@@ -82,8 +82,8 @@ program EPSS
         if(size(welfare,1)>1) call plot('cev_regression')
     enddo
 
-    call cpu_time(end_time)
-    secs= end_time - start_time
+    call system_clock(end_time,count_rate)
+    secs= real(end_time - start_time,dp)/real(count_rate,dp)
     print*, '*********** ..... Program ', projectname, ' completed ..... ***********'
 	print '(a10, f8.2, a9, f6.2, a6)', 'CPU time: ', secs,' secs (= ', secs/60,' mins)'
 

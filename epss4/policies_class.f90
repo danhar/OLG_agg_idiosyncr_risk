@@ -11,8 +11,9 @@ module policies_class
         procedure :: allocate => allocate_policies
         procedure :: deallocate => deallocate_policies
         procedure :: calc_kappa
-        procedure :: interpolate    ! At the moment, I am not using this anywhere
+        procedure :: consumption    ! At the moment, I am not using this anywhere
         procedure :: mean           ! At the moment, I am not using this anywhere
+        procedure :: interpolate    ! At the moment, I am not using this anywhere
     end type tPolicies
 
 contains
@@ -20,10 +21,12 @@ contains
 ! Module procedures in order:
 ! - pure subroutine allocate_policies(p,nk,nmu)
 ! - pure subroutine deallocate_policies(p)
+! - pure subroutine calc_kappa(p)
+! - pure function consumption(this)
 ! - pure function mean(this,dimension_o,weight_o) result(mean_policy)
 ! - pure function interpolate(this,dim_x, gridx, x) result(pol_int)
-! - pure subroutine calc_kappa(p)
 !-------------------------------------------------------------------------------
+
 pure subroutine allocate_policies(this,nz,nk,nmu)
     use params_mod, only: nx, n_eta, nj
     class(tPolicies), intent(inout)  :: this
@@ -41,6 +44,25 @@ pure subroutine deallocate_policies(this)
     if (allocated(this%kappa)) deallocate(this%kappa)
     if (allocated(this%apgrid)) deallocate(this%apgrid)
 end subroutine deallocate_policies
+!-------------------------------------------------------------------------------
+
+pure subroutine calc_kappa(this)
+    class(tPolicies), intent(inout)  :: this
+    where (this%apgrid .ne. 0.0)
+        this%kappa = this%stocks/this%apgrid
+    elsewhere
+        this%kappa = 0.0
+    end where
+end subroutine calc_kappa
+!-------------------------------------------------------------------------------
+
+pure function consumption(this)
+    real(dp), dimension(:,:,:,:,:,:), allocatable :: consumption
+    class(tPolicies), intent(in)  :: this
+
+    consumption = this%xgrid - this%apgrid
+
+end function consumption
 !-------------------------------------------------------------------------------
 
 pure function mean(this,dimension_o,weight_o) result(mean_policy)
@@ -128,16 +150,6 @@ pure function interpolate(this,dim_x, gridx, x) result(pol_int)
 
     call pol_int%calc_kappa
 end function interpolate
-!-------------------------------------------------------------------------------
-
-pure subroutine calc_kappa(this)
-    class(tPolicies), intent(inout)  :: this
-    where (this%apgrid .ne. 0.0)
-        this%kappa = this%stocks/this%apgrid
-    elsewhere
-        this%kappa = 0.0
-    end where
-end subroutine calc_kappa
 !-------------------------------------------------------------------------------
 
 end module policies_class

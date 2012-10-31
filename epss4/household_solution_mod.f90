@@ -3,21 +3,26 @@ module household_solution_mod
     use laws_of_motion  ,only: tCoeffs
     use aggregate_grids ,only: tAggGrids
     use policies_class  ,only: tPolicies
+
     implicit none
+    private
+    public olg_backwards_recursion, tPolicies
 
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
+! - (pure) subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! - pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! - pure subroutine interp_policies_tomorrow(p,cons,value,kp, mup, grid, jc, consp, xgridp, vp, app_min)
 ! - pure function f_apgrid_j(rfp,yp, xgridp, app_min)
 ! - pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
 ! - pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
 !-------------------------------------------------------------------------------
+
 subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
+! It it pure but for the OMP directives
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use error_class
     use makegrid_mod
@@ -64,8 +69,8 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
 !$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z) &
-!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
+!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax) &
+!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
@@ -82,14 +87,11 @@ etaloop:            do ec=1,n_eta
                         p%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min, apmax(ec,zc,jc), jc)
 
 xloop:                  do xc=1,nx
-                            ! Asset allocation problem, see internal subroutine below
                             call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err%asset(xc,ec,zc,jc,kc,muc))
                             p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
 
-                            ! Consumption problem, see internal subroutine below. Also returns evp.
                             call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons(xc,ec,zc,jc,kc,muc), evp, err%cons(:,xc,ec,zc,jc,kc,muc))
 
-                            ! calculate new optimal value
                             value(xc,ec,zc,jc,kc,muc) = (cons(xc,ec,zc,jc,kc,muc)**((1.0-theta)/gamm) + betatildej*evp**(1.0/gamm))**(gamm/(1.0-theta))
 
                             ! create new grid for cash at hand (xgrid)
@@ -108,8 +110,7 @@ end subroutine olg_backwards_recursion
 !-------------------------------------------------------------------------------
 
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
-! Forecast kp, mup, and get corresonding prices
-! Might want to move it into laws_of_motion
+! Forecast kp, mup, and get corresonding prices  (might want to move into laws_of_motion)
     use params_mod     ,only: nz, pi_z, jr, ej, etagrid
     use laws_of_motion ,only: Forecast
     use income
@@ -447,9 +448,8 @@ contains
     end function asseteuler_f
 
     !-------------------------------------------------------------------------------
-    ! Taylor expansion of Euler euqation (optional)
+    ! Taylor expansion of Euler euqation (need to outcomment above)
     !-------------------------------------------------------------------------------
-
     pure function taylor_expansion(cons_in, vp_in,epc,zpc)
     ! only works for theta\=1
         use params_mod, only: theta, gamm
@@ -470,7 +470,6 @@ contains
           *0.5_dp*(cons_in-consp(1,epc,zpc))**2.0*((1.0-theta-gamm)/gamm)*((1.0-theta-gamm)/gamm-1.0)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm-2.0) &
         + (vp_in-vp(1,epc,zpc))*((1.0-theta)*(gamm-1.0)/gamm)*vp(1,epc,zpc)**((1.0-theta)*(gamm-1.0)/gamm -1.0) &
           *(cons_in-consp(1,epc,zpc))*((1.0-theta-gamm)/gamm)*consp(1,epc,zpc)**((1.0-theta-gamm)/gamm-1.0)
-
     end function taylor_expansion
 
 end subroutine asset_allocation
@@ -480,7 +479,7 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
     use fun_lininterp
     use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
 
-    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)      ! apgrid(xc,ec,zc,jc), kappa(xc,ec,zc,jc)
+    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)
     integer                    ,intent(in)  :: zc, xc, ec
     real(dp)                   ,intent(out) :: cons_out, evp  ! cons(xc,ec,zc,jc), evp
     logical(1) ,dimension(nz)  ,intent(out) :: error
