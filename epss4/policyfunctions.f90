@@ -20,7 +20,7 @@ module policyfunctions
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - pure subroutine solve_policyfunctions(coeffs, grids, p, value, err_o)
+! - pure subroutine solve_policyfunctions(coeffs, grids, p, value, err)
 ! - pure subroutine interp_policies(kp, mup, grid, p, consp, xgridp, vp, app_min)
 ! - pure subroutine allocate_policies(p,nk,nmu)
 ! - pure subroutine deallocate_policies(p)
@@ -29,7 +29,7 @@ contains
 ! - pure subroutine calc_kappa(p)
 !-------------------------------------------------------------------------------
 
-subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
+subroutine solve_policyfunctions(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use household_solution_mod
@@ -40,21 +40,20 @@ subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
     type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
     real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
-    type(tErrors)        ,optional   ,intent(out) :: err_o
+    type(tErrors)                    ,intent(out) :: err
     real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
     real(dp) ,dimension(nx,n_eta,nz)              :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
     real(dp) ,dimension(n_eta,nz)                 :: yp      ! income tomorrow, for every idiosyncr & aggr state
     real(dp) ,dimension(nz)                       :: rp, mup ! risky return AND equity premium for every aggr state tomorrow
     real(dp)   :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
     real(dp)   :: betatildej, evp                            ! modified discount factor, expected value tomorrow
-    logical(1) :: err_kp, err_mup, err_rfp, err_cons(nz), err_asset
 	integer    :: nk, nmu, jc, muc, kc, zc, xc, ec
 
     nk = size(grids%k)
     nmu= size(grids%mu)
     call p%allocate(nz,nk,nmu)
     allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
-    if (present(err_o)) call err_o%allocate(nk,nmu)
+    call err%allocate(nk,nmu)
 
     !---------------------------------------------------------------------------
     ! Model solution, last generation
@@ -79,7 +78,7 @@ subroutine solve_policyfunctions(p, coeffs, grids, value, err_o)
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
 !$OMP PARALLEL DEFAULT(NONE) &
-!$OMP SHARED(p,value,cons,grids,coeffs,err_o,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z) &
+!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z) &
 !$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
@@ -88,12 +87,7 @@ muloop: do muc=1,nmu
 kloop:      do kc=1,nk
 zloop: 			do zc=1,nz
 
-                    call calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp)
-                    if (present(err_o) .and. (err_kp .or. err_mup .or. err_rfp)) then
-                        err_o%kp (zc,kc,muc) = err_kp
-                        err_o%mup(zc,kc,muc) = err_mup
-                        err_o%rfp(zc,kc,muc) = err_rfp
-                    endif
+                    call calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp,err%kp (zc,kc,muc),err%mup(zc,kc,muc),err%rfp(zc,kc,muc))
 
                     call p%interpolate_tomorrow(cons, value, kp, mup, grids, jc, consp, xgridp, vp, app_min)
 
@@ -103,19 +97,17 @@ etaloop:            do ec=1,n_eta
 
 xloop:                  do xc=1,nx
 					        ! Asset allocation problem, see internal subroutine below
-							call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err_asset)
+							call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err%asset(xc,ec,zc,jc,kc,muc))
 							p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
 
 							! Consumption problem, see internal subroutine below. Also returns evp.
-							call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons(xc,ec,zc,jc,kc,muc), evp, err_cons)
+							call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons(xc,ec,zc,jc,kc,muc), evp, err%cons(:,xc,ec,zc,jc,kc,muc))
 
 							! calculate new optimal value
 							value(xc,ec,zc,jc,kc,muc) = (cons(xc,ec,zc,jc,kc,muc)**((1.0-theta)/gamm) + betatildej*evp**(1.0/gamm))**(gamm/(1.0-theta))
 
 							! create new grid for cash at hand (xgrid)
 							p%xgrid(xc,ec,zc,jc,kc,muc)=p%apgrid(xc,ec,zc,jc,kc,muc)+cons(xc,ec,zc,jc,kc,muc)
-
-							if(present(err_o) .and. (err_asset .or. any(err_cons))) call error_handling(err_o, err_asset, err_cons, err_kp, err_mup)
 
 	                    end do xloop
                     enddo etaloop
@@ -126,29 +118,7 @@ xloop:                  do xc=1,nx
 	enddo jloop
 !$OMP END PARALLEL
 
-contains
-!-------------------------------------------------------------------------------
-! Internal procedures in order:
-! - (pure) subroutine error_handling(err, err_asset, err_cons)
-!-------------------------------------------------------------------------------
-
-
-    !---------------------------------------------------------------------------
-    ! Print errors
-    !---------------------------------------------------------------------------
-    pure subroutine error_handling(err, err_asset, err_cons, err_kp, err_mup)
-        use params_mod ,only: detailed_euler_errs
-        type(tErrors)  ,intent(inout) :: err
-        logical(1)     ,intent(in)    :: err_asset, err_cons(:), err_kp, err_mup
-        err%asset(xc,ec,zc,jc,kc,muc)  = err_asset
-	    err%cons(:,xc,ec,zc,jc,kc,muc) = err_cons
-	    if (detailed_euler_errs) then ! the following is only for serious debugging. Outcommenting destroys pure!
-!            print '(a54,6i3)','ERROR: in policyfunctions at (xc,ec,zc,jc,kc,muc)=', xc,ec,zc,jc, kc, muc
-!            print '(t8,a9,l1,a12,l1,a14,l1,a14,<nz>(l1,x))', 'err_kp = ', err_kp, ' ,err_mup = ', err_mup, ' ,err_asset = ',err_asset,',  err_cons = ', err_cons
-        endif
-    end subroutine error_handling
 end subroutine solve_policyfunctions
-!-------------------------------------------------------------------------------
 
 pure subroutine interp_policies(p,cons,value,kp, mup, grid, jc, consp, xgridp, vp, app_min)
 ! Make a projection of tomorrow's policies on k prime and mu prime

@@ -15,7 +15,7 @@ module meanshock_equilib
     type(tCoeffs)   :: coeffs                !coeffs of loms
     type(tPolicies) :: policies
     type(tAggGrids) :: grid
-    type(tErrors)   :: errs_o
+    type(tErrors)   :: errs
     real(dp)        :: mean_zeta, mean_delta ! mean shocks
     real(dp), allocatable :: w(:)                 ! weights (distance from the two means)
     real(dp), allocatable :: etagrid(:)        ! idio states in mean shock path
@@ -48,7 +48,7 @@ function ms_equilib(msvars) result(distance)
     grid%k  = msvars(1)
     grid%mu = msvars(2)
 
-    call policies%solve(coeffs, grid, value, errs_o)
+    call policies%solve(coeffs, grid, value, errs)
 
 	! Projection of policies / grids on mean shock
     xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
@@ -100,11 +100,11 @@ pure subroutine ms_equilib_get(P, pol, v, er)
     pol = policies
     v = value
     ! The trouble with err is that I do not want to overwrite er%not_converged
-    er%asset   = errs_o%asset
-    er%cons    = errs_o%cons
-    er%kp      = errs_o%kp
-    er%mup      = errs_o%mup
-    er%rfp      = errs_o%rfp
+    er%asset   = errs%asset
+    er%cons    = errs%cons
+    er%kp      = errs%kp
+    er%mup      = errs%mup
+    er%rfp      = errs%rfp
 end subroutine ms_equilib_get
 
 end module meanshock_equilib

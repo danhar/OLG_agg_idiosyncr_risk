@@ -773,7 +773,7 @@ subroutine CheckParams()
         call critical_stop
     endif
 
-    if (detailed_euler_errs) print*, 'WARNING: detailed_euler_errors=.true., check that policyfunctions:solve_policyfunctions:error_handling is not outcommented and not pure'
+    if (detailed_euler_errs) print*, 'WARNING: detailed_euler_errs=.true., but not implemented, check error_class'
 
     if (zeta_mean .ne. 1.0) print*, 'WARNING: zeta_mean .ne. 1.0'
     if (zeta_std > 0.1_dp) print*, 'WARNING: zeta_std > 0.1'

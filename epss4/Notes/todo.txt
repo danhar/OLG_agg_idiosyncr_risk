@@ -29,6 +29,8 @@ For example, simvars should read and write output unformatted also, see  subrout
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
 - implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
+- Instead of having tPolicies with allocatable components, make tPolicies a tuple (of scalars) and then define arrays of tPolicies. Should work much better, also for 
+adding, interpolating, calling routines, having less dimensions. But have to think it through, not clear how interpolation and other type-bound procedures could be called.
 - use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
     -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
         Allocating tPolicies with extent 1 in that dimension introduces a lot of cumbersome notation with brackets like (:,:,1,:,:,:) .
@@ -95,6 +97,8 @@ If I try to change this, I should first try it on a new copy (not even a branch,
 
 - replace Intel's system(string) subroutine, which is a non-portable extension, with the F2008 execute_command_line(string),
     which is already supported by Gfortran. It is not yet supported by the Intel Fortran compiler. Don't forget to remove the use ifport
+
+- errors_mod: detailed_euler_errs not used at the moment!
 
 - errors_mod: either initialize err%cons and err%asset with xp in first dimensioon, or save to file with explicit format. At the moment the
 files written to disk are quite unusable. Also, setting detailed_euler_errs=.true. should write to file, not to stdout, because it's too much for stdout.

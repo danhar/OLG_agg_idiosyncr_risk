@@ -25,7 +25,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 	type(tAggGrids)  :: grids   ! grids for aggregate states k and mu
     type(tLifecycle) :: lc      ! lifecycle profiles
     type(tPolicies)  :: pol
-    type(tErrors), optional :: err
+    type(tErrors)    :: err
 	real(dp)         :: Phi(nx,n_eta,nj), secs !distribution, seconds
 	integer          :: it
     character(len=*) :: dir, projectname, calib_name
@@ -287,15 +287,14 @@ contains
     write(21,*)
 125 format(3(a7,i6,a3,f4.1,a5))
 
-    if (present(err)) then
     write(21,*)   'Warnings in solution'
     write(21,125) ' kp    ', count(err%kp) , '  (',real(count(err%kp ),dp)/real(size(err%kp ),dp)*100.0,'%)   ', &
                   '   mup ', count(err%mup), '  (',real(count(err%mup),dp)/real(size(err%mup),dp)*100.0,'%)   ', &
                   '   rfp ', count(err%rfp), '  (',real(count(err%rfp),dp)/real(size(err%rfp),dp)*100.0,'%)   '
     write(21,125) ' asset ', count(err%asset), '  (',real(count(err%asset),dp)/real(size(err%asset),dp)*100.0,'%)   ', &
                   '  cons ', count(err%cons) , '  (',real(count(err%cons ),dp)/real(size(err%cons ),dp)*100.0,'%)   '
-        if (err%not_converged) write(21,*)' WARNING: root finder did not converge'
-    endif
+    if (err%not_converged) write(21,*)' WARNING: root finder did not converge'
+
 
     write(21,*)   'Warnings in simulation'
     write(21,125) ' K     ', count_err_K, '  (',percent_err_K ,'%)   ', &
@@ -401,7 +400,7 @@ contains
     write(21,201) grids%mu
     close(21)
 
-    if (present(err)) call err%write2file(path)
+    call err%write2file(path)
 
     open(unit=21, file=path//'/simvars.txt', status = 'replace')
     write(21,369) ' z        ', simvars%z

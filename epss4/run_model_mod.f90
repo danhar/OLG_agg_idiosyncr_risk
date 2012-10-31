@@ -191,9 +191,9 @@ contains
     subroutine save_and_plot_results(dir, grids, err)
     ! Calc stats and save all results for each run, then plot and save to pdf
         use save_results_mod
-	    character(len=*), intent(in)   :: dir
-	    type(tAggGrids), intent(in)    :: grids
-        type(tErrors), intent(in), optional     :: err
+	    character(len=*) ,intent(in)   :: dir
+	    type(tAggGrids)  ,intent(in)   :: grids
+        type(tErrors)    ,intent(in)   :: err
         real(dp) :: secs, end_time
 
         print*, '- main: Saving results and plots to folder ./model_output '
