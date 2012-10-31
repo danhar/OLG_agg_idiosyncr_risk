@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='br007-test'
-BUILD=Build_Optimmax # Debugmax # Parallel_Optim # 
+thisrun='007-check'
+BUILD=Build_Optimmax # Debugmax # Parallel_Optim #  
 NTHREADS=1  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

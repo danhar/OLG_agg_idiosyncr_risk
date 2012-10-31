@@ -2,7 +2,7 @@ module household_solution_mod
     use kinds
     use laws_of_motion  ,only: tCoeffs
     use aggregate_grids ,only: tAggGrids
-    use policies_class ,only: tPolicies
+    use policies_class  ,only: tPolicies
     implicit none
 
 contains
@@ -17,6 +17,7 @@ contains
 !-------------------------------------------------------------------------------
 subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
+! This is the master subroutine, calling all module procedures below (which are appear in calling order)
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use error_class
     use makegrid_mod
@@ -109,7 +110,7 @@ end subroutine olg_backwards_recursion
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! Forecast kp, mup, and get corresonding prices
 ! Might want to move it into laws_of_motion
-    use params_mod     ,only: nk, nmu, nz, pi_z, jr, ej, etagrid
+    use params_mod     ,only: nz, pi_z, jr, ej, etagrid
     use laws_of_motion ,only: Forecast
     use income
 
@@ -118,12 +119,14 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     integer         ,intent(in)  :: jc, zc, kc, muc
     real(dp)        ,intent(out) :: kp, mup(:), rp(:), rfp, yp(:,:)
     logical(1)      ,intent(out) :: err_k, err_mu, err_rfp
-    integer :: zpc
+    integer :: zpc, nk, nmu
     real(dp), parameter :: crit = 1.0e-10
 
     err_k   = .false.
     err_mu  = .false.
     err_rfp = .false.
+    nk = size(grids%k)
+    nmu= size(grids%mu)
 
     kp  = Forecast(coeffs%k(:,zc), grids%k(kc))
     if (kp  > grids%k(nk)) then
