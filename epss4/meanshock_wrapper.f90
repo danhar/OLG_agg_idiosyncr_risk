@@ -6,7 +6,7 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
 
     use kinds
     use types
-    use policyfunctions
+    use policies_class  ,only: tPolicies
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs, Initialize
     use error_class

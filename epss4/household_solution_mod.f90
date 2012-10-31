@@ -2,17 +2,110 @@ module household_solution_mod
     use kinds
     use laws_of_motion  ,only: tCoeffs
     use aggregate_grids ,only: tAggGrids
-
+    use policies_class ,only: tPolicies
     implicit none
 
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
+! - subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! - pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
+! - pure subroutine interp_policies_tomorrow(p,cons,value,kp, mup, grid, jc, consp, xgridp, vp, app_min)
 ! - pure function f_apgrid_j(rfp,yp, xgridp, app_min)
 ! - pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
 ! - pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
 !-------------------------------------------------------------------------------
+subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
+! Get the policy functions for the entire state space, i.e. both individual and aggregate states
+    use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
+    use error_class
+    use makegrid_mod
+
+    type(tPolicies)                 ,intent(out) :: p      ! policies
+    type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
+    type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
+    real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
+    type(tErrors)                    ,intent(out) :: err
+    real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
+    real(dp) ,dimension(nx,n_eta,nz)              :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
+    real(dp) ,dimension(n_eta,nz)                 :: yp      ! income tomorrow, for every idiosyncr & aggr state
+    real(dp) ,dimension(nz)                       :: rp, mup ! risky return AND equity premium for every aggr state tomorrow
+    real(dp)   :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
+    real(dp)   :: betatildej, evp                            ! modified discount factor, expected value tomorrow
+    integer    :: nk, nmu, jc, muc, kc, zc, xc, ec
+
+    nk = size(grids%k)
+    nmu= size(grids%mu)
+    call p%allocate(nz,nk,nmu)
+    allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
+    call err%allocate(nk,nmu)
+
+    !---------------------------------------------------------------------------
+    ! Model solution, last generation
+    !---------------------------------------------------------------------------
+    do muc=1,nmu
+        do kc=1,nk
+            do zc=1,nz
+                do ec=1,n_eta
+                    p%xgrid(:,ec,zc,nj,kc,muc)=MakeGrid(cmin,apmax(ec,zc,nj),nx, 2.0_dp)
+                enddo
+            enddo
+        enddo
+    enddo
+    ! Final period policy functions and value function
+    p%apgrid(:,:,:,:,:,:) = 0.0
+    p%kappa(:,:,:,:,:,:)  = 0.0
+    p%stocks(:,:,:,:,:,:) = 0.0
+    cons(:,:,:,nj,:,:)    = p%xgrid(:,:,:,nj,:,:)
+    value(:,:,:,nj,:,:)   = cons(:,:,:,nj,:,:)
+
+    !---------------------------------------------------------------------------
+    ! Model solution, generations nj-1 to 1
+    !---------------------------------------------------------------------------
+!$OMP PARALLEL DEFAULT(NONE) &
+!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z) &
+!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,err_kp,err_mup,err_rfp,consp,xgridp,vp,app_min,err_asset,evp,err_cons)
+jloop:do jc= nj-1,1,-1
+        betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
+!$OMP DO SCHEDULE(STATIC)
+muloop: do muc=1,nmu
+kloop:      do kc=1,nk
+zloop:          do zc=1,nz
+
+                    call calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp,err%kp (zc,kc,muc),err%mup(zc,kc,muc),err%rfp(zc,kc,muc))
+
+                    call interp_policies_tomorrow(p, cons, value, kp, mup, grids, jc, consp, xgridp, vp, app_min)
+
+etaloop:            do ec=1,n_eta
+                        ! Create savings grid apgrid
+                        p%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min, apmax(ec,zc,jc), jc)
+
+xloop:                  do xc=1,nx
+                            ! Asset allocation problem, see internal subroutine below
+                            call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err%asset(xc,ec,zc,jc,kc,muc))
+                            p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
+
+                            ! Consumption problem, see internal subroutine below. Also returns evp.
+                            call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons(xc,ec,zc,jc,kc,muc), evp, err%cons(:,xc,ec,zc,jc,kc,muc))
+
+                            ! calculate new optimal value
+                            value(xc,ec,zc,jc,kc,muc) = (cons(xc,ec,zc,jc,kc,muc)**((1.0-theta)/gamm) + betatildej*evp**(1.0/gamm))**(gamm/(1.0-theta))
+
+                            ! create new grid for cash at hand (xgrid)
+                            p%xgrid(xc,ec,zc,jc,kc,muc)=p%apgrid(xc,ec,zc,jc,kc,muc)+cons(xc,ec,zc,jc,kc,muc)
+
+                        end do xloop
+                    enddo etaloop
+                enddo zloop
+            enddo kloop
+        enddo muloop
+!$OMP END DO
+    enddo jloop
+!$OMP END PARALLEL
+
+end subroutine olg_backwards_recursion
+!-------------------------------------------------------------------------------
+
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! Forecast kp, mup, and get corresonding prices
 ! Might want to move it into laws_of_motion
@@ -64,6 +157,88 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     endif
 
 end subroutine calc_vars_tomorrow
+!-------------------------------------------------------------------------------
+
+pure subroutine interp_policies_tomorrow(p,cons,value,kp, mup, grid, jc, consp, xgridp, vp, app_min)
+! Make a projection of tomorrow's policies on k prime and mu prime
+    use fun_locate
+
+    type(tPolicies) ,intent(in) :: p
+    type(tAggGrids)  ,intent(in) :: grid
+    real(dp), intent(in) :: kp, mup(:), cons(:,:,:,:,:,:), value(:,:,:,:,:,:)
+    integer, intent(in) :: jc
+    real(dp), dimension(:,:,:) ,intent(out) :: consp, xgridp, vp
+    real(dp)                         ,intent(out) :: app_min
+    integer :: iK, imu, zpc, nz
+    real(dp) :: wK, wmu
+
+    nz = size(cons,3)
+
+    if(size(grid%K)>1 .and. size(grid%mu)>1) then
+        ! Projection of policies on Kt
+        iK        = f_locate(grid%K, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+        wK        = (kp - grid%k(iK)) / (grid%k(iK+1) - grid%k(iK))
+        do zpc=1,nz
+            imu        = f_locate(grid%mu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+            wmu        = (mup(zpc) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
+
+            ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
+            consp(:,:,zpc) = (1-wK)*(1-wmu)*   cons(:,:,zpc,jc+1,iK  ,imu  ) + &
+                                wK *(1-wmu)*   cons(:,:,zpc,jc+1,iK+1,imu  ) + &
+                             (1-wK)*   wmu *   cons(:,:,zpc,jc+1,iK  ,imu+1) + &
+                                wK *   wmu *   cons(:,:,zpc,jc+1,iK+1,imu+1)
+
+            xgridp(:,:,zpc)= (1-wK)*(1-wmu)*p%xgrid(:,:,zpc,jc+1,iK  ,imu  ) + &
+                                wK *(1-wmu)*p%xgrid(:,:,zpc,jc+1,iK+1,imu  ) + &
+                             (1-wK)*   wmu *p%xgrid(:,:,zpc,jc+1,iK  ,imu+1) + &
+                                wK *   wmu *p%xgrid(:,:,zpc,jc+1,iK+1,imu+1)
+
+            vp(:,:,zpc)    = (1-wK)*(1-wmu)*  value(:,:,zpc,jc+1,iK  ,imu  ) + &
+                                wK *(1-wmu)*  value(:,:,zpc,jc+1,iK+1,imu  ) + &
+                             (1-wK)*   wmu *  value(:,:,zpc,jc+1,iK  ,imu+1) + &
+                                wK *   wmu *  value(:,:,zpc,jc+1,iK+1,imu+1)
+        enddo
+
+        imu        = f_locate(grid%mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+        wmu        = (mup(1) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
+        app_min= (1-wK)*(1-wmu)*p%apgrid(1,1,1,jc+1,iK  ,imu  ) + & ! This creates smallest aprime for forecasts
+                    wK *(1-wmu)*p%apgrid(1,1,1,jc+1,iK+1,imu  ) + & ! I should move this into the loop and calc for all zpc
+                 (1-wK)*   wmu *p%apgrid(1,1,1,jc+1,iK  ,imu+1) + & ! coz then better to understand.
+                    wK *   wmu *p%apgrid(1,1,1,jc+1,iK+1,imu+1)
+
+    elseif (size(grid%K)>1) then
+        ! Projection of policies on Kt
+        iK        = f_locate(grid%K, kp)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+        wK        = (kp - grid%k(iK)) / (grid%k(iK+1) - grid%k(iK))
+        consp  = (1.0 -wK)*cons    (:,:,:,jc+1,iK,1) + wK*cons    (:,:,:,jc+1,iK+1,1)
+        xgridp = (1.0 -wK)*p%xgrid (:,:,:,jc+1,iK,1) + wK*p%xgrid (:,:,:,jc+1,iK+1,1)
+        vp     = (1.0 -wK)*value   (:,:,:,jc+1,iK,1) + wK*value   (:,:,:,jc+1,iK+1,1)
+        app_min= (1.0 -wK)*p%apgrid(1,1,1,jc+1,iK,1) + wK*p%apgrid(1,1,1,jc+1,iK+1,1)
+
+    elseif (size(grid%mu)>1) then
+        do zpc=1,nz
+            imu        = f_locate(grid%mu, mup(zpc))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+            wmu        = (mup(zpc) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
+
+            ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
+            consp(:,:,zpc) = (1.0-wmu)*   cons(:,:,zpc,jc+1,1,imu) + wmu*   cons(:,:,zpc,jc+1,1,imu+1)
+            xgridp(:,:,zpc)= (1.0-wmu)*p%xgrid(:,:,zpc,jc+1,1,imu) + wmu*p%xgrid(:,:,zpc,jc+1,1,imu+1)
+            vp(:,:,zpc)    = (1.0-wmu)*  value(:,:,zpc,jc+1,1,imu) + wmu*  value(:,:,zpc,jc+1,1,imu+1)
+        enddo
+
+        imu        = f_locate(grid%mu, mup(1))   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+        wmu        = (mup(1) - grid%mu(imu)) / (grid%mu(imu+1) - grid%mu(imu))
+        app_min= (1.0-wmu)*p%apgrid(1,1,1,jc+1,1,imu) + wmu*p%apgrid(1,1,1,jc+1,1,imu+1)
+        ! This creates smallest aprime for forecasts. should move this into the loop and calc for all zpc coz then better to understand.
+
+    else    ! Mean shock
+        consp  = cons    (:,:,:,jc+1,1,1)
+        xgridp = p%xgrid (:,:,:,jc+1,1,1)
+        vp     = value   (:,:,:,jc+1,1,1)
+        app_min= p%apgrid(1,1,1,jc+1,1,1)
+    endif
+
+end subroutine interp_policies_tomorrow
 !-------------------------------------------------------------------------------
 
 pure function f_apgrid_j(rfp,yp, xgridp, app_min, apmax, jc)

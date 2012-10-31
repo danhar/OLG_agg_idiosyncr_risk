@@ -7,7 +7,7 @@ module interpolate_xgrid
 contains
     pure subroutine InterpolateXgrid(policies, value, polx, valx)
         use kinds      ,only: dp
-        use policyfunctions
+        use policies_class
         use fun_lininterp
 
         type(tPolicies) ,intent(in)    :: policies

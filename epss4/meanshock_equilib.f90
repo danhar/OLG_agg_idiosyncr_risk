@@ -2,7 +2,7 @@ module meanshock_equilib
 
     use kinds
     use params_mod      ,only: n_eta, nx, nj, nz
-    use policyfunctions ,only: tPolicies
+    use household_solution_mod ,only: tPolicies, olg_backwards_recursion
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class      ,only: tErrors
@@ -34,7 +34,7 @@ function ms_equilib(msvars) result(distance)
 ! Solve for the 'mean shock equilibrium' (ms) to get initial values for k, mu, Phi
     use params_mod    ,only: L_N_ratio, n, g, stat_dist_z, de_ratio
     use income
-    use policyfunctions
+    use policies_class, only: tPolicies
     use distribution ,only: TransitionPhi
 
     implicit none
@@ -48,7 +48,7 @@ function ms_equilib(msvars) result(distance)
     grid%k  = msvars(1)
     grid%mu = msvars(2)
 
-    call policies%solve(coeffs, grid, value, errs)
+    call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
 	! Projection of policies / grids on mean shock
     xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0

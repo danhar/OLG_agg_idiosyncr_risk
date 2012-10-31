@@ -722,7 +722,7 @@ subroutine CheckParams()
     endif
 
     if (theta == 1.0) then
-        print*, 'WARNING: theta == 1.0, Taylor expansion in policyfunctions:asseteuler doesnt work!'
+        print*, 'WARNING: theta == 1.0, Taylor expansion in household_solution_mod:asseteuler doesnt work!'
     endif
 
     if (nz /= 4) then
