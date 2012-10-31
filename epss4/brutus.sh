@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='007-par-time'
-BUILD=Build_Parallel_Optim #Parallel_Debug #Optimmax # Debugmax #   
+thisrun='007-trans_par2'
+BUILD=Build_Parallel_Debug #Optimmax # Debugmax #Parallel_Optim #   
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

@@ -50,6 +50,7 @@ pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm
     enddo
 
     ! Generations jc=2 to nj
+!$OMP PARALLEL DO IF(present(Phitm_o)) SCHEDULE(DYNAMIC) REDUCTION(+:Phi) DEFAULT(SHARED) PRIVATE(y,x,ix,wx)
     do jc=2,nj
         if (jc>=jr) then
             y=pens
@@ -70,7 +71,7 @@ pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm
             enddo
         enddo
     enddo
-
+!$OMP END  PARALLEL DO
     if (present(Phitm_o)) then
         deallocate(Phitm)
     else
