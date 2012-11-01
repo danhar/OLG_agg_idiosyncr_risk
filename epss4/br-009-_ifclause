@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # #BSUB-q pub.1h                    # Job queue
-#BSUB-W 300                         # Time limit in minutes
+#BSUB-W 100                         # Time limit in minutes
 #BSUB-n 8            # number of processors / threads
 # #BSUB-R "rusage[mem=4096]"          # Memory im MB
 # #BSUB-M 4096000                     # Memory requirements in Kbytes

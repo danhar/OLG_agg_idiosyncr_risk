@@ -68,7 +68,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     !---------------------------------------------------------------------------
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
-!$OMP PARALLEL DEFAULT(NONE) &
+!$OMP PARALLEL IF(nk>1) DEFAULT(NONE) &
 !$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax) &
 !$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 jloop:do jc= nj-1,1,-1
@@ -277,6 +277,9 @@ end function f_apgrid_j
 !-------------------------------------------------------------------------------
 
 pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
+    ! This subroutine will pass the asset euler equation as a function argument to a root finder.
+    ! In this version, the function argument is an internal subroutine, which is a Fortran 2008 feature implemented
+    ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
     use params_mod ,only: opt_zbren, tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio, g
 !    use zreal_int      ! IMSL Math.pdf, p. 1195f: Mullers Method to find roots (like secant but quadratic).
                            ! expects array as input (i.e. define scalar as dimension(1)).
