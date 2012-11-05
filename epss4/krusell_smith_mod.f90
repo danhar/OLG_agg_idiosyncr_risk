@@ -2,7 +2,7 @@ module krusell_smith_mod
     use kinds
     use types                  ,only: tSimvars, tLifecycle
     use error_class            ,only: tErrors
-    use laws_of_motion         ,only: tCoeffs
+    use laws_of_motion         ,only: tCoeffs, MakeType, MakeVector
     use aggregate_grids        ,only: tAggGrids
     use household_solution_mod ,only: tPolicies
 
@@ -19,10 +19,7 @@ contains
 !-------------------------------------------------------------------------------
     subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
     ! Set up environment to use rootfinder for coefficients of loms (KS)
-
-        use household_solution_mod,only: olg_backwards_recursion
-        use laws_of_motion        ,only: MakeType, MakeVector, Regression
-        use params_mod            ,only: exogenous_xgrid, save_all_iterations, normalize_coeffs, tol_coeffs, partial_equilibrium
+        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
         !use sub_broyden
@@ -67,14 +64,18 @@ contains
                  reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=100,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
 
             if (err%not_converged) call err%write2file(fvals, output_path)
-            coeffs = MakeType(xvals, normalize_coeffs)
 
         endif
 
     contains
 
         function krusellsmith(coeffvec) result(distance)
-            use simulate_economy
+            ! Here we first solve for the policyfunctions, then simulate, then update the regression coefficients.
+            ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
+            use params_mod            ,only: exogenous_xgrid, save_all_iterations
+            use household_solution_mod,only: olg_backwards_recursion
+            use laws_of_motion        ,only: Regression
+            use simulate_economy      ,only: simulate, print_error_msg
             use interpolate_xgrid
 
             real(dp), dimension(:), intent(in) :: coeffvec
