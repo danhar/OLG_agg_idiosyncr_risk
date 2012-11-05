@@ -13,6 +13,7 @@ subroutine run_model(projectname, calib_name, welfare)
 	use markovchain_mod   ,only: MarkovChain
 	use distribution      ,only: CheckPhi
 	use meanshock_wrapper ,only: SolveMeanShock
+    use krusell_smith_mod ,only: solve_krusellsmith
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, save_all_iterations, & ! logicals
 	                             nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
@@ -28,7 +29,6 @@ subroutine run_model(projectname, calib_name, welfare)
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:) ! value function and distribution
 	integer           :: start_time, it, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	character(:),allocatable :: dir, output_path
-
 
     call system_clock(start_time)
 !-------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ subroutine run_model(projectname, calib_name, welfare)
         close(132)
     endif
 
-    call internal_subroutine_krusellsmith()
+    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
@@ -135,58 +135,11 @@ subroutine run_model(projectname, calib_name, welfare)
 contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
-! - subroutine solve_krusellsmith()
 ! - subroutine save_and_plot_results(dir, grids, err)
 ! - pure real(dp) function calc_average(simvars%welfare)
 ! - real(dp) function average_of_simulations()
 !-------------------------------------------------------------------------------
 
-    subroutine internal_subroutine_krusellsmith()
-    ! Set up environment to use rootfinder for coefficients of loms (KS)
-        use numrec_utils, only: put_diag
-        use krusell_smith
-        use sub_alg_qn
-        use params_mod, only: tol_coeffs, normalize_coeffs
-        !use sub_broyden
-
-        real(dp),allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
-        real(dp):: maxstp
-        logical :: intialize_jacobi
-        integer :: n
-
-        if (normalize_coeffs) then ! instead of if, could put maxstp in calibration file
-            maxstp=1.0_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
-        else
-            maxstp=10.0     ! this is large and arbitrary
-        endif
-
-        intialize_jacobi=.true.
-        n= size(MakeVector(coeffs, normalize_coeffs))
-        allocate(xvals(n), fvals(n), Rmat(n,n), QTmat(n,n))
-        Rmat  = 0.0
-        QTmat = 0.0
-        call put_diag(1.0/0.5_dp,Rmat)
-
-        xvals = MakeVector(coeffs, normalize_coeffs)
-        call set_krusellsmith(policies, grids, Phi, lifecycles,simvars, projectname, calib_name)
-
-        if (partial_equilibrium) then
-            fvals = solve_krusellsmith(xvals)
-        else
-		    !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
-		    call s_alg_qn(solve_krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
-		         reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=100,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
-
-            if (err%not_converged) call err%write2file(fvals, output_path)
-            coeffs = MakeType(xvals, normalize_coeffs)
-
-	    endif
-
-        call get_krusellsmith(policies, value, Phi, lifecycles, simvars, coeffs%r_squared, err, it)
-
-    end subroutine internal_subroutine_krusellsmith
-
-!-------------------------------------------------------------------------------
     subroutine save_and_plot_results(dir, grids, err)
     ! Calc stats and save all results for each run, then plot and save to pdf
         use save_results_mod

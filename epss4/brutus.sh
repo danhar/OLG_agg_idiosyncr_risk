@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='009-_ifclause'
+thisrun='011_ks_test'
 BUILD=Build_Parallel_Optim #Parallel_Debug #Optimmax # Debugmax #   
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
