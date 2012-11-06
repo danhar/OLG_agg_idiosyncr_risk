@@ -13,7 +13,7 @@ module params_mod
 	                      factor_k, factor_mu, cover_k, cover_mu, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
-                          n_coeffs, nt, t_scrap, opt_initial_ms_guess, run_n_times, run_counter_start
+                          n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
@@ -85,7 +85,7 @@ subroutine SetDefaultValues()
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
-    nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; t_scrap=nt/10; opt_initial_ms_guess=0
+    nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.

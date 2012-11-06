@@ -36,6 +36,7 @@ contains
         real(dp) ,allocatable ,intent(out) :: value(:,:,:,:,:,:)
 
         real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
+        real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
         integer               :: n
@@ -56,6 +57,7 @@ contains
         it = 0
         xvals = MakeVector(coeffs, normalize_coeffs)
 
+        xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! for first time with mean shock grid
         if (partial_equilibrium) then
             fvals = krusellsmith(xvals)
         else
@@ -72,7 +74,7 @@ contains
         function krusellsmith(coeffvec) result(distance)
             ! Here we first solve for the policyfunctions, then simulate, then update the regression coefficients.
             ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
-            use params_mod            ,only: exogenous_xgrid, save_all_iterations
+            use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression
             use simulate_economy      ,only: simulate, print_error_msg
@@ -82,21 +84,21 @@ contains
             real(dp), dimension(size(coeffvec)):: distance
             type(tPolicies) :: pol_newx    ! if (exogenous_xgrid) then this will hold interpolated policies
             type(tCoeffs)   :: coeffs_old, coeff_dif
-            real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_old
-            integer, parameter :: nx_factor=1
+            real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:)
 
             coeffs = MakeType(coeffvec, normalize_coeffs)
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
-            xgrid_old = sum(policies%xgrid(:,:,1,:,:,1),5)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined. accounts for first time with mean shock grid
+            xgrid_mean_old = xgrid_mean_new
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
+            xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined
             call err%print2stderr
 
             print *,'- krusell_smith: simulating'
             if (exogenous_xgrid) then
                 call InterpolateXgrid(nx_factor, policies, value, pol_newx, val_newx)
-                call InterpolateXgrid(Phi, xgrid_old, pol_newx%xgrid)
+                call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
                 call simulate(pol_newx, val_newx, grids, simvars, Phi, lifecycles)
             else
                 call simulate(policies, value, grids, simvars, Phi, lifecycles)

@@ -13,7 +13,7 @@ module meanshock_equilib
     real(dp), allocatable :: v_fine(:,:,:,:,:,:)
     real(dp) ,dimension(:,:,:) ,allocatable  :: apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms  ! policies /grids mean shock projection
     type(tCoeffs)   :: coeffs                !coeffs of loms
-    type(tPolicies) :: policies
+    type(tPolicies) :: policies, fine
     type(tAggGrids) :: grid
     type(tErrors)   :: errs
     real(dp)        :: mean_zeta, mean_delta ! mean shocks
@@ -32,10 +32,11 @@ contains
 
 function ms_equilib(msvars) result(distance)
 ! Solve for the 'mean shock equilibrium' (ms) to get initial values for k, mu, Phi
-    use params_mod    ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
+    use params_mod     ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
     use income
-    use policies_class, only: tPolicies
-    use distribution ,only: TransitionPhi
+    use policies_class ,only: tPolicies
+    use distribution   ,only: TransitionPhi
+    use interpolate_xgrid, only: InterpolateXgrid
 
     implicit none
     real(dp) ,dimension(:),intent(in) :: msvars 			! k_ms, mu_ms
@@ -107,7 +108,8 @@ end subroutine ms_equilib_set
 !-------------------------------------------------------------------------------
 pure subroutine ms_equilib_get(P, pol, v_fi, er, xgr, ap, sto, kap, v_ms)
     real(dp), allocatable, intent(out)   :: P(:,:,:)
-    real(dp), dimension(:,:,:,:,:,:), allocatable, intent(out):: xgr, ap, sto, kap, v_fi, v_ms
+    real(dp), dimension(:,:,:,:,:,:) ,allocatable, intent(out):: v_fi
+    real(dp), dimension(:,:,:)       ,allocatable, intent(out):: xgr, ap, sto, kap, v_ms
     type(tPolicies), intent(out)         :: pol
     type(tErrors), intent(inout)           :: er ! need inout because of er%not_converged
     P   = Phi

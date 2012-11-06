@@ -13,7 +13,7 @@ module interpolate_xgrid
 
 contains
     pure subroutine InterpolateXgrid_policies(nx_factor,policies, value, polx, valx)
-        use kinds      ,only: dp, cmin
+        use kinds      ,only: dp
         use policies_class
         use makegrid_mod
         use fun_lininterp
@@ -25,6 +25,7 @@ contains
         real(dp) ,allocatable ,intent(out)   :: valx(:,:,:,:,:,:)
         integer                        :: muc, kc, jc, zc, ec, nx, nz, nk, nmu, n_eta, nj
         real(dp)                       :: xmin, xmax
+        real(dp) ,parameter            :: cmin = 1e-10
 
         nx = size(value,1); n_eta=size(value,2); nz = size(value,3); nj=size(value,4); nk = size(value,5); nmu=size(value,6)
         call polx%allocate(nx*nx_factor, nz, nk,nmu)
@@ -59,12 +60,12 @@ contains
         use fun_lininterp
 
         real(dp) ,intent(inout) :: Phi(:,:,:)
-        real(dp) ,intent(in)    :: xgrid_old(:), xgrid_new(:)
+        real(dp) ,intent(in)    :: xgrid_old(:,:,:), xgrid_new(:,:,:)
         integer                 :: jc, ec
 
         do jc=1,size(Phi,3)
             do ec=1,size(Phi,2)
-                Phi(:,ec,jc) = f_lininterp(xgrid_old, Phi(:,ec,jc), xgrid_new)
+                Phi(:,ec,jc) = f_lininterp(xgrid_old(:,ec,jc), Phi(:,ec,jc), xgrid_new(:,ec,jc))
             enddo
         enddo
     end subroutine InterpolateXgrid_Phi
