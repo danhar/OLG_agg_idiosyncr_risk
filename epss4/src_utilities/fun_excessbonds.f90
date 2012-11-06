@@ -32,9 +32,8 @@ contains
 	    use distribution ,only: TransitionPhi
     !    use bs3vl_int   ! IMSL Math.pdf, p. 754ff: evaluate a 3d tensor-product spline given B-spline-coeffs
 
-	    real(dp) ,intent(in)             :: mut       ! expected equity premium
-        real(dp) ,dimension(nx,n_eta,nj) :: Phi    ! distribution
-        real(dp) ,dimension(nx,n_eta,nj) :: apgridt, stockst, xgridt ! for given z, K, AND mu
+	    real(dp) ,intent(in) :: mut       ! expected equity premium
+        real(dp) ,dimension(:,:,:) ,allocatable :: Phi, apgridt, stockst, xgridt    ! distribution, policies for given z, K, AND mu
 	    real(dp)                         :: w, bond_supply
 	    integer                          :: i
 

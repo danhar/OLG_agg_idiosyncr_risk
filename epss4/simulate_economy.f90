@@ -13,7 +13,7 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     use types           ,only: tSimvars, tLifecycle, AllocateType, set_number
     use policies_class  ,only: tPolicies
     use aggregate_grids ,only: tAggGrids
-    use params_mod      ,only: nx,n_eta,nj,nz,nk,nt,n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
+    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_excessbonds ,only: f_excessbonds, set_excessbondsvars
     use fun_locate      ,only: f_locate
@@ -28,18 +28,24 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     type(tSimvars)   ,intent(inout) :: simvars    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(inout) :: Phi(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tLifecycle) ,intent(out)   :: lc         ! lifecycle profiles
-    real(dp) ,dimension(nx,n_eta,nj,size(value,6)) :: apgrid_zk, kappa_zk, xgrid_zk, stocks_zk ! policies for given z and K
-    real(dp) ,dimension(nx,n_eta,nj)     :: apgridt, kappat, xgridt, stockst         ! policies for given z, K, and mu
-    real(dp)                        :: val_j1_zk(nx,n_eta,size(value,6)), val_j1_t(nx,n_eta)   ! value of j=1 for given z and K, and mu
-    real(dp) ,dimension(nx,n_eta,nj):: Phi_avg, r_pf ! portfolio return
-    real(dp) ,dimension(nj)         :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
-    real(dp) ,dimension(nt+1)       :: Knew       ! partial equilibrium: save aggregate stock in t
+    real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, kappa_zk, xgrid_zk, stocks_zk ! policies for given z and K
+    real(dp) ,dimension(:,:,:)   ,allocatable :: apgridt, kappat, xgridt, stockst         ! policies for given z, K, and mu
+    real(dp) ,dimension(:,:,:)   ,allocatable :: Phi_avg, r_pf, val_j1_zk ! portfolio return
+    real(dp) ,dimension(:,:)     ,allocatable :: val_j1_t ! value of j=1 for given z and K, and mu
+    real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
+    real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
     real(dp) ,parameter :: tol_mut = 1e-8_dp
     real(dp)  :: Kt, mut, rt, netwaget, penst, w, brackl, bracku ! variables in period t
-    integer   :: tc, i, zt, jc, nmu
+    integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
     logical   :: brack_found
 
-    nmu = size(agg_grid%mu)
+    nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)
+    allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu))
+    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), stockst(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
+    allocate(val_j1_zk(nx,n_eta,nmu), val_j1_t(nx,n_eta))
+    allocate(ap_lct(nj), stocks_lct(nj), cons_lct(nj), cons_var_lct(nj), return_lct(nj), return_var_lct(nj))
+    allocate(Knew(nt+1))
+
     Phi_avg         = 0.0
     call set_number(lc, 0.0_dp)
     simvars%err_K   = .false.
@@ -204,11 +210,12 @@ contains
     ! Calculate policies for mean shock, which correspond to initial (=mean shock) distribution, K, mu
 
         use params_mod ,only: stat_dist_z
-	    real(dp) ,dimension(nx,n_eta,nj) ,intent(out) :: apgridt, stockst
-	    real(dp)                         ,intent(out) :: rf1
+	    real(dp) ,dimension(:,:,:) ,intent(inout) :: apgridt, stockst !intent(in) to get allocation status and size
+	    real(dp)                   ,intent(out)   :: rf1
 	    real(dp) :: K0, mu0, wK, wmu, w_ms
-	    integer  :: iK, imu, zc, jc
+	    integer  :: iK, imu, zc, jc, nz
 
+        nz = size(policies%apgrid,3)
         w_ms    = 0.25_dp ! corresponds to MeanShockGE variable w
         apgridt = 0.0
         stockst = 0.0

@@ -1,8 +1,10 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-- paralellize household solution (first try with do concurrent, if that doesnt work maybe also try openmp)
+- move meanshock_equil to meanshock_wrapp
+- move value into policies
+- make interpolateXgrid a function
+- parallelize simulation
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
@@ -22,9 +24,9 @@ For example, simvars should read and write output unformatted also, see  subrout
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- bequests to the young
 - simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
-- use workshare directive to parallelize transition of Phi in the simulations?
+- bequests to the young
+- subfolder src_classes
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow

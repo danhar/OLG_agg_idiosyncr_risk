@@ -29,7 +29,7 @@ contains
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars
         real(dp)        ,intent(inout) :: Phi(:,:,:)
-        type(tPolicies) ,intent(out)   :: policies
+        type(tPolicies) ,intent(inout) :: policies
         type(tLifecycle),intent(out)   :: lifecycles
         type(tErrors)   ,intent(out)   :: err
         integer         ,intent(out)   :: it
@@ -82,18 +82,21 @@ contains
             real(dp), dimension(size(coeffvec)):: distance
             type(tPolicies) :: pol_newx    ! if (exogenous_xgrid) then this will hold interpolated policies
             type(tCoeffs)   :: coeffs_old, coeff_dif
-            real(dp), allocatable :: val_newx(:,:,:,:,:,:)
+            real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_old
+            integer, parameter :: nx_factor=1
 
             coeffs = MakeType(coeffvec, normalize_coeffs)
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
+            xgrid_old = sum(policies%xgrid(:,:,1,:,:,1),5)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined. accounts for first time with mean shock grid
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
             call err%print2stderr
 
             print *,'- krusell_smith: simulating'
             if (exogenous_xgrid) then
-                call InterpolateXgrid(policies, value, pol_newx, val_newx) ! No need to interpolate Phi
+                call InterpolateXgrid(nx_factor, policies, value, pol_newx, val_newx)
+                call InterpolateXgrid(Phi, xgrid_old, pol_newx%xgrid)
                 call simulate(pol_newx, val_newx, grids, simvars, Phi, lifecycles)
             else
                 call simulate(policies, value, grids, simvars, Phi, lifecycles)

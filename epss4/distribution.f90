@@ -1,6 +1,6 @@
 module distribution
     use kinds
-    use params_mod, only: nj, nx, n_eta, n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta
+    use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta
     implicit none
 
     private check_Phi_full, check_Phi_small, check_Phi_pure
@@ -20,15 +20,18 @@ pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm
 ! Calculate the transition of Phi
     use fun_locate
 
-    real(dp) ,dimension(nx,n_eta,nj) ,target     :: Phi                  ! new distribution
-    real(dp) ,dimension(nx,n_eta,nj) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
-    real(dp)                         ,intent(in) :: rf, r, netwage, pens ! today's risk-free rate, risky return, net wage, pensions
-    real(dp) ,dimension(nx,n_eta,nj) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
-    real(dp) ,dimension(n_eta)       ,intent(in) :: etagrid              ! idiosyncratic income shocks today
-    real(dp) ,dimension(:,:,:)       ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
+    real(dp) ,dimension(:,:,:) ,allocatable ,target     :: Phi                  ! new distribution
+    real(dp) ,dimension(:,:,:) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
+    real(dp)                   ,intent(in) :: rf, r, netwage, pens ! today's risk-free rate, risky return, net wage, pensions
+    real(dp) ,dimension(:,:,:) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
+    real(dp) ,dimension(:)     ,intent(in) :: etagrid              ! idiosyncratic income shocks today
+    real(dp) ,dimension(:,:,:) ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
     real(dp) ,dimension(size(etagrid)) :: y ! income
     real(dp) :: wx, x ! weight, cash at hand
-    integer  :: ix, jc, ec, xmc, emc   ! xmc,emc: x/eta previous period or generation
+    integer  :: ix, jc, ec, xmc, emc, nj, n_eta, nx   ! xmc,emc: x/eta previous period or generation
+
+    nx= size(apgrid,1); n_eta = size(apgrid,2); nj = size(apgrid,3)
+    allocate(Phi(nx,n_eta,nj))
 
     if (present(Phitm_o)) then
         allocate(Phitm(nx,n_eta,nj))
@@ -82,22 +85,22 @@ end function TransitionPhi
 
 pure subroutine check_Phi_pure(Phi_full, bound_Phi_1, bound_Phi_2)
 ! Phi including eta
-    real(dp), dimension(nx,n_eta,nj), intent(in) :: Phi_full
+    real(dp), dimension(:,:,:), intent(in) :: Phi_full
     real(dp), intent(out)       :: bound_Phi_1, bound_Phi_2
-    real(dp), dimension(nx,nj)  :: Phi
+    real(dp), dimension(:,:), allocatable  :: Phi
 
     Phi = sum(Phi_full,2)
     bound_Phi_1=sum(Phi(1,:))
-    bound_Phi_2=sum(Phi(nx,:))
+    bound_Phi_2=sum(Phi(size(Phi,1),:))
 
 end subroutine check_Phi_pure
 !-------------------------------------------------------------------------------
 
 subroutine check_Phi_full(Phi_full,path)
 ! Phi including eta
-    real(dp), dimension(nx,n_eta,nj), intent(in) :: Phi_full
+    real(dp), dimension(:,:,:), intent(in) :: Phi_full
     character(len=*), intent(in)        :: path  ! directory to write to
-    real(dp), dimension(nx,nj)  :: Phi
+    real(dp), dimension(:,:), allocatable  :: Phi
 
     Phi = sum(Phi_full,2)
 
@@ -108,9 +111,14 @@ end subroutine check_Phi_full
 
 subroutine check_Phi_small(Phi,path)
 ! Phi excluding eta
-    real(dp), dimension(nx,nj), intent(in) :: Phi
-    character(len=*), intent(in)        :: path  ! directory to write to
-    real(dp)      :: marg_Phi(nj), bounds_Phi(2), mass_Phi, crit
+    real(dp) ,dimension(:,:) ,intent(in) :: Phi
+    character(len=*)         ,intent(in) :: path  ! directory to write to
+    real(dp) ,allocatable :: marg_Phi(:)
+    real(dp)              :: bounds_Phi(2), mass_Phi, crit
+    integer :: nx, nj
+
+    nx = size(Phi,1); nj = size(Phi,2)
+    allocate(marg_Phi(nj))
 
     crit= 1e-8_dp
     marg_Phi=sum(Phi,dim=1)

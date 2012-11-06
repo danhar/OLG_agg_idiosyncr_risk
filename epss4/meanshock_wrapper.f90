@@ -10,7 +10,7 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs, Initialize
     use error_class
-    use params_mod      ,only: n_coeffs,nj,nx,nz,n_eta,alpha,etagrid,stat_dist_z, partial_equilibrium
+    use params_mod      ,only: n_coeffs,nj,nx,n_eta,alpha,etagrid,stat_dist_z, partial_equilibrium
     use income
 	use meanshock_equilib ,only: ms_equilib_set, ms_equilib_get, ms_equilib
 	use sub_broyden
@@ -26,12 +26,13 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
     type(tErrors)   ,intent(out)   :: err
     character(len=*), intent(in)   :: output_path
 	real(dp) ,dimension(2)		   :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
-	real(dp) ,dimension(n_eta)     :: m_etagrid
+	real(dp) ,dimension(:), allocatable  :: m_etagrid, w
 	real(dp)                       :: mean_zeta, mean_delta ! mean shocks
-	real(dp)					   :: wz, wd, w(nz)	! weights (distance to mean zeta, mean delta)
-	real(dp) ,dimension(nx,n_eta,nj) :: apgrid_ms, stocks_ms, kappa_ms, xgrid_ms, value_ms ! mean shock projections
-	integer         	           :: i		        ! index
+	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
+	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, xgrid_ms, value_ms ! mean shock projections
+	integer         	           :: i, nz		        ! index
 
+    nz = size(stat_dist_z)
     coeffs          = Initialize('msge',n_coeffs,nz)
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
 	mean_delta		= dot_product(stat_dist_z, delta)
@@ -65,22 +66,8 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
 
 	grids%K (1) = xvars(1)
 	grids%mu(1) = xvars(2)
-    call ms_equilib_get(Phi, policies, value, err)
+    call ms_equilib_get(Phi, policies, value, err, xgrid_ms, apgrid_ms, stocks_ms, kappa_ms, value_ms)
     call err%print2stderr
-
-    ! Calc mean shock policies for lc profiles and for saving
-    xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0; value_ms = 0.0
-    do i=1,nz
-        xgrid_ms    = xgrid_ms  + w(i)* policies%xgrid(:,:,i,:,1,1)
-        apgrid_ms   = apgrid_ms + w(i)* policies%apgrid(:,:,i,:,1,1)
-        stocks_ms   = stocks_ms + w(i)* policies%stocks(:,:,i,:,1,1)
-        value_ms    = value_ms  + w(i)* value(:,:,i,:,1,1)
-    enddo
-    where (apgrid_ms .ne. 0.0)
-        kappa_ms = stocks_ms/apgrid_ms
-    elsewhere
-        kappa_ms = 0.0
-    end where
 
     call simulate_ms(simvars)
 

@@ -42,7 +42,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 
     nk = size(grids%k)
     nmu= size(grids%mu)
-    call p%allocate(nz,nk,nmu)
+    call p%allocate(nx,nz,nk,nmu)
     allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
     call err%allocate(nk,nmu)
 

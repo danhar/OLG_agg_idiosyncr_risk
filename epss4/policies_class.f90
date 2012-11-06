@@ -27,10 +27,10 @@ contains
 ! - pure function interpolate(this,dim_x, gridx, x) result(pol_int)
 !-------------------------------------------------------------------------------
 
-pure subroutine allocate_policies(this,nz,nk,nmu)
-    use params_mod, only: nx, n_eta, nj
+pure subroutine allocate_policies(this,nx,nz,nk,nmu)
+    use params_mod, only: n_eta, nj
     class(tPolicies), intent(inout)  :: this
-    integer,    intent(in)      :: nz,nk,nmu
+    integer,    intent(in)      :: nx,nz,nk,nmu
     call deallocate_policies(this)
     allocate(this%apgrid(nx,n_eta,nz,nj,nk,nmu),this%kappa(nx,n_eta,nz,nj,nk,nmu),this%stocks(nx,n_eta,nz,nj,nk,nmu),this%xgrid(nx,n_eta,nz,nj,nk,nmu))
 end subroutine allocate_policies
@@ -90,7 +90,7 @@ pure function mean(this,dimension_o,weight_o) result(mean_policy)
 
     select case (dimension)
     case (3)
-        call mean_policy%allocate(1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
+        call mean_policy%allocate(size(this%apgrid,1),1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
         mean_policy%apgrid = 0.0
         mean_policy%stocks = 0.0
         mean_policy%xgrid  = 0.0
@@ -100,7 +100,7 @@ pure function mean(this,dimension_o,weight_o) result(mean_policy)
             mean_policy%xgrid (:,:,1,:,:,:) = mean_policy%xgrid (:,:,1,:,:,:) + weight*this%xgrid (:,:,dc,:,:,:)
         enddo
     case default ! same as case 3
-        call mean_policy%allocate(1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
+        call mean_policy%allocate(size(this%apgrid,1),1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
         mean_policy%apgrid = 0.0
         mean_policy%stocks = 0.0
         mean_policy%xgrid  = 0.0
@@ -137,12 +137,12 @@ pure function interpolate(this,dim_x, gridx, x) result(pol_int)
 
     select case (dim_x)
     case (5)
-        call pol_int%allocate(size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
+        call pol_int%allocate(size(this%apgrid,1),size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
         pol_int%apgrid(:,:,:,:,1,:)= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
         pol_int%stocks(:,:,:,:,1,:)= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
         pol_int%xgrid (:,:,:,:,1,:) = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
     case default ! same as case 5
-        call pol_int%allocate(size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
+        call pol_int%allocate(size(this%apgrid,1),size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
         pol_int%apgrid(:,:,:,:,1,:)= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
         pol_int%stocks(:,:,:,:,1,:)= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
         pol_int%xgrid (:,:,:,:,1,:) = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)

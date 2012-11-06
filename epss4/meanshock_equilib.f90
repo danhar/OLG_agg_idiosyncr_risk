@@ -1,17 +1,17 @@
 module meanshock_equilib
 
     use kinds
-    use params_mod      ,only: n_eta, nx, nj, nz
     use household_solution_mod ,only: tPolicies, olg_backwards_recursion
-    use aggregate_grids ,only: tAggGrids
-    use laws_of_motion  ,only: tCoeffs
-    use error_class      ,only: tErrors
+    use aggregate_grids        ,only: tAggGrids
+    use laws_of_motion         ,only: tCoeffs
+    use error_class            ,only: tErrors
     implicit none
 
     private
 
     real(dp), allocatable :: Phi(:,:,:)      ! distribution
-    real(dp), allocatable :: value(:,:,:,:,:,:)
+    real(dp), allocatable :: v_fine(:,:,:,:,:,:)
+    real(dp) ,dimension(:,:,:) ,allocatable  :: apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms  ! policies /grids mean shock projection
     type(tCoeffs)   :: coeffs                !coeffs of loms
     type(tPolicies) :: policies
     type(tAggGrids) :: grid
@@ -32,7 +32,7 @@ contains
 
 function ms_equilib(msvars) result(distance)
 ! Solve for the 'mean shock equilibrium' (ms) to get initial values for k, mu, Phi
-    use params_mod    ,only: L_N_ratio, n, g, stat_dist_z, de_ratio
+    use params_mod    ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
     use income
     use policies_class, only: tPolicies
     use distribution ,only: TransitionPhi
@@ -40,7 +40,7 @@ function ms_equilib(msvars) result(distance)
     implicit none
     real(dp) ,dimension(:),intent(in) :: msvars 			! k_ms, mu_ms
     real(dp) ,dimension(size(msvars)) :: distance           ! excess demands
-    real(dp) ,dimension(nx,n_eta,nj)  :: apgrid_ms, stocks_ms, xgrid_ms	! policies /grids mean shock projection
+    real(dp) ,dimension(:,:,:,:,:,:), allocatable :: value
     real(dp)						  :: kp_ms, agg_bond_demand
     real(dp)						  :: netwage_ms, pens_ms, r_ms, rf_ms
 	integer 						  :: i
@@ -50,13 +50,26 @@ function ms_equilib(msvars) result(distance)
 
     call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
+    call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
 	! Projection of policies / grids on mean shock
+	allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	         stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	         xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	         kappa_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	         value_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
+
     xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
-	do i=1,nz
-		xgrid_ms  = xgrid_ms  + w(i)* policies%xgrid (:,:,i,:,1,1)
-		apgrid_ms = apgrid_ms + w(i)* policies%apgrid(:,:,i,:,1,1)
-		stocks_ms = stocks_ms + w(i)* policies%stocks(:,:,i,:,1,1)
+	do i=1,size(fine%xgrid,3)
+		xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)
+		apgrid_ms = apgrid_ms + w(i)* fine%apgrid(:,:,i,:,1,1)
+		stocks_ms = stocks_ms + w(i)* fine%stocks(:,:,i,:,1,1)
+		value_ms  = value_ms  + w(i)* v_fine(:,:,i,:,1,1) ! I don't need it right here, but in meanshock_wrapper
 	enddo
+	where (apgrid_ms .ne. 0.0)
+        kappa_ms = stocks_ms/apgrid_ms  ! I don't need it right here, but in meanshock_wrapper
+    elsewhere
+        kappa_ms = 0.0
+    end where
 
 	! Prices in mean shock path
 	netwage_ms	  = f_netwage (msvars(1), mean_zeta)
@@ -92,13 +105,19 @@ subroutine ms_equilib_set(co, ag_gr, m_z, m_d, s_w, eta)
 end subroutine ms_equilib_set
 
 !-------------------------------------------------------------------------------
-pure subroutine ms_equilib_get(P, pol, v, er)
-    real(dp), allocatable, intent(out)   :: P(:,:,:), v(:,:,:,:,:,:)
+pure subroutine ms_equilib_get(P, pol, v_fi, er, xgr, ap, sto, kap, v_ms)
+    real(dp), allocatable, intent(out)   :: P(:,:,:)
+    real(dp), dimension(:,:,:,:,:,:), allocatable, intent(out):: xgr, ap, sto, kap, v_fi, v_ms
     type(tPolicies), intent(out)         :: pol
     type(tErrors), intent(inout)           :: er ! need inout because of er%not_converged
     P   = Phi
-    pol = policies
-    v = value
+    pol = fine !policies
+    v_fi = v_fine
+    v_ms = value_ms
+    xgr = xgrid_ms
+    ap = apgrid_ms
+    sto = stocks_ms
+    kap = kappa_ms
     ! The trouble with err is that I do not want to overwrite er%not_converged
     er%asset   = errs%asset
     er%cons    = errs%cons

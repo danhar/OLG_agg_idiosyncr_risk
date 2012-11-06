@@ -15,6 +15,7 @@ module types
     end type tSimvars
 
     type tLifecycle
+    !?!? Why do I need them to be allocatable?
         real(dp), dimension(:), allocatable :: ap, kappa, cons, stock, cons_var, return, return_var   ! life-cycle profiles
 !    contains
 !        procedure :: set_number => set_number_lifecycle        ! generates compiler bug
