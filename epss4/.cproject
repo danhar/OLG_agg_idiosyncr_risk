@@ -46,6 +46,7 @@
 								<option id="intel.linux.fortran.compiler.fp.stack.x86.1829957990_64" name="Check Floating Point Stack (-fp-stack-check)" superClass="intel.linux.fortran.compiler.fp.stack.x86_64" value="true" valueType="boolean"/>
 								<option id="intel.linux.fortran.compiler.runtime.traceback.1124691472" name="Generate Traceback Information (-traceback)" superClass="intel.linux.fortran.compiler.runtime.traceback" value="true" valueType="boolean"/>
 								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.929038878" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.all" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.runtime.chkbnds.672602668" name="Check Array and String Bounds (-check bounds)" superClass="intel.linux.fortran.compiler.runtime.chkbnds" value="true" valueType="boolean"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.256917700" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
 							</tool>
 							<tool command="ifort" commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.1526495870" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">

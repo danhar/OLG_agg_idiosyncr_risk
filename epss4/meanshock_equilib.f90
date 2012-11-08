@@ -52,13 +52,15 @@ function ms_equilib(msvars) result(distance)
     call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
     call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
-	! Projection of policies / grids on mean shock
-	allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-	         stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-	         xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-	         kappa_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-	         value_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
 
+    if (.not. allocated(apgrid_ms)) &
+            allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	                 stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	                 xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	                 kappa_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+	                 value_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
+
+    ! Projection of policies / grids on mean shock
     xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
 	do i=1,size(fine%xgrid,3)
 		xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)

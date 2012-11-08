@@ -33,6 +33,7 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
 	integer         	           :: i, nz		        ! index
 
     nz = size(stat_dist_z)
+    allocate(w(nz))
     coeffs          = Initialize('msge',n_coeffs,nz)
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
 	mean_delta		= dot_product(stat_dist_z, delta)

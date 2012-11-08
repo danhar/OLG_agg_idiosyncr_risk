@@ -1,11 +1,5 @@
 eclipse.preferences.version=1
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698/OMP_NUM_THREADS/delimiter=\:
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698/OMP_NUM_THREADS/operation=replace
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698/OMP_NUM_THREADS/value=2
 environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698/append=true
 environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698/appendContributed=true
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/OMP_NUM_THREADS/delimiter=\:
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/OMP_NUM_THREADS/operation=append
-environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/OMP_NUM_THREADS/value=4
 environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/append=true
 environment/project/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/appendContributed=true

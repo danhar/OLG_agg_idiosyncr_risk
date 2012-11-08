@@ -8,7 +8,7 @@ contains
 !-------------------------------------------------------------------------------
 
 subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
-
+! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
     use types           ,only: tSimvars, tLifecycle, AllocateType, set_number
     use policies_class  ,only: tPolicies
@@ -39,6 +39,7 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
     logical   :: brack_found
 
+    ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
     nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)
     allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu))
     allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), stockst(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
@@ -71,10 +72,11 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
         i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
         w        = (Kt - agg_grid%K(i)) / (agg_grid%K(i+1) - agg_grid%K(i))
         ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
-        xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
-        apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
-        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
-        val_j1_zk= (1-w)*value(:,:,zt,1,i,:) +w*value(:,:,zt,1,i+1,:)
+        !! Once the Intel Fortran bug on reallocation is fixed, I can simply write xgrid_zk= ...
+        xgrid_zk (:,:,:,:)= (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
+        apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
+        val_j1_zk(:,:,:)  = (1-w)*value(:,:,zt,1,i,:) +w*value(:,:,zt,1,i+1,:)
 
         where (apgrid_zk .ne. 0.0)
             kappa_zk = stocks_zk/apgrid_zk
