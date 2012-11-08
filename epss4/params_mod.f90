@@ -195,6 +195,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) nt
             case ('t_scrap')
                 read (parval,*) t_scrap
+            case ('nx_factor')
+                read (parval,*) nx_factor
             case ('loms_in_logs')
                 read (parval,*) loms_in_logs
             case ('pooled_regression')
@@ -739,6 +741,13 @@ subroutine CheckParams()
         call critical_stop
     endif
 
+    if (nx_factor < 1) then
+        print*, 'ERROR: nx_factor < 1'
+        call critical_stop
+    elseif (nx_factor > 100) then
+        print*, 'WARNING: nx_factor > 100 : might run out of mem/ take long time'
+    endif
+
     if (jr>nj+1) then
         print*, 'ERROR: jr > nj+1'
         call critical_stop
@@ -1016,6 +1025,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,218) ' nmu          = ', nmu
     write(21,'(a16, i5)') ' nt           = ', nt
     write(21,218) ' tscrap       = ', t_scrap
+    write(21,218) ' nx_factor    = ', nx_factor
     write(21,217) ' cover_k      = ', cover_k
     write(21,217) ' cover_mu     = ', cover_mu
 217 format(a16, 2(f0.6,x))

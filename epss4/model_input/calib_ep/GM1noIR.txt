@@ -57,6 +57,7 @@ nmu             8       grid for ex-ante expected equity premium (mu)
 n_coeffs        2       coefficients in law of motion, for every state z
 nt              5000    simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         500     In simulations, throw away the first t_scrap.
+nx_factor       2       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
