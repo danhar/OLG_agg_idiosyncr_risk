@@ -406,6 +406,8 @@ contains
     call err%write2file(path)
 
     open(unit=21, file=path//'/simvars.txt', status = 'replace')
+    write(21,368) ' t         ', [(i,i=1,size(simvars%z))]
+368 format(a11,<size(simvars%z)> (i6.6,4x))
     write(21,369) ' z        ', simvars%z
 369 format(a10,<size(simvars%z)> (i2,8x))
     write(21,371) ' K        ', simvars%K

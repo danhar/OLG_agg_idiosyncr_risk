@@ -95,9 +95,7 @@ contains
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
-            xgrid_mean_old = xgrid_mean_new ! Need this only for interpolating Phi later. Would be nicer to have a derived type Phi which carries its own xgrid.
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
-            xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined. Would be nicer to have a derived type Phi which carries its own correct xgrid.
             call err%print2stderr
 
             print *,'- krusell_smith: simulating'
@@ -105,6 +103,8 @@ contains
                 ! This is the standard case which should always be used, because we make the xgrid much finer
                 call InterpolateXgrid(nx_factor, policies, value, pol_newx, val_newx)
                 ! We also want the initial Phi that we take from previous simulations to be defined over the new xgrid
+                xgrid_mean_old = xgrid_mean_new ! Would be nicer to have a derived type Phi which carries its own xgrid.
+                xgrid_mean_new = sum(pol_newx%xgrid(:,:,1,:,:,1),4)/size(pol_newx%xgrid,5) ! only an approximation of the grid over which Phi is defined
                 call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
 
                 call simulate(pol_newx, val_newx, grids, simvars, Phi, lifecycles)
