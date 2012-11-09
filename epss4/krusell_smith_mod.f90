@@ -17,8 +17,12 @@ contains
 ! -- (internal) function solve_krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
 !-------------------------------------------------------------------------------
-    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
-    ! Set up environment to use rootfinder for coefficients of loms (KS)
+    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
+    ! Set up environment to use rootfinder for coefficients of loms (KS),
+    ! then pass the function krusell_smith as a function argument to a root finder.
+    ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
+    ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
+
         use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
@@ -29,7 +33,8 @@ contains
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars
         real(dp)        ,intent(inout) :: Phi(:,:,:)
-        type(tPolicies) ,intent(inout) :: policies
+        real(dp)        ,intent(in)    :: xgrid_ms(:,:,:) ! Could remove if Phi was derived type carrying its own grid.
+        type(tPolicies) ,intent(out)   :: policies
         type(tLifecycle),intent(out)   :: lifecycles
         type(tErrors)   ,intent(out)   :: err
         integer         ,intent(out)   :: it
@@ -57,7 +62,7 @@ contains
         it = 0
         xvals = MakeVector(coeffs, normalize_coeffs)
 
-        xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! for first time with mean shock grid
+        xgrid_mean_new = xgrid_ms ! First grid is mean shock grid. Could remove if Phi was derived type carrying its own grid.
         if (partial_equilibrium) then
             fvals = krusellsmith(xvals)
         else
@@ -90,21 +95,27 @@ contains
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
-            xgrid_mean_old = xgrid_mean_new
+            xgrid_mean_old = xgrid_mean_new ! Need this only for interpolating Phi later. Would be nicer to have a derived type Phi which carries its own xgrid.
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
-            xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined
+            xgrid_mean_new = sum(policies%xgrid(:,:,1,:,:,1),4)/size(policies%xgrid,5) ! only an approximation of the grid over which Phi is defined. Would be nicer to have a derived type Phi which carries its own correct xgrid.
             call err%print2stderr
 
             print *,'- krusell_smith: simulating'
             if (exogenous_xgrid) then
+                ! This is the standard case which should always be used, because we make the xgrid much finer
                 call InterpolateXgrid(nx_factor, policies, value, pol_newx, val_newx)
+                ! We also want the initial Phi that we take from previous simulations to be defined over the new xgrid
                 call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
+
                 call simulate(pol_newx, val_newx, grids, simvars, Phi, lifecycles)
             else
+                ! In this case, we simultaneously solve for the rf(t+1) (actually the mu(t+1)) and the corresponding xgrid(since it depends on mu).
+                ! That is very costly, so we do not refine xgrid. While more correct theoretically, the coarse xgrid makes the solution less precise.
                 call simulate(policies, value, grids, simvars, Phi, lifecycles)
             endif
             call print_error_msg(simvars)
-            ! One could make a (dampened) update of grids using the mean from simvars, but too complex for rootfinder
+
+            ! Here, one could make a (dampened) update of grids using the mean from simvars, but this turns out to be too complex for rootfinder
 
             coeffs_old    = coeffs
             call Regression(simvars,coeffs)

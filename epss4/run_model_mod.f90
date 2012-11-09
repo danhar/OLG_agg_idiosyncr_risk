@@ -26,7 +26,7 @@ subroutine run_model(projectname, calib_name, welfare)
     type(tLifecycle)  :: lifecycles
     type(tSimvars)    :: simvars    ! simulation variables, e.g. zt, kt,...
     type(tErrors)     :: err
-    real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:) ! value function and distribution
+    real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
 	integer           :: start_time, it, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	character(:),allocatable :: dir, output_path
 
@@ -53,7 +53,7 @@ subroutine run_model(projectname, calib_name, welfare)
     syserr = system('mkdir '//output_path) ! Creates directory for output files
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
-    call SolveMeanShock(coeffs, ms_grids, policies, simvars, lifecycles, Phi, value, err, output_path)
+    call SolveMeanShock(coeffs, ms_grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
@@ -116,7 +116,7 @@ subroutine run_model(projectname, calib_name, welfare)
         close(132)
     endif
 
-    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
+    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 

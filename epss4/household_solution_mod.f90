@@ -27,7 +27,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     use error_class
     use makegrid_mod
 
-    type(tPolicies)                 ,intent(out) :: p      ! policies
+    type(tPolicies)                  ,intent(out) :: p      ! policies
     type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
     type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
     real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
@@ -278,7 +278,7 @@ end function f_apgrid_j
 
 pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
     ! This subroutine will pass the asset euler equation as a function argument to a root finder.
-    ! In this version, the function argument is an internal subroutine, which is a Fortran 2008 feature implemented
+    ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
     use params_mod ,only: opt_zbren, tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio, g
 !    use zreal_int      ! IMSL Math.pdf, p. 1195f: Mullers Method to find roots (like secant but quadratic).

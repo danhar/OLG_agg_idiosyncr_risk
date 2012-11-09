@@ -36,7 +36,7 @@ function ms_equilib(msvars) result(distance)
     use income
     use policies_class ,only: tPolicies
     use distribution   ,only: TransitionPhi
-    use interpolate_xgrid, only: InterpolateXgrid
+    use interpolate_xgrid ,only: InterpolateXgrid
 
     implicit none
     real(dp) ,dimension(:),intent(in) :: msvars 			! k_ms, mu_ms

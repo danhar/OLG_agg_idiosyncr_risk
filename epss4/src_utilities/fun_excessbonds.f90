@@ -27,7 +27,7 @@ contains
 
 	pure real(dp) function f_excessbonds(mut)
 	! calculates excess bond demand
-	    use params_mod    ,only: L_N_ratio, exogenous_xgrid, de_ratio, nx, nj, n_eta
+	    use params_mod    ,only: L_N_ratio, exogenous_xgrid, de_ratio
 	    use fun_locate
 	    use distribution ,only: TransitionPhi
     !    use bs3vl_int   ! IMSL Math.pdf, p. 754ff: evaluate a 3d tensor-product spline given B-spline-coeffs

@@ -1,9 +1,15 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- move meanshock_equil to meanshock_wrapp
+- move meanshock_equil to meanshock_wrapp? Maybe not. 
+    Advantage: one file with mean_shock stuff, alogous structure to other rootfinders (in household_solution_mod and krusell_smith_mod).
+    Disadvantage: this is different from household_solution_mod:olg_backwards_recursion:asset_allocation, because the function is not pure. 
+                    We need to get back other values besides the root (that's why we have a getter method). So either I write into the variables by host association, which I
+                    think is a worse approach than the getter method (with 'global' module variables), or I create a subroutine which duplicates everything but has all
+                    return (intent(out)) arguments. That would make everything pure. And in the pure function (not the subroutine), I do not need the InterpolateXgrid, so dont need
+                    'fine' grid policies! Also, I can make sure that the coarse policies are returned.                
 - move value into policies
-- make interpolateXgrid a function
+- make interpolateXgrid a (type-bound?) function
 - parallelize simulation
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -27,6 +33,8 @@ For example, simvars should read and write output unformatted also, see  subrout
 - simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
 - bequests to the young
 - subfolder src_classes
+- make params_mod readable by Matlab and read it in
+- make nx, n_eta, nz ... private in params_mod? nx should be relatively easy!
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
@@ -81,7 +89,8 @@ If I try to change this, I should first try it on a new copy (not even a branch,
     cons_out = cmin/100.0 which is only true for apmin_exog = 0.
     Overall, the case  apmin_exog<0 is a bit buggy.
 
-- make finer grid for distribution as proposed by Rios-Rull (in Marimon/Scott) and Heer/Maussner ?
+- Make Distribution Phi a derived type, so that it can carry the grid over which it is defined. See my comments in krusell_smith_mod.f90. 
+    Could delete xgrid_ms in run_model_mod and make local in SolveMeanshock. Could make interpolate_xgrid:InterpolateXgrid_Phi a type-bound procedure
 
 - allow for subfolders in model_input/ep_calib (and other calbration directories). For this, maybe want to keep the subdirectory as part of the calib_name.
     In that case, need to check that the mkdir command creates all necessary parent directories. Also need to ensure that cal_id keeps the subdir (search for the
@@ -133,3 +142,7 @@ Remove the optional on errors (everywhere!)
 - maybe mod_demographics.f90?
  
 - Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (E) Done! (started only in Nov. 2012) cronological order
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

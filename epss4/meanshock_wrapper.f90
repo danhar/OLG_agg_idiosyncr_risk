@@ -2,7 +2,7 @@ module meanshock_wrapper
     implicit none
 contains
 
-subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, value, err, output_path)
+subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
 
     use kinds
     use types
@@ -17,19 +17,19 @@ subroutine SolveMeanShock(coeffs, grids, policies, simvars, lifecycles, Phi, val
     use fun_locate
     use fun_aggregate_diff
 
-    type(tCoeffs)   ,intent(out)    :: coeffs       ! coefficients for laws of motion
+    type(tCoeffs)   ,intent(out)   :: coeffs       ! coefficients for laws of motion
     type(tAggGrids) ,intent(inout) :: grids        ! grids for aggregate states k and mu
     type(tPolicies) ,intent(out)   :: policies
     type(tSimvars)  ,intent(out)   :: simvars
     type(tLifecycle),intent(out)   :: lifecycles
-    real(dp) ,allocatable ,intent(out)   :: Phi(:,:,:), value(:,:,:,:,:,:)  ! distribution, valuefunction
+    real(dp) ,allocatable ,intent(out)   :: Phi(:,:,:), value(:,:,:,:,:,:), xgrid_ms(:,:,:)  ! distribution, valuefunction, mean shock xgrid
     type(tErrors)   ,intent(out)   :: err
     character(len=*), intent(in)   :: output_path
 	real(dp) ,dimension(2)		   :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
 	real(dp) ,dimension(:), allocatable  :: m_etagrid, w
 	real(dp)                       :: mean_zeta, mean_delta ! mean shocks
 	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
-	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, xgrid_ms, value_ms ! mean shock projections
+	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, value_ms ! mean shock projections
 	integer         	           :: i, nz		        ! index
 
     nz = size(stat_dist_z)

@@ -4,7 +4,7 @@ close all;
 
 if (isempty(gplot_all))    
     visibility = 'on ';
-    dir = 'STY2/msge';  % 'ge'
+    dir = 'FD1_KK/ge';  % 'ge'
 else
     visibility = 'off';
     dir = getenv('EPSSDIR');
@@ -39,6 +39,21 @@ else
     fontsize=16;
     linewidth =2.5;
     markersize = 9;
+end
+
+nx2 = size(xgrid_mean,2);
+if (nx2 ~= nx)
+    xgrid_new = zeros(nj,nx);
+    c =2;
+    for j=1:size(xgrid_mean,1)
+        xgrid_new(j,1) = xgrid_mean(j,1);
+        xgrid_new(j,nx) = xgrid_mean(j,nx2);
+  		scalefact = xgrid_new(j,nx)-xgrid_new(j,1);
+        for i=2:nx-1
+		    xgrid_new(j,i) = xgrid_new(j,1) + scalefact*((i-1.0)/(nx-1.0))^c;
+        end
+    end
+    xgrid_mean = xgrid_new;
 end
 
 figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
