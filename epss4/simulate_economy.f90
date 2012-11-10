@@ -15,7 +15,6 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     use aggregate_grids ,only: tAggGrids
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
-    use fun_excessbonds ,only: f_excessbonds, set_excessbondsvars
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_zbrent
@@ -77,7 +76,6 @@ subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
         apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
         stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
         val_j1_zk(:,:,:)  = (1-w)*value(:,:,zt,1,i,:) +w*value(:,:,zt,1,i+1,:)
-
         where (apgrid_zk .ne. 0.0)
             kappa_zk = stocks_zk/apgrid_zk
         elsewhere
@@ -88,9 +86,6 @@ ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
             ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
             Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
-            call set_excessbondsvars(apgrid_zk, stocks_zk, agg_grid ,Phi)
-        else
-            call set_excessbondsvars(netwaget,penst,rt,simvars%rf(tc),apgridt,stockst,apgrid_zk,stocks_zk,xgrid_zk,agg_grid,Phi, etagrid(:,zt))
         endif ex
 
 mu:     if (partial_equilibrium) then
@@ -205,7 +200,44 @@ mu:     if (partial_equilibrium) then
 contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
+! - pure real(dp) function f_excessbonds(mut)
 ! - pure subroutine get_initial_values(apgridt, stockst, rf1)
+!-------------------------------------------------------------------------------
+
+    pure real(dp) function f_excessbonds(mut)
+    ! calculates excess bond demand
+        use params_mod    ,only: de_ratio
+    !    use bs3vl_int   ! IMSL Math.pdf, p. 754ff: evaluate a 3d tensor-product spline given B-spline-coeffs
+
+        real(dp) ,intent(in) :: mut       ! expected equity premium
+        real(dp) ,dimension(:,:,:) ,allocatable :: Phit, apgridtt, stockstt, xgridtt    ! temporary distribution, policies for given z, K, AND mu
+        real(dp)                         :: w, bond_supply
+        integer                          :: i
+
+        if (size(agg_grid%mu) >1) then
+            i        = f_locate(agg_grid%mu, mut)
+            w        = (mut - agg_grid%mu(i)) / (agg_grid%mu(i+1) - agg_grid%mu(i))
+
+            if (.not. exogenous_xgrid) then
+                xgridtt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
+                Phit      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
+            else
+                Phit = Phi
+            endif
+
+            apgridtt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
+            stockstt  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
+
+        else
+            Phit = Phi
+            apgridtt  = apgrid_zk(:,:,:,1)
+            stockstt  = stocks_zk(:,:,:,1)
+        endif
+
+        bond_supply   = de_ratio * sum(stockstt*Phit)/L_N_ratio
+        f_excessbonds = bond_supply - sum((apgridtt - stockstt)*Phit)/L_N_ratio    ! analytically, L_N_ratio drops out
+
+    end function f_excessbonds
 !-------------------------------------------------------------------------------
 
     pure subroutine get_initial_values(apgridt, stockst, rf1)
@@ -255,6 +287,7 @@ contains
     end subroutine get_initial_values
 
 end subroutine simulate
+!-------------------------------------------------------------------------------
 
 subroutine print_error_msg(simvars)
     use types      ,only: tSimvars
