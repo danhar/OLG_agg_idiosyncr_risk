@@ -82,8 +82,8 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
-! - pure function ms_equilibrium(msvars) result(distance)
-! - pure subroutine get_equilibrium_values(fine,v_fine,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, errs)
+! - (pure) function ms_equilibrium(msvars) result(distance)
+! - (pure) subroutine get_equilibrium_values(fine,v_fine,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, errs)
 ! - pure subroutine simulate_ms(simvars)
 ! - pure subroutine ms_lc_profiles(lifecycles)
 !-------------------------------------------------------------------------------
