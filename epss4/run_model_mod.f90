@@ -24,10 +24,10 @@ subroutine run_model(projectname, calib_name, welfare)
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
     type(tLifecycle)  :: lifecycles
-    type(tSimvars)    :: simvars    ! simulation variables, e.g. zt, kt,...
+    type(tSimvars), allocatable:: simvars(:)    ! simulation variables, e.g. zt, kt,...
     type(tErrors)     :: err
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
-	integer           :: start_time, it, syserr ! 'it' cointains total iterations of Krusell-Smith loop
+	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	character(:),allocatable :: dir, output_path
 
     call system_clock(start_time)
@@ -53,7 +53,8 @@ subroutine run_model(projectname, calib_name, welfare)
     syserr = system('mkdir '//output_path) ! Creates directory for output files
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
-    call solve_meanshock(coeffs, ms_grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
+    allocate(simvars(1)) ! only one core used for mean shock
+    call solve_meanshock(coeffs, ms_grids, policies, simvars(1), lifecycles, Phi, xgrid_ms, value, err, output_path)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
@@ -61,9 +62,10 @@ subroutine run_model(projectname, calib_name, welfare)
     call CheckPhi(Phi,output_path) ! writes errors to file
     if (.not. partial_equilibrium) then
         syserr = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
-        call SaveUnformatted(Phi, ms_grids, simvars%pens(1))
+        call SaveUnformatted(Phi, ms_grids, simvars(1)%pens(1))
     endif
     call save_and_plot_results(dir, ms_grids, err)
+    deallocate(simvars)
     print*, ' '
 
     if (scale_AR == -1.0) then
@@ -96,10 +98,13 @@ subroutine run_model(projectname, calib_name, welfare)
     else
         print*,'- main: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
-        ! realizations of aggregate shock z for simulation (keep constant over all simulations)
+        allocate(simvars(8)) ! change literal!!!!!!!!!!
         call AllocateType(simvars,nt)
-        simvars%z     = MarkovChain(pi_z,nt, seed=seed)
-        simvars%K(1)  = ms_grids%k(1) ! starting value for simulation
+        call random_seed(put=seed) ! so that same sequence for different experiments
+        do i=1,size(simvars)
+            simvars(i)%z     = MarkovChain(pi_z,nt)
+            simvars(i)%K(1)  = ms_grids%k(1) ! starting value for simulation
+        enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
         coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
         grids  = MakeGrid(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)

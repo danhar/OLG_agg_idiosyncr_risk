@@ -34,11 +34,9 @@ module types
     end interface DeallocateType
 
 contains
-    pure subroutine allocate_simvars(simvars,t)
-        type(tSimvars), intent(inout)  :: simvars
+    elemental subroutine allocate_simvars(simvars,t)
+        type(tSimvars), intent(out)  :: simvars
         integer,    intent(in)      :: t
-
-        call deallocate_simvars(simvars)
 
         allocate(simvars%z(t), simvars%Phi_1(t), simvars%Phi_nx(t), simvars%err_aggr(t), simvars%err_income(t))
         allocate(simvars%K(t+1),simvars%mu(t), simvars%output(t), simvars%stock(t), simvars%bonds(t), simvars%invest(t), simvars%C(t), simvars%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1

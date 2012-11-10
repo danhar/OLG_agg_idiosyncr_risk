@@ -133,7 +133,7 @@ contains
         real(dp) ,parameter :: coef_k2_init  = 0.95_dp ! could delete this
         real(dp) ,parameter :: coef_mu3_init = 0.70_dp
         integer             :: io_err
-        type(tSimvars)      :: simvars_old
+        type(tSimvars) ,allocatable :: simvars_old(:)
 
         allocate(coeffs%k(n_coeffs,nz), coeffs%mu(n_coeffs,nz), coeffs%r_squared(2,nz))
         coeffs%r_squared = 0.0
@@ -311,20 +311,27 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
 
     subroutine ReadUnformatted_simvars(simvars, err)
         use types      ,only         : tSimvars, AllocateType
-        type(tSimvars) ,intent(out) :: simvars
+        type(tSimvars) ,intent(out), allocatable :: simvars(:)
         integer        ,intent(out) :: err
-        integer                     :: nt
+        integer                     :: i
+
+        open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted')
+        read(55) i
+        close(55)
+        allocate(simvars(i))
 
         open(55,file='model_input/last_results/nt.unformatted',form='unformatted',iostat=err,action='read')
-        read(55) nt
+        read(55) i
         close(55)
         if (err/=0) return
 !nt      = 5000
-        call AllocateType(simvars,nt)
+        call AllocateType(simvars,i)
 
-        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',iostat=err,action='read')
-        read(55,iostat=err) simvars%z, simvars%K, simvars%mu, simvars%B, simvars%C, simvars%Phi_1, simvars%Phi_nx, simvars%err_aggr, &
-        simvars%err_income, simvars%r, simvars%rf, simvars%wage, simvars%pens, simvars%tau, simvars%welf, simvars%err_K, simvars%err_mu
+        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',action='read')
+        do i=1,size(simvars)
+            read(55) simvars(i)%z, simvars(i)%K, simvars(i)%mu, simvars(i)%B, simvars(i)%C, simvars(i)%Phi_1, simvars(i)%Phi_nx, simvars(i)%err_aggr, &
+                     simvars(i)%err_income, simvars(i)%r, simvars(i)%rf, simvars(i)%wage, simvars(i)%pens, simvars(i)%tau, simvars(i)%welf, simvars(i)%bequests, simvars(i)%err_K, simvars(i)%err_mu
+        enddo
         close(55)
     end subroutine ReadUnformatted_simvars
 !-------------------------------------------------------------------------------

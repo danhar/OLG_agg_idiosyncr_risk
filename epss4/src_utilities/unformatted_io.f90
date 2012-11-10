@@ -65,7 +65,8 @@ contains
     subroutine SaveUnformatted_ksvars(grids, coeffs, simvars)
         type(tAggGrids) ,intent(in) :: grids
         type(tCoeffs)   ,intent(in) :: coeffs
-        type(tSimvars)  ,intent(in) :: simvars
+        type(tSimvars)  ,intent(in) :: simvars(:)
+        integer :: i
 
         open(55,file='model_input/last_results/grids_ge.unformatted',form='unformatted')
         write(55) grids%k, grids%mu
@@ -76,39 +77,54 @@ contains
         close(55)
 
         open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted')
-        write(55) simvars%z, simvars%K, simvars%mu, simvars%B, simvars%C, simvars%Phi_1, simvars%Phi_nx, simvars%err_aggr, &
-        simvars%err_income, simvars%r, simvars%rf, simvars%wage, simvars%pens, simvars%tau, simvars%welf, simvars%bequests, simvars%err_K, simvars%err_mu
+        ! Could I make this elemental instead of the do-loop? or use standard derived type IO
+        do i=1,size(simvars)
+            write(55) simvars(i)%z, simvars(i)%K, simvars(i)%mu, simvars(i)%B, simvars(i)%C, simvars(i)%Phi_1, simvars(i)%Phi_nx, simvars(i)%err_aggr, &
+                      simvars(i)%err_income, simvars(i)%r, simvars(i)%rf, simvars(i)%wage, simvars(i)%pens, simvars(i)%tau, simvars(i)%welf, simvars(i)%bequests, simvars(i)%err_K, simvars(i)%err_mu
+        enddo
         close(55)
 
         open(55,file='model_input/last_results/nt.unformatted',form='unformatted')
-        write(55) size(simvars%z)
+        write(55) size(simvars(1)%z)
         close(55)
 
+        open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted')
+        write(55) size(simvars)
+        close(55)
     end subroutine SaveUnformatted_ksvars
 
     subroutine ReadUnformatted_ksvars(grids, coeffs, simvars)
-        use params_mod, only: nk, nmu, nt, n_coeffs, nz
+        use params_mod  ,only: nk, nmu, n_coeffs, nz
         type(tAggGrids) ,intent(out) :: grids
         type(tCoeffs)   ,intent(out) :: coeffs
-        type(tSimvars)  ,intent(out) :: simvars
+        type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
+        integer :: i
 
         call AllocateType(grids,nk,nmu)
         open(55,file='model_input/last_results/grids_ge.unformatted',form='unformatted',action='read')
         read(55) grids%k, grids%mu
         close(55)
 
-        if (allocated(coeffs%k)) deallocate(coeffs%k)        ! Should make an AllocateType like for the others
-        if (allocated(coeffs%mu)) deallocate(coeffs%mu)
-        if (allocated(coeffs%r_squared)) deallocate(coeffs%r_squared)
         allocate(coeffs%k(n_coeffs,nz), coeffs%mu(n_coeffs,nz), coeffs%r_squared(2,nz))
         open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted',action='read')
         read(55) coeffs%k, coeffs%mu
         close(55)
 
-        call AllocateType(simvars,nt)
+        open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted')
+        read(55) i
+        close(55)
+        allocate(simvars(i))
+
+        open(55,file='model_input/last_results/nt.unformatted',form='unformatted')
+        read(55) i
+        close(55)
+        call AllocateType(simvars,i)
+
         open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',action='read')
-        read(55) simvars%z, simvars%K, simvars%mu, simvars%B, simvars%C, simvars%Phi_1, simvars%Phi_nx, simvars%err_aggr, &
-        simvars%err_income, simvars%r, simvars%rf, simvars%wage, simvars%pens, simvars%tau, simvars%welf, simvars%bequests, simvars%err_K, simvars%err_mu
+        do i=1,size(simvars)
+            read(55) simvars(i)%z, simvars(i)%K, simvars(i)%mu, simvars(i)%B, simvars(i)%C, simvars(i)%Phi_1, simvars(i)%Phi_nx, simvars(i)%err_aggr, &
+                     simvars(i)%err_income, simvars(i)%r, simvars(i)%rf, simvars(i)%wage, simvars(i)%pens, simvars(i)%tau, simvars(i)%welf, simvars(i)%bequests, simvars(i)%err_K, simvars(i)%err_mu
+        enddo
         close(55)
     end subroutine ReadUnformatted_ksvars
 

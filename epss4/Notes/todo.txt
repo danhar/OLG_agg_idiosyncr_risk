@@ -3,6 +3,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - parallelize simulation
 
+- make simvars class and coeffs class. see unformatted_io and laws_of_motion
+
 - add calibration routine
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu

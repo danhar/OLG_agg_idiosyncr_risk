@@ -31,7 +31,7 @@ contains
         type(tAggGrids) ,intent(in)    :: grids
         character(len=*),intent(in)    :: projectname, calib_name, output_path
         type(tCoeffs)   ,intent(inout) :: coeffs
-        type(tSimvars)  ,intent(inout) :: simvars
+        type(tSimvars)  ,intent(inout) :: simvars(:)
         real(dp)        ,intent(inout) :: Phi(:,:,:)
         real(dp)        ,intent(in)    :: xgrid_ms(:,:,:) ! Could remove if Phi was derived type carrying its own grid.
         type(tPolicies) ,intent(out)   :: policies
@@ -142,7 +142,7 @@ contains
         type(tCoeffs)   ,intent(in) :: coeffs, coeffs_old
         type(tAggGrids) ,intent(in) :: grids
         character(len=*),intent(in) :: calib_name, projectname
-        type(tSimvars)  ,intent(in) :: simvars
+        type(tSimvars)  ,intent(in) :: simvars(:)
         real(dp)        ,intent(in) :: Phi(:,:,:)
         type(tPolicies) ,intent(in) :: policies
         type(tLifecycle),intent(in) :: lifecycles
