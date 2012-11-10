@@ -98,7 +98,7 @@ subroutine run_model(projectname, calib_name, welfare)
     else
         print*,'- main: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
-        allocate(simvars(8)) ! change literal!!!!!!!!!!
+        allocate(simvars(1)) ! change literal!!!!!!!!!!
         call AllocateType(simvars,nt)
         call random_seed(put=seed) ! so that same sequence for different experiments
         do i=1,size(simvars)

@@ -79,6 +79,7 @@ contains
         function krusellsmith(coeffvec) result(distance)
             ! Here we first solve for the policyfunctions, then simulate, then update the regression coefficients.
             ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
+            use types                 ,only: average
             use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression
@@ -89,7 +90,9 @@ contains
             real(dp), dimension(size(coeffvec)):: distance
             type(tPolicies) :: pol_newx    ! if (exogenous_xgrid) then this will hold interpolated policies
             type(tCoeffs)   :: coeffs_old, coeff_dif
+            type(tLifecycle) :: lifecycles_array(size(simvars))
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:)
+            integer         :: i
 
             coeffs = MakeType(coeffvec, normalize_coeffs)
             it = it+1
@@ -106,12 +109,21 @@ contains
                 xgrid_mean_old = xgrid_mean_new ! Would be nicer to have a derived type Phi which carries its own xgrid.
                 xgrid_mean_new = sum(pol_newx%xgrid(:,:,1,:,:,1),4)/size(pol_newx%xgrid,5) ! only an approximation of the grid over which Phi is defined
                 call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
-
-                call simulate(pol_newx, val_newx, grids, simvars, Phi, lifecycles)
+                !OMP PARALLEL DO
+                do i=1,size(simvars)
+                    call simulate(pol_newx, val_newx, grids, simvars(i), Phi, lifecycles_array(i))
+                enddo
+                !END OMP PARALLEL DO
+                lifecycles=average(lifecycles_array)
             else
                 ! In this case, we simultaneously solve for the rf(t+1) (actually the mu(t+1)) and the corresponding xgrid(since it depends on mu).
                 ! That is very costly, so we do not refine xgrid. While more correct theoretically, the coarse xgrid makes the solution less precise.
-                call simulate(policies, value, grids, simvars, Phi, lifecycles)
+                !OMP PARALLEL DO
+                do i=1,size(simvars)
+                    call simulate(policies, value, grids, simvars(i), Phi, lifecycles_array(i))
+                enddo
+                !END OMP PARALLEL DO
+                lifecycles=average(lifecycles_array)
             endif
             call print_error_msg(simvars)
 

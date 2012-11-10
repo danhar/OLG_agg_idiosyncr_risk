@@ -341,13 +341,13 @@ pure subroutine Regression(simvars,coeffs)
     use types        ,only: tSimvars
     use MKL95_LAPACK ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
 
-    type(tSimvars)           ,intent(in)   :: simvars
+    type(tSimvars)           ,intent(in)   :: simvars(:)
     type(tCoeffs)            ,intent(inout):: coeffs   ! inout coz some coeffs might not be updated
     real(dp) ,dimension(:,:) ,allocatable  :: cov_k, cov_mu  ! covariates, rhs
     real(dp) ,dimension(:) ,allocatable    :: kp, mup              ! lhs
     real(dp) ,dimension(2) :: residual_sum_of_squares, total_sum_of_squares
     real(dp)               :: mean
-    integer                :: n_covars, zc, n_zc, n_zpc, info
+    integer                :: n_covars, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i
     logical, parameter :: use_gelsy = .false. ! instead of using gels (which had an error in Intel Composer XE 2013 original release)
 
     n_covars = size(coeffs%k,1)
@@ -357,38 +357,40 @@ pure subroutine Regression(simvars,coeffs)
             n_zc = nt-t_scrap
             n_zpc = n_zc
 
-            allocate(cov_k (n_zc,n_covars), kp (n_zc))
-            allocate(cov_mu(n_zc,n_covars), mup(n_zc))
+            allocate(cov_k (sum(n_zc), n_covars), kp (sum(n_zc) ))
+            allocate(cov_mu(sum(n_zpc),n_covars), mup(sum(n_zpc)))
             cov_k(:,1)  = 1.0
-            cov_k(:,2)  = simvars%K (t_scrap:nt-1)
+            cov_k(:,2)  = [(simvars(i)%K (t_scrap:nt-1), i=1,size(simvars))]
             if (loms_in_logs) cov_k(:,2) = log(cov_k(:,2))
             if (n_covars > 2) cov_k(:,3) = cov_k(:,2)**2
-            kp          = simvars%K (t_scrap+1:nt)
+            kp          = [(simvars(i)%K (t_scrap+1:nt), i=1,size(simvars))]
 
             cov_mu(:,1) = 1.0
-            cov_mu(:,2) = simvars%K (t_scrap+1:nt)
+            cov_mu(:,2) = [(simvars(i)%K (t_scrap+1:nt), i=1,size(simvars))]
             if (loms_in_logs) cov_mu(:,2) = log(cov_mu(:,2))
             if (n_covars > 2) cov_mu(:,3) = cov_mu(:,2)**2 !simvars%mu(t_scrap:nt-1)
-            mup        = simvars%mu(t_scrap+1:nt)
+            mup         = [(simvars(i)%mu(t_scrap+1:nt), i=1,size(simvars))]
         else
-            n_zc   = count(simvars%z(t_scrap:nt-1)==zc)
-            n_zpc  = count(simvars%z(t_scrap+1:nt)==zc)
-            if (n_zc < 2) cycle     ! coeffs stay the same
+            do i=1,size(simvars)
+                n_zc(i)   = count(simvars(i)%z(t_scrap:nt-1)==zc)
+                n_zpc(i)  = count(simvars(i)%z(t_scrap+1:nt)==zc)
+            enddo
+            if (sum(n_zc) < 2) cycle     ! coeffs stay the same
 
-            allocate(cov_k (n_zc, n_covars), kp (n_zc ))
-            allocate(cov_mu(n_zpc,n_covars), mup(n_zpc))
+            allocate(cov_k (sum(n_zc), n_covars), kp (sum(n_zc) ))
+            allocate(cov_mu(sum(n_zpc),n_covars), mup(sum(n_zpc)))
 
             cov_k(:,1)  = 1.0
-            cov_k(:,2)  = pack(simvars%K (t_scrap:nt-1), simvars%z(t_scrap:nt-1)==zc)
+            cov_k(:,2)  = [(pack(simvars(i)%K (t_scrap:nt-1), simvars(i)%z(t_scrap:nt-1)==zc), i=1,size(simvars))]
             if (loms_in_logs) cov_k (:,2) = log(cov_k (:,2))
             if (n_covars > 2) cov_k(:,3)  = cov_k(:,2)**2
-            kp          = pack(simvars%K (t_scrap+1:nt), simvars%z(t_scrap:nt-1)==zc)
+            kp          = [(pack(simvars(i)%K (t_scrap+1:nt), simvars(i)%z(t_scrap:nt-1)==zc), i=1,size(simvars))]
 
             cov_mu(:,1) = 1.0
-            cov_mu(:,2) = pack(simvars%K (t_scrap+1:nt), simvars%z(t_scrap+1:nt)==zc)
+            cov_mu(:,2) = [(pack(simvars(i)%K (t_scrap+1:nt), simvars(i)%z(t_scrap+1:nt)==zc), i=1,size(simvars))]
             if (loms_in_logs) cov_mu(:,2) = log(cov_mu(:,2))
             if (n_covars > 2) cov_mu(:,3) = cov_mu(:,2)**2 !pack(simvars%mu(t_scrap:nt-1), simvars%z(t_scrap+1:nt)==zc)
-            mup         = pack(simvars%mu(t_scrap+1:nt), simvars%z(t_scrap+1:nt)==zc)
+            mup         = [(pack(simvars(i)%mu(t_scrap+1:nt), simvars(i)%z(t_scrap+1:nt)==zc), i=1,size(simvars))]
         endif
 
         if (loms_in_logs) then
@@ -396,9 +398,9 @@ pure subroutine Regression(simvars,coeffs)
 !            mup           = log(mup)
         endif
 
-        mean = sum(kp) /real(n_zc,dp)
+        mean = sum(kp) /real(sum(n_zc),dp)
         total_sum_of_squares(1) = dot_product((kp -mean), (kp -mean))
-        mean = sum(mup)/real(n_zpc,dp)
+        mean = sum(mup)/real(sum(n_zpc),dp)
         total_sum_of_squares(2) = dot_product((mup-mean), (mup-mean))
 
         if (n_covars == 4) then

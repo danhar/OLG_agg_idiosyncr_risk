@@ -293,19 +293,20 @@ subroutine print_error_msg(simvars)
     use types      ,only: tSimvars
     use kinds      ,only: dp
     use params_mod ,only: nt, t_scrap
-    type(tSimvars) ,intent(in) :: simvars
-    integer                    :: count_err
+    type(tSimvars) ,intent(in) :: simvars(:)
+    integer                    :: count_err, i, n
     real(dp)                   :: perc_err
 
-    if (any(simvars%err_K)) then
-        count_err = count(simvars%err_K(t_scrap+1:))
-        perc_err  = count_err/real((nt-t_scrap),dp)*100_dp
+    n = size(simvars)
+    if (any([(simvars(i)%err_K ,i=1,n)])) then
+        count_err = count([(simvars(i)%err_K(t_scrap+1:) ,i=1,n)])
+        perc_err  = count_err/real((nt-t_scrap)*n,dp)*100_dp
         print 214, ' Warning: simulate_economy: # K  not in grid =', count_err,'  (',perc_err,'%)'
     endif
 
-    if (any(simvars%err_mu)) then
-        count_err = count(simvars%err_mu(t_scrap+1:))
-        perc_err  = real(count_err,dp)/real((nt-t_scrap),dp)*100_dp
+    if (any([(simvars(i)%err_mu ,i=1,n)])) then
+        count_err = count([(simvars(i)%err_mu(t_scrap+1:) ,i=1,n)])
+        perc_err  = real(count_err,dp)/real((nt-t_scrap)*n,dp)*100_dp
         print 214, ' Warning: simulate_economy: # mu not in grid =', count_err,'  (',perc_err,'%)'
     endif
 
