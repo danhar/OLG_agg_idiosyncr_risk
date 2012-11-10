@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='014_check_DB'
-BUILD=Build_Parallel_Optim # Parallel_Debug # Optimmax #    
+thisrun='014_check2DB'
+BUILD=Build_Parallel_Debug #Parallel_Optim #  Optimmax #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

@@ -92,8 +92,9 @@ contains
     function ms_equilibrium(msvars) result(distance)
     ! Solve for the MSE, i.e. where k'=k and mu'=mu given that all realizations are at the mean_z.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
-        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio
+        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
+        use aggregate_grids        ,only: AllocateType
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
         use interpolate_xgrid      ,only: InterpolateXgrid
@@ -102,35 +103,39 @@ contains
         implicit none
         real(dp) ,dimension(:),intent(in) :: msvars             ! k_ms, mu_ms
         real(dp) ,dimension(size(msvars)) :: distance           ! excess demands
-        type(tPolicies) :: policies
+        type(tPolicies) :: policies, fine
+        type(tAggGrids) :: grid
         type(tErrors)   :: errs
-        real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: value
+        real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: value, v_fine
         real(dp) ,dimension(:,:,:) ,allocatable :: apgrid_ms, stocks_ms, xgrid_ms, Phi ! mean shock projections and distribution
         real(dp)                          :: netwage_ms, pens_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
         integer                           :: i
 
-        grids%k  = msvars(1)
-        grids%mu = msvars(2)
+        call AllocateType(grid, size(grids%k), size(grids%mu))
+        grid%k  = msvars(1)
+        grid%mu = msvars(2)
 
-        call olg_backwards_recursion(policies,coeffs, grids, value, errs)
+        call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
-        allocate(apgrid_ms(size(policies%xgrid,1),size(policies%xgrid,2),size(policies%xgrid,4)), &
-                 stocks_ms(size(policies%xgrid,1),size(policies%xgrid,2),size(policies%xgrid,4)), &
-                 xgrid_ms (size(policies%xgrid,1),size(policies%xgrid,2),size(policies%xgrid,4))  )
+        call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
 
-        ! Projection of policies / grids on mean shock
+        allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+                 stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
+                 xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
+
+        ! Projection of policies / grid on mean shock
         xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
-        do i=1,size(policies%xgrid,3)
-            xgrid_ms  = xgrid_ms  + w(i)* policies%xgrid (:,:,i,:,1,1)
-            apgrid_ms = apgrid_ms + w(i)* policies%apgrid(:,:,i,:,1,1)
-            stocks_ms = stocks_ms + w(i)* policies%stocks(:,:,i,:,1,1)
+        do i=1,size(fine%xgrid,3)
+            xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)
+            apgrid_ms = apgrid_ms + w(i)* fine%apgrid(:,:,i,:,1,1)
+            stocks_ms = stocks_ms + w(i)* fine%stocks(:,:,i,:,1,1)
         enddo
 
         ! Prices in mean shock path
-        netwage_ms    = f_netwage (grids%k(1), mean_zeta)
-        pens_ms       = f_pensions(grids%k(1), mean_zeta)
-        rf_ms         = f_riskfree_rate(grids%k(1),grids%mu(1),stat_dist_z)
-        r_ms          = f_stock_return(grids%k(1), mean_zeta, mean_delta, rf_ms)
+        netwage_ms    = f_netwage (grid%k(1), mean_zeta)
+        pens_ms       = f_pensions(grid%k(1), mean_zeta)
+        rf_ms         = f_riskfree_rate(grid%k(1),grid%mu(1),stat_dist_z)
+        r_ms          = f_stock_return(grid%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
         Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
