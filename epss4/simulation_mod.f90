@@ -1,4 +1,4 @@
-module simulate_economy
+module simulation_mod
     implicit none
 contains
 !-------------------------------------------------------------------------------
@@ -313,4 +313,4 @@ subroutine print_error_msg(simvars)
 
 end subroutine print_error_msg
 
-end module simulate_economy
+end module simulation_mod

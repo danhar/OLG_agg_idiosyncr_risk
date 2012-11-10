@@ -82,7 +82,7 @@ contains
             use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression
-            use simulate_economy      ,only: simulate, print_error_msg
+            use simulation_mod        ,only: simulate, print_error_msg
             use interpolate_xgrid
 
             real(dp), dimension(:), intent(in) :: coeffvec
