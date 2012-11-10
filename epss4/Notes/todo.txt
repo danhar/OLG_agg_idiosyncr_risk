@@ -36,7 +36,8 @@ For example, simvars should read and write output unformatted also, see  subrout
 - make params_mod readable by Matlab and read it in
 - bequests to the young
 - subfolder src_classes
-- make nx, n_eta, nz ... private in params_mod? nx should be relatively easy!
+- make nx, n_eta, nz ... private in params_mod? nx should be relatively easy! 
+    I think better: put into policies! But that might interfere when I define the type as a tuple of scalars and then use arrays of the type... but that's far into the future 
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow

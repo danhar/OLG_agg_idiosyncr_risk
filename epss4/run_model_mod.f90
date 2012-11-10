@@ -12,7 +12,7 @@ subroutine run_model(projectname, calib_name, welfare)
     use laws_of_motion    ,only: tCoeffs, Initialize, MakeVector, MakeType
 	use markovchain_mod   ,only: MarkovChain
 	use distribution      ,only: CheckPhi
-	use meanshock_wrapper ,only: SolveMeanShock
+	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, save_all_iterations, & ! logicals
@@ -53,7 +53,7 @@ subroutine run_model(projectname, calib_name, welfare)
     syserr = system('mkdir '//output_path) ! Creates directory for output files
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
-    call SolveMeanShock(coeffs, ms_grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
+    call solve_meanshock(coeffs, ms_grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
