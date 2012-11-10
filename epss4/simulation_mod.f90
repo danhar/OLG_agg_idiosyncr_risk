@@ -3,11 +3,11 @@ module simulation_mod
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - subroutine simulate(policies, agg_grid, simvars, Phi, lc)
+! - pure subroutine simulate(policies, agg_grid, simvars, Phi, lc)
 ! - subroutine print_error_msg_sim(simvars)
 !-------------------------------------------------------------------------------
 
-subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
+pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
     use types           ,only: tSimvars, tLifecycle, AllocateType, set_number

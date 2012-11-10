@@ -17,7 +17,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs, Initialize
     use error_class
-    use params_mod      ,only: n_coeffs,nj,nx,n_eta,alpha,etagrid,stat_dist_z, partial_equilibrium
+    use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium
     use income
 	use sub_broyden
     use fun_locate
@@ -219,7 +219,7 @@ contains
         use partial_sorting     ! function valnth
 
         type(tSimvars) ,intent(out) :: simvars
-        real(dp) ,dimension(nx,n_eta,nj):: r_pf
+        real(dp) ,allocatable       :: r_pf(:,:,:)
         integer                     :: i
 
         call AllocateType(simvars,nz+1)   ! allocate all simulation variables
@@ -286,13 +286,13 @@ contains
         use params_mod   ,only        :  g
         type(tLifecycle) ,intent(out) :: lifecycles
         integer                       :: jc
-        call AllocateType(lifecycles,nj)
+        call AllocateType(lifecycles,size(apgrid_ms,3))
 
         lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
         lifecycles%cons    = sum(sum((xgrid_ms-apgrid_ms) * Phi,1),1)
         lifecycles%stock   = sum(sum(stocks_ms * Phi,1),1)
         lifecycles%return  = sum(sum(Phi*sign(1.0,apgrid_ms)*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
-        do jc=1,nj
+        do jc=1,size(apgrid_ms,3)
             lifecycles%cons_var(jc)  = sum((((xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%cons(jc)))**2 * Phi(:,:,jc))
             lifecycles%return_var(jc)= sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * Phi(:,:,jc))
         enddo
