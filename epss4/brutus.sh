@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='012_xgrid_cor3'
-BUILD=Build_Parallel_Optim  #Parallel_Debug #Optimmax #    
+thisrun='012_xgrid_cor3DB'
+BUILD=Build_Parallel_Debug #Parallel_Optim  #Optimmax #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

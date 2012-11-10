@@ -8,6 +8,7 @@
                     think is a worse approach than the getter method (with 'global' module variables), or I create a subroutine which duplicates everything but has all
                     return (intent(out)) arguments. That would make everything pure. And in the pure function (not the subroutine), I do not need the InterpolateXgrid, so dont need
                     'fine' grid policies! Also, I can make sure that the coarse policies are returned.                
+- simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
 - move value into policies
 - make interpolateXgrid a (type-bound?) function
 - parallelize simulation
@@ -30,15 +31,15 @@ For example, simvars should read and write output unformatted also, see  subrout
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- simulate also in mean shock? Just for comparison. For this, see src_unused_code:sub_simulate_mspe.f90u
+- splines to interpolate stocks and bonds? and consumption in euler equations?
+- implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
+- make params_mod readable by Matlab and read it in
 - bequests to the young
 - subfolder src_classes
-- make params_mod readable by Matlab and read it in
 - make nx, n_eta, nz ... private in params_mod? nx should be relatively easy!
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
     This should help a lot to avoid the problem that either kappa is not found in hh solution, or mu hits bounds in simulation.
     But then remove if(rfp < rp(1)) in policyfunctions:calc_vars_tomorrow
-- implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
 - Instead of having tPolicies with allocatable components, make tPolicies a tuple (of scalars) and then define arrays of tPolicies. Should work much better, also for 
 adding, interpolating, calling routines, having less dimensions. But have to think it through, not clear how interpolation and other type-bound procedures could be called.
 - use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
@@ -50,7 +51,6 @@ adding, interpolating, calling routines, having less dimensions. But have to thi
     -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
 - arithmetic operations on tPolicies? Maybe not needed.
 - pol_zk = Interpolate(pol,dim=3,w) is already started. Should unify with the external interpolation in interplate_xgrid.
-- splines to interpolate stocks and bonds? and consumption in euler equations?
 - record and report stats for gross wages (important when def benefits) (in simulations and save_results)
 - correct eigenvalue calc of stationary distribution (in module markov_station_distr, see also params_mod:CheckParams), check codes/Fortran/Bewley_by_Karibzhanov/source/toolbox   
 - remove a lot of the use params_mod, in particular in the specification part of a module (e.g. krusell_smith.f90). Instead, use sourced allocation and the like.
