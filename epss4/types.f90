@@ -4,7 +4,7 @@ module types
     use kinds      ,only: dp
     implicit none
 
-    private allocate_simvars, deallocate_simvars
+    private allocate_simvars, deallocate_simvars, cons_grow, delta, zeta, K_Y, ex_ret, bequest_rate
 
     type tSimvars
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
@@ -12,6 +12,17 @@ module types
                 K, output, stock, bonds, B, invest, mu, C, Phi_1, Phi_nx, err_aggr, err_income, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests ! prices
         logical,  dimension(:), allocatable :: err_K, err_mu
+
+    contains
+        procedure, private :: get_real
+        procedure, private :: get_logical
+        generic :: get => get_real !, get_logical
+        procedure :: cons_grow
+        procedure :: zeta
+        procedure :: delta
+        procedure :: K_Y
+        procedure :: ex_ret
+        procedure :: bequest_rate
     end type tSimvars
 
     type tLifecycle
@@ -82,6 +93,257 @@ contains
         if (allocated(simvars%err_mu)) deallocate(simvars%err_mu)
 
     end subroutine deallocate_simvars
+
+    pure function get_real(this,varname, lb_o, ub_o) result(get)
+        real(dp) ,allocatable         :: get(:)
+        class(tSimvars)  ,intent(in)  :: this
+        character(len=*) ,intent(in)  :: varname
+        integer, intent(in) ,optional :: lb_o, ub_o ! lower bound, upper bound
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%z)
+        endif
+
+        select case (varname)
+        case ('K','k')
+            if (.not.present(ub_o)) ub = size(this%k)
+            get = this%k(lb:ub)
+        case ('mu')
+            get = this%mu(lb:ub)
+        case ('output')
+            get = this%output(lb:ub)
+        case ('stock')
+            get = this%stock(lb:ub)
+        case ('bonds')
+            get = this%bonds(lb:ub)
+        case ('B')
+            get = this%B(lb:ub)
+        case ('invest')
+            get = this%invest(lb:ub)
+        case ('C')
+            get = this%C(lb:ub)
+        case ('Phi_1')
+            get = this%Phi_1(lb:ub)
+        case ('Phi_nx')
+            get = this%Phi_nx(lb:ub)
+        case ('err_aggr')
+            ! Att: absolute value
+            get = abs(this%err_aggr(lb:ub))
+        case ('err_income')
+            ! Att: absolute value
+            get = abs(this%err_income(lb:ub))
+        case ('r')
+            get = this%r(lb:ub)
+        case ('rf')
+            if (.not.present(ub_o)) ub = size(this%rf)
+            get = this%rf(lb:ub)
+        case ('rpf_med')
+            get = this%r_pf_median(lb:ub)
+        case ('rpf_kapm')
+            get = this%r_pf_kappa_med(lb:ub)
+        case ('wage')
+            get = this%wage(lb:ub)
+        case ('pension')
+            get = this%pens(lb:ub)
+        case ('tau')
+            get = this%tau(lb:ub)
+        case ('welfare')
+            get = this%welf(lb:ub)
+        case ('bequests')
+            get = this%bequests(lb:ub)
+        case ('ex_ret')
+            get = this%ex_ret(lb,ub)
+        case ('K_Y')
+            get = this%K_Y(lb,ub)
+        case ('bequests,%')
+            get = this%bequest_rate(lb,ub)
+        case ('cons_grow')
+            get = this%cons_grow(lb,ub)
+        case ('zeta')
+            get = this%zeta(lb,ub)
+        case ('delta')
+            get = this%delta(lb,ub)
+        end select
+    end function get_real
+
+    pure function get_logical(this,varname, lb_o, ub_o) result(get)
+    ! Not used at the moment
+        logical ,allocatable         :: get(:)
+        class(tSimvars)  ,intent(in)  :: this
+        character(len=*) ,intent(in)  :: varname
+        integer, intent(in) ,optional :: lb_o, ub_o ! lower bound, upper bound
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%err_K)
+        endif
+
+        select case(varname)
+        case ('err_K','err_k')
+            get = this%err_K(lb:ub)
+        case ('err_mu')
+            get = this%err_mu(lb:ub)
+        end select
+
+    end function get_logical
+
+    pure function cons_grow(this,lb_o,ub_o)
+        real(dp), allocatable :: cons_grow(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%C)
+        endif
+
+        cons_grow = this%C(lb+1:ub)/this%C(lb:ub-1) -1.0
+    end function cons_grow
+
+    pure function K_Y(this,lb_o,ub_o)
+        ! Capital-output-ratio
+        use params_mod ,only: alpha
+        real(dp), allocatable :: K_Y(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%output)
+        endif
+
+        K_Y = this%K(lb:ub)**(1.0-alpha)
+    end function K_Y
+
+    pure function ex_ret(this,lb_o,ub_o)
+        ! Excess returns
+        real(dp), allocatable :: ex_ret(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%r)
+        endif
+
+        ex_ret = this%r(lb:ub) - this%rf(lb:ub)
+    end function ex_ret
+
+    pure function bequest_rate(this,lb_o,ub_o)
+        use params_mod ,only: alpha
+        real(dp), allocatable :: bequest_rate(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%r)
+        endif
+
+        bequest_rate = this%bequests(lb:ub)/this%K(lb:ub)**alpha
+    end function bequest_rate
+
+    pure function zeta(this,lb_o,ub_o)
+        use params_mod, only: zetaval => zeta
+        real(dp), allocatable :: zeta(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%z)
+        endif
+
+        if (size(this%z) <= size(zetaval)+2) then
+            zeta  = [1.0_dp ,  zetaval(this%z(lb:))] !mean shock equilibrium
+        else
+            zeta = zetaval(this%z(lb:ub))
+        endif
+    end function zeta
+
+    pure function delta(this,lb_o,ub_o)
+        use params_mod, only: deltaval => delta
+        real(dp), allocatable :: delta(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%z)
+        endif
+
+        if (size(this%z) <= size(deltaval)+2) then !mean shock equilibrium
+            delta = [sum(deltaval)/size(deltaval) , deltaval(this%z(lb:))]
+        else
+            delta = deltaval(this%z(lb:ub))
+        endif
+    end function delta
+
 
     pure subroutine allocate_lifecycle(lc,nj)
         class(tLifecycle), intent(inout)  :: lc

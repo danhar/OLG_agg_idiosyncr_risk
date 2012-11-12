@@ -20,7 +20,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir
 
-    type(tSimvars)   :: simvars ! (kt, mut, bt,...), first element contains starting values
+    type(tSimvars)   :: simvars(:) ! (kt, mut, bt,...), first element contains starting values
     type(tCoeffs)    :: coeffs
 	type(tAggGrids)  :: grids   ! grids for aggregate states k and mu
     type(tLifecycle) :: lc      ! lifecycle profiles
@@ -32,7 +32,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
-    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cg, netwage, pens, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, K_Y, welfare, &
+    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
     real(dp) :: percent_err_K, percent_err_mu, cov_w_r, cov_zeta_r, cov_zeta_w, cov_output_r, cov_output_w, cov_output_zeta, cov_inv_r, cov_inv_w, cov_inv_zeta, cov_inv_output, &
                 cov_cons_r, cov_cons_w, cov_cons_zeta, cov_cons_output, cov_cons_invest, cov_cons_ex_ret, cov_cg_r, cov_cg_w, cov_cg_zeta, cov_cg_output, cov_cg_invest, cov_cg_ex_ret, &
@@ -59,57 +59,36 @@ contains
 ! - subroutine write_output_files()
 !-------------------------------------------------------------------------------
     subroutine calc_stats()
-	    use params_mod, only: alpha, nt, t_scrap
-	    use income, only: zetaval => zeta, deltaval => delta
-	    real(dp), dimension(:), allocatable :: simvars_zeta, simvars_delta
-	    real(dp), dimension(size(simvars%C)-1) :: C_growth
-	    real(dp), dimension(size(simvars%r))   :: excess_return
 	    integer  :: nk,nmu, xc, jc, lb
 
-        associate(err_mu => simvars%err_mu, err_k => simvars%err_K)
+        ! Assign character name and calculate the statistics
+        K=tStats('K'); call K%calc_stats(simvars)
+        mu=tStats('mu'); call mu%calc_stats(simvars)
+        ex_ret=tStats('ex_ret'); call ex_ret%calc_stats(simvars)
+        r=tStats('r'); call r%calc_stats(simvars)
+        rf=tStats('rf'); call rf%calc_stats(simvars)
+        r_pf_median=tStats('rpf_med'); call r_pf_median%calc_stats(simvars)
+        r_pf_kappa_med=tStats('rpf_kapm'); call r_pf_kappa_med%calc_stats(simvars)
+        output=tStats('output'); call output%calc_stats(simvars)
+        stock=tStats('stock'); call stock%calc_stats(simvars)
+        bonds=tStats('bonds'); call bonds%calc_stats(simvars)
+        invest=tStats('invest'); call invest%calc_stats(simvars)
+        cons=tStats('cons'); call cons%calc_stats(simvars)
+        netwage=tStats('netwage'); call netwage%calc_stats(simvars)
+        pension=tStats('pension'); call pension%calc_stats(simvars)
+        tau=tStats('tau'); call tau%calc_stats(simvars)
+        K_Y=tStats('K_Y'); call K_Y%calc_stats(simvars)
+        welfare=tStats('welfare'); call welfare%calc_stats(simvars)
+        Phi_1=tStats('Phi_1'); call Phi_1%calc_stats(simvars)
+        Phi_nx=tStats('Phi_nx'); call Phi_nx%calc_stats(simvars)
+        err_aggr=tStats('err_aggr'); call err_aggr%calc_stats(simvars)
+        B=tStats('B'); call B%calc_stats(simvars)
+        err_inc=tStats('err_inc'); call err_inc%calc_stats(simvars)
+        bequest_rate=tStats('bequests,%'); call bequest_rate%calc_stats(simvars)
+        cons_grow=tStats('cons_grow'); call cons_grow%calc_stats(simvars)
+        zeta=tStats('zeta'); call zeta%calc_stats(simvars)
+        delta=tStats('delta'); call delta%calc_stats(simvars)
 
-        excess_return = simvars%r - simvars%rf
-
-        call K%calc_stats(simvars%K,   err_mu, err_K)
-        call mu%calc_stats(simvars%mu, err_mu, err_K)
-        call ex_ret%calc_stats(excess_return, err_mu, err_K)
-        call r%calc_stats(simvars%r, err_mu, err_K)
-        call rf%calc_stats(simvars%rf, err_mu, err_K)
-        call r_pf_median%calc_stats(simvars%r_pf_median, err_mu, err_K)
-        call r_pf_kappa_med%calc_stats(simvars%r_pf_kappa_med, err_mu, err_K)
-        call output%calc_stats(simvars%output,   err_mu, err_K)
-        call stock%calc_stats(simvars%stock,   err_mu, err_K)
-        call bonds%calc_stats(simvars%bonds,   err_mu, err_K)
-        call invest%calc_stats(simvars%invest,   err_mu, err_K)
-        call cons%calc_stats(simvars%C,   err_mu, err_K)
-        call netwage%calc_stats(simvars%wage,   err_mu, err_K)
-        call pens%calc_stats(simvars%pens,   err_mu, err_K)
-        call tau%calc_stats(simvars%tau,   err_mu, err_K)
-        call K_Y%calc_stats(simvars%K**(1.0-alpha),   err_mu, err_K)
-        call welfare%calc_stats(simvars%welf,   err_mu, err_K)
-        call Phi_1%calc_stats(simvars%Phi_1,   err_mu, err_K)
-        call Phi_nx%calc_stats(simvars%Phi_nx,   err_mu, err_K)
-        call err_aggr%calc_stats(abs(simvars%err_aggr),   err_mu, err_K)
-        call B%calc_stats(simvars%B,   err_mu, err_K)
-        call err_inc%calc_stats(abs(simvars%err_income),   err_mu, err_K)
-        call bequest_rate%calc_stats(simvars%bequests/simvars%K**alpha,   err_mu, err_K)
-
-        allocate(simvars_zeta(size(simvars%z)))
-        if (dir=='msge' .or. dir=='mspe') then
-            lb = 2
-            C_growth    = 0.0
-            call cg%set_number(0.0_dp)
-            simvars_zeta  = [1.0_dp ,  zetaval(simvars%z(lb:))]
-            simvars_delta = [sum(deltaval)/size(deltaval) , deltaval(simvars%z(lb:))]
-        else
-            lb = t_scrap +1
-            C_growth    = (simvars%C(2:) - simvars%C(1:size(simvars%C)-1))/simvars%C(1:size(simvars%C)-1)
-            call cg%calc_stats(C_growth, err_mu, err_K)
-            simvars_zeta =  zetaval(simvars%z)
-            simvars_delta= deltaval(simvars%z)
-        endif
-        call  zeta%calc_stats(simvars_zeta, err_mu, err_K)
-        call delta%calc_stats(simvars_delta,err_mu, err_K)
 
         cov_w_r         = covariance(simvars%wage,simvars%r,err_mu, err_K)
         cov_zeta_r      = covariance(simvars_zeta,simvars%r,err_mu, err_K)
@@ -198,9 +177,9 @@ contains
     if (prec == 'long') call r_pf_median%write(21,'rpf_med',prec)
     if (prec == 'long') call r_pf_kappa_med%write(21,'rpf_kapm',prec)
     call cons%write(21,'cons',prec)   ! in units of efficient labor, so that stationary
-    call cg%write(21,'cons_grow',prec)
+    call cons_grow%write(21,'cons_grow',prec)
     call netwage%write(21,'netwage',prec)
-    call pens%write(21,'pension',prec)
+    call pension%write(21,'pension',prec)
     call tau%write(21,'tau',prec)
     call zeta%write(21,'zeta',prec)
     call K_Y%write(21,'K_Y',prec)

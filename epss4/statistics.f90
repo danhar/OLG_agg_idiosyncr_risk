@@ -10,8 +10,9 @@ module statistics
         private
         real(dp) :: avg, std, auto, absmin, absmax, cv, & ! these include all realizations with an error
                     avg_exerr, min_exerr, max_exerr       ! these exclude all realizations with an error
+        real(dp), allocatable :: series(:)                ! contains the whole series (over all parallel runs), excluding the t_scrap
         integer  :: namelength=10, digits2display_short=2, digits2display_long=8
-        ! character(:), allocatable: name  ! instantiate with a user-written constructor. but overkill.
+        character(:), allocatable:: name  ! instantiate with a user-written constructor.
     contains
         procedure :: calc_stats => calculate_statistics
         procedure :: write => write_stats
@@ -25,9 +26,13 @@ module statistics
         procedure :: writing_format
     end type tStats
 
+    interface tStats
+        procedure constructor
+    end interface
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
+! - pure function constructor(varname) result (new_stats)
 ! - pure subroutine calculate_statistics(this, series, err_mu, err_K)
 ! - subroutine write_to_file(this, unit, format)
 ! - pure subroutine set_number(this, number)
@@ -40,40 +45,64 @@ contains
 ! - pure real(dp)function Correlation(series1,stats1,series2,stats2)
 !-------------------------------------------------------------------------------
 
-    pure subroutine calculate_statistics(this, series, err_mu, err_K)
-    ! This is a specific type bound procedure
-        use params_mod ,only: t_scrap, nz, stat_dist_z
-        class(tStats)          ,intent(out) :: this
-        real(dp) ,dimension(:) ,intent(in)  :: series
-        logical  ,dimension(:) ,intent(in)  :: err_mu, err_K
-        integer :: lb, n ! lb = lower bound
+    pure function constructor(varname) result (new_stats)
+        character(len=*) ,intent(in)  :: varname
+        type(tStats) :: new_stats
+        new_stats%name = varname
+    end function constructor
 
-        if (size(series)<= nz +2) then
-            lb = 2 ! mean shock
+    pure subroutine calculate_statistics(this, simvars)
+    ! This is a specific type bound procedure
+        use params_mod ,only: t_scrap, stat_dist_z
+        use types      ,only: tSimvars
+        class(tStats)          ,intent(inout) :: this
+        type(tSimvars)         ,intent(in)  :: simvars(:)
+        real(dp) ,allocatable :: seriesp(:)
+        logical  ,allocatable :: err_k(:), err_mu(:)
+        integer :: i, lb, n ! lb = lower bound
+
+!        allocate(var   (size(simvars(1)%get(this%name)),size(simvars)), &
+!                 err_k (size(simvars(1)%err_k)       ,size(simvars)), &
+!                 err_mu(size(simvars(1)%err_mu)      ,size(simvars))  )
+!
+!        do i=1,size(simvars)
+!            var(:,i)    = simvars(i)%get(this%name)
+!            err_k(:,i)  = simvars(i)%err_k
+!            err_mu(:,i) = simvars(i)%err_mu
+!        enddo
+
+
+        if (size(simvars(1)%get(this%name))<= size(stat_dist_z) +2) then
+            lb = 2 ! mean shock equilibrium
         else
             lb = t_scrap+1
         endif
 
-        n = size(series) -(lb-1)
+        this%series = [(simvars(i)%get(this%name,lb) ,i=1, size(simvars))]
+        err_k  = [(simvars(i)%err_k(lb:)      ,i=1, size(simvars))]
+        err_mu = [(simvars(i)%err_mu(lb:)     ,i=1, size(simvars))]
 
-        if (lb ==2) then ! mean shock
-        ! A bit sloppy: _avg are mean shock values, _std deviations from this mean shock
+        n = size(this%series)
+
+        if (lb ==2) then ! mean shock equilibrium
+        ! Mean shock stats are not important. _avg are mean shock values, _std deviations from this mean shock
         ! might be different for arithmetic average or weighted average with stat_dist_z
-            this%avg = series(1)
-            this%std = sqrt(sum(stat_dist_z*(series(lb:)- this%avg)**2))
-            this%absmax = abs(series(1))
-            this%absmin = abs(series(1))
+            seriesp  = simvars(1)%get(this%name,1,1) ! This is only temporary
+            this%avg = seriesp(1)
+            this%std = sqrt(sum(stat_dist_z*(this%series - this%avg)**2))
+            this%absmax = abs(this%avg)
+            this%absmin = abs(this%avg)
             this%avg_exerr = this%avg
             this%max_exerr = this%absmax
             this%max_exerr = this%absmin
         else
-            this%avg = sum(series(lb:))/n
-            this%std = sqrt(sum((series(lb:) - this%avg)**2)/real(n-1,dp)) ! should I rather divide by n?
-            this%absmax = maxval(abs(series(lb:)))
-            this%absmin = minval(abs(series(lb:)))
-            this%avg_exerr = sum(pack(series(lb:),err_mu(lb:) == .false. .and. err_K(lb:) == .false.))/count(err_mu(lb:) == .false. .and. err_K(lb:) == .false.)
-            this%max_exerr = maxval(abs(pack(series(lb:),err_mu(lb:) == .false. .and. err_K(lb:) == .false.)))
-            this%min_exerr = minval(abs(pack(series(lb:),err_mu(lb:) == .false. .and. err_K(lb:) == .false.)))
+            this%avg = sum(this%series)/n
+            this%std = sqrt(sum((this%series - this%avg)**2)/real(n-1,dp)) ! should I rather divide by n?
+            this%absmax = maxval(abs(this%series))
+            this%absmin = minval(abs(this%series))
+            this%avg_exerr = sum(pack(this%series,err_mu == .false. .and. err_K == .false.))/count(err_mu == .false. .and. err_K == .false.)
+            this%max_exerr = maxval(abs(pack(this%series,err_mu == .false. .and. err_K == .false.)))
+            this%min_exerr = minval(abs(pack(this%series,err_mu == .false. .and. err_K == .false.)))
         endif
         if (this%avg == 0.0) then
             ! This happens in particular for pensions if tau = 0.0. Not assigning a NaN helps in debugging.
@@ -85,7 +114,10 @@ contains
         if (this%std == 0.0) then
             this%auto =0.0
         else
-            this%auto = sum((series(lb:size(series)-1)-this%avg)*(series(lb+1:)-this%avg))/(real((n-2),dp)*this%std**2)
+            this%series = [(simvars(i)%get(this%name,lb,size(simvars(1)%get(this%name))-1) ,i=1, size(simvars))]
+            seriesp= [(simvars(i)%get(this%name,lb+1) ,i=1, size(simvars))]
+
+            this%auto = sum((this%series-this%avg)*(seriesp-this%avg))/(real((n-2),dp)*this%std**2)
         endif
     end subroutine calculate_statistics
 
