@@ -15,8 +15,8 @@ module types
 
     contains
         procedure, private :: get_real
-        procedure, private :: get_logical
-        generic :: get => get_real !, get_logical
+        procedure :: get_logical
+        generic   :: get => get_real !, get_logical !compiler bug
         procedure :: cons_grow
         procedure :: zeta
         procedure :: delta
@@ -176,8 +176,7 @@ contains
     end function get_real
 
     pure function get_logical(this,varname, lb_o, ub_o) result(get)
-    ! Not used at the moment
-        logical ,allocatable         :: get(:)
+        logical ,allocatable,dimension(:)         :: get
         class(tSimvars)  ,intent(in)  :: this
         character(len=*) ,intent(in)  :: varname
         integer, intent(in) ,optional :: lb_o, ub_o ! lower bound, upper bound

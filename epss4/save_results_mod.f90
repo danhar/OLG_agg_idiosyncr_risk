@@ -12,7 +12,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     use kinds
     use types
     use policies_class  ,only: tPolicies
-    use statistics      ,only: tStats, covariance
+    use statistics      ,only: tStats, tStats_logical, cov
     use aggregate_grids ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class      ,only: tErrors
@@ -34,11 +34,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
     type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
-    real(dp) :: percent_err_K, percent_err_mu, cov_w_r, cov_zeta_r, cov_zeta_w, cov_output_r, cov_output_w, cov_output_zeta, cov_inv_r, cov_inv_w, cov_inv_zeta, cov_inv_output, &
-                cov_cons_r, cov_cons_w, cov_cons_zeta, cov_cons_output, cov_cons_invest, cov_cons_ex_ret, cov_cg_r, cov_cg_w, cov_cg_zeta, cov_cg_output, cov_cg_invest, cov_cg_ex_ret, &
-                cov_delta_r, cov_delta_w, cov_delta_zeta, cov_delta_output, cov_delta_invest, cov_delta_ex_ret
-
-    integer  :: count_err_K, count_err_mu, i
+    type(tStats_logical) :: err_K, err_mu
     character(:), allocatable :: path
 
     path = construct_path(dir, calib_name)
@@ -55,7 +51,7 @@ contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
 ! - subroutine calc_stats()
-! - subroutine write_stats()
+! - subroutine write_stats(prec)
 ! - subroutine write_output_files()
 !-------------------------------------------------------------------------------
     subroutine calc_stats()
@@ -88,48 +84,13 @@ contains
         cons_grow=tStats('cons_grow'); call cons_grow%calc_stats(simvars)
         zeta=tStats('zeta'); call zeta%calc_stats(simvars)
         delta=tStats('delta'); call delta%calc_stats(simvars)
+        err_K =tStats_logical('err_K' ); call err_K %calc_stats(simvars)
+        err_mu=tStats_logical('err_mu'); call err_mu%calc_stats(simvars)
 
-
-        cov_w_r         = covariance(simvars%wage,simvars%r,err_mu, err_K)
-        cov_zeta_r      = covariance(simvars_zeta,simvars%r,err_mu, err_K)
-        cov_zeta_w      = covariance(simvars_zeta,simvars%wage,err_mu, err_K)
-        cov_output_r    = covariance(simvars%output,simvars%r,err_mu, err_K)
-        cov_output_w    = covariance(simvars%output,simvars%wage,err_mu, err_K)
-        cov_output_zeta = covariance(simvars%output,simvars_zeta,err_mu, err_K)
-        cov_inv_r       = covariance(simvars%invest,simvars%r,err_mu, err_K)
-        cov_inv_w       = covariance(simvars%invest,simvars%wage,err_mu, err_K)
-        cov_inv_zeta    = covariance(simvars%invest,simvars_zeta,err_mu, err_K)
-        cov_inv_output  = covariance(simvars%invest,simvars%output,err_mu, err_K)
-        cov_cons_r      = covariance(simvars%C,simvars%r,err_mu, err_K)
-        cov_cons_w      = covariance(simvars%C,simvars%wage,err_mu, err_K)
-        cov_cons_zeta   = covariance(simvars%C,simvars_zeta,err_mu, err_K)
-        cov_cons_output = covariance(simvars%C,simvars%output,err_mu, err_K)
-        cov_cons_invest = covariance(simvars%C,simvars%invest,err_mu, err_K)
-        cov_cons_ex_ret = covariance(simvars%C,excess_return,err_mu, err_K)
-        cov_cg_r        = covariance(C_growth,simvars%r(2:size(simvars%r)),err_mu, err_K)
-        cov_cg_w        = covariance(C_growth,simvars%wage(2:size(simvars%wage)),err_mu, err_K)
-        cov_cg_zeta     = covariance(C_growth,simvars_zeta(2:size(simvars_zeta)),err_mu, err_K)
-        cov_cg_output   = covariance(C_growth,simvars%output(2:size(simvars%output)),err_mu, err_K)
-        cov_cg_invest   = covariance(C_growth,simvars%invest(2:size(simvars%invest)),err_mu, err_K)
-        cov_cg_ex_ret   = covariance(C_growth,excess_return,err_mu, err_K)
-        cov_delta_r     = covariance(simvars_delta,simvars%r,err_mu, err_K)
-        cov_delta_w     = covariance(simvars_delta,simvars%wage,err_mu, err_K)
-        cov_delta_zeta  = covariance(simvars_delta,simvars_zeta,err_mu, err_K)
-        cov_delta_output= covariance(simvars_delta,simvars%output,err_mu, err_K)
-        cov_delta_invest= covariance(simvars_delta,simvars%invest,err_mu, err_K)
-        cov_delta_ex_ret= covariance(simvars_delta,excess_return,err_mu, err_K)
-
-        deallocate(simvars_zeta, simvars_delta)
-
-        count_err_K    = count(err_K(lb:))
-        count_err_mu   = count(err_mu(lb:))
-        percent_err_K  = real(count_err_K,dp) / real(size(simvars%err_K(lb:)),dp) *100_dp
-        percent_err_mu = real(count_err_mu,dp)/ real(size(simvars%err_mu(lb:)),dp)*100_dp
-        end associate
        ! The next holds for mean shock only if wm=0.25, which is ususally true
-        nk  = size(pol%apgrid,5)
         nmu = size(pol%apgrid,6)
-        do jc=1,nj
+        nk  = size(pol%apgrid,5)
+        do jc=1,size(pol%apgrid,4)
             do xc =1,size(pol%apgrid,1)
                 apgrid_mean(xc,jc) = sum(pol%apgrid(xc,:,:,jc,:,:))/(nk*nmu*nz*n_eta)
                 stocks_mean(xc,jc) = sum(pol%stocks(xc,:,:,jc,:,:))/(nk*nmu*nz*n_eta)
@@ -194,15 +155,15 @@ contains
     write(21,*)
     write(21,*) 'Covariances'
     write(21,*) repeat('-',63)
-    write(21,123) '            ',   '       r',   ' netwage',       '    zeta',      '  output',         '  invest',     '  Ex_ret'
-    write(21,fmt1)' r         ' ,   r%std_()**2
-    write(21,fmt1)' netwage   ' ,     cov_w_r , netwage%std_()**2
-    write(21,fmt1)' zeta      ' ,  cov_zeta_r ,  cov_zeta_w , zeta%std_()**2
-    write(21,fmt1)' output    ' ,cov_output_r ,cov_output_w , cov_output_zeta , output%std_()**2
-    write(21,fmt1)' invest    ' ,   cov_inv_r ,   cov_inv_w ,    cov_inv_zeta ,  cov_inv_output , invest%std_()**2
-    write(21,fmt1)' cons      ' ,  cov_cons_r ,  cov_cons_w ,   cov_cons_zeta , cov_cons_output ,  cov_cons_invest , cov_cons_ex_ret
-    write(21,fmt1)' cons_grow ' ,    cov_cg_r ,    cov_cg_w ,     cov_cg_zeta ,   cov_cg_output ,    cov_cg_invest ,   cov_cg_ex_ret
-    write(21,fmt1)' delta     ' , cov_delta_r , cov_delta_w ,  cov_delta_zeta ,cov_delta_output , cov_delta_invest ,cov_delta_ex_ret
+    write(21,123)'            ',       '       r',             ' netwage',          '    zeta',            '  output',            '  invest',            '  ex_ret'
+    write(21,fmt1)' r         ', r%std_()**2
+    write(21,fmt1)' netwage   ', cov(netwage  ,r), netwage%std_()**2
+    write(21,fmt1)' zeta      ', cov(zeta     ,r), cov(zeta     ,netwage), zeta%std_()**2
+    write(21,fmt1)' output    ', cov(output   ,r), cov(output   ,netwage), cov(output   ,zeta), output%std_()**2
+    write(21,fmt1)' invest    ', cov(invest   ,r), cov(invest   ,netwage), cov(invest   ,zeta), cov(invest   ,output), invest%std_()**2
+    write(21,fmt1)' cons      ', cov(cons     ,r), cov(cons     ,netwage), cov(cons     ,zeta), cov(cons     ,output), cov(cons     ,invest), cov(cons     ,ex_ret)
+    write(21,fmt1)' cons_grow ', cov(cons_grow,r), cov(cons_grow,netwage), cov(cons_grow,zeta), cov(cons_grow,output), cov(cons_grow,invest), cov(cons_grow,ex_ret)
+    write(21,fmt1)' delta     ', cov(delta    ,r), cov(delta    ,netwage), cov(delta    ,zeta), cov(delta    ,output), cov(delta    ,invest), cov(delta    ,ex_ret)
 
     write(21,*)
     write(21,*) 'Laws of motion'
@@ -276,8 +237,8 @@ contains
 
 
     write(21,*)   'Warnings in simulation'
-    write(21,125) ' K     ', count_err_K, '  (',percent_err_K ,'%)   ', &
-                  '    mu ', count_err_mu,'  (',percent_err_mu,'%)   '
+    write(21,125) ' K     ', err_K%count , '  (',err_K%percent ,'%)   ', &
+                  '    mu ', err_mu%count, '  (',err_mu%percent,'%)   '
 
     write(21,*)   'Duration measures'
     write(21,'(a7,i6, 14x, a5, es9.2)') ' KS_it ', it, 'secs ', secs

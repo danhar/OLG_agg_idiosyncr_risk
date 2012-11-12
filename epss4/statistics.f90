@@ -4,7 +4,7 @@ module statistics
 
     implicit none
     private
-    public tStats, Correlation, covariance, lorenz_calc, lorenz_err
+    public tStats, tStats_logical, corr, cov, lorenz_calc, lorenz_err
 
     type tStats
         private
@@ -26,13 +26,28 @@ module statistics
         procedure :: writing_format
     end type tStats
 
+    type tStats_logical
+        private
+        integer :: count
+        real(dp) :: percent
+        logical(dp)  ,allocatable :: series(:)
+        character(:) ,allocatable :: name
+    contains
+        procedure :: calc_stats => calculate_statistics_logical
+    end type tStats_logical
+
     interface tStats
         procedure constructor
     end interface
+    interface tStats_logical
+        procedure constructor_logical
+    end interface
+
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
 ! - pure function constructor(varname) result (new_stats)
+! - pure function constructor_logical(varname) result (new_stats)
 ! - pure subroutine calculate_statistics(this, series, err_mu, err_K)
 ! - subroutine write_to_file(this, unit, format)
 ! - pure subroutine set_number(this, number)
@@ -51,8 +66,13 @@ contains
         new_stats%name = varname
     end function constructor
 
+    pure function constructor_logical(varname) result (new_stats)
+        character(len=*) ,intent(in)  :: varname
+        type(tStats_logical) :: new_stats
+        new_stats%name = varname
+    end function constructor_logical
+
     pure subroutine calculate_statistics(this, simvars)
-    ! This is a specific type bound procedure
         use params_mod ,only: t_scrap, stat_dist_z
         use types      ,only: tSimvars
         class(tStats)          ,intent(inout) :: this
@@ -120,6 +140,26 @@ contains
             this%auto = sum((this%series-this%avg)*(seriesp-this%avg))/(real((n-2),dp)*this%std**2)
         endif
     end subroutine calculate_statistics
+
+    pure subroutine calculate_statistics_logical(this, simvars)
+        use params_mod ,only: t_scrap, stat_dist_z
+        use types      ,only: tSimvars
+        class(tStats_logical) ,intent(inout) :: this
+        type(tSimvars)        ,intent(in)    :: simvars(:)
+        integer :: i, lb ! lb = lower bound
+
+        if (size(simvars(1)%get_logical(this%name))<= size(stat_dist_z) +2) then
+            lb = 2 ! mean shock equilibrium
+        else
+            lb = t_scrap+1
+        endif
+
+        this%series  = [(simvars(i)%get(this%name,lb) ,i=1, size(simvars))]
+        this%count   = count(this%series) ! counts only .true.
+        this%percent = real(this%count,dp)/real(size(this%series),dp) * 100.0
+
+    end subroutine calculate_statistics_logical
+
 
     subroutine write_stats(this, unit, name_opt, format)
     ! This is a specific type bound procedure
@@ -234,57 +274,25 @@ contains
     end function writing_format
 
 
-    pure real(dp) function Correlation(series1,stats1,series2,stats2)
-        use params_mod, only: t_scrap, nt
-        real(dp), dimension(:), intent(in) :: series1, series2
-        class(tStats), intent(in)          :: stats1, stats2
-        integer :: lb, n ! lb = lower bound
+    pure real(dp) function corr(var1,var2)
+        ! correlation, including all realizations (also those where err_mu or err_K true)
+        type(tStats) ,intent(in) :: var1,var2
 
-        if (size(series1) .ne. size(series2)) then
-            Correlation = -2.0
+        if (size(var1%series) .ne. size(var2%series)) then
+            corr = -2.0
             return
         endif
 
-        if (size(series1)< nt) then
-            lb = 2 ! mean shock
-        else
-            lb = t_scrap+1
-        endif
-        n = size(series1) -(lb-1)
+        corr = sum((var1%series - var1%avg)*(var2%series - var2%avg))/(real(size(var1%series)-1,dp)*var1%std*var2%std)
 
-        Correlation = sum((series1(lb:) - stats1%avg)*(series2(lb:) - stats2%avg))/(real(n-1,dp)*stats1%std*stats2%std)
+    end function corr
 
-    end function Correlation
+    pure real(dp) function cov(var1,var2)
+        ! covariance, including all realizations (also those where err_mu or err_K true)
+        type(tStats) ,intent(in) :: var1,var2
 
-    pure real(dp) function covariance(series1,series2,err_mu,err_K)
-        use params_mod, only: t_scrap, nt
-        real(dp), dimension(:), intent(in) :: series1, series2
-        logical, dimension(:), optional, intent(in) :: err_mu,err_K
-        real(dp), dimension(:) ,allocatable :: ser1_ex, ser2_ex
-        real(dp) :: mean1, mean2
-        integer :: lb, n ! lb = lower bound
-
-        if (size(series1)< nt) then
-            lb = 2 ! mean shock
-        else
-            lb = t_scrap+1
-        endif
-
-        if (present(err_mu) .and. present(err_K)) then
-	        ser1_ex = pack(series1(lb:),err_mu(lb:) == .false. .and. err_K(lb:) == .false.)
-	        ser2_ex = pack(series2(lb:),err_mu(lb:) == .false. .and. err_K(lb:) == .false.)
-	        n = count(err_mu(lb:) == .false. .and. err_K(lb:) == .false.)
-        else
-            ser1_ex= series1(lb:)
-            ser2_ex= series2(lb:)
-            n = size(series1) -(lb-1)
-        endif
-        mean1 = sum(ser1_ex)/n
-        mean2 = sum(ser2_ex)/n
-
-        covariance = sum((ser1_ex - mean1)*(ser2_ex - mean2))/(n-1)
-
-    end function covariance
+        cov = sum((var1%series - var1%avg)*(var2%series - var2%avg))/real((size(var1%series)-1),dp)
+    end function cov
 
 	subroutine lorenz_calc(f,x,fx,gini,error)
 	! Compute Lorenz curve and Gini coefficient by sorting vector x and using density f
