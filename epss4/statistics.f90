@@ -27,7 +27,6 @@ module statistics
     end type tStats
 
     type tStats_logical
-        private
         integer :: count
         real(dp) :: percent
         logical(dp)  ,allocatable :: series(:)

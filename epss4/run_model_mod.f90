@@ -92,7 +92,9 @@ subroutine run_model(projectname, calib_name, welfare)
             deallocate(grids%mu); allocate(grids%mu(1))
             grids%mu = 0.0
             print*,'setting simvars%mu= 0'
-            simvars%mu = 0.0
+            do i=1,size(simvars)
+                simvars(i)%mu = 0.0
+            enddo
         endif
 
     else
@@ -168,9 +170,10 @@ contains
 !-------------------------------------------------------------------------------
     pure real(dp) function calc_average_welfare(simvars)
 	    use statistics        ,only: tStats
-	    type(tSimvars), intent(in) :: simvars
+	    type(tSimvars), intent(in) :: simvars(:)
 	    type(tStats)      :: welfare_stats
-	    call welfare_stats%calc_stats(simvars%welf, simvars%err_mu, simvars%err_K)
+	    welfare_stats = tStats('welfare')
+	    call welfare_stats%calc_stats(simvars)
 	    calc_average_welfare = welfare_stats%avg_exerr_() ! without the periods where simvars hit gridbounds
     end function calc_average_welfare
 

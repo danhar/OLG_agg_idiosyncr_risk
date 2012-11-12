@@ -27,7 +27,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     type(tPolicies)  :: pol
     type(tErrors)    :: err
 	real(dp)         :: Phi(:,:,:), secs !distribution, seconds
-	integer          :: it
+	integer          :: it, i
     character(len=*) :: dir, projectname, calib_name
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
@@ -55,7 +55,7 @@ contains
 ! - subroutine write_output_files()
 !-------------------------------------------------------------------------------
     subroutine calc_stats()
-	    integer  :: nk,nmu, xc, jc, lb
+	    integer  :: nk,nmu, xc, jc
 
         ! Assign character name and calculate the statistics
         K=tStats('K'); call K%calc_stats(simvars)
@@ -251,7 +251,7 @@ contains
     ! Since all arrays follow Fortran's natural storage order (i.e. column-major),
     ! no (implied) do-loops necessary when writing to file.
     ! The following will write all nx in one line, then change zc, then jc, ...
-    integer :: nx
+    integer :: nx, i2
 
     nx = size(pol%apgrid,1)
 201 format(<nx> (f10.6,1x))
@@ -346,35 +346,39 @@ contains
     call err%write2file(path)
 
     open(unit=21, file=path//'/simvars.txt', status = 'replace')
-    write(21,368) ' t         ', [(i,i=1,size(simvars%z))]
-368 format(a11,<size(simvars%z)> (i6.6,4x))
-    write(21,369) ' z        ', simvars%z
-369 format(a10,<size(simvars%z)> (i2,8x))
-    write(21,371) ' K        ', simvars%K
-371 format(a10,<size(simvars%K)> (f9.6,1x))
-    write(21,370) ' mu       ', simvars%mu
-370 format(a10,<size(simvars%z)> (f9.6,1x))
-    write(21,370) ' output   ', simvars%output
-    write(21,370) ' invest   ', simvars%invest
-    write(21,370) ' stock    ', simvars%stock
-    write(21,370) ' bonds    ', simvars%bonds
-    write(21,370) ' cons     ', simvars%C
-    write(21,370) ' r        ', simvars%r
-    write(21,371) ' rf       ', simvars%rf
-    write(21,370) ' wage     ', simvars%wage
-    write(21,370) ' pens     ', simvars%pens
-    write(21,370) ' tau      ', simvars%tau
-    write(21,373) ' welf     ', simvars%welf
-    write(21,372) ' err_K    ', simvars%err_K
-    write(21,372) ' err_mu   ', simvars%err_mu
-372 format(a10,<size(simvars%z)> (1x,l1,8x))
-    write(21,373) ' Phi_1    ', simvars%Phi_1
-    write(21,373) ' Phi_nx   ', simvars%Phi_nx
-    write(21,370) ' B        ', simvars%B
-    write(21,373) ' err_inc  ', simvars%err_income
-    write(21,373) ' err_aggr ', simvars%err_aggr
-    write(21,373) ' bequests ', simvars%bequests
-373 format(a10,<size(simvars%z)> (es9.2,1x))
+    do i=1,size(simvars)
+        write(21,*) 'Parallel simulation 1 of ',size(simvars)
+        write(21,368) ' t         ', [(i2,i2=1,size(simvars(i)%z))]
+    368 format(a11,<size(simvars(i)%z)> (i6.6,4x))
+        write(21,369) ' z        ', simvars(i)%z
+    369 format(a10,<size(simvars(i)%z)> (i2,8x))
+        write(21,371) ' K        ', simvars(i)%K
+    371 format(a10,<size(simvars(i)%K)> (f9.6,1x))
+        write(21,370) ' mu       ', simvars(i)%mu
+    370 format(a10,<size(simvars(i)%z)> (f9.6,1x))
+        write(21,370) ' output   ', simvars(i)%output
+        write(21,370) ' invest   ', simvars(i)%invest
+        write(21,370) ' stock    ', simvars(i)%stock
+        write(21,370) ' bonds    ', simvars(i)%bonds
+        write(21,370) ' cons     ', simvars(i)%C
+        write(21,370) ' r        ', simvars(i)%r
+        write(21,371) ' rf       ', simvars(i)%rf
+        write(21,370) ' wage     ', simvars(i)%wage
+        write(21,370) ' pens     ', simvars(i)%pens
+        write(21,370) ' tau      ', simvars(i)%tau
+        write(21,373) ' welf     ', simvars(i)%welf
+        write(21,372) ' err_K    ', simvars(i)%err_K
+        write(21,372) ' err_mu   ', simvars(i)%err_mu
+    372 format(a10,<size(simvars(i)%z)> (1x,l1,8x))
+        write(21,373) ' Phi_1    ', simvars(i)%Phi_1
+        write(21,373) ' Phi_nx   ', simvars(i)%Phi_nx
+        write(21,370) ' B        ', simvars(i)%B
+        write(21,373) ' err_inc  ', simvars(i)%err_income
+        write(21,373) ' err_aggr ', simvars(i)%err_aggr
+        write(21,373) ' bequests ', simvars(i)%bequests
+    373 format(a10,<size(simvars(i)%z)> (es9.2,1x))
+        write(21,*)
+    enddo
     close(21)
 
     end subroutine write_output_files
