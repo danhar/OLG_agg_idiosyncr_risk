@@ -291,6 +291,11 @@ contains
         ! covariance, including all realizations (also those where err_mu or err_K true)
         type(tStats) ,intent(in) :: var1,var2
 
+        if (size(var1%series) .ne. size(var2%series)) then
+            cov = -huge(1.0_dp)
+            return
+        endif
+
         cov = sum((var1%series - var1%avg)*(var2%series - var2%avg))/real((size(var1%series)-1),dp)
     end function cov
 

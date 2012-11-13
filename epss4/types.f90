@@ -115,7 +115,7 @@ contains
 
         select case (varname)
         case ('K','k')
-            if (.not.present(ub_o)) ub = size(this%k)
+            !if (.not.present(ub_o)) ub = size(this%k) !better to have all of equal size - more comparable, and e.g. for covariances
             get = this%k(lb:ub)
         case ('mu')
             get = this%mu(lb:ub)
@@ -144,7 +144,7 @@ contains
         case ('r')
             get = this%r(lb:ub)
         case ('rf')
-            if (.not.present(ub_o)) ub = size(this%rf)
+            ! if (.not.present(ub_o)) ub = size(this%rf) !better to have all of equal size - more comparable, and e.g. for covariances
             get = this%rf(lb:ub)
         case ('rpf_med')
             get = this%r_pf_median(lb:ub)
@@ -204,8 +204,7 @@ contains
     end function get_logical
 
     pure function cons_grow(this,lb_o,ub_o)
-        use params_mod ,only: nz
-        real(dp), allocatable :: cons_grow(:)
+        real(dp), allocatable :: cons_grow(:), temp(:)
         class(tSimvars) ,intent(in) :: this
         integer, intent(in), optional :: lb_o, ub_o
         integer :: lb, ub
@@ -222,13 +221,8 @@ contains
             ub = size(this%C)
         endif
 
-        if (lb == 2 .and. ub <= nz +1 ) lb=1 ! mean shock equilibrium
-
-        if (lb == ub) then
-            cons_grow = [0.0]
-        else
-            cons_grow = this%C(lb+1:ub)/this%C(lb:ub-1) -1.0
-        endif
+        temp = [0.0_dp, this%C(2:)/this%C(:size(this%C)-1) -1.0]
+        cons_grow = temp(lb:ub)
 
     end function cons_grow
 
