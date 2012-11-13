@@ -316,7 +316,8 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
         integer                     :: i
 
         open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted')
-        read(55) i
+!        read(55) i
+        i=1
         close(55)
         allocate(simvars(i))
 

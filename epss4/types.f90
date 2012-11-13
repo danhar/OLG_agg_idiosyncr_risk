@@ -28,7 +28,7 @@ module types
     type tLifecycle
     !?!? Why do I need them to be allocatable?
         real(dp), dimension(:), allocatable :: ap, kappa, cons, stock, cons_var, return, return_var   ! life-cycle profiles
-    contains
+!    contains
 !        procedure :: set_number => set_number_lifecycle        ! generates compiler bug
 !        procedure :: average ! doesnt work because not scalar input
     end type tLifecycle
@@ -129,7 +129,7 @@ contains
             get = this%B(lb:ub)
         case ('invest')
             get = this%invest(lb:ub)
-        case ('C')
+        case ('cons')
             get = this%C(lb:ub)
         case ('Phi_1')
             get = this%Phi_1(lb:ub)
@@ -138,7 +138,7 @@ contains
         case ('err_aggr')
             ! Att: absolute value
             get = abs(this%err_aggr(lb:ub))
-        case ('err_income')
+        case ('err_inc')
             ! Att: absolute value
             get = abs(this%err_income(lb:ub))
         case ('r')
@@ -150,7 +150,7 @@ contains
             get = this%r_pf_median(lb:ub)
         case ('rpf_kapm')
             get = this%r_pf_kappa_med(lb:ub)
-        case ('wage')
+        case ('netwage')
             get = this%wage(lb:ub)
         case ('pension')
             get = this%pens(lb:ub)
@@ -204,6 +204,7 @@ contains
     end function get_logical
 
     pure function cons_grow(this,lb_o,ub_o)
+        use params_mod ,only: nz
         real(dp), allocatable :: cons_grow(:)
         class(tSimvars) ,intent(in) :: this
         integer, intent(in), optional :: lb_o, ub_o
@@ -221,7 +222,14 @@ contains
             ub = size(this%C)
         endif
 
-        cons_grow = this%C(lb+1:ub)/this%C(lb:ub-1) -1.0
+        if (lb == 2 .and. ub <= nz +1 ) lb=1 ! mean shock equilibrium
+
+        if (lb == ub) then
+            cons_grow = [0.0]
+        else
+            cons_grow = this%C(lb+1:ub)/this%C(lb:ub-1) -1.0
+        endif
+
     end function cons_grow
 
     pure function K_Y(this,lb_o,ub_o)
@@ -310,8 +318,12 @@ contains
             ub = size(this%z)
         endif
 
-        if (size(this%z) <= size(zetaval)+2) then
-            zeta  = [1.0_dp ,  zetaval(this%z(lb:))] !mean shock equilibrium
+        if (size(this%z) <= size(zetaval)+2) then  !mean shock equilibrium
+            if (lb == 1) then
+                zeta  = [1.0_dp ,  zetaval(this%z(lb+1:))]
+            else
+                zeta  = zetaval(this%z(lb:))
+            endif
         else
             zeta = zetaval(this%z(lb:ub))
         endif
@@ -337,7 +349,11 @@ contains
         endif
 
         if (size(this%z) <= size(deltaval)+2) then !mean shock equilibrium
-            delta = [sum(deltaval)/size(deltaval) , deltaval(this%z(lb:))]
+            if (lb == 1) then
+                delta = [sum(deltaval)/size(deltaval) , deltaval(this%z(lb+1:))]
+            else
+                delta = deltaval(this%z(lb:))
+            endif
         else
             delta = deltaval(this%z(lb:ub))
         endif

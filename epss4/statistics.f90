@@ -12,7 +12,7 @@ module statistics
                     avg_exerr, min_exerr, max_exerr       ! these exclude all realizations with an error
         real(dp), allocatable :: series(:)                ! contains the whole series (over all parallel runs), excluding the t_scrap
         integer  :: namelength=10, digits2display_short=2, digits2display_long=8
-        character(:), allocatable:: name  ! instantiate with a user-written constructor.
+        character(:), public, allocatable:: name  ! could make private and instantiate with a user-written constructor below
     contains
         procedure :: calc_stats => calculate_statistics
         procedure :: write => write_stats
@@ -35,12 +35,13 @@ module statistics
         procedure :: calc_stats => calculate_statistics_logical
     end type tStats_logical
 
-    interface tStats
-        procedure constructor
-    end interface
-    interface tStats_logical
-        procedure constructor_logical
-    end interface
+! Compiler bug in Intel Fortran 12.1.2 (but not in 13.0.0)
+!    interface tStats
+!        module procedure constructor
+!    end interface
+!    interface tStats_logical
+!        module procedure constructor_logical
+!    end interface
 
 contains
 !-------------------------------------------------------------------------------
@@ -76,7 +77,7 @@ contains
         use types      ,only: tSimvars
         class(tStats)          ,intent(inout) :: this
         type(tSimvars)         ,intent(in)  :: simvars(:)
-        real(dp) ,allocatable :: seriesp(:)
+        real(dp) ,allocatable :: seriest(:), seriesp(:)
         logical  ,allocatable :: err_k(:), err_mu(:)
         integer :: i, lb, n ! lb = lower bound
 
@@ -133,10 +134,10 @@ contains
         if (this%std == 0.0) then
             this%auto =0.0
         else
-            this%series = [(simvars(i)%get(this%name,lb,size(simvars(1)%get(this%name))-1) ,i=1, size(simvars))]
-            seriesp= [(simvars(i)%get(this%name,lb+1) ,i=1, size(simvars))]
+            seriest = [(simvars(i)%get(this%name,lb,size(simvars(1)%get(this%name))-1) ,i=1, size(simvars))]
+            seriesp = [(simvars(i)%get(this%name,lb+1) ,i=1, size(simvars))]
 
-            this%auto = sum((this%series-this%avg)*(seriesp-this%avg))/(real((n-2),dp)*this%std**2)
+            this%auto = sum((seriest-this%avg)*(seriesp-this%avg))/(real((n-2),dp)*this%std**2)
         endif
     end subroutine calculate_statistics
 
@@ -153,7 +154,7 @@ contains
             lb = t_scrap+1
         endif
 
-        this%series  = [(simvars(i)%get(this%name,lb) ,i=1, size(simvars))]
+        this%series  = [(simvars(i)%get_logical(this%name,lb) ,i=1, size(simvars))]
         this%count   = count(this%series) ! counts only .true.
         this%percent = real(this%count,dp)/real(size(this%series),dp) * 100.0
 

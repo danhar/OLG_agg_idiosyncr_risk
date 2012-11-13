@@ -172,7 +172,7 @@ contains
 	    use statistics        ,only: tStats
 	    type(tSimvars), intent(in) :: simvars(:)
 	    type(tStats)      :: welfare_stats
-	    welfare_stats = tStats('welfare')
+	    welfare_stats%name = 'welfare'
 	    call welfare_stats%calc_stats(simvars)
 	    calc_average_welfare = welfare_stats%avg_exerr_() ! without the periods where simvars hit gridbounds
     end function calc_average_welfare
