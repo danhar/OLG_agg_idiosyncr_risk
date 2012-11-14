@@ -92,13 +92,16 @@ contains
             type(tCoeffs)   :: coeffs_old, coeff_dif
             type(tLifecycle) :: lifecycles_array(size(simvars))
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
-            integer         :: i
+            integer         :: i , start,end, rate
 
             coeffs = MakeType(coeffvec, normalize_coeffs)
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
+            call system_clock(start)
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
+            call system_clock(end,rate)
+            print *, 'time: ', real(end-start,dp)/real(rate,dp)
             call err%print2stderr
 
             print *,'- krusell_smith: simulating'
@@ -110,11 +113,14 @@ contains
                 xgrid_mean_new = sum(pol_newx%xgrid(:,:,1,:,:,1),4)/size(pol_newx%xgrid,5) ! only an approximation of the grid over which Phi is defined
                 call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
                 Phi_spread = spread(Phi,4,size(simvars))
+                call system_clock(start)
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
                     call simulate(pol_newx, val_newx, grids, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
+                call system_clock(end)
+                print *, 'time: ', real(end-start,dp)/real(rate,dp)
             else
                 ! In this case, we simultaneously solve for the rf(t+1) (actually the mu(t+1)) and the corresponding xgrid(since it depends on mu).
                 ! That is very costly, so we do not refine xgrid. While more correct theoretically, the coarse xgrid makes the solution less precise.
