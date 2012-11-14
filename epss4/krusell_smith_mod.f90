@@ -91,7 +91,7 @@ contains
             type(tPolicies) :: pol_newx    ! if (exogenous_xgrid) then this will hold interpolated policies
             type(tCoeffs)   :: coeffs_old, coeff_dif
             type(tLifecycle) :: lifecycles_array(size(simvars))
-            real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:)
+            real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
             integer         :: i
 
             coeffs = MakeType(coeffvec, normalize_coeffs)
@@ -109,22 +109,24 @@ contains
                 xgrid_mean_old = xgrid_mean_new ! Would be nicer to have a derived type Phi which carries its own xgrid.
                 xgrid_mean_new = sum(pol_newx%xgrid(:,:,1,:,:,1),4)/size(pol_newx%xgrid,5) ! only an approximation of the grid over which Phi is defined
                 call InterpolateXgrid(Phi, xgrid_mean_old, xgrid_mean_new)
-                !OMP PARALLEL DO
+                Phi_spread = spread(Phi,4,size(simvars))
+                !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(pol_newx, val_newx, grids, simvars(i), Phi, lifecycles_array(i))
+                    call simulate(pol_newx, val_newx, grids, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
-                !END OMP PARALLEL DO
-                lifecycles=average(lifecycles_array)
+                !$OMP END PARALLEL DO
             else
                 ! In this case, we simultaneously solve for the rf(t+1) (actually the mu(t+1)) and the corresponding xgrid(since it depends on mu).
                 ! That is very costly, so we do not refine xgrid. While more correct theoretically, the coarse xgrid makes the solution less precise.
-                !OMP PARALLEL DO
+                Phi_spread = spread(Phi,4,size(simvars))
+                !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(policies, value, grids, simvars(i), Phi, lifecycles_array(i))
+                    call simulate(policies, value, grids, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
-                !END OMP PARALLEL DO
-                lifecycles=average(lifecycles_array)
+                !$OMP END PARALLEL DO
             endif
+            lifecycles=average(lifecycles_array)
+            Phi = sum(Phi_spread,4)/size(Phi_spread,4)
             call print_error_msg(simvars)
 
             ! Here, one could make a (dampened) update of grids using the mean from simvars, but this turns out to be too complex for rootfinder

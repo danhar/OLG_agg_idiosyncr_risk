@@ -347,7 +347,7 @@ contains
 
     open(unit=21, file=path//'/simvars.txt', status = 'replace')
     do i=1,size(simvars)
-        write(21,*) 'Parallel simulation 1 of ',size(simvars)
+        write(21,'(a,i3,a,i3)') 'Parallel simulation ',i,' of ',size(simvars)
         write(21,368) ' t         ', [(i2,i2=1,size(simvars(i)%z))]
     368 format(a11,<size(simvars(i)%z)> (i6.6,4x))
         write(21,369) ' z        ', simvars(i)%z
