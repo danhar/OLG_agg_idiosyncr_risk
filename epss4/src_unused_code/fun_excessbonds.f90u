@@ -1,6 +1,6 @@
 module fun_excessbonds
     use kinds           ,only: dp
-    use aggregate_grids ,only: tAggGrids
+    use aggregate_grids_class ,only: tAggGrids
     implicit none
 
     private

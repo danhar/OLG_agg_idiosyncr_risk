@@ -3,7 +3,7 @@ module krusell_smith_mod
     use types                  ,only: tSimvars, tLifecycle
     use error_class            ,only: tErrors
     use laws_of_motion         ,only: tCoeffs, MakeType, MakeVector
-    use aggregate_grids        ,only: tAggGrids
+    use aggregate_grids_class        ,only: tAggGrids
     use household_solution_mod ,only: tPolicies
 
     implicit none

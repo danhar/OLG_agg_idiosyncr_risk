@@ -123,7 +123,7 @@ contains
 
     function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) result(coeffs)
         use types           ,only: tSimvars
-        use aggregate_grids ,only: tAggGrids
+        use aggregate_grids_class ,only: tAggGrids
 
         type(tCoeffs)                          :: coeffs
         character(len=*) ,intent(in)           :: dir

@@ -9,7 +9,7 @@ subroutine run_model(projectname, calib_name, welfare)
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
     use unformatted_io    ,only: SaveUnformatted, ReadUnformatted
-    use aggregate_grids
+    use aggregate_grids_class
     use laws_of_motion    ,only: tCoeffs, Initialize, MakeVector, MakeType
 	use markovchain_mod   ,only: MarkovChain
 	use distribution      ,only: CheckPhi

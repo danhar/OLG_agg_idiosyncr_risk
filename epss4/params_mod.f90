@@ -3,7 +3,7 @@ module params_mod
 ! All 'variables' in this module have either parameter or protected attribute.
 
 	use kinds
-	use aggregate_grids, only: tAggGrids, AllocateType
+	use aggregate_grids_class, only: tAggGrids, AllocateType
 	implicit none
 !-------------------------------------------------------------------------------------------------
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)

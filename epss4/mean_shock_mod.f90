@@ -14,7 +14,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use kinds
     use types
     use policies_class  ,only: tPolicies
-    use aggregate_grids ,only: tAggGrids
+    use aggregate_grids_class ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs, Initialize
     use error_class
     use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium
@@ -94,7 +94,7 @@ contains
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
         use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
-        use aggregate_grids        ,only: AllocateType
+        use aggregate_grids_class        ,only: AllocateType
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
         use interpolate_xgrid      ,only: InterpolateXgrid

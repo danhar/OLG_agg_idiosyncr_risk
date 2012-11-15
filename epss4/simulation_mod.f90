@@ -12,7 +12,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     use kinds           ,only: dp
     use types           ,only: tSimvars, tLifecycle, AllocateType, set_number
     use policies_class  ,only: tPolicies
-    use aggregate_grids ,only: tAggGrids
+    use aggregate_grids_class ,only: tAggGrids
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate

@@ -1,7 +1,7 @@
 module household_solution_mod
     use kinds
     use laws_of_motion  ,only: tCoeffs
-    use aggregate_grids ,only: tAggGrids
+    use aggregate_grids_class ,only: tAggGrids
     use policies_class  ,only: tPolicies
 
     implicit none

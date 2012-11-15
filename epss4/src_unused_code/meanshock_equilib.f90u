@@ -2,7 +2,7 @@ module meanshock_equilib
 
     use kinds
     use household_solution_mod ,only: tPolicies, olg_backwards_recursion
-    use aggregate_grids        ,only: tAggGrids
+    use aggregate_grids_class        ,only: tAggGrids
     use laws_of_motion         ,only: tCoeffs
     use error_class            ,only: tErrors
     implicit none

@@ -1,7 +1,7 @@
 module unformatted_io
     use kinds           ,only: dp
     use types           ,only: tSimvars, AllocateType
-    use aggregate_grids ,only: tAggGrids, AllocateType
+    use aggregate_grids_class ,only: tAggGrids, AllocateType
     use laws_of_motion  ,only: tCoeffs
     implicit none
     private

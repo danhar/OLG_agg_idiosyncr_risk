@@ -1,5 +1,3 @@
-! Module defining derived types and their procedures
-! Makes heavy use of Fortran 2003: allocatable component of derived type
 module types
     use kinds      ,only: dp
     implicit none

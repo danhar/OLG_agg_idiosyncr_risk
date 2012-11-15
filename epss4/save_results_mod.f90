@@ -13,7 +13,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     use types
     use policies_class  ,only: tPolicies
     use statistics      ,only: tStats, tStats_logical, cov
-    use aggregate_grids ,only: tAggGrids
+    use aggregate_grids_class ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs
     use error_class      ,only: tErrors
     use params_mod      ,only: n_eta, nj,nz, n_coeffs, pop_frac, construct_path, loms_in_logs

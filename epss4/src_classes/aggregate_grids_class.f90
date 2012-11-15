@@ -1,4 +1,4 @@
-module aggregate_grids
+module aggregate_grids_class
     use kinds,  only : dp
     implicit none
     private
@@ -62,4 +62,4 @@ contains
 	    agg_grid%mu=MakeGrid(lb,ub,nmu)
 	end function make_aggr_grid
 
-end module aggregate_grids
+end module aggregate_grids_class
