@@ -321,7 +321,7 @@ contains
     end function delta
 
     subroutine read_unformatted_array(this, io_stat_o)
-        class(tSimvars) ,allocatable ,intent(out) :: this(:)
+        type(tSimvars) ,allocatable ,intent(out) :: this(:)
         integer ,intent(out) ,optional :: io_stat_o
         integer :: array_size, nt, i, io_stat
 
@@ -336,9 +336,9 @@ contains
 
             open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',iostat=io_stat,action='read')
             ! Could I use standard derived type IO?
-            do i=1,size(simvars)
-               read(55) simvars(i)%z, simvars(i)%K, simvars(i)%mu, simvars(i)%B, simvars(i)%C, simvars(i)%Phi_1, simvars(i)%Phi_nx, simvars(i)%err_aggr, &
-                        simvars(i)%err_income, simvars(i)%r, simvars(i)%rf, simvars(i)%wage, simvars(i)%pens, simvars(i)%tau, simvars(i)%welf, simvars(i)%bequests, simvars(i)%err_K, simvars(i)%err_mu
+            do i=1,size(this)
+               read(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
+                        this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
             enddo
             close(55)
 
@@ -353,14 +353,14 @@ contains
         integer :: i
 
         open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',action='write')
-        write(55) size(simvars), size(simvars(1)%z)
+        write(55) size(this), size(this(1)%z)
         close(55)
 
         open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',action='write')
         ! Could I use standard derived type IO?
-        do i=1,size(simvars)
-            write(55) simvars(i)%z, simvars(i)%K, simvars(i)%mu, simvars(i)%B, simvars(i)%C, simvars(i)%Phi_1, simvars(i)%Phi_nx, simvars(i)%err_aggr, &
-                      simvars(i)%err_income, simvars(i)%r, simvars(i)%rf, simvars(i)%wage, simvars(i)%pens, simvars(i)%tau, simvars(i)%welf, simvars(i)%bequests, simvars(i)%err_K, simvars(i)%err_mu
+        do i=1,size(this)
+            write(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
+                      this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
         enddo
         close(55)
 

@@ -14,7 +14,7 @@ subroutine run_model(projectname, calib_name, welfare)
     use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, save_all_iterations, & ! logicals
-	                             nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
+	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
@@ -82,7 +82,7 @@ subroutine run_model(projectname, calib_name, welfare)
     if(partial_equilibrium) then
         print*,'- main: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
-        call read_unformatted(grids, coeffs, simvars)
+        call read_unformatted_ks(grids, coeffs, simvars)
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 70
             print*,'scale_AR = -1.0, i.e. no aggregate risk'
@@ -182,7 +182,7 @@ contains
         use statistics        ,only: tStats
         use params_mod, only: del_mean, de_ratio
         use income, only: f_net_mpk, alpha, delta, zeta
-        type(tSimvars) :: s_temp
+        type(tSimvars) ,allocatable :: s_temp(:)
         type(tStats)   :: k_stats, mpk_stats
         real(dp), dimension(nt) :: mpk
         real(dp) :: rf, r
@@ -226,13 +226,13 @@ contains
     end subroutine save_unformatted
 !-------------------------------------------------------------------------------
 
-    subroutine read_unformatted(grids, coeffs, simvars)
+    subroutine read_unformatted_ks(grids, coeffs, simvars)
         use params_mod  ,only: n_coeffs, nz
         type(tAggGrids) ,intent(out) :: grids
         type(tCoeffs)   ,intent(out) :: coeffs
         type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
 
-        call grids%read_unformatted
+        call grids%read_unformatted('ks')
 
         allocate(coeffs%k(n_coeffs,nz), coeffs%mu(n_coeffs,nz), coeffs%r_squared(2,nz))
         open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted',action='read')
@@ -240,7 +240,7 @@ contains
         close(55)
 
         call read_unformatted(simvars)
-    end subroutine read_unformatted
+    end subroutine read_unformatted_ks
 !-------------------------------------------------------------------------------
 
 end subroutine run_model

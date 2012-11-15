@@ -283,7 +283,7 @@ subroutine SetRemainingParams()
 
     select case (opt_initial_ms_guess)
     case (0) ! use previous ms equilibrium values saved in ./input/last_results/
-        call ms_guess%read('ms')
+        call ms_guess%read_unformatted('ms')
     case (1) ! use parameter-sensitive hard-coded guesses
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     case (2) ! use user-supplied guess in this calibration file

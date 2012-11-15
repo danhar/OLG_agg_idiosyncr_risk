@@ -1,8 +1,7 @@
 module household_solution_mod
     use kinds
-    use laws_of_motion  ,only: tCoeffs
-    use aggregate_grids ,only: tAggGrids
-    use policies_class  ,only: tPolicies
+    use classes_mod ,only: tAggGrids, tPolicies, tErrors
+    use laws_of_motion ,only: tCoeffs
 
     implicit none
     private
@@ -24,7 +23,6 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
-    use error_class
     use makegrid_mod
 
     type(tPolicies)                  ,intent(out) :: p      ! policies

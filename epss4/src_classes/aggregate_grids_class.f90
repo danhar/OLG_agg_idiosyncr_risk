@@ -30,6 +30,7 @@ contains
     subroutine read_unformatted(this,equilibrium_type)
         class(tAggGrids) ,intent(out) :: this
         character(len=*) ,intent(in)  :: equilibrium_type
+        integer :: nk, nmu
 
         open(55,file='model_input/last_results/aggr_grid_size'//equilibrium_type//'.unformatted',form='unformatted',action='read')
         read(55) nk, nmu
@@ -47,7 +48,7 @@ contains
         character(len=*) ,intent(in)  :: equilibrium_type
 
         open(55,file='model_input/last_results/aggr_grid_size'//equilibrium_type//'.unformatted',form='unformatted',action='write')
-        write(55) nk, nmu
+        write(55) size(this%k), size(this%mu)
         close(55)
 
         open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',action='write')

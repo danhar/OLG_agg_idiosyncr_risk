@@ -183,7 +183,7 @@
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactName="${ProjName}" buildProperties="" description="Parallel Max Debug" id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698" name="Build_Parallel_Debug" parent="org.eclipse.cdt.build.core.emptycfg">
 					<folderInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698." name="/" resourcePath="">
-						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.962658432" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
+						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.962658432" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" resourceTypeBasedDiscovery="true" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
 							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.XCOFF32;org.eclipse.cdt.core.SOM;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.MachO64" id="photran.managedbuild.target.intel.platform.x86_64.base.108511198" name="Intel(R) 64 Platform" osList="linux" superClass="photran.managedbuild.target.intel.platform.x86_64.base"/>
 							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.680557919" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base"/>
 							<tool id="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2018263982" name="GCC C Compiler" superClass="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base">
@@ -235,7 +235,7 @@
 					</folderInfo>
 					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698.src_unused_code/asseteuler.f90u" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="types.f90u|asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src_unused_code" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -333,6 +333,8 @@
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.1647259652;cdt.managedbuild.tool.gnu.c.compiler.input.2059878800">
@@ -341,7 +343,8 @@
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1623462470;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2015405717;cdt.managedbuild.tool.gnu.c.compiler.input.93924483">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2018263982;cdt.managedbuild.tool.gnu.c.compiler.input.1770759737">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

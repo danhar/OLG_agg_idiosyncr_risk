@@ -4,7 +4,7 @@ module lifecycles_class
     implicit none
     private
 
-    public tLifecycle
+    public tLifecycle, average
 
     type tLifecycle
         real(dp), dimension(:), allocatable :: ap, kappa, cons, stock, cons_var, return, return_var
