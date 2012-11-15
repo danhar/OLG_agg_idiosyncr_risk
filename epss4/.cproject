@@ -26,14 +26,25 @@
 					<folderInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1623462470" name="/" resourcePath="">
 						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1381982486" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
 							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.XCOFF32;org.eclipse.cdt.core.SOM;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.MachO64" id="photran.managedbuild.target.intel.platform.x86_64.base.1293429770" name="Intel(R) 64 Platform" osList="linux" superClass="photran.managedbuild.target.intel.platform.x86_64.base"/>
-							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1448368368" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base"/>
+							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1448368368" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Debugmax"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Optimmax"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Parallel_Debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Parallel_Optim"/>
+								</outputEntries>
+							</builder>
 							<tool id="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2015405717" name="GCC C Compiler" superClass="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base">
+								<option id="gnu.c.compiler.option.include.paths.1067647188" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.93924483" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base.1079276910" name="Intel(R) Intel(R) 64 Fortran Compiler" superClass="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base">
 								<option id="intel.linux.fortran.compiler.preprocessor.includedirectories.609910793" name="Additional Include Directories (-I)" superClass="intel.linux.fortran.compiler.preprocessor.includedirectories" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
 								</option>
 								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1127285709" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -standard-semantics" valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1009820391" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.none" valueType="enumerated"/>
@@ -53,13 +64,7 @@
 								<option id="intel.fortran.link.option.libpath.1305783328" name="Search Directory for Libraries (-L)" superClass="intel.fortran.link.option.libpath" valueType="stringList">
 									<listOptionValue builtIn="false" value="$(MKLROOT)/lib/intel64"/>
 								</option>
-								<option id="intel.fortran.link.option.l.415476076" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l" valueType="libs">
-									<listOptionValue builtIn="false" value="mkl_intel_lp64"/>
-									<listOptionValue builtIn="false" value="mkl_sequential"/>
-									<listOptionValue builtIn="false" value="pthread"/>
-									<listOptionValue builtIn="false" value="m"/>
-									<listOptionValue builtIn="false" value="mkl_core"/>
-								</option>
+								<option id="intel.fortran.link.option.l.415476076" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l"/>
 								<option id="intel.fortran.link.cmdline.addlopts.585080405" name="Additional Options" superClass="intel.fortran.link.cmdline.addlopts" value="$(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a" valueType="string"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.linker.input.7673802" superClass="photran.managedbuild.tool.intel.fortran.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -67,6 +72,10 @@
 								</inputType>
 							</tool>
 							<tool id="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base.630968356" name="GCC Assembler" superClass="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base">
+								<option id="gnu.both.asm.option.include.paths.1398772400" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
+									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.912902345" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base.909615977" name="Archiver" superClass="photran.managedbuild.tool.intel.fortran.archiver.x86_64.base"/>
@@ -74,7 +83,7 @@
 					</folderInfo>
 					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1673895078" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="types.f90u|src_utilities/fun_excessbonds.f90|src_unused_code|meanshock_equilib.f90|asseteuler.f90u" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -145,7 +154,7 @@
 					</folderInfo>
 					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1522841654" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="types.f90u|asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -226,7 +235,7 @@
 					</folderInfo>
 					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698.src_unused_code/asseteuler.f90u" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="types.f90u|asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -299,7 +308,7 @@
 					</folderInfo>
 					<fileInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157.src_unused_code/asseteuler.f90u" name="asseteuler.f90u" rcbsApplicability="disable" resourcePath="src_unused_code/asseteuler.f90u" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="types.f90u|asseteuler.f90u|meanshock_equilib.f90|src_utilities/fun_excessbonds.f90|src_unused_code" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
