@@ -970,6 +970,7 @@ end function construct_path
 !-------------------------------------------------------------------------------------------------
 subroutine SaveParams(projectname, calib_name)
 ! Save parameters and exogenous variables
+    use omp_lib           ,only: OMP_get_max_threads
     character(len=*), intent(in)    :: projectname, calib_name
     character(:), allocatable :: path
 
@@ -1031,6 +1032,7 @@ subroutine SaveParams(projectname, calib_name)
 217 format(a16, 2(f0.6,x))
     write(21,219) ' cmin         = ', cmin
 219 format(a16, es8.2)
+    write(21,218) ' No. threads  = ', OMP_get_max_threads()
     write(21,*)
     write(21,*) '----------------------------- Options ------------------------------'
     write(21,'(a20,l1)') ' ccv             =  ', ccv

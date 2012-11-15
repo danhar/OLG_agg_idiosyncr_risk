@@ -48,7 +48,7 @@ contains
 ! Module procedures in order:
 ! - pure function constructor(varname) result (new_stats)
 ! - pure function constructor_logical(varname) result (new_stats)
-! - pure subroutine calculate_statistics(this, series, err_mu, err_K)
+! - pure subroutine calculate_statistics(this, simvars)
 ! - subroutine write_to_file(this, unit, format)
 ! - pure subroutine set_number(this, number)
 ! - pure real(dp) function avg_exerr_
@@ -80,17 +80,6 @@ contains
         real(dp) ,allocatable :: seriest(:), seriesp(:)
         logical  ,allocatable :: err_k(:), err_mu(:)
         integer :: i, lb, n ! lb = lower bound
-
-!        allocate(var   (size(simvars(1)%get(this%name)),size(simvars)), &
-!                 err_k (size(simvars(1)%err_k)       ,size(simvars)), &
-!                 err_mu(size(simvars(1)%err_mu)      ,size(simvars))  )
-!
-!        do i=1,size(simvars)
-!            var(:,i)    = simvars(i)%get(this%name)
-!            err_k(:,i)  = simvars(i)%err_k
-!            err_mu(:,i) = simvars(i)%err_mu
-!        enddo
-
 
         if (size(simvars(1)%get(this%name))<= size(stat_dist_z) +2) then
             lb = 2 ! mean shock equilibrium

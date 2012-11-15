@@ -2,3 +2,10 @@ To add a new parameter to all calibration files at a certain location (i.e. afte
 
 find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ep -name "*.txt" -exec sed -i '/t_scrap/ a\nx_factor       2       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points' {} \;
 find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ss -name "*.txt" -exec sed -i '/t_scrap/ a\nx_factor       2       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points' {} \;
+
+
+
+To find and replace:
+
+find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ep -name "*.txt" -exec sed -i 's/5000/2500/g' {} \;
+find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ss -name "*.txt" -exec sed -i 's/5000/2500/g' {} \;

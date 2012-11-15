@@ -7,6 +7,7 @@ subroutine run_model(projectname, calib_name, welfare)
     use policies_class
     use error_class
     use ifport            ,only: system  ! Intel Fortran portability library
+    use omp_lib           ,only: OMP_get_max_threads
     use unformatted_io    ,only: SaveUnformatted, ReadUnformatted
     use aggregate_grids
     use laws_of_motion    ,only: tCoeffs, Initialize, MakeVector, MakeType
@@ -100,7 +101,7 @@ subroutine run_model(projectname, calib_name, welfare)
     else
         print*,'- main: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
-        allocate(simvars(6)) ! change literal!!!!!!!!!!
+        allocate(simvars(OMP_get_max_threads()))
         call AllocateType(simvars,nt)
         call random_seed(put=seed) ! so that same sequence for different experiments
         do i=1,size(simvars)
