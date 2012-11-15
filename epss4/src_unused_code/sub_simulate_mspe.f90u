@@ -8,7 +8,7 @@ contains
 
 pure subroutine s_simulate_mspe(policies, value, simvars, Phi, lc)
     use mod_kinds,       only: dp, d0, d1
-    use mod_types,       only: tPolicies, tAggGrids, tSimvars, tLifecycle
+    use mod_classes_mod,       only: tPolicies, tAggGrids, tSimvars, tLifecycle
     use ParamsMod,      only: n_eta,nx,nj,nz,nt,n,g,L_N_ratio,pi_z,nugrid,etagrid,t_scrap
     use mod_income,      only: f_netwage, f_pensions, f_netreturn, f_tau, zeta, delta
     use Distribution, only: TransitionPhi

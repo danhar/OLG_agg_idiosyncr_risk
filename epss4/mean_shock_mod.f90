@@ -12,7 +12,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
 
     use kinds
-    use types
+    use classes_mod
     use policies_class  ,only: tPolicies
     use aggregate_grids_class ,only: tAggGrids
     use laws_of_motion  ,only: tCoeffs, Initialize

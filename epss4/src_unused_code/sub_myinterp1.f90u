@@ -1,6 +1,6 @@
 subroutine sub_myinterp1(x,f_x,xp,length_x,interp_value)
 
-	use mod_types
+	use mod_classes_mod
 	implicit none
 
 	integer, intent(in) :: length_x

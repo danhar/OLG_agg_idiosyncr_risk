@@ -10,7 +10,7 @@ contains
 pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
-    use types           ,only: tSimvars, tLifecycle, AllocateType, set_number
+    use classes_mod           ,only: tSimvars, tLifecycle, AllocateType, set_number
     use policies_class  ,only: tPolicies
     use aggregate_grids_class ,only: tAggGrids
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
@@ -290,7 +290,7 @@ end subroutine simulate
 !-------------------------------------------------------------------------------
 
 subroutine print_error_msg(simvars)
-    use types      ,only: tSimvars
+    use classes_mod      ,only: tSimvars
     use kinds      ,only: dp
     use params_mod ,only: nt, t_scrap
     type(tSimvars) ,intent(in) :: simvars(:)

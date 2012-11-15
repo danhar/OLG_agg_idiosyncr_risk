@@ -324,6 +324,8 @@
 			<resource resourceType="PROJECT" workspacePath="/epss4"/>
 		</configuration>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.1647259652;cdt.managedbuild.tool.gnu.c.compiler.input.2059878800">
@@ -332,7 +334,8 @@
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1623462470;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2015405717;cdt.managedbuild.tool.gnu.c.compiler.input.93924483">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1596004698.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2018263982;cdt.managedbuild.tool.gnu.c.compiler.input.1770759737">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>

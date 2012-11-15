@@ -3,7 +3,7 @@ module run_model_mod
 contains
 
 subroutine run_model(projectname, calib_name, welfare)
-    use types
+    use classes_mod
     use policies_class
     use error_class
     use ifport            ,only: system  ! Intel Fortran portability library

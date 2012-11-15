@@ -1,6 +1,6 @@
 module krusell_smith_mod
     use kinds
-    use types                  ,only: tSimvars, tLifecycle
+    use classes_mod                  ,only: tSimvars, tLifecycle
     use error_class            ,only: tErrors
     use laws_of_motion         ,only: tCoeffs, MakeType, MakeVector
     use aggregate_grids_class        ,only: tAggGrids
@@ -79,7 +79,7 @@ contains
         function krusellsmith(coeffvec) result(distance)
             ! Here we first solve for the policyfunctions, then simulate, then update the regression coefficients.
             ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
-            use types                 ,only: average
+            use classes_mod                 ,only: average
             use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression

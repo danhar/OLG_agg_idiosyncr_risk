@@ -10,7 +10,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
                           pol, secs, it, projectname, calib_name, dir, err)
 
     use kinds
-    use types
+    use classes_mod
     use policies_class  ,only: tPolicies
     use statistics      ,only: tStats, tStats_logical, cov
     use aggregate_grids_class ,only: tAggGrids

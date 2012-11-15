@@ -122,7 +122,7 @@ contains
 !-------------------------------------------------------------------------------
 
     function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) result(coeffs)
-        use types           ,only: tSimvars
+        use classes_mod           ,only: tSimvars
         use aggregate_grids_class ,only: tAggGrids
 
         type(tCoeffs)                          :: coeffs
@@ -310,7 +310,7 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
 !-------------------------------------------------------------------------------
 
     subroutine ReadUnformatted_simvars(simvars, err)
-        use types      ,only         : tSimvars, AllocateType
+        use classes_mod      ,only         : tSimvars, AllocateType
         type(tSimvars) ,intent(out), allocatable :: simvars(:)
         integer        ,intent(out) :: err
         integer                     :: i
@@ -338,7 +338,7 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
 
 pure subroutine Regression(simvars,coeffs)
     use params_mod   ,only: nt, t_scrap
-    use types        ,only: tSimvars
+    use classes_mod        ,only: tSimvars
     use MKL95_LAPACK ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
 
     type(tSimvars)           ,intent(in)   :: simvars(:)

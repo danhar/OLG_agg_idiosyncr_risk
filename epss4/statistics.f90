@@ -74,7 +74,7 @@ contains
 
     pure subroutine calculate_statistics(this, simvars)
         use params_mod ,only: t_scrap, stat_dist_z
-        use types      ,only: tSimvars
+        use classes_mod      ,only: tSimvars
         class(tStats)          ,intent(inout) :: this
         type(tSimvars)         ,intent(in)  :: simvars(:)
         real(dp) ,allocatable :: seriest(:), seriesp(:)
@@ -132,7 +132,7 @@ contains
 
     pure subroutine calculate_statistics_logical(this, simvars)
         use params_mod ,only: t_scrap, stat_dist_z
-        use types      ,only: tSimvars
+        use classes_mod      ,only: tSimvars
         class(tStats_logical) ,intent(inout) :: this
         type(tSimvars)        ,intent(in)    :: simvars(:)
         integer :: i, lb ! lb = lower bound
