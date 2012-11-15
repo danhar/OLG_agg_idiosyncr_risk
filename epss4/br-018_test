@@ -5,7 +5,7 @@
 #BSUB-n 8            # number of processors / threads
 # #BSUB-R "rusage[mem=4096]"          # Memory im MB
 # #BSUB-M 4096000                     # Memory requirements in Kbytes
-#BSUB-R "select[model==Opteron8380]"   # Select CPU Type: OpteronXXXX: 2220 (ok), 8220, 8380 (best), 8384, 6174 (worst)
+# #BSUB-R "select[model==Opteron8380]"   # Select CPU Type: OpteronXXXX: 2220 (ok), 8220, 8380 (best), 8384, 6174 (worst)
 #BSUB-oo bsub_output.txt           # Redirect output to file
 #BSUB-B                             # Send email when begins
 #BSUB-N                             # Send email when ends

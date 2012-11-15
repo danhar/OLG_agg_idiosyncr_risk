@@ -15,7 +15,7 @@ r=simvars(6,:);
 rf=simvars(7,:);
 wage=simvars(8,:);
 pens=simvars(9,:);
-cd('../../Matlab')
+cd('../../src_matlab')
 
 scrsz = get(0,'ScreenSize');
 figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)])

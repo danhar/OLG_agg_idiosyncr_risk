@@ -38,4 +38,4 @@ print('-depsc', ['graphs/apgrids']);
 system(['epstopdf graphs/apgrids.eps']);
 
 cd('..')
-cd('../../Matlab/')
+cd('../../src_matlab/')

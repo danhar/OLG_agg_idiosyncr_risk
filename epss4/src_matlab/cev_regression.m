@@ -13,13 +13,13 @@ cd('../model_output/')
 
 data  = dlmread(['welfare_',calibname,'.txt'],'', 1,0);
 
-% cd('../../../Matlab/')
+% cd('../../../src_matlab/')
 
 risk_scale = data(:,1);
 welfare_0 = data(:,2);
 if (length(welfare_0) <2)
     disp('Only one data point, cannot regress; stopping execution');
-    cd('../Matlab/')
+    cd('../src_matlab/')
     return
 end
 if (size(data,2)>2)
@@ -157,4 +157,4 @@ system(['epstopdf welfare_',calibname,'.eps']);
 
 end % ends if (cev_present)
 
-cd('../Matlab/')
+cd('../src_matlab/')

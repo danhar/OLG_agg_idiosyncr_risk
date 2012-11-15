@@ -87,4 +87,4 @@ view([-25 60]);
 print('-depsc', ['graphs/Phi_tilde']);
 system(['epstopdf graphs/Phi_tilde.eps']);
 
-cd('../../../Matlab/')
+cd('../../../src_matlab/')

@@ -211,7 +211,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
 	    cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
-	    err_matl = system('CALIBNAME='//cal_id_temp//' && export CALIBNAME && cd Matlab && matlab -nodesktop -nosplash -r '//mfile//' > cl_output.txt')
+	    err_matl = system('CALIBNAME='//cal_id_temp//' && export CALIBNAME && cd src_matlab && matlab -nodesktop -nosplash -r '//mfile//' > cl_output.txt')
 	    if (err_matl ==-1) print*, 'Warning in main:plot: An error occured while plotting graphs'
     end subroutine plot
 

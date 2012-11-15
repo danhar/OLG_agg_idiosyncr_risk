@@ -36,7 +36,7 @@ consvar_lc = dlmread('consvar_lc.txt')./pop_frac*pop_frac(1);
 return_lc  = dlmread('return_lc.txt')./pop_frac*pop_frac(1);
 returnvar_lc=dlmread('return_var_lc.txt')./pop_frac*pop_frac(1);
 bond_lc    = ap_lc - stock_lc;
-% cd('../../../Matlab/')
+% cd('../../../src_matlab/')
 
 j0 = 21;
 nj = length(ap_lc);
@@ -159,4 +159,4 @@ title('Variance of portfolio return');
 print('-depsc', ['graphs/lifecycles2']);
 system(['epstopdf graphs/lifecycles2.eps']);
 
-cd('../../../Matlab/')
+cd('../../../src_matlab/')

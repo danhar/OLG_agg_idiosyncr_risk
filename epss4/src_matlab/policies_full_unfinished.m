@@ -22,7 +22,7 @@ kappa_in = dlmread('kappa.txt')';
 xgrid_in=dlmread('xgrid.txt')';
 agg_grid_k=dlmread('agg_grids.txt','\t',['A2..A',num2str(nk+1)])';
 %cons = dlmread('cons_mean.txt');
-cd('../../Matlab/')
+cd('../../src_matlab/')
 
 xgrid=zeros(nx,neta,nz,nj,nk,nmu);
 apgrid=xgrid;

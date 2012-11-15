@@ -90,4 +90,4 @@ for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57]
     system(['epstopdf graphs/policies_',gen_str,'.eps']);
 end
 
-cd('../../../Matlab/')
+cd('../../../src_matlab/')

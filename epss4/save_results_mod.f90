@@ -398,7 +398,7 @@ subroutine plot_results(path,mfile)
     !print*, 'Starting MATLAB to plot ',mfile,'(',dir,')'
     err_matl = system('mkdir '//path//'/graphs')
     epssdir = path(1+scan(path,'/'):)
-    err_matl = system('EPSSDIR='//epssdir//' && export EPSSDIR && cd Matlab && matlab -nodesktop -nosplash -r '//mfile//' > cl_output.txt')
+    err_matl = system('EPSSDIR='//epssdir//' && export EPSSDIR && cd src_matlab && matlab -nodesktop -nosplash -r '//mfile//' > cl_output.txt')
     if (err_matl ==-1) print*, 'Warning in save_results:plot: An error occured while plotting graphs'
 end subroutine plot_results
 

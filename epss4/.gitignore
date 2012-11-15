@@ -4,4 +4,4 @@ bin
 /model_output
 model_input/last_results/*.unformatted
 model_input/last_results/previous
-Matlab/cl_output.txt
+src_matlab/cl_output.txt
