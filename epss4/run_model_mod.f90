@@ -4,17 +4,24 @@ contains
 
 subroutine run_model(projectname, calib_name, welfare)
     use classes_mod
+<<<<<<< HEAD
     use policies_class
     use error_class
+=======
+>>>>>>> refs/heads/018-derived_type_classes
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
+<<<<<<< HEAD
     use unformatted_io    ,only: SaveUnformatted, ReadUnformatted
     use aggregate_grids_class
+=======
+>>>>>>> refs/heads/018-derived_type_classes
     use laws_of_motion    ,only: tCoeffs, Initialize, MakeVector, MakeType
 	use markovchain_mod   ,only: MarkovChain
 	use distribution      ,only: CheckPhi
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
+    use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, save_all_iterations, & ! logicals
 	                             nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
@@ -39,7 +46,7 @@ subroutine run_model(projectname, calib_name, welfare)
     if (partial_equilibrium) then
         print*,'- main: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
-        call ReadUnformatted(ms_grids)
+        call ms_grids%read_unformatted('ms')
         if (scale_AR == -1.0) then
             print*,'- main: setting ms_grids%mu = 0.0, ms_grids%k = average over simulations'
             ms_grids%mu =0.0
@@ -63,7 +70,7 @@ subroutine run_model(projectname, calib_name, welfare)
     call CheckPhi(Phi,output_path) ! writes errors to file
     if (.not. partial_equilibrium) then
         syserr = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
-        call SaveUnformatted(Phi, ms_grids, simvars(1)%pens(1))
+        call ms_grids%write_unformatted('ms')
     endif
     call save_and_plot_results(dir, ms_grids, err)
     deallocate(simvars)
@@ -85,7 +92,7 @@ subroutine run_model(projectname, calib_name, welfare)
     if(partial_equilibrium) then
         print*,'- main: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
-        call ReadUnformatted(grids, coeffs, simvars)
+        call read_unformatted(grids, coeffs, simvars)
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 70
             print*,'scale_AR = -1.0, i.e. no aggregate risk'
@@ -102,7 +109,7 @@ subroutine run_model(projectname, calib_name, welfare)
         print*,'- main: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
         allocate(simvars(OMP_get_max_threads()))
-        call AllocateType(simvars,nt)
+        call simvars%allocate(nt)
         call random_seed(put=seed) ! so that same sequence for different experiments
         do i=1,size(simvars)
             simvars(i)%z     = MarkovChain(pi_z,nt)
@@ -110,7 +117,7 @@ subroutine run_model(projectname, calib_name, welfare)
         enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
         coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
-        grids  = MakeGrid(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
+        call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
     endif
     output_path = construct_path(dir,calib_name)
     syserr = system('mkdir '//output_path)
@@ -131,7 +138,7 @@ subroutine run_model(projectname, calib_name, welfare)
     ! Check distribution and save results
     print*, ' '
     call CheckPhi(Phi,output_path)
-    if (.not. partial_equilibrium) call SaveUnformatted(grids, coeffs, simvars)
+    if (.not. partial_equilibrium) call save_unformatted(grids, coeffs, simvars)
     call save_and_plot_results(dir, grids, err)
     print*,' **** Completed solution of calibration ', calib_name, ' **** '
     print*, ' '
@@ -146,6 +153,8 @@ contains
 ! - subroutine save_and_plot_results(dir, grids, err)
 ! - pure real(dp) function calc_average(simvars%welfare)
 ! - real(dp) function average_of_simulations()
+! - subroutine save_unformatted(grids, coeffs, simvars)
+! - subroutine read_unformatted(grids, coeffs, simvars)
 !-------------------------------------------------------------------------------
 
     subroutine save_and_plot_results(dir, grids, err)
@@ -189,11 +198,7 @@ contains
         real(dp) :: rf, r
         integer :: tc
 
-        call AllocateType(s_temp,nt)
-        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',action='read')
-        read(55) s_temp%z, s_temp%K, s_temp%mu, s_temp%B, s_temp%C, s_temp%Phi_1, s_temp%Phi_nx, s_temp%err_aggr, &
-        s_temp%err_income, s_temp%r, s_temp%rf, s_temp%wage, s_temp%pens, s_temp%tau, s_temp%welf, s_temp%bequests, s_temp%err_K, s_temp%err_mu
-        close(55)
+        call read_unformatted(s_temp)
 
         !call k_stats%calc_stats(s_temp%K, s_temp%err_mu, s_temp%err_K)
 
@@ -212,6 +217,42 @@ contains
         inverted_average_mpk = (alpha/(mpk(1)+del_mean))**(1.0/(1.0-alpha))
 
     end function inverted_average_mpk !average_of_simulations
+!-------------------------------------------------------------------------------
+
+    subroutine save_unformatted(grids, coeffs, simvars)
+        type(tAggGrids) ,intent(in) :: grids
+        type(tCoeffs)   ,intent(in) :: coeffs
+        type(tSimvars)  ,intent(in) :: simvars(:)
+
+        call grids%write_unformatted('ge')
+
+        open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted')
+        write(55) coeffs%k, coeffs%mu
+    !        write(55) coeffs
+        close(55)
+
+        call write_unformatted(simvars)
+
+    end subroutine save_unformatted
+!-------------------------------------------------------------------------------
+
+    subroutine read_unformatted(grids, coeffs, simvars)
+        use params_mod  ,only: n_coeffs, nz
+        type(tAggGrids) ,intent(out) :: grids
+        type(tCoeffs)   ,intent(out) :: coeffs
+        type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
+
+        call grids%read_unformatted
+
+        allocate(coeffs%k(n_coeffs,nz), coeffs%mu(n_coeffs,nz), coeffs%r_squared(2,nz))
+        open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted',action='read')
+        read(55) coeffs%k, coeffs%mu
+        close(55)
+
+        call read_unformatted(simvars)
+    end subroutine read_unformatted
+!-------------------------------------------------------------------------------
 
 end subroutine run_model
+
 end module run_model_mod

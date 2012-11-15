@@ -4,7 +4,7 @@ module laws_of_motion
 
     implicit none
     private
-    public tCoeffs, MakeType, MakeVector, Initialize, Regression, Forecast, ReadUnformatted
+    public tCoeffs, MakeType, MakeVector, Initialize, Regression, Forecast
     real(dp), parameter :: norm_factor_small = 10.0, norm_factor_large = 100.0 ! should be type component. Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
 
     type tCoeffs
@@ -23,17 +23,12 @@ module laws_of_motion
         module procedure initialize_coeffs
     end interface
 
-    interface ReadUnformatted
-        module procedure ReadUnformatted_simvars
-    end interface ReadUnformatted
-
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order: (would be nice in submodules)
 ! - pure function makevector_coeffs(coeffs_in,o_norm) result(coeff_vec)
 ! - pure function maketype_coeffs(coeff_vec, o_norm) result(coeffs)
 ! - function initialize_coeffs(dir,n_coeffs, agg_grid_o) result(coeffs)
-! - subroutine ReadUnformatted_simvars
 ! - pure subroutine Regression(simvars,coeffs)
 ! - pure real(dp) function Forecast(coeffs, k_in, mu_in_o)
 !-------------------------------------------------------------------------------
@@ -122,8 +117,13 @@ contains
 !-------------------------------------------------------------------------------
 
     function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) result(coeffs)
+<<<<<<< HEAD
         use classes_mod           ,only: tSimvars
         use aggregate_grids_class ,only: tAggGrids
+=======
+        use classes_mod   ,only: tSimvars, tAggGrids
+        use simvars_class ,only: read_unformatted
+>>>>>>> refs/heads/018-derived_type_classes
 
         type(tCoeffs)                          :: coeffs
         character(len=*) ,intent(in)           :: dir
@@ -146,7 +146,7 @@ ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
             if (present(estimate_from_simvars_o)) then
 		        if (estimate_from_simvars_o) then
 		            print*, 'laws_of_motion:initialize_coeffs: estimating from old simvars'
-		            call ReadUnformatted(simvars_old, io_err)
+		            call read_unformatted(simvars_old, io_err)
 		            if (io_err == 0) then
 		                call Regression(simvars_old,coeffs)
 		                return
@@ -309,6 +309,7 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
      end function initialize_coeffs
 !-------------------------------------------------------------------------------
 
+<<<<<<< HEAD
     subroutine ReadUnformatted_simvars(simvars, err)
         use classes_mod      ,only         : tSimvars, AllocateType
         type(tSimvars) ,intent(out), allocatable :: simvars(:)
@@ -336,9 +337,15 @@ ir2:                       if ((1.0 + scale_IR) > 0.1_dp) then
     end subroutine ReadUnformatted_simvars
 !-------------------------------------------------------------------------------
 
+=======
+>>>>>>> refs/heads/018-derived_type_classes
 pure subroutine Regression(simvars,coeffs)
     use params_mod   ,only: nt, t_scrap
+<<<<<<< HEAD
     use classes_mod        ,only: tSimvars
+=======
+    use classes_mod  ,only: tSimvars
+>>>>>>> refs/heads/018-derived_type_classes
     use MKL95_LAPACK ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
 
     type(tSimvars)           ,intent(in)   :: simvars(:)

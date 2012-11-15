@@ -3,7 +3,11 @@ module params_mod
 ! All 'variables' in this module have either parameter or protected attribute.
 
 	use kinds
+<<<<<<< HEAD
 	use aggregate_grids_class, only: tAggGrids, AllocateType
+=======
+	use aggregate_grids_class, only: tAggGrids
+>>>>>>> refs/heads/018-derived_type_classes
 	implicit none
 !-------------------------------------------------------------------------------------------------
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)
@@ -283,11 +287,7 @@ subroutine SetRemainingParams()
 
     select case (opt_initial_ms_guess)
     case (0) ! use previous ms equilibrium values saved in ./input/last_results/
-!        call ReadUnformatted(ms_guess)  ! causes use circularity! Should change this when making more object-oriented!
-        call AllocateType(ms_guess,1,1)
-        open(55,file='model_input/last_results/grids_ms.unformatted'  ,form='unformatted',action='read')
-        read(55) ms_guess%k, ms_guess%mu
-        close(55)
+        call ms_guess%read('ms')
     case (1) ! use parameter-sensitive hard-coded guesses
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     case (2) ! use user-supplied guess in this calibration file
@@ -415,7 +415,7 @@ contains
     logical, intent(in) :: ccv
     real(dp), intent(in) :: scale_IR, tau
 
-    call AllocateType(ms_guess,1,1) ! needed because assigning scalars, not vectors
+    call ms_guess%allocate(1,1) ! needed because assigning scalars, not vectors
 ccvif:  if (ccv) then
         if (tau >= .10_dp) then
             if (del_std >= .15_dp) then

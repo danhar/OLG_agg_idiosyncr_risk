@@ -1,18 +1,17 @@
 module simulation_mod
     implicit none
 contains
-!-------------------------------------------------------------------------------
-! Module procedures in order:
-! - pure subroutine simulate(policies, agg_grid, simvars, Phi, lc)
-! - subroutine print_error_msg_sim(simvars)
-!-------------------------------------------------------------------------------
 
 pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
+<<<<<<< HEAD
     use classes_mod           ,only: tSimvars, tLifecycle, AllocateType, set_number
     use policies_class  ,only: tPolicies
     use aggregate_grids_class ,only: tAggGrids
+=======
+    use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids
+>>>>>>> refs/heads/018-derived_type_classes
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
@@ -47,7 +46,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     allocate(Knew(nt+1))
 
     Phi_avg         = 0.0
-    call set_number(lc, 0.0_dp)
+    call lc%set_number(0.0_dp)
     simvars%err_K   = .false.
     simvars%err_mu  = .false.
     Knew(1)   = simvars%K(1)    ! This is only interesting for PE
@@ -287,6 +286,7 @@ contains
     end subroutine get_initial_values
 
 end subroutine simulate
+<<<<<<< HEAD
 !-------------------------------------------------------------------------------
 
 subroutine print_error_msg(simvars)
@@ -313,5 +313,7 @@ subroutine print_error_msg(simvars)
 214 format((a,i6,a3,f5.1,a2))
 
 end subroutine print_error_msg
+=======
+>>>>>>> refs/heads/018-derived_type_classes
 
 end module simulation_mod

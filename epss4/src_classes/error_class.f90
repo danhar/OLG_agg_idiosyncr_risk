@@ -1,6 +1,12 @@
 module error_class
     use kinds
     implicit none
+<<<<<<< HEAD
+=======
+    private
+
+    public tErrors
+>>>>>>> refs/heads/018-derived_type_classes
 
     type tErrors
 	    logical(1) ,dimension(:,:,:,:,:,:)   ,allocatable :: asset
