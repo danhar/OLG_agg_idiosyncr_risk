@@ -1,18 +1,11 @@
 module simulation_mod
     implicit none
 contains
-!-------------------------------------------------------------------------------
-! Module procedures in order:
-! - pure subroutine simulate(policies, agg_grid, simvars, Phi, lc)
-! - subroutine print_error_msg_sim(simvars)
-!-------------------------------------------------------------------------------
 
 pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
-    use types           ,only: tSimvars, tLifecycle, AllocateType, set_number
-    use policies_class  ,only: tPolicies
-    use aggregate_grids ,only: tAggGrids
+    use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
@@ -47,7 +40,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     allocate(Knew(nt+1))
 
     Phi_avg         = 0.0
-    call set_number(lc, 0.0_dp)
+    call lc%set_number(0.0_dp)
     simvars%err_K   = .false.
     simvars%err_mu  = .false.
     Knew(1)   = simvars%K(1)    ! This is only interesting for PE
@@ -287,31 +280,5 @@ contains
     end subroutine get_initial_values
 
 end subroutine simulate
-!-------------------------------------------------------------------------------
-
-subroutine print_error_msg(simvars)
-    use types      ,only: tSimvars
-    use kinds      ,only: dp
-    use params_mod ,only: nt, t_scrap
-    type(tSimvars) ,intent(in) :: simvars(:)
-    integer                    :: count_err, i, n
-    real(dp)                   :: perc_err
-
-    n = size(simvars)
-    if (any([(simvars(i)%err_K ,i=1,n)])) then
-        count_err = count([(simvars(i)%err_K(t_scrap+1:) ,i=1,n)])
-        perc_err  = count_err/real((nt-t_scrap)*n,dp)*100_dp
-        print 214, ' Warning: simulate_economy: # K  not in grid =', count_err,'  (',perc_err,'%)'
-    endif
-
-    if (any([(simvars(i)%err_mu ,i=1,n)])) then
-        count_err = count([(simvars(i)%err_mu(t_scrap+1:) ,i=1,n)])
-        perc_err  = real(count_err,dp)/real((nt-t_scrap)*n,dp)*100_dp
-        print 214, ' Warning: simulate_economy: # mu not in grid =', count_err,'  (',perc_err,'%)'
-    endif
-
-214 format((a,i6,a3,f5.1,a2))
-
-end subroutine print_error_msg
 
 end module simulation_mod

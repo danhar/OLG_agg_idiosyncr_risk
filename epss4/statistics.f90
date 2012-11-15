@@ -73,8 +73,8 @@ contains
     end function constructor_logical
 
     pure subroutine calculate_statistics(this, simvars)
-        use params_mod ,only: t_scrap, stat_dist_z
-        use types      ,only: tSimvars
+        use params_mod    ,only: t_scrap, stat_dist_z
+        use simvars_class ,only: tSimvars
         class(tStats)          ,intent(inout) :: this
         type(tSimvars)         ,intent(in)  :: simvars(:)
         real(dp) ,allocatable :: seriest(:), seriesp(:)
@@ -131,8 +131,8 @@ contains
     end subroutine calculate_statistics
 
     pure subroutine calculate_statistics_logical(this, simvars)
-        use params_mod ,only: t_scrap, stat_dist_z
-        use types      ,only: tSimvars
+        use params_mod    ,only: t_scrap, stat_dist_z
+        use simvars_class ,only: tSimvars
         class(tStats_logical) ,intent(inout) :: this
         type(tSimvars)        ,intent(in)    :: simvars(:)
         integer :: i, lb ! lb = lower bound

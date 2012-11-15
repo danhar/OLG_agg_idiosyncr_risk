@@ -1,6 +1,9 @@
 module error_class
     use kinds
     implicit none
+    private
+
+    public tErrors
 
     type tErrors
 	    logical(1) ,dimension(:,:,:,:,:,:)   ,allocatable :: asset

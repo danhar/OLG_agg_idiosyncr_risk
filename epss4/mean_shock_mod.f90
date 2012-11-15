@@ -12,11 +12,8 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
 
     use kinds
-    use types
-    use policies_class  ,only: tPolicies
-    use aggregate_grids ,only: tAggGrids
+    use classes_mod ,only: tPolicies, tAggGrids, tErrors
     use laws_of_motion  ,only: tCoeffs, Initialize
-    use error_class
     use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium
     use income
 	use sub_broyden
@@ -94,7 +91,6 @@ contains
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
         use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
-        use aggregate_grids        ,only: AllocateType
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
         use interpolate_xgrid      ,only: InterpolateXgrid
@@ -111,7 +107,7 @@ contains
         real(dp)                          :: netwage_ms, pens_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
         integer                           :: i
 
-        call AllocateType(grid, size(grids%k), size(grids%mu))
+        call grid%allocate(size(grids%k), size(grids%mu))
         grid%k  = msvars(1)
         grid%mu = msvars(2)
 
@@ -222,7 +218,7 @@ contains
         real(dp) ,allocatable       :: r_pf(:,:,:)
         integer                     :: i
 
-        call AllocateType(simvars,nz+1)   ! allocate all simulation variables
+        call simvars%allocate(nz+1)   ! allocate all simulation variables
         simvars%z(1)    = 0     ! to indicate that these are mean-shock-results
         simvars%K(1)    = xvars(1)
         simvars%mu(1)   = xvars(2)
@@ -286,7 +282,7 @@ contains
         use params_mod   ,only        :  g
         type(tLifecycle) ,intent(out) :: lifecycles
         integer                       :: jc
-        call AllocateType(lifecycles,size(apgrid_ms,3))
+        call lifecycles%allocate(size(apgrid_ms,3))
 
         lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
         lifecycles%cons    = sum(sum((xgrid_ms-apgrid_ms) * Phi,1),1)

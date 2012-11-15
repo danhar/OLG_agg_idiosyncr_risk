@@ -10,12 +10,9 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
                           pol, secs, it, projectname, calib_name, dir, err)
 
     use kinds
-    use types
-    use policies_class  ,only: tPolicies
-    use statistics      ,only: tStats, tStats_logical, cov
-    use aggregate_grids ,only: tAggGrids
+    use classes_mod     ,only: tPolicies, tAggGrids, tErrors
     use laws_of_motion  ,only: tCoeffs
-    use error_class      ,only: tErrors
+    use statistics      ,only: tStats, tStats_logical, cov
     use params_mod      ,only: n_eta, nj,nz, n_coeffs, pop_frac, construct_path, loms_in_logs
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir

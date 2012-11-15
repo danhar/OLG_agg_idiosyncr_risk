@@ -1,10 +1,7 @@
 module krusell_smith_mod
     use kinds
-    use types                  ,only: tSimvars, tLifecycle
-    use error_class            ,only: tErrors
+    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies
     use laws_of_motion         ,only: tCoeffs, MakeType, MakeVector
-    use aggregate_grids        ,only: tAggGrids
-    use household_solution_mod ,only: tPolicies
 
     implicit none
     private
@@ -79,11 +76,12 @@ contains
         function krusellsmith(coeffvec) result(distance)
             ! Here we first solve for the policyfunctions, then simulate, then update the regression coefficients.
             ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
-            use types                 ,only: average
+            use lifecycles_class      ,only: average
+            use simvars_class         ,only: print_error
             use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression
-            use simulation_mod        ,only: simulate, print_error_msg
+            use simulation_mod        ,only: simulate
             use interpolate_xgrid
 
             real(dp), dimension(:), intent(in) :: coeffvec
@@ -127,7 +125,7 @@ contains
             endif
             lifecycles=average(lifecycles_array)
             Phi = sum(Phi_spread,4)/size(Phi_spread,4)
-            call print_error_msg(simvars)
+            call print_error(simvars)
 
             ! Here, one could make a (dampened) update of grids using the mean from simvars, but this turns out to be too complex for rootfinder
 
