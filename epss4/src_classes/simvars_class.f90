@@ -325,9 +325,17 @@ contains
         integer ,intent(out) ,optional :: io_stat_o
         integer :: array_size, nt, i, io_stat
 
-        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',iostat=io_stat,action='read')
-        read(55) array_size, nt
+!        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',iostat=io_stat,action='read')
+!        read(55) array_size, nt
+!        close(55)
+        ! DELETE FOLOWWING!!!
+        open(55,file='model_input/last_results/nt.unformatted',form='unformatted',iostat=io_stat,action='read')
+        read(55) nt
         close(55)
+        open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted',iostat=io_stat,action='read')
+        read(55) array_size
+        close(55)
+        io_stat = 0
 
         if (io_stat == 0) then
 

@@ -1021,7 +1021,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,218) ' nk           = ', nk
     write(21,218) ' nmu          = ', nmu
     write(21,'(a16, i5)') ' nt           = ', nt
-    write(21,218) ' tscrap       = ', t_scrap
+    write(21,'(a16, i5)') ' tscrap       = ', t_scrap
     write(21,218) ' nx_factor    = ', nx_factor
     write(21,217) ' cover_k      = ', cover_k
     write(21,217) ' cover_mu     = ', cover_mu

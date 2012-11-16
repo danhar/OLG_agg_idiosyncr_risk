@@ -32,9 +32,16 @@ contains
         character(len=*) ,intent(in)  :: equilibrium_type
         integer :: nk, nmu
 
-        open(55,file='model_input/last_results/aggr_grid_size'//equilibrium_type//'.unformatted',form='unformatted',action='read')
-        read(55) nk, nmu
-        close(55)
+!        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',action='read')
+!        read(55) nk, nmu
+!        close(55)
+        if (equilibrium_type == 'ms') then ! DELETE LATER!
+            nk = 1
+            nmu = 1
+        else
+            nk = 10
+            nmu = 8
+        endif
 
         call this%allocate(nk,nmu)
 
@@ -47,7 +54,7 @@ contains
         class(tAggGrids) ,intent(in) :: this
         character(len=*) ,intent(in)  :: equilibrium_type
 
-        open(55,file='model_input/last_results/aggr_grid_size'//equilibrium_type//'.unformatted',form='unformatted',action='write')
+        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',action='write')
         write(55) size(this%k), size(this%mu)
         close(55)
 
