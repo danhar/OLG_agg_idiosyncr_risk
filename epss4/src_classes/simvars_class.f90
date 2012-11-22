@@ -320,57 +320,58 @@ contains
         endif
     end function delta
 
-    subroutine read_unformatted_array(this, io_stat_o)
+    subroutine read_unformatted_array(this)
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
-        integer ,intent(out) ,optional :: io_stat_o
         integer :: array_size, nt, i, io_stat
 
-!        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',iostat=io_stat,action='read')
-!        read(55) array_size, nt
-!        close(55)
-        ! DELETE FOLOWWING!!!
-        open(55,file='model_input/last_results/nt.unformatted',form='unformatted',iostat=io_stat,action='read')
-        read(55) nt
+        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        read(55) array_size, nt
         close(55)
-        open(55,file='model_input/last_results/size_simvars.unformatted',form='unformatted',iostat=io_stat,action='read')
-        read(55) array_size
-        close(55)
-        io_stat = 0
 
         if (io_stat == 0) then
 
             allocate(this(array_size))
             call this%allocate(nt)
 
-            open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',iostat=io_stat,action='read')
+            open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
             ! Could I use standard derived type IO?
             do i=1,size(this)
                read(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
                         this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
             enddo
             close(55)
-
         endif
 
-        if (present(io_stat_o)) io_stat_o = io_stat
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR reading simvars from unformatted file'
+            stop 'STOP in in simvars_class:read_unformatted_array'
+        endif
 
     end subroutine read_unformatted_array
 
     subroutine write_unformatted_array(this)
+        ! One can't use standard derived type IO because of the allocatable components.
         class(tSimvars) ,intent(in) :: this(:)
-        integer :: i
+        integer :: i, io_stat
 
-        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',action='write')
+        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) size(this), size(this(1)%z)
         close(55)
 
-        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',action='write')
-        ! Could I use standard derived type IO?
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
+        endif
+
+        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         do i=1,size(this)
             write(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
                       this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
         enddo
         close(55)
+
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
+        endif
 
     end subroutine write_unformatted_array
     !-------------------------------------------------------------------------------

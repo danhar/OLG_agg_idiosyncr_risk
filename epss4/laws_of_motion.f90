@@ -141,13 +141,11 @@ ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
             if (present(estimate_from_simvars_o)) then
 		        if (estimate_from_simvars_o) then
 		            print*, 'laws_of_motion:initialize_coeffs: estimating from old simvars'
-		            call read_unformatted(simvars_old, io_err)
-		            if (io_err == 0) then
-		                call Regression(simvars_old,coeffs)
-		                return
-		            else
-		                print*, 'WARNING: laws_of_motion:initialize_coeffs: could not read simvars'
-		            endif
+		            call read_unformatted(simvars_old)
+                    call Regression(simvars_old,coeffs)
+
+	                return
+
 		        endif
             endif
 

@@ -30,37 +30,48 @@ contains
     subroutine read_unformatted(this,equilibrium_type)
         class(tAggGrids) ,intent(out) :: this
         character(len=*) ,intent(in)  :: equilibrium_type
-        integer :: nk, nmu
+        integer :: nk, nmu, io_stat
 
-!        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',action='read')
-!        read(55) nk, nmu
-!        close(55)
-        if (equilibrium_type == 'ms') then ! DELETE LATER!
-            nk = 1
-            nmu = 1
-        else
-            nk = 10
-            nmu = 8
+        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        read(55) nk, nmu
+        close(55)
+
+        if (io_stat == 0) then
+            call this%allocate(nk,nmu)
+
+            open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='read')
+            read(55) this%k, this%mu
+            close(55)
         endif
 
-        call this%allocate(nk,nmu)
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR reading aggregate grids from unformatted file'
+            stop 'STOP in in aggregate_grids_class:read_unformatted'
+        endif
 
-        open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',action='read')
-        read(55) this%k, this%mu
-        close(55)
     end subroutine read_unformatted
 
     subroutine write_unformatted(this,equilibrium_type)
         class(tAggGrids) ,intent(in) :: this
         character(len=*) ,intent(in)  :: equilibrium_type
+        integer :: io_stat
 
-        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',action='write')
+        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
         write(55) size(this%k), size(this%mu)
         close(55)
 
-        open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',action='write')
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
+        endif
+
+        open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) this%k, this%mu
         close(55)
+
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
+        endif
+
     end subroutine write_unformatted
 
 	elemental subroutine construct_aggr_grid(this, mean_guess, factor_k, factor_mu, cover_k, cover_mu, nk,nmu)

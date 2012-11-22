@@ -706,10 +706,33 @@ end subroutine set_apmax
 
 !-------------------------------------------------------------------------------------------------
 subroutine CheckParams()
+use omp_lib           ,only: OMP_get_max_threads
 ! Very simple error checks on the parameters.
 ! Important because of different scenarios/calibrations, saved in modules calib_**.f90
 ! Put checks into the modules / objects they belong to? Would probably destroy pure in some cases?
     real(dp), parameter :: crit = 0.0000001_dp
+
+    if (ms_guess%k(1) < 1e-6) then
+        print*, 'ERROR: ms_guess%k(1)<1e-6'
+        call critical_stop
+    elseif (ms_guess%k(1)>1000.0) then
+        print*, 'ERROR: ms_guess%k(1)>1000'
+        call critical_stop
+    elseif (ms_guess%k(1)>50.0) then
+        print*, 'WARNING: ms_guess%k(1)>50'
+    endif
+
+    if (ms_guess%mu(1)<-1.0) then
+        print*, 'ERROR: ms_guess%mu(1)<-1.0'
+        call critical_stop
+    elseif (ms_guess%mu(1) < 1e-4) then
+        print*, 'WARNING: ms_guess%mu(1) <= 1e-4'
+    elseif (ms_guess%mu(1)>1.0) then
+        print*, 'ERROR: ms_guess%mu(1)>1.0'
+        call critical_stop
+    elseif (ms_guess%mu(1)>0.2_dp) then
+        print*, 'WARNING: ms_guess%mu(1)>0.2'
+    endif
 
     if (n_coeffs>3) then
         print*, 'ERROR: n_coeffs>3, check laws_of_motion:initialize_coeffs AND :Regression!'
@@ -735,6 +758,10 @@ subroutine CheckParams()
     if (nt<=t_scrap) then
         print*, 'ERROR: nt<=t_scrap'
         call critical_stop
+    endif
+
+    if ((nt-t_scrap)*OMP_get_max_threads() < 5000) then
+        print*, 'Warning: too few simulation periods? (nt-t_scrap)*OMP_get_max_threads() < 5000'
     endif
 
     if (nx_factor < 1) then
