@@ -10,8 +10,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
                           pol, secs, it, projectname, calib_name, dir, err)
 
     use kinds
-    use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle
-    use laws_of_motion  ,only: tCoeffs
+    use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs
     use statistics      ,only: tStats, tStats_logical, cov
     use params_mod      ,only: n_eta, nj,nz, n_coeffs, pop_frac, construct_path, loms_in_logs
 

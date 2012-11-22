@@ -1,7 +1,6 @@
 module krusell_smith_mod
     use kinds
-    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies
-    use laws_of_motion         ,only: tCoeffs, MakeType, MakeVector
+    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs
 
     implicit none
     private
@@ -50,14 +49,14 @@ contains
         endif
 
         intialize_jacobi=.true.
-        n= size(MakeVector(coeffs, normalize_coeffs))
+        n= size(coeffs%makevector(normalize_coeffs))
         allocate(xvals(n), fvals(n), Rmat(n,n), QTmat(n,n))
         Rmat  = 0.0
         QTmat = 0.0
         call put_diag(1.0/0.5_dp,Rmat)
 
         it = 0
-        xvals = MakeVector(coeffs, normalize_coeffs)
+        xvals = coeffs%makevector(normalize_coeffs)
 
         xgrid_mean_new = xgrid_ms ! First grid is mean shock grid. Could remove if Phi was derived type carrying its own grid.
         if (partial_equilibrium) then
@@ -92,7 +91,7 @@ contains
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
             integer         :: i
 
-            coeffs = MakeType(coeffvec, normalize_coeffs)
+            call coeffs%maketype(coeffvec, normalize_coeffs)
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
@@ -135,7 +134,7 @@ contains
             coeff_dif%k  = (coeffs%k  - coeffs_old%k)  !/(coeffs_old%k+1.0)
             coeff_dif%mu = (coeffs%mu - coeffs_old%mu) !/(coeffs_old%mu+1.0)
 
-            distance = MakeVector(coeff_dif, normalize_coeffs)
+            distance = coeff_dif%makevector(normalize_coeffs)
 
             if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 

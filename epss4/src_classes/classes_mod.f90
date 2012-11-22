@@ -5,5 +5,6 @@ module classes_mod
     use lifecycles_class
     use policies_class
     use simvars_class
+    use coefficients_class
 
 end module classes_mod

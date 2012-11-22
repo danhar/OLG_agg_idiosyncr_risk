@@ -6,7 +6,7 @@ subroutine run_model(projectname, calib_name, welfare)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
-    use laws_of_motion    ,only: tCoeffs, Initialize, MakeVector, MakeType
+    use laws_of_motion    ,only: Initialize
 	use markovchain_mod   ,only: MarkovChain
 	use distribution      ,only: CheckPhi
 	use mean_shock_mod    ,only: solve_meanshock

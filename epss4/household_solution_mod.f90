@@ -1,11 +1,10 @@
 module household_solution_mod
     use kinds
-    use classes_mod ,only: tAggGrids, tPolicies, tErrors
-    use laws_of_motion ,only: tCoeffs
+    use classes_mod ,only: tAggGrids, tPolicies, tErrors, tCoeffs
 
     implicit none
     private
-    public olg_backwards_recursion, tPolicies
+    public olg_backwards_recursion
 
 contains
 !-------------------------------------------------------------------------------
