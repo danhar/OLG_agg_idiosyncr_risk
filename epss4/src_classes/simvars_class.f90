@@ -9,7 +9,7 @@ module simvars_class
     type tSimvars
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
         real(dp), dimension(:), allocatable ::    &
-                K, output, stock, bonds, B, invest, mu, C, Phi_1, Phi_nx, err_aggr, err_income, &      ! mu, per capita: k, bonds, consumption
+                K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests ! prices
         logical,  dimension(:), allocatable :: err_K, err_mu
 
@@ -336,8 +336,10 @@ contains
             open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
             ! Could I use standard derived type IO?
             do i=1,size(this)
-               read(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
-                        this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
+               read(55) this(i)%z, &    ! integer
+                        this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &
+                        this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
+                        this(i)%err_K, this(i)%err_mu   !logical
             enddo
             close(55)
         endif
@@ -365,8 +367,10 @@ contains
 
         open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         do i=1,size(this)
-            write(55) this(i)%z, this(i)%K, this(i)%mu, this(i)%B, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, &
-                      this(i)%err_income, this(i)%r, this(i)%rf, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, this(i)%err_K, this(i)%err_mu
+            write(55) this(i)%z, &    ! integer
+                      this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &
+                      this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
+                      this(i)%err_K, this(i)%err_mu   !logical
         enddo
         close(55)
 

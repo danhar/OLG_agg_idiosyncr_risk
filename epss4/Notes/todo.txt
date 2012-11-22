@@ -79,8 +79,7 @@ If I try to change this, I should first try it on a new copy (not even a branch,
     first /).
 
 - maybe: put start_solution(.,ms) and start_solution(.,ge) in main, then distinguish the two cases in start_solution_mod with if statements,
-    because tehre is some redundancy. In a similar spirit, I could move some of the steps into meanshock_wrapper and create an analogous
-    krusell_smith_wrapper (which contains the current internal_subroutine_krusellsmith()). In a similar spirit, I could move the pseudo-simulation step
+    because tehre is some redundancy. In a similar spirit, I could move the pseudo-simulation step
     from meanshock_wrapper to meanshock_equilib to keep it analogous to krusell_smith.f90. Actually, regarding the last sentence, I would prefer to
     just call the simulate_economy from meanshock_wrapper, because then the statistics are more comparable to the ge case. 
      
@@ -110,8 +109,6 @@ and should treat err_cons and err_asset the same as err_kp and err_mup.
 also should make err_mup(nz), allocate accordingly.
 Remove the optional on errors (everywhere!)
 
-- move value into policies
-
 - in fun_eulerasset I do Taylor approx IFF xp<x(1,j+1). Should also do for upper bound? And also for consumption-Euler?!
 - create derived types for  loms (has types coeffs and grids), prices (wages etc)?
 
@@ -128,7 +125,7 @@ Remove the optional on errors (everywhere!)
 - Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (E) Done! (started only in Nov. 2012) cronological order
+ (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - parallelize simulation
 
