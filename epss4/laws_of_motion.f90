@@ -209,7 +209,6 @@ function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) r
     type(tAggGrids)  ,intent(in) ,optional :: agg_grid_o
     real(dp) ,parameter :: coef_k2_init  = 0.95_dp ! could delete this
     real(dp) ,parameter :: coef_mu3_init = 0.70_dp
-    integer             :: io_err
     type(tSimvars) ,allocatable :: simvars_old(:)
 
     call coeffs%allocate(n_coeffs,nz)

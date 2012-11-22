@@ -215,11 +215,7 @@ contains
         type(tSimvars)  ,intent(in) :: simvars(:)
 
         call grids%write_unformatted('ge')
-
-        open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted')
-        write(55) coeffs%k, coeffs%mu
-    !        write(55) coeffs
-        close(55)
+        call coeffs%write_unformatted
 
         call write_unformatted(simvars)
 
@@ -233,11 +229,7 @@ contains
         type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
 
         call grids%read_unformatted('ks')
-
-        allocate(coeffs%k(n_coeffs,nz), coeffs%mu(n_coeffs,nz), coeffs%r_squared(2,nz))
-        open(55,file='model_input/last_results/coeffs_ge.unformatted',form='unformatted',action='read')
-        read(55) coeffs%k, coeffs%mu
-        close(55)
+        call coeffs%read_unformatted
 
         call read_unformatted(simvars)
     end subroutine read_unformatted_ks

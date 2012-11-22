@@ -7,7 +7,7 @@ module coefficients_class
 
     type tCoeffs
         real(dp), dimension(:,:), allocatable :: k, mu, r_squared  ! coefficients for laws of motion, and residual sum of squares
-        real(dp), private, parameter :: norm_factor_small = 10.0, norm_factor_large = 100.0 ! Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
+        real(dp), private :: norm_factor_small = 10.0_dp, norm_factor_large = 100.0_dp ! Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
     contains
         procedure :: allocate
         procedure :: deallocate
@@ -21,7 +21,7 @@ contains
 
     elemental subroutine allocate(this,ncoeffs,nz)
         class(tCoeffs), intent(out)  :: this
-        integer,    intent(in)      :: nk,nmu
+        integer,    intent(in)      :: ncoeffs,nz
         allocate(this%k(ncoeffs,nz),this%mu(ncoeffs,nz))
         allocate(this%r_squared(2,nz))
     end subroutine allocate
@@ -57,7 +57,7 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine write_unformatted(this)
-        class(tAggGrids) ,intent(in) :: this
+        class(tCoeffs) ,intent(in) :: this
         integer :: io_stat
 
         open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
@@ -80,8 +80,8 @@ contains
 !-------------------------------------------------------------------------------
 
     pure subroutine maketype(this, coeff_vec, normalize)
-        use params_mod ,only: n_coeffs, pooled_regression, pi_delta
-        class(tCoeffs) :: this
+        use params_mod ,only: n_coeffs, pooled_regression, pi1_delta
+        class(tCoeffs)         ,intent(out):: this
         real(dp), dimension(:) ,intent(in) :: coeff_vec
         logical                ,intent(in) :: normalize
         integer :: zc, nz
@@ -125,14 +125,15 @@ contains
 !-------------------------------------------------------------------------------
 
     pure function makevector(this,normalize) result(coeff_vec)
-        use params_mod ,only: pooled_regression, pi_delta
+        use params_mod ,only: pooled_regression, pi1_delta
         real(dp), dimension(:), allocatable :: coeff_vec
         class(tCoeffs) ,intent(in) :: this
-        logical       ,intent(in) :: normalize
+        logical        ,intent(in) :: normalize
         type(tCoeffs) :: coeffs     ! need this only because this has intent(in), and if I want to normalize
-        integer :: zc, n_coeffs
+        integer :: zc, nz, n_coeffs
 
         n_coeffs = size(this%k,1)
+        nz       = size(this%k,2)
         coeffs = this
 
         if (normalize) then
