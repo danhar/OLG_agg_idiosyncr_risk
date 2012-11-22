@@ -7,7 +7,8 @@ module coefficients_class
 
     type tCoeffs
         real(dp), dimension(:,:), allocatable :: k, mu, r_squared  ! coefficients for laws of motion, and residual sum of squares
-        real(dp), private :: norm_factor_small = 10.0_dp, norm_factor_large = 100.0_dp ! Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
+        logical           :: normalize
+        real(dp), private :: norm_factor_small = 10.0, norm_factor_large = 100.0 ! Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
     contains
         procedure :: allocate
         procedure :: deallocate
@@ -79,11 +80,10 @@ contains
     end subroutine write_unformatted
 !-------------------------------------------------------------------------------
 
-    pure subroutine maketype(this, coeff_vec, normalize)
+    pure subroutine maketype(this, coeff_vec)
         use params_mod ,only: n_coeffs, pooled_regression, pi1_delta
         class(tCoeffs)         ,intent(out):: this
         real(dp), dimension(:) ,intent(in) :: coeff_vec
-        logical                ,intent(in) :: normalize
         integer :: zc, nz
 
         nz = size(coeff_vec)/n_coeffs
@@ -112,7 +112,7 @@ contains
             enddo
         endif
 
-        if (normalize) then
+        if (this%normalize) then
             this%mu(1,:) = this%mu(1,:)/this%norm_factor_small
             this%mu(2,:) = this%mu(2,:)/this%norm_factor_large
             if (n_coeffs >= 3) then
@@ -124,11 +124,10 @@ contains
     end subroutine maketype
 !-------------------------------------------------------------------------------
 
-    pure function makevector(this,normalize) result(coeff_vec)
+    pure function makevector(this) result(coeff_vec)
         use params_mod ,only: pooled_regression, pi1_delta
         real(dp), dimension(:), allocatable :: coeff_vec
         class(tCoeffs) ,intent(in) :: this
-        logical        ,intent(in) :: normalize
         type(tCoeffs) :: coeffs     ! need this only because this has intent(in), and if I want to normalize
         integer :: zc, nz, n_coeffs
 
@@ -136,7 +135,7 @@ contains
         nz       = size(this%k,2)
         coeffs = this
 
-        if (normalize) then
+        if (this%normalize) then
             coeffs%mu(1,:) = coeffs%mu(1,:)*this%norm_factor_small
             coeffs%mu(2,:) = coeffs%mu(2,:)*this%norm_factor_large
             if (n_coeffs >= 3) then
