@@ -2,8 +2,10 @@ module distribution
     use kinds
     use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta
     implicit none
+    private
 
-    private check_Phi_full, check_Phi_small, check_Phi_pure
+    public TransitionPhi, CheckPhi
+
     interface CheckPhi
         module procedure check_Phi_full, check_Phi_small, check_Phi_pure
     end interface

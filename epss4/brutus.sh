@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='018_check_IO3DB'
-BUILD=Build_Parallel_Debug #Parallel_Optim #Optimmax #Debugmax #    
+thisrun='018_coef4'
+BUILD=Build_Parallel_Optim #Parallel_Debug #Optimmax #Debugmax #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

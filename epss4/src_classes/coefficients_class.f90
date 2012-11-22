@@ -81,12 +81,11 @@ contains
 !-------------------------------------------------------------------------------
 
     pure subroutine maketype(this, coeff_vec)
-        use params_mod ,only: n_coeffs, pooled_regression, pi1_delta
+        use params_mod ,only: n_coeffs, pooled_regression, pi1_delta, nz
         class(tCoeffs)         ,intent(out):: this
         real(dp), dimension(:) ,intent(in) :: coeff_vec
-        integer :: zc, nz
+        integer :: zc
 
-        nz = size(coeff_vec)/n_coeffs
         call this%allocate(n_coeffs,nz)
         this%r_squared = 0.0
 

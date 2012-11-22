@@ -1,10 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- parallelize simulation
-
-- make simvars class and coeffs class. see unformatted_io and laws_of_motion
-
 - add calibration routine
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -18,13 +14,6 @@
 
 - add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
 
-- put reading and writing of unformatted output together. Better: make different objects and put all reading and writing there.
-In the course of this, check that all components of a type are read and written. 
-For example, simvars should read and write output unformatted also, see  subroutine SaveUnformatted_ksvars in unformatted_io.f90 and laws_of_motion.f90:ReadUnformatted 
-
-- rewrite unformatted IO to use form='unformatted', access='stream' for better portability
-    (first only change the unformatted write, then run all calibrations, then change the unformatted read)
-
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -32,7 +21,6 @@ For example, simvars should read and write output unformatted also, see  subrout
 - implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
 - make params_mod readable by Matlab and read it in
 - bequests to the young
-- subfolder src_classes
 - make nx, n_eta, nz ... private in params_mod? nx should be relatively easy! 
     I think better: put into policies! But that might interfere when I define the type as a tuple of scalars and then use arrays of the type... but that's far into the future 
 - have an aggregate grid for each z, coz mu and k change a lot with z (k coz depreciation, mu coz probabilities of high return tomorrow).
@@ -61,19 +49,15 @@ adding, interpolating, calling routines, having less dimensions. But have to thi
 - check why opt_zbrak=.true. takes so much longer (might just be curse of dimensionality)
 
 Object orientation:
-- put the write and reads (formatted and unformatted) into the types. This avoids cirularities, e.g. in subroutine SetRemainingParams() can call ReadUnformatted(ms_guess).
-  Do this both for unformatted_IO.f90, as well as for save_results_mod.f90
-- make aggregate grids with type-bound procedures. Maybe just call it grid? And put makegrid in there? and use it also for apgrid?
+- put the formatted write into the types. see save_results_mod.f90
+- Call aggregate_grids_class just grids? And use aggregate_grids_class also for apgrid??
 - lifecycles_mod with calculation of lifecycles, consistent both with mean shock and simulations
 - for lifecycles, make 'sub'type with avg and std_dev, and record for all; maybe also avg_cond std_dev_cond (conditional on survival). 
     Also make a write statement similar to the aggregate stats.  put pop_frac in lifecycles
 - in simulations, use a tLifecycle 'lc_t' to record in t, and define an operator (+) to add that to the lifecylce 
-- put type policyfunctions in policyfunctions.f90 and make solution a method 'solve'
 - Make type params and have a method that distributes the params to the objects that need them, e.g. policyfunctions. No more need for all the use statements
     Then I can have an allocatable type params in main, see how many runs we have (depends on experiment / number of calibs), then allocate and have a params
     for each, which I then pass by argument to start_solution, which has a scalar type params as input.
-
-
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (C) To do later/ ideas
@@ -146,3 +130,17 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) cronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- parallelize simulation
+
+- make simvars class and coeffs class. see unformatted_io and laws_of_motion
+
+- put reading and writing of unformatted output together. Better: make different objects and put all reading and writing there.
+In the course of this, check that all components of a type are read and written. 
+For example, simvars should read and write output unformatted also, see  subroutine SaveUnformatted_ksvars in unformatted_io.f90 and laws_of_motion.f90:ReadUnformatted 
+
+- rewrite unformatted IO to use form='unformatted', access='stream' for better portability
+    (first only change the unformatted write, then run all calibrations, then change the unformatted read)
+
+- subfolder src_classes    
+
+- make aggregate grids with type-bound procedures. And put makegrid in there?
