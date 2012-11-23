@@ -1,6 +1,6 @@
 module krusell_smith_mod
     use kinds
-    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs
+    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs, tStats
 
     implicit none
     private
@@ -24,7 +24,7 @@ contains
         use sub_alg_qn
         !use sub_broyden
 
-        type(tAggGrids) ,intent(in)    :: grids
+        type(tAggGrids) ,intent(inout) :: grids
         character(len=*),intent(in)    :: projectname, calib_name, output_path
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars(:)
@@ -36,33 +36,46 @@ contains
         integer         ,intent(out)   :: it
         real(dp) ,allocatable ,intent(out) :: value(:,:,:,:,:,:)
 
+        type(tStats)          :: K, mu
         real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
         real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
-        integer               :: n
+        integer               :: n, i
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
-        if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
-            maxstp=1.0_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
-        else
-            maxstp=10.0     ! this is large and arbitrary
-        endif
 
-        intialize_jacobi=.true.
         n= size(coeffs%makevector())
-        allocate(xvals(n), fvals(n), Rmat(n,n), QTmat(n,n))
-        Rmat  = 0.0
-        QTmat = 0.0
-        call put_diag(1.0/0.5_dp,Rmat)
+        allocate(xvals(n), fvals(n))
 
         it = 0
         xvals = coeffs%makevector()
-
         xgrid_mean_new = xgrid_ms ! First grid is mean shock grid. Could remove if Phi was derived type carrying its own grid.
-        if (partial_equilibrium) then
-            fvals = krusellsmith(xvals)
-        else
+
+        fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
+
+        if (.not. partial_equilibrium) then
+            print '(t2,a43,i3.3)','- krusell_smith: updating aggregate grid and starting root finder'
+
+            ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good
+            K%name ='K' ; call K%calc_stats(simvars)
+            mu%name='mu'; call mu%calc_stats(simvars)
+            call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
+            forall (i = 1:size(simvars))  simvars(i)%K(1) = K%avg_()
+
+            ! Initialize root finder
+            if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
+                maxstp=1.0_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+            else
+                maxstp=10.0     ! this is large and arbitrary
+            endif
+            intialize_jacobi=.true.
+            allocate(Rmat(n,n), QTmat(n,n))
+            Rmat  = 0.0
+            QTmat = 0.0
+            call put_diag(1.0/0.5_dp,Rmat)
+
+            ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
                  reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=100,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
@@ -90,7 +103,6 @@ contains
             type(tCoeffs)   :: coeffs_old, coeff_dif
             type(tLifecycle) :: lifecycles_array(size(simvars))
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
-            integer         :: i
 
             call coeffs%maketype(coeffvec)
             it = it+1

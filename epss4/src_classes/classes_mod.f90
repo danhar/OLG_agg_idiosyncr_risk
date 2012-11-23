@@ -6,5 +6,6 @@ module classes_mod
     use policies_class
     use simvars_class
     use coefficients_class
+    use statistics              ,only: tStats, tStats_logical
 
 end module classes_mod

@@ -13,6 +13,7 @@ module aggregate_grids_class
         procedure :: read_unformatted
         procedure :: write_unformatted
         procedure :: construct =>construct_aggr_grid
+        procedure :: update => update_grid_with_stats
     end type tAggGrids
 
 contains
@@ -94,5 +95,28 @@ contains
 	    ub=factor_mu*mean_guess%mu(1)*(1.0+cover_mu)
 	    this%mu=MakeGrid(lb,ub,nmu)
 	end subroutine construct_aggr_grid
+
+    elemental subroutine update_grid_with_stats(this, k_mean, mu_mean, k_std, mu_std)
+    ! Update the grid using mean and variance of k and mu
+    ! Wanted to use statistics, only: tStats and have type(tStats) ,intent(in) :: k, mu,
+    ! but circular dependency statistics-> aggregate_grids_class -> params_mod -> statistics
+        use makegrid_mod
+
+        class(tAggGrids),intent(inout):: this
+        real(dp) ,intent(in) :: k_mean, mu_mean, k_std, mu_std
+        integer   :: n
+        real(dp)                    :: lb, ub       ! lower and upper bound
+        real(dp), parameter :: cover = 4.0
+
+        lb=k_mean -cover*k_std
+        ub=k_mean +cover*k_std
+        n = size(this%k)
+        this%k=MakeGrid(lb,ub,n)
+
+        lb=mu_mean -cover*mu_std
+        ub=mu_mean +cover*mu_std
+        n = size(this%mu)
+        this%mu=MakeGrid(lb,ub,n)
+    end subroutine update_grid_with_stats
 
 end module aggregate_grids_class
