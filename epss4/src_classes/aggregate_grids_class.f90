@@ -106,15 +106,17 @@ contains
         real(dp) ,intent(in) :: k_mean, mu_mean, k_std, mu_std
         integer   :: n
         real(dp)                    :: lb, ub       ! lower and upper bound
-        real(dp), parameter :: cover = 4.0
+        real(dp), parameter :: cover_k_l = 2.0, cover_k_u = 3.0,cover_mu_l = 2.0, cover_mu_u = 2.0, min_k=1.0_dp, min_mu = 0.01_dp
 
-        lb=k_mean -cover*k_std
-        ub=k_mean +cover*k_std
+        lb=k_mean -cover_k_l*k_std
+        if (lb < min_k) lb = min_k
+        ub=k_mean +cover_k_u*k_std
         n = size(this%k)
         this%k=MakeGrid(lb,ub,n)
 
-        lb=mu_mean -cover*mu_std
-        ub=mu_mean +cover*mu_std
+        lb=mu_mean -cover_mu_l*mu_std
+        if (lb < min_mu) lb = min_mu
+        ub=mu_mean +cover_mu_u*mu_std
         n = size(this%mu)
         this%mu=MakeGrid(lb,ub,n)
     end subroutine update_grid_with_stats

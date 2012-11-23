@@ -55,7 +55,8 @@ contains
         fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
 
         if (.not. partial_equilibrium) then
-            print '(t2,a43,i3.3)','- krusell_smith: updating aggregate grid and starting root finder'
+            print *
+            print '(t2,a)','- krusell_smith: updating aggregate grid and starting root finder'
 
             ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good
             K%name ='K' ; call K%calc_stats(simvars)
