@@ -45,9 +45,6 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     simvars%err_mu  = .false.
     Knew(1)   = simvars%K(1)    ! This is only interesting for PE
 
-    ! Initialize rf and policies for 'previous' period (i.e. t=0) by setting them to mean-shock value
-    call get_initial_values(apgridt, stockst, simvars%rf(1))
-
     do tc=1,nt
         zt = simvars%z(tc)
         Kt = simvars%K(tc)
@@ -74,6 +71,18 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
         elsewhere
             kappa_zk = 0.0
         end where
+
+tc1:    if (tc == 1) then
+            if (nmu > 1) then
+                i        = f_locate(agg_grid%mu, simvars%mu(1))
+                w        = (simvars%mu(1) - agg_grid%mu(i)) / (agg_grid%mu(i+1) - agg_grid%mu(i))
+                apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
+                stockst  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
+            else
+                apgridt  = apgrid_zk(:,:,:,1)
+                stockst  = stocks_zk(:,:,:,1)
+            endif
+        endif tc1
 
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
@@ -194,7 +203,6 @@ contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
 ! - pure real(dp) function f_excessbonds(mut)
-! - pure subroutine get_initial_values(apgridt, stockst, rf1)
 !-------------------------------------------------------------------------------
 
     pure real(dp) function f_excessbonds(mut)
@@ -232,52 +240,6 @@ contains
 
     end function f_excessbonds
 !-------------------------------------------------------------------------------
-
-    pure subroutine get_initial_values(apgridt, stockst, rf1)
-    ! Calculate policies for mean shock, which correspond to initial (=mean shock) distribution, K, mu
-
-        use params_mod ,only: stat_dist_z
-	    real(dp) ,dimension(:,:,:) ,intent(inout) :: apgridt, stockst !intent(in) to get allocation status and size
-	    real(dp)                   ,intent(out)   :: rf1
-	    real(dp) :: K0, mu0, wK, wmu, w_ms
-	    integer  :: iK, imu, zc, jc, nz
-
-        nz = size(policies%apgrid,3)
-        w_ms    = 0.25_dp ! corresponds to MeanShockGE variable w
-        apgridt = 0.0
-        stockst = 0.0
-
-	    K0      = simvars%K(1)
-        iK      = f_locate(agg_grid%K, K0)     ! In 'default', returns ju-1 if x>xgrid(ju-1) !
-        wK      = (K0 - agg_grid%K(iK)) / (agg_grid%K(iK+1) - agg_grid%K(iK))
-        mu0     = (agg_grid%mu(1) + agg_grid%mu(nmu))/2  ! very close to mean shock value
-        imu     = f_locate(agg_grid%mu, mu0)
-
-        if (nmu > 1) then
-            wmu     = (mu0 - agg_grid%mu(imu)) / (agg_grid%mu(imu+1) - agg_grid%mu(imu))
-		    do zc=1,nz
-	            apgridt = apgridt + w_ms*( &
-	                              (1-wK)*(1-wmu)*policies%apgrid(:,:,zc,:,iK  ,imu  ) + &
-	                                 wK *(1-wmu)*policies%apgrid(:,:,zc,:,iK+1,imu  ) + &
-	                              (1-wK)*   wmu *policies%apgrid(:,:,zc,:,iK  ,imu+1) + &
-	                                 wK *   wmu *policies%apgrid(:,:,zc,:,iK+1,imu+1) )
-
-	            stockst = stockst + w_ms*( &
-	                              (1-wK)*(1-wmu)*policies%stocks(:,:,zc,:,iK  ,imu  ) + &
-	                                 wK *(1-wmu)*policies%stocks(:,:,zc,:,iK+1,imu  ) + &
-	                              (1-wK)*   wmu *policies%stocks(:,:,zc,:,iK  ,imu+1) + &
-	                                 wK *   wmu *policies%stocks(:,:,zc,:,iK+1,imu+1) )
-			enddo
-        else
-            do zc=1,nz
-                apgridt = apgridt + w_ms*((1-wK)*policies%apgrid(:,:,zc,:,iK,1) + wK*policies%apgrid(:,:,zc,:,iK+1,1))
-                stockst = stockst + w_ms*((1-wK)*policies%stocks(:,:,zc,:,iK,1) + wK*policies%stocks(:,:,zc,:,iK+1,1))
-            enddo
-        endif
-
-        rf1     = f_riskfree_rate(simvars%K(1),mu0,stat_dist_z)
-
-    end subroutine get_initial_values
 
 end subroutine simulate
 

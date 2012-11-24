@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='020_test2DB'
+thisrun='020_test4DB_noinit'
 BUILD=Build_Parallel_Debug #Parallel_Optim #Optimmax #Debugmax #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

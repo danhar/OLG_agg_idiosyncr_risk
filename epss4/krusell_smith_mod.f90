@@ -36,7 +36,7 @@ contains
         integer         ,intent(out)   :: it
         real(dp) ,allocatable ,intent(out) :: value(:,:,:,:,:,:)
 
-        type(tStats)          :: K, mu
+        type(tStats)          :: K, mu, rf
         real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
         real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
@@ -61,8 +61,13 @@ contains
             ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good
             K%name ='K' ; call K%calc_stats(simvars)
             mu%name='mu'; call mu%calc_stats(simvars)
+            rf%name='rf'; call rf%calc_stats(simvars)
             call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
-            forall (i = 1:size(simvars))  simvars(i)%K(1) = K%avg_()
+            forall (i = 1:size(simvars))
+                simvars(i)%K(1) = K%avg_()
+                simvars(i)%mu(1) = mu%avg_()
+                simvars(i)%rf(1) = rf%avg_()
+            end forall
 
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file

@@ -99,7 +99,8 @@ contains
     elemental subroutine update_grid_with_stats(this, k_mean, mu_mean, k_std, mu_std)
     ! Update the grid using mean and variance of k and mu
     ! Wanted to use statistics, only: tStats and have type(tStats) ,intent(in) :: k, mu,
-    ! but circular dependency statistics-> aggregate_grids_class -> params_mod -> statistics
+    ! but circular dependency statistics-> aggregate_grids_class -> params_mod -> statistics.
+    ! Instead of mean and std one could also use min and max.
         use makegrid_mod
 
         class(tAggGrids),intent(inout):: this

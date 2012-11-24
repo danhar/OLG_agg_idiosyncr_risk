@@ -25,6 +25,7 @@ subroutine run_model(projectname, calib_name, welfare)
     type(tSimvars), allocatable:: simvars(:)    ! simulation variables, e.g. zt, kt,...
     type(tErrors)     :: err
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
+    real(dp)          :: ms_rf_temp
 	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	character(:),allocatable :: dir, output_path
 
@@ -63,6 +64,8 @@ subroutine run_model(projectname, calib_name, welfare)
         call ms_grids%write_unformatted('ms')
     endif
     call save_and_plot_results(dir, ms_grids, err)
+
+    ms_rf_temp = simvars(1)%rf(1)
     deallocate(simvars)
     print*, ' '
 
@@ -103,7 +106,9 @@ subroutine run_model(projectname, calib_name, welfare)
         call random_seed(put=seed) ! so that same sequence for different experiments
         do i=1,size(simvars)
             simvars(i)%z     = MarkovChain(pi_z,nt)
-            simvars(i)%K(1)  = ms_grids%k(1) ! starting value for simulation
+            simvars(i)%K(1)  = ms_grids%k(1)    ! starting value for simulation
+            simvars(i)%mu(1) = ms_grids%mu(1)   ! starting value for simulation
+            simvars(i)%rf(1) = ms_rf_temp       ! starting value for simulation
         enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
         coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
