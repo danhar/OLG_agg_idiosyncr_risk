@@ -1,8 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- update agg_grid in krusell_smith so that dont hit borders
-
 - add calibration routine
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -143,3 +141,5 @@ For example, simvars should read and write output unformatted also, see  subrout
 - subfolder src_classes    
 
 - make aggregate grids with type-bound procedures. And put makegrid in there?
+
+- update agg_grid in krusell_smith so that doesn't hit borders
