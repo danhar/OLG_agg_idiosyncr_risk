@@ -2,7 +2,7 @@ module run_model_mod
     implicit none
 contains
 
-subroutine run_model(projectname, calib_name, welfare)
+subroutine run_model(projectname, calib_name, welfare, simvars_o)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
@@ -13,11 +13,12 @@ subroutine run_model(projectname, calib_name, welfare)
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, save_all_iterations, & ! logicals
+	                             partial_equilibrium, estimate_from_simvars, & ! logicals
 	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
+	type(tSimvars)   ,intent(out) ,optional, allocatable :: simvars_o(:)
     type(tCoeffs)     :: coeffs  ! coefficients for laws of motion
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
@@ -27,9 +28,11 @@ subroutine run_model(projectname, calib_name, welfare)
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
     real(dp)          :: ms_rf_temp
 	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
+	logical           :: calibrating
 	character(:),allocatable :: dir, output_path
 
     call system_clock(start_time)
+    if (present(simvars_o)) calibrating = .true.
 !-------------------------------------------------------------------------------
 ! Mean Shock (partial or general) Equilibrium (to generate good initial guesses)
 !-------------------------------------------------------------------------------
@@ -59,11 +62,11 @@ subroutine run_model(projectname, calib_name, welfare)
 
     ! Check distribution and save results
     call CheckPhi(Phi,output_path) ! writes errors to file
-    if (.not. partial_equilibrium) then
+    if (.not. (partial_equilibrium .or. calibrating)) then
         syserr = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
         call ms_grids%write_unformatted('ms')
     endif
-    call save_and_plot_results(dir, ms_grids, err)
+    if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
 
     ms_rf_temp = simvars(1)%rf(1)
     deallocate(simvars)
@@ -77,7 +80,7 @@ subroutine run_model(projectname, calib_name, welfare)
     endif
 !stop 'Stop after ms'
 !-------------------------------------------------------------------------------
-! Full (partial or general) Equilibrium (i.e. Krusell/Smith algorithm)
+! Non-stationary (partial or general) Equilibrium (i.e. Krusell/Smith algorithm)
 !-------------------------------------------------------------------------------
     ! set new apmax using the results of mean shock
     call set_apmax(ms_grids%k(1)*factor_k)
@@ -117,15 +120,6 @@ subroutine run_model(projectname, calib_name, welfare)
     output_path = construct_path(dir,calib_name)
     syserr = system('mkdir '//output_path)
 
-    ! The following block is for debugging / understanding Krusell Smith
-    if (save_all_iterations) then   ! format the file where intermediate coeffs will be saved
-        open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
-        write(132,*)
-        write(132,'(t8,a91)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3)     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3)'
-        write(132,*)
-        close(132)
-    endif
-
     call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
@@ -133,8 +127,9 @@ subroutine run_model(projectname, calib_name, welfare)
     ! Check distribution and save results
     print*, ' '
     call CheckPhi(Phi,output_path)
-    if (.not. partial_equilibrium) call save_unformatted(grids, coeffs, simvars)
-    call save_and_plot_results(dir, grids, err)
+    if (.not. (partial_equilibrium .or. calibrating)) call save_unformatted(grids, coeffs, simvars)
+    if (.not. calibrating) call save_and_plot_results(dir, grids, err)
+    if (present(simvars_o)) simvars_o = simvars
     print*,' **** Completed solution of calibration ', calib_name, ' **** '
     print*, ' '
     print*, ' '

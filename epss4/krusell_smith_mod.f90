@@ -10,7 +10,7 @@ contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
 ! - subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
-! -- (internal) function solve_krusellsmith(coeffvec) result(distance)
+! -- (internal) function krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
 !-------------------------------------------------------------------------------
     subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
@@ -19,7 +19,7 @@ contains
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
 
-        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium
+        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium, save_all_iterations
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
         !use sub_broyden
@@ -81,6 +81,15 @@ contains
             QTmat = 0.0
             call put_diag(1.0/0.5_dp,Rmat)
 
+            ! The following block is useful for debugging Krusell Smith
+            if (save_all_iterations) then   ! write the headers into the file for saving intermediate coeffs
+                open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
+                write(132,*)
+                write(132,'(t8,a91)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3)     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3)'
+                write(132,*)
+                close(132)
+            endif
+
             ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
@@ -97,7 +106,7 @@ contains
             ! This function has many side-effects. In particular, it writes directly into host's coeffs, so that in the end we have the latest update and also the R2 in that type.
             use lifecycles_class      ,only: average
             use simvars_class         ,only: print_error
-            use params_mod            ,only: exogenous_xgrid, save_all_iterations, nx_factor
+            use params_mod            ,only: exogenous_xgrid, nx_factor
             use household_solution_mod,only: olg_backwards_recursion
             use laws_of_motion        ,only: Regression
             use simulation_mod        ,only: simulate

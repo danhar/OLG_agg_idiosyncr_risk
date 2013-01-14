@@ -11,10 +11,10 @@ module params_mod
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
 	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, rho, n, tau, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, apmax_factor, cmin, kappamax, &
-	                      apmax_curv, tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
+	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
-                          n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start
-    logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
+                          n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params
+    logical ,protected :: ccv, surv_rates, def_contrib, calibrate_model, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
 
@@ -83,12 +83,12 @@ subroutine SetDefaultValues()
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
-    apmax_curv=1.0; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
+    apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
     nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
-    run_n_times=1; run_counter_start=1
+    run_n_times=1; run_counter_start=1; n_end_params=2
     ! Logicals
-    ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
+    ccv=.true.; surv_rates=.false.; def_contrib=.true.; calibrate_model=.false.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
 end subroutine SetDefaultValues
@@ -712,6 +712,16 @@ use omp_lib           ,only: OMP_get_max_threads
 ! Put checks into the modules / objects they belong to? Would probably destroy pure in some cases?
     real(dp), parameter :: crit = 0.0000001_dp
 
+    if (beta <= 0.0) then
+        print*, 'ERROR: beta <= 0.0'
+        call critical_stop
+    endif
+
+    if (theta == 1.0) then
+        print*, 'ERROR: theta == 1.0 not implemented (yields gamma = 0)!'
+        call critical_stop
+    endif
+
     if (ms_guess%k(1) < 1e-6) then
         print*, 'ERROR: ms_guess%k(1)<1e-6'
         call critical_stop
@@ -740,10 +750,6 @@ use omp_lib           ,only: OMP_get_max_threads
     elseif (n_coeffs<2) then
         print*, 'ERROR: n_coeffs<2, check laws_of_motion:initialize_coeffs AND :Regression!'
         call critical_stop
-    endif
-
-    if (theta == 1.0) then
-        print*, 'WARNING: theta == 1.0, Taylor expansion in household_solution_mod:asseteuler doesnt work!'
     endif
 
     if (nz /= 4) then
@@ -893,7 +899,10 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
-    if (psi > 5.0 .or. psi < 0.0) then
+    if (psi == 1.0 .or. psi == 0.0) then
+        print*, 'ERROR: gamma not defined for psi = ', psi
+        call critical_stop
+    elseif (psi > 5.0 .or. psi < 0.0) then
         print*, 'ERROR: psi out of range, psi = ', psi
         call critical_stop
     endif
@@ -961,6 +970,10 @@ use omp_lib           ,only: OMP_get_max_threads
     if (scale_AR == -1.0 .and. .not. partial_equilibrium) then
         print*, 'ERROR: scale_AR = -1.0, ie. no aggregate risk, not yet implemented with general equilibrium'
         call critical_stop
+    endif
+
+    if (calibrate_model .and. partial_equilibrium) then
+        print*, 'Warning: Calibrating in partial equilibrium'
     endif
 
 contains
@@ -1099,7 +1112,7 @@ end subroutine SaveParams
 
 
 subroutine params_set_real(param_name, new_value)
-! this is inefficient, should do one setter method for each
+! From computational viewpoint, this is inefficient, should do one setter method for each
     character(len=*), intent(in) :: param_name
     real(dp), intent(in)     :: new_value
 	    select case (param_name)
@@ -1127,6 +1140,31 @@ subroutine params_set_real(param_name, new_value)
             else
                 tau= new_value
             endif
+        case ('beta')
+           if (new_value < 0.0) then
+               print* , 'params_set: beta < 0.0, setting to 1e-6'
+               beta = 1e-6_dp
+           else
+               beta = new_value
+           endif
+        case ('theta')
+           if (new_value = 1.0) then
+               print* , 'params_set: theta = 1.0 not implemented, setting to 1.01'
+               theta = 1.01
+           else
+               theta = new_value
+           endif
+       case ('psi')
+           if (new_value = 1.0) then
+               print* , 'params_set: gamma not defined for psi = 1.0, setting psi = 1.01'
+               psi = 1.01
+           elseif (new_value = 1.0) then
+               print* , 'params_set: gamma not defined for psi = 0.0, setting psi = 0.01'
+               psi = 0.01
+           else
+               theta = new_value
+           endif
+
 		case default
 		    print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
 		end select

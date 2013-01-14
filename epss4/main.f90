@@ -3,8 +3,9 @@
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
-	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, SaveParams, cal_id, params_set, params_set_thisrun, &
+	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, SaveParams, cal_id, calibrate_model, params_set, params_set_thisrun, &
 	                              run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, dp
+	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
     implicit none
@@ -32,6 +33,12 @@ program EPSS
 	    print*, '- main: Reading calibration file '// calib_name
 	    call ReadCalibration(trim(adjustl(calib_name)))
 	    call SetRemainingParams
+
+	    if (calibrate_model) then
+	        call params_set_thisrun
+            call CheckParams
+	        call calibrate(projectname, calib_name)
+        endif
 
         if (twosided_experiment .and. run_n_times>1) call params_set('run_counter_start', -1*run_n_times+2)
         if (allocated(welfare)) deallocate(welfare)
