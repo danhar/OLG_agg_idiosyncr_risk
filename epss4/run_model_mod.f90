@@ -32,7 +32,11 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 	character(:),allocatable :: dir, output_path
 
     call system_clock(start_time)
-    if (present(simvars_o)) calibrating = .true.
+    if (present(simvars_o)) then
+        calibrating = .true.
+    else
+        calibrating =.false.
+    endif
 !-------------------------------------------------------------------------------
 ! Mean Shock (partial or general) Equilibrium (to generate good initial guesses)
 !-------------------------------------------------------------------------------
@@ -52,7 +56,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         ms_grids = ms_guess
     endif
     output_path = construct_path(dir,calib_name)
-    syserr = system('mkdir '//output_path) ! Creates directory for output files
+    if (.not. calibrating) syserr = system('mkdir '//output_path) ! Creates directory for output files
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
     allocate(simvars(1)) ! only one core used for mean shock
@@ -61,7 +65,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     welfare = calc_average_welfare(simvars)
 
     ! Check distribution and save results
-    call CheckPhi(Phi,output_path) ! writes errors to file
+    if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
     if (.not. (partial_equilibrium .or. calibrating)) then
         syserr = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
         call ms_grids%write_unformatted('ms')
@@ -118,7 +122,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
     endif
     output_path = construct_path(dir,calib_name)
-    syserr = system('mkdir '//output_path)
+    if (.not. calibrating) syserr = system('mkdir '//output_path)
 
     call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
     if (err%not_converged) call err%print2stderr(dir)
@@ -126,7 +130,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 
     ! Check distribution and save results
     print*, ' '
-    call CheckPhi(Phi,output_path)
+    if (.not. calibrating) call CheckPhi(Phi,output_path)
     if (.not. (partial_equilibrium .or. calibrating)) call save_unformatted(grids, coeffs, simvars)
     if (.not. calibrating) call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars

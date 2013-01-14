@@ -32,7 +32,7 @@ contains
         real(dp)              :: maxstp
         logical               :: intialize_jacobi, not_converged
         integer               :: it
-        integer, parameter    :: max_iterations = 1000
+        integer, parameter    :: max_iterations = 3
 
         xvals = get_params()
         allocate(fvals(n_end_params))
@@ -42,7 +42,7 @@ contains
 
         ! Initialize root finder
         it=0
-        maxstp=10.0     ! this is large and arbitrary
+        maxstp=1.0     ! this is large and arbitrary
         intialize_jacobi=.true.
         allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
         Rmat  = 0.0
@@ -52,7 +52,7 @@ contains
         ! Start root finder
         !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
         call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
-             reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib) ! maxstp=1.0_dp
+             reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
 
         if (not_converged) then
             print *,' CRITICAL ERROR: Calibration didnt converge, fvals =', fvals
@@ -79,7 +79,7 @@ contains
             it = it+1
             call set_params(param_vec)
 
-            print '(t2,a43,i3.3)','Calibration iteration ', it
+            print '(a,i3.3)','Calibration iteration ', it
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
             distance = 1.0
