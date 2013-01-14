@@ -1141,24 +1141,24 @@ subroutine params_set_real(param_name, new_value)
                 tau= new_value
             endif
         case ('beta')
-           if (new_value < 0.0) then
-               print* , 'params_set: beta < 0.0, setting to 1e-6'
+           if (new_value < 1e-6_dp) then
+               print* , 'params_set: beta < 1e-6_dp, setting to 1e-6'
                beta = 1e-6_dp
            else
                beta = new_value
            endif
         case ('theta')
-           if (new_value = 1.0) then
+           if (new_value == 1.0) then
                print* , 'params_set: theta = 1.0 not implemented, setting to 1.01'
                theta = 1.01
            else
                theta = new_value
            endif
        case ('psi')
-           if (new_value = 1.0) then
+           if (new_value == 1.0) then
                print* , 'params_set: gamma not defined for psi = 1.0, setting psi = 1.01'
                psi = 1.01
-           elseif (new_value = 1.0) then
+           elseif (new_value == 1.0) then
                print* , 'params_set: gamma not defined for psi = 0.0, setting psi = 0.01'
                psi = 0.01
            else

@@ -29,9 +29,9 @@ contains
 
         character(len=*) ,intent(in) :: projectname, calib_name
         real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
-        real(dp)              :: maxstp, welfare_temp
+        real(dp)              :: maxstp
         logical               :: intialize_jacobi, not_converged
-        integer               :: i, it
+        integer               :: it
         integer, parameter    :: max_iterations = 1000
 
         xvals = get_params()
@@ -51,7 +51,7 @@ contains
 
         ! Start root finder
         !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
-        call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
+        call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
              reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib) ! maxstp=1.0_dp
 
         if (not_converged) then
@@ -64,7 +64,7 @@ contains
 
     contains
 
-        function krusellsmith(param_vec) result(distance)
+        function calibration_step(param_vec) result(distance)
             ! The whole model is solved and the distance is calculated from the moments of equilibrium simulations.
             ! This function has side effects, because it writes into the global parameters.
 
@@ -72,8 +72,8 @@ contains
             use classes_mod ,only: tSimvars
 
             real(dp), dimension(:), intent(in) :: param_vec
-            real(dp), dimension(size(paramsvec)):: distance
-            type(tSimvars) :: simvars
+            real(dp), dimension(size(param_vec)):: distance
+            type(tSimvars), allocatable :: simvars(:)
             real(dp) :: welfare_temp
 
             it = it+1
@@ -86,7 +86,7 @@ contains
 
             ! if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 
-        end function krusellsmith
+        end function calibration_step
 
     end subroutine calibrate
 !-------------------------------------------------------------------------------
