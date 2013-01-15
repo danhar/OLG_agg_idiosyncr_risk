@@ -109,7 +109,7 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine set_params(param_vec)
-        use params_mod ,only: params_set
+        use params_mod ,only: params_set, calibration_set_derived_params
         real(dp) ,dimension(:) ,intent(in):: param_vec
         integer :: n
 
@@ -119,6 +119,9 @@ contains
         if (n > 1) call params_set('theta',param_vec(2))
         if (n > 2) call params_set('del_std',param_vec(3))
         if (n > 3) call params_set('pi1_delta',param_vec(4))
+
+        ! The following two calls set 'derived' parameters, e.g. gamma, which is a function of theta
+        call calibration_set_derived_params()
 
     end subroutine set_params
 !-------------------------------------------------------------------------------

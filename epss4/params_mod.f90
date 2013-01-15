@@ -61,19 +61,23 @@ end interface params_set
 ! maybe implement the F2008 submodule feature: put the following, very large procedures in separate submodules
 contains
 !-------------------------------------------------------------------------------------------------
+! - subroutine SetDefaultValues()
 ! - subroutine ReadCalibration()
 ! - subroutine SetRemainingParams() contains the following internal subroutines
 !   -- subroutine set_demographics()
-!   -- pure function set_pi_z(pi1_zeta, p1_delta)
 !   -- subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, ccv)
 !   -- subroutine set_benefits
 !   -- pure subroutine set_ms_guess(ms_guess, r_ms_guess, ccv, tau)
+! - subroutine params_set_thisrun()
+! - subroutine calibration_set_derived_params()
 ! - subroutine set_apmax(k, factor, curv_o)
+! - pure function set_pi_z(pi1_zeta, p1_delta)
 ! - subroutine CheckParams(zeta,delta)
 ! - pure function cal_id(calib_name)
 ! - pure function construct_path(dir, calib_name)
 ! - subroutine SaveParams(projectname)
 ! - subroutine params_set_real(param_name, new_value)
+! - subroutine params_set_integer(param_name, new_value)
 ! - subroutine params_set_logical(param_name, new_value)
 !-------------------------------------------------------------------------------------------------
 
@@ -351,50 +355,6 @@ contains
     end subroutine set_demographics
 !-------------------------------------------------------------------------------------------------
 
-    pure function set_pi_z(pi1_zeta, p1_delta, n_zeta, nz)
-        use fun_kronprod
-        real(dp) ,dimension(nz,nz):: set_pi_z
-        real(dp) ,intent(in)      :: pi1_zeta, p1_delta
-        integer  ,intent(in)      :: n_zeta, nz
-        real(dp)                  :: pi_zeta(n_zeta,n_zeta), pi_delta(n_delta,n_delta)
-        real(dp)                  :: pi_1, w_KK, pi_delta_vec(nz) ! only for Kubler Kruger spec
-        real(dp) ,dimension(nz,nz):: pi_KK, id, pi_zeta_kron, pi_delta_kron
-        integer                   :: i
-        real(dp)                  :: unit_mat(n_zeta,n_zeta), unit_vec(nz)
-        logical  ,parameter       :: KK_setup = .false. ! Set pi_z like in Kubler/Krueger 2006 AER
-
-        unit_mat =1.0
-        unit_vec = 1.0
-
-        if (KK_setup) then
-            w_KK = .78_dp !.15_dp !68_dp !
-            pi_1=.12_dp !.22_dp !12_dp
-
-            pi_KK(:,1)=pi_1
-            pi_KK(:,2)=0.5_dp -pi_1
-            pi_KK(:,3)=pi_KK(:,2)
-            pi_KK(:,4)=pi_KK(:,1)
-
-            id=0.0; do i=1,nz; id(i,i)=1.0; enddo
-            set_pi_z=(1.0-w_KK)*pi_KK + w_kk*id
-
-        else    ! This is our standard, Harenberg/Ludwig way: includes STY, GM, iid
-            pi_zeta = reshape([ pi1_zeta,     1.0-pi1_zeta, &
-                                1.0-pi1_zeta, pi1_zeta],&
-                      shape(pi_zeta), order=[2,1])
-            pi_zeta_kron = f_kronprod(pi_zeta, unit_mat)
-
-            pi_delta_vec = [pi1_delta, 1.0 - pi1_delta, 1.0 - pi1_delta, pi1_delta]
-            do i=1, nz
-                pi_delta_kron(:,i) = pi_delta_vec
-            enddo
-
-            set_pi_z = pi_zeta_kron * transpose(pi_delta_kron)
-        endif
-
-    end function set_pi_z
-!-------------------------------------------------------------------------------
-
     subroutine set_defined_benefits
         open(iounit, file='model_input/last_results/def_benefits.unformatted', form='unformatted', action='read')
         read(iounit) def_benefits
@@ -647,6 +607,21 @@ contains
 end subroutine params_set_thisrun
 !-------------------------------------------------------------------------------------------------
 
+subroutine calibration_set_derived_params()
+    ! calibration_mod changes the values of 'endogenous' parameters, so the parameters that depend
+    ! on those have to be updated. This happens here.
+    use markov_station_distr
+
+    gamm = (1.0-theta)/(1.0-1.0/psi)
+    delta=[del_mean + del_std, del_mean - del_std, del_mean + del_std, del_mean - del_std]
+
+    pi_z = set_pi_z(pi1_zeta,pi1_delta, n_zeta, nz)
+
+    stat_dist_z= f_markov_statdist(pi_z,400)       ! need to check eigenvalue calc!
+
+end subroutine calibration_set_derived_params
+!-------------------------------------------------------------------------------------------------
+
 subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
 ! This is a very adhoc function, based on trials
     use makegrid_mod
@@ -703,8 +678,52 @@ subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
 	    enddo
     enddo
 end subroutine set_apmax
-
 !-------------------------------------------------------------------------------------------------
+
+pure function set_pi_z(pi1_zeta, p1_delta, n_zeta, nz)
+    use fun_kronprod
+    real(dp) ,dimension(nz,nz):: set_pi_z
+    real(dp) ,intent(in)      :: pi1_zeta, p1_delta
+    integer  ,intent(in)      :: n_zeta, nz
+    real(dp)                  :: pi_zeta(n_zeta,n_zeta), pi_delta(n_delta,n_delta)
+    real(dp)                  :: pi_1, w_KK, pi_delta_vec(nz) ! only for Kubler Kruger spec
+    real(dp) ,dimension(nz,nz):: pi_KK, id, pi_zeta_kron, pi_delta_kron
+    integer                   :: i
+    real(dp)                  :: unit_mat(n_zeta,n_zeta), unit_vec(nz)
+    logical  ,parameter       :: KK_setup = .false. ! Set pi_z like in Kubler/Krueger 2006 AER
+
+    unit_mat =1.0
+    unit_vec = 1.0
+
+    if (KK_setup) then
+        w_KK = .78_dp !.15_dp !68_dp !
+        pi_1=.12_dp !.22_dp !12_dp
+
+        pi_KK(:,1)=pi_1
+        pi_KK(:,2)=0.5_dp -pi_1
+        pi_KK(:,3)=pi_KK(:,2)
+        pi_KK(:,4)=pi_KK(:,1)
+
+        id=0.0; do i=1,nz; id(i,i)=1.0; enddo
+        set_pi_z=(1.0-w_KK)*pi_KK + w_kk*id
+
+    else    ! This is our standard, Harenberg/Ludwig way: includes STY, GM, iid
+        pi_zeta = reshape([ pi1_zeta,     1.0-pi1_zeta, &
+                            1.0-pi1_zeta, pi1_zeta],&
+                  shape(pi_zeta), order=[2,1])
+        pi_zeta_kron = f_kronprod(pi_zeta, unit_mat)
+
+        pi_delta_vec = [pi1_delta, 1.0 - pi1_delta, 1.0 - pi1_delta, pi1_delta]
+        do i=1, nz
+            pi_delta_kron(:,i) = pi_delta_vec
+        enddo
+
+        set_pi_z = pi_zeta_kron * transpose(pi_delta_kron)
+    endif
+
+end function set_pi_z
+!-------------------------------------------------------------------------------
+
 subroutine CheckParams()
 use omp_lib           ,only: OMP_get_max_threads
 ! Very simple error checks on the parameters.
