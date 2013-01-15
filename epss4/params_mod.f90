@@ -14,8 +14,8 @@ module params_mod
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params
-    logical ,protected :: ccv, surv_rates, def_contrib, calibrate_model, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
-                          loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
+    logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
+                          calibrate_model, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
 
 !-------------------------------------------------------------------------------------------------
@@ -92,8 +92,8 @@ subroutine SetDefaultValues()
     nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=1
     ! Logicals
-    ccv=.true.; surv_rates=.false.; def_contrib=.true.; calibrate_model=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
-    loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
+    ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
+    calibrate_model=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
 end subroutine SetDefaultValues
 
@@ -169,6 +169,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) run_n_times
             case ('run_counter_start')
                 read (parval,*) run_counter_start
+            case ('n_end_params')
+                read (parval,*) n_end_params
             case ('surv_rates')
                 read (parval,*) surv_rates
             case ('def_contrib')
@@ -181,6 +183,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) collateral_constraint
             case ('kappa_in_01')
                 read (parval,*) kappa_in_01
+            case ('calibrate_model')
+                read (parval,*) calibrate_model
             case ('nap')
                 read (parval,*) nap
             case ('n_eta')
@@ -235,6 +239,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) kappamax
             case ('apmax_curv')
                 read (parval,*) apmax_curv
+            case ('tol_calib')
+                read (parval,*) tol_calib
             case ('tol_coeffs')
                 read (parval,*) tol_coeffs
             case ('tol_asset_eul')
@@ -1108,6 +1114,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,'(a20,l1)') ' def_contrib     =  ', def_contrib
     write(21,'(a20,l1)') ' collat_constr   =  ', collateral_constraint
     write(21,'(a20,l1)') ' kappa_in_01     =  ', kappa_in_01
+    write(21,'(a20,l1)') ' calibrate_model =  ', calibrate_model
     write(21,'(a20,l1)') ' exogenous_xgrid =  ', exogenous_xgrid
     write(21,'(a20,l1)') ' loms_in_logs    =  ', loms_in_logs
     write(21,'(a20,l1)') ' pooled_regress  =  ', pooled_regression
@@ -1116,6 +1123,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,'(a20,l1)') ' opt_zbrak       =  ', opt_zbrak
     write(21,216)        ' scale_AR        =  ', scale_AR
     write(21,216)        ' scale_IR        =  ', scale_IR
+    write(21,'(a20,i1)') ' n_end_params    =  ', n_end_params
     write(21,*)
     write(21,*) '------------------------------ Guesses -----------------------------'
     write(21,216) ' r_ms_guess      =  ', r_ms_guess
@@ -1129,6 +1137,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,220) ' tol_asset_eul   =  ', tol_asset_eul
 220 format(a20, es8.2)
     write(21,220) ' tol_coeffs      =  ', tol_coeffs
+    write(21,220) ' tol_calib       =  ', tol_calib
     write(21,*)
     write(21,*)
     write(21,*)
