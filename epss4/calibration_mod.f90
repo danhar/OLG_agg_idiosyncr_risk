@@ -4,7 +4,7 @@ module calibration_mod
 
     implicit none
     private
-    public calibrate
+    public calibrate, read_data_targets, model_targets, distance_norm
 
 contains
 !-------------------------------------------------------------------------------
@@ -28,17 +28,19 @@ contains
         !use sub_broyden
 
         character(len=*) ,intent(in) :: projectname, calib_name
-        real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
+        real(dp) ,allocatable :: xvals(:), fvals(:), data_targets(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
         real(dp)              :: maxstp
         logical               :: intialize_jacobi, not_converged
         integer               :: it
         integer, parameter    :: max_iterations = 3
 
-        xvals = get_params()
+        xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
 
         print *
         print '(t2,a)','- calibration: starting root finder'
+
+        call read_data_targets(n_end_params, data_targets)
 
         ! Initialize root finder
         it=0
@@ -82,7 +84,7 @@ contains
             print '(a,i3.3)','Calibration iteration ', it
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
-            distance = 1.0
+            distance = distance_norm(data_targets, model_targets(n_end_params, simvars))
 
             ! if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 
@@ -91,14 +93,16 @@ contains
     end subroutine calibrate
 !-------------------------------------------------------------------------------
 
-    pure function get_params()
-        use params_mod ,only: n_end_params, beta, theta
+    pure function get_params(n)
+        use params_mod ,only: beta, theta, del_std, pi1_delta
         real(dp) ,allocatable ,dimension(:) :: get_params
+        integer ,intent(in) :: n
 
-        allocate(get_params(n_end_params))
+        allocate(get_params(n))
         get_params(1) = beta
-        if (n_end_params > 1) get_params(2) = theta
-        ! if (n_end_params > 2) get_params(3) =
+        if (n > 1) get_params(2) = theta
+        if (n > 2) get_params(3) = del_std
+        if (n > 3) get_params(4) = pi1_delta
 
     end function get_params
 !-------------------------------------------------------------------------------
@@ -112,8 +116,72 @@ contains
 
         call params_set('beta',param_vec(1))
         if (n > 1) call params_set('theta',param_vec(2))
+        if (n > 2) call params_set('del_std',param_vec(3))
+        if (n > 3) call params_set('pi1_delta',param_vec(4))
 
     end subroutine set_params
+!-------------------------------------------------------------------------------
+
+    pure function model_targets(n, simvars)
+        use classes_mod ,only: tSimvars, tStats
+        use statistics  ,only: corr
+
+        real(dp) ,allocatable:: model_targets(:)
+        integer        ,intent(in) :: n
+        type(tSimvars) ,intent(in) :: simvars(:)
+        type(tStats) :: K_Y, ex_ret, r, zeta
+
+        allocate(model_targets(n))
+
+        K_Y%name='K_Y'; call K_Y%calc_stats(simvars)
+        ex_ret%name='ex_ret'; call ex_ret%calc_stats(simvars)
+        r%name='r'; call r%calc_stats(simvars)
+        zeta%name='zeta'; call zeta%calc_stats(simvars)
+
+        model_targets(1) = K_Y%avg_exerr_()
+        if (n > 1) model_targets(2) = ex_ret%avg_exerr_()
+        if (n > 2) model_targets(3) = r%std_()
+        if (n > 3) model_targets(4) = corr(zeta,r)
+
+    end function model_targets
+!-------------------------------------------------------------------------------
+
+    subroutine read_data_targets(n, data_targets)
+
+        real(dp) ,allocatable ,intent(out):: data_targets(:)
+        integer               ,intent(in) :: n
+        integer  :: io_stat, line
+        character(len=80) :: val, param, description
+
+        allocate(data_targets(n))
+        open(unit=301, file='model_input/data/data_targets.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
+        if (io_stat==0) then
+            do line = 1,n
+                read (301,*,iostat=io_stat) val, param, description
+                if (io_stat/=0) then
+                    print '(a,i6)', 'calibration_mod:read_data_targets: An error occured reading line', line
+                    exit
+                endif
+                if (scan(val,'!')>0) cycle
+                read (val,*) data_targets(line)
+            enddo
+        end if
+        close (unit=301)
+
+        if (io_stat .ne. 0) then
+            print '(a,i6)', 'I/O ERROR reading model_input/data_targets.txt: IOSTAT=',io_stat
+            stop 'STOP in in calibration_mod:read_data_targets'
+        endif
+
+    end subroutine read_data_targets
+!-------------------------------------------------------------------------------
+
+    pure function distance_norm(data_targets, model_targets)
+        real(dp) :: distance_norm
+        real(dp), dimension(:), intent(in) :: data_targets, model_targets
+
+        distance_norm = sum(abs(data_targets - model_targets))
+    end function distance_norm
 !-------------------------------------------------------------------------------
 
     subroutine write2file(not_converged, fvals, calib_name)
@@ -130,7 +198,7 @@ contains
             prefix = ''
         endif
 
-        open(unit=301, file='model_output/'prefix//cal_id(calib_name)//'_calibration.txt', status = 'replace')
+        open(unit=301, file='model_output/'//prefix//cal_id(calib_name)//'_calibration.txt', status = 'replace')
         write(301,*) 'not_converged = ', not_converged
         write(301,*) 'fvals = ', fvals
         close(301)

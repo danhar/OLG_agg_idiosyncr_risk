@@ -819,7 +819,13 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'ERROR: zeta_mean - zeta_std <= 0.0'
         call critical_stop
     endif
-    if (del_std  > 0.2_dp) print*, 'WARNING: del_std > 0.2'
+
+    if (del_std < 0.0) then
+        print*, 'ERROR: del_std < 0.0'
+        call critical_stop
+    elseif (del_std  > 0.2_dp) then
+        print*, 'WARNING: del_std > 0.2'
+    endif
 
     if (pi1_zeta > 1.0 .or. pi1_zeta < 0.0) then
         print*, 'ERROR: pi1_zeta not in [0.0, 1.0]'
@@ -974,6 +980,14 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (calibrate_model .and. partial_equilibrium) then
         print*, 'Warning: Calibrating in partial equilibrium'
+    endif
+
+    if (n_end_params < 0) then
+        print*, 'ERROR: n_end_params < 0'
+        call critical_stop
+    elseif (n_end_params > 4) then
+        print*, 'ERROR: n_end_params > 4 not implemented'
+        call critical_stop
     endif
 
 contains
@@ -1164,6 +1178,14 @@ subroutine params_set_real(param_name, new_value)
            else
                theta = new_value
            endif
+        case ('del_std')
+           if (del_std < 0.0) then
+               print* , 'params_set: del_std < 0.0, setting to 0.0'
+               del_std = 0.0
+           else
+               del_std = new_value
+           endif
+
 
 		case default
 		    print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
