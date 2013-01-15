@@ -41,6 +41,12 @@ contains
         print '(t2,a)','- calibration: starting root finder'
 
         call read_data_targets(n_end_params, data_targets)
+        !DEBUG
+        print*, 'params'
+        print*, xvals
+        print*, 'data'
+        print*, data_targets
+        ! END DEBUG
 
         ! Initialize root finder
         it=0
@@ -82,9 +88,22 @@ contains
             call set_params(param_vec)
             print *,''
             print '(a,i3.3)','Calibration iteration ', it
+            !DEBUG
+            print*, 'params'
+            print*, param_vec
+            ! END DEBUG
+
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
             distance = distance_norm(data_targets, model_targets(n_end_params, simvars))
+            !DEBUG
+            print*, 'data'
+            print*, data_targets
+            print*, 'model'
+            print*, model_targets(n_end_params, simvars)
+            print*, 'distance'
+            print*, distance
+            ! END DEBUG
 
             ! if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 
@@ -154,15 +173,19 @@ contains
         character(len=80) :: val, param, description
 
         allocate(data_targets(n))
+        line = 0
+
         open(unit=301, file='model_input/data/data_targets.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
         if (io_stat==0) then
-            do line = 1,n
+            do
                 read (301,*,iostat=io_stat) val, param, description
                 if (io_stat/=0) then
                     print '(a,i6)', 'calibration_mod:read_data_targets: An error occured reading line', line
                     exit
                 endif
                 if (scan(val,'!')>0) cycle
+                line = line + 1
+                if (line > n) exit
                 read (val,*) data_targets(line)
             enddo
         end if
