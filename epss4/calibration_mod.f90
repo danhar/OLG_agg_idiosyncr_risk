@@ -32,7 +32,7 @@ contains
         real(dp)              :: maxstp
         logical               :: intialize_jacobi, not_converged
         integer               :: it
-        integer, parameter    :: max_iterations = 3
+        integer, parameter    :: max_iterations = 10
 
         xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
@@ -44,7 +44,7 @@ contains
 
         ! Initialize root finder
         it=0
-        maxstp=1.0     ! this is large and arbitrary
+        maxstp=.1     ! this is large and arbitrary
         intialize_jacobi=.true.
         allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
         Rmat  = 0.0

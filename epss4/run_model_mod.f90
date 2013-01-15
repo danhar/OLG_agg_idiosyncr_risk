@@ -42,16 +42,16 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 !-------------------------------------------------------------------------------
     print*, ' '
     if (partial_equilibrium) then
-        print*,'- main: mean shock PARTIAL equilibrium'
+        print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
         call ms_grids%read_unformatted('ms')
         if (scale_AR == -1.0) then
-            print*,'- main: setting ms_grids%mu = 0.0, ms_grids%k = average over simulations'
+            print*,'- run_model: setting ms_grids%mu = 0.0, ms_grids%k = average over simulations'
             ms_grids%mu =0.0
             ms_grids%k = inverted_average_mpk()
         endif
     else
-        print*,'- main: mean shock GENERAL equilibrium'
+        print*,'- run_model: mean shock GENERAL equilibrium'
         dir    = 'msge'
         ms_grids = ms_guess
     endif
@@ -90,7 +90,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     call set_apmax(ms_grids%k(1)*factor_k)
 
     if(partial_equilibrium) then
-        print*,'- main: Krusell-Smith PARTIAL equilibrium'
+        print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
         call read_unformatted_ks(grids, coeffs, simvars)
         if (scale_AR == -1.0) then
@@ -106,7 +106,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         endif
 
     else
-        print*,'- main: Krusell-Smith GENERAL equilibrium'
+        print*,'- run_model: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
         allocate(simvars(OMP_get_max_threads()))
         call simvars%allocate(nt)
@@ -164,7 +164,7 @@ contains
         real(dp) :: secs
         integer  :: end_time, count_rate
 
-        print*, '- main: Saving results and plots to folder ./model_output '
+        print*, '- run_model: Saving results and plots to folder ./model_output '
         call system_clock(end_time,count_rate)
         secs= real(end_time-start_time,dp)/real(count_rate,dp) ! excludes time for saving and plotting results
 

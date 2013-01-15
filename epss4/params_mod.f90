@@ -86,9 +86,9 @@ subroutine SetDefaultValues()
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
     nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
-    run_n_times=1; run_counter_start=1; n_end_params=2
+    run_n_times=1; run_counter_start=1; n_end_params=1
     ! Logicals
-    ccv=.true.; surv_rates=.false.; def_contrib=.true.; calibrate_model=.false.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
+    ccv=.true.; surv_rates=.false.; def_contrib=.true.; calibrate_model=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
 end subroutine SetDefaultValues
@@ -290,7 +290,7 @@ subroutine SetRemainingParams()
         ms_guess%mu = [mu_ms_guess]
         ms_guess%k  = [(alpha/(r_ms_guess+del_mean))**(1.0/(1.0-alpha))] ! should I set ms_guess%k directly instead of r_ms_guess?
     case default
-        print '(a,i1)', 'Warning in params_mod:SetRemainingParams(): opt_initial_ms_guess has value ', opt_initial_ms_guess
+        print '(a,i1)', 'WARNING in params_mod:SetRemainingParams(): opt_initial_ms_guess has value ', opt_initial_ms_guess
         print *, 'Admissible values are 0, 1, 2. Setting to 1 (i.e. use parameter-sensitive hard-coded guesses)'
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     end select
@@ -758,7 +758,7 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if (n_eta /= 2) then
-        print*, 'Warning: n_eta /= 2'
+        print*, 'WARNING: n_eta /= 2'
     endif
 
     if (nt<=t_scrap) then
@@ -767,7 +767,7 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if ((nt-t_scrap)*OMP_get_max_threads() < 5000) then
-        print*, 'Warning: too few simulation periods? (nt-t_scrap)*OMP_get_max_threads() < 5000'
+        print*, 'WARNING: too few simulation periods? (nt-t_scrap)*OMP_get_max_threads() < 5000'
     endif
 
     if (nx_factor < 1) then
@@ -939,12 +939,12 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if (run_counter_start < 1 .and. .not. twosided_experiment) then
-        print*, 'Warning: run_counter_start < 1 .and. .not. twosided_experiment, setting to 1'
+        print*, 'WARNING: run_counter_start < 1 .and. .not. twosided_experiment, setting to 1'
         run_counter_start = 1
     endif
 
     if (run_n_times <  run_counter_start) then
-        print*, 'Warning: run_n_times < run_counter_start, setting to run_n_times = run_counter_start'
+        print*, 'WARNING: run_n_times < run_counter_start, setting to run_n_times = run_counter_start'
         run_n_times = run_counter_start
     endif
 
@@ -979,7 +979,7 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if (calibrate_model .and. partial_equilibrium) then
-        print*, 'Warning: Calibrating in partial equilibrium'
+        print*, 'WARNING: Calibrating in partial equilibrium'
     endif
 
     if (n_end_params < 0) then
