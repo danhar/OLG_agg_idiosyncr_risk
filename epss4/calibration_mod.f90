@@ -78,7 +78,7 @@ contains
 
             it = it+1
             call set_params(param_vec)
-
+            print *,''
             print '(a,i3.3)','Calibration iteration ', it
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
@@ -117,6 +117,7 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine write2file(not_converged, fvals, calib_name)
+        use params_mod ,only: cal_id
 
         logical                ,intent(in) :: not_converged
         real(dp), dimension(:) ,intent(in) :: fvals
@@ -129,7 +130,7 @@ contains
             prefix = ''
         endif
 
-        open(unit=301, file=prefix//calib_name//'_calibration.txt', status = 'replace')
+        open(unit=301, file='model_output/'prefix//cal_id(calib_name)//'_calibration.txt', status = 'replace')
         write(301,*) 'not_converged = ', not_converged
         write(301,*) 'fvals = ', fvals
         close(301)

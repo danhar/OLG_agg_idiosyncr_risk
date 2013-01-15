@@ -134,9 +134,13 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     if (.not. (partial_equilibrium .or. calibrating)) call save_unformatted(grids, coeffs, simvars)
     if (.not. calibrating) call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
-    print*,' **** Completed solution of calibration ', calib_name, ' **** '
-    print*, ' '
-    print*, ' '
+    if (.not. calibrating) then
+        print*,' **** Completed solution of calibration ', calib_name, ' **** '
+        print*, ' '
+        print*, ' '
+    else
+        print*,' * Model solution succsessful during calibration of ', calib_name
+    endif
 
     ! Solution of mean shock OLG model during transition ?
     ! Solution of model with stochastic transition ?

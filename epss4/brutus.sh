@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='024_calibtest_DB'
-BUILD=Build_Parallel_Debug #Parallel_Optim #Optimmax #Debugmax #    
+thisrun='024_replicate3'
+BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
