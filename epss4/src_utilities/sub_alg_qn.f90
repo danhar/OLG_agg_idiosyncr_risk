@@ -12,10 +12,10 @@ subroutine s_alg_qn(fname,fvec,x,n,QTmat,Rmat,intlj,reevalj,check,rstit0,MaxLns,
 
     real(dp) ,dimension(n)   ,intent(out)   :: fvec    ! output of fname
     real(dp) ,dimension(n)   ,intent(inout) :: x       ! input of fname
-	integer                  ,intent(in) 	:: n, rstit0 	  ! size of x andfvec, number of iterations before Broyden is restarted
+	integer                  ,intent(in) 	:: n, rstit0 	  ! size of x andfvec; number of iterations before Jacobian is re-initialized
 	integer                  ,intent(in) 	:: MaxLns, max_it ! max no of line searches, max no of iterations
 	logical                  ,intent(in)	:: reevalj ! true: reevaulate Jacobian if line-search fails
-	real(dp)                 ,intent(in) 	:: tol_f, maxstp  ! tolerance for f(x); scale maximum Newton step to stepmax
+	real(dp)                 ,intent(in) 	:: tol_f, maxstp  ! tolerance for f(x); maxstp is passed to lnsrch (maximum Newton step)
 	logical                  ,intent(inout)	:: intlj   ! true: Jacobian and Q-R-decomp are computed in iteration 1, false: input Q and R
     real(dp) ,dimension(n,n) ,intent(out)   :: QTmat   ! Q-R-decomposition of Jacobian
 	real(dp) ,dimension(n,n) ,intent(inout)	:: Rmat	   ! Q-R-decomposition of Jacobian
@@ -144,7 +144,7 @@ subroutine s_alg_qn(fname,fvec,x,n,QTmat,Rmat,intlj,reevalj,check,rstit0,MaxLns,
 			endif
 		else
 			if (.not.(restrt)) then
-				restrt=.true.
+				restrt=.true.       ! Try re-initializing Jacobian
 			! ELSE: keep your fingers crossed and continue
 			endif
 		endif

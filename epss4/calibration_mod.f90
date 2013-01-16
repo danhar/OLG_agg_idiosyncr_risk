@@ -25,14 +25,16 @@ contains
         use params_mod            ,only: n_end_params, tol_calib
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
+        use sub_zbrac
+        use fun_zbrent
         !use sub_broyden
 
         character(len=*) ,intent(in) :: projectname, calib_name
         real(dp) ,allocatable :: xvals(:), fvals(:), data_targets(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
-        real(dp)              :: maxstp
-        logical               :: intialize_jacobi, not_converged
+        real(dp)              :: maxstp, brack1, brack2
+        logical               :: intialize_jacobi, not_converged, bracket_found
         integer               :: it
-        integer, parameter    :: max_iterations = 10
+        integer, parameter    :: max_iterations = 100, brac_cover=0.1
 
         xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
@@ -42,19 +44,37 @@ contains
 
         call read_data_targets(n_end_params, data_targets)
 
-        ! Initialize root finder
-        it=0
-        maxstp=.01     ! this is large and arbitrary
-        intialize_jacobi=.true.
-        allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
-        Rmat  = 0.0
-        QTmat = 0.0
-        call put_diag(1.0/0.5_dp,Rmat)
+alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
 
-        ! Start root finder
-        !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
-        call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
-             reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
+            ! First try to bracket a root by extending the bounds
+            brack1 = xvals(1)*(1.0+brac_cover)
+            brack2 = xvals(1)*(1.0-brac_cover)
+            call s_zbrac(calibration_step, brack1, brack2, bracket_found)
+
+            if (bracket_found) then
+                ! Now Brent's bracketing algorithm
+                xvals(1)= f_zbrent(calibration_step, brack1, brack2,tol_calib)
+            endif
+
+            not_converged = .not. bracket_found
+            fvals = -1.0
+
+        else alg ! Use a Broyden algorithm (s_alg_qn)
+
+            ! Initialize root finder Broyden
+            it=0
+            maxstp=.01     ! this is crucial
+            intialize_jacobi=.true.
+            allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
+            Rmat  = 0.0
+            QTmat = 0.0
+            call put_diag(1.0/0.5_dp,Rmat)
+
+            ! Start root finder
+            !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
+            call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
+                 reevalj=.true.,check=not_converged,rstit0=20,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
+        endif alg
 
         if (not_converged) then
             print *,' CRITICAL ERROR: Calibration didnt converge, fvals =', fvals

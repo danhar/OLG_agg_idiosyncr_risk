@@ -5,11 +5,12 @@ contains
 subroutine lnsrch(xold,fold,g,p,x,f,fvec,stpmax,check,fname,MaxLns_o)
 ! Line search: find new x with original Newton step p,scaled down by lambda
 ! Adapted from Press et al. (2002), Numerical Recipes in F90 (NR), p. 1195
+! See also explanation of algorithm in Press et al. (2001), NR in F77, p. 377. Equation numbers below refer to this one.
 	use kinds
 	real(dp) ,dimension(:)          ,intent(in)    :: xold
 	real(dp)                        ,intent(in)    :: fold		! value of distance function at xold
-	real(dp) ,dimension(size(xold)) ,intent(in)    :: g		! gradient at xold
-	real(dp) ,dimension(size(xold)) ,intent(inout) :: p		! Newton step \delta x
+	real(dp) ,dimension(size(xold)) ,intent(in)    :: g		! gradient at xold, i.e. \nabla f(xold)
+	real(dp) ,dimension(size(xold)) ,intent(inout) :: p		! direction, typically the Newton step \delta x
 	real(dp) ,dimension(size(xold)) ,intent(out)   :: x
 	real(dp) ,dimension(size(xold)) ,intent(inout) :: fvec		! output of fname
     real(dp)                        ,intent(in)    :: stpmax   ! limit length of steps
@@ -17,7 +18,7 @@ subroutine lnsrch(xold,fold,g,p,x,f,fvec,stpmax,check,fname,MaxLns_o)
 	logical                         ,intent(out)   :: check	! false on normal exit, true when x too close to xold. In a minimization algorithm, this usually signals convergence and can be ignored. However, in a zero-finding algorithm the calling program should check whether the convergence is spurious.
     integer  ,optional              ,intent(in)    :: MaxLns_o ! maximum number of line searches
 	real(dp) ,parameter	:: ALF=1.0e-4_dp ,tolx=epsilon(x)	! ALF ensures sufficient decrease in function value; tolx is the convergence criterion
-	real(dp) 			:: a,alam,alam2,alamin,b,disc,f2,rhs1,rhs2,slope,tmplam
+	real(dp) 			:: a,alam,alam2,alamin,b,disc,f2,rhs1,rhs2,slope,tmplam ! alam corresponds to \lambda in Press et al.
 	integer				:: n, MaxLns, its
 	interface
 		function fname(x)
@@ -43,20 +44,20 @@ subroutine lnsrch(xold,fold,g,p,x,f,fvec,stpmax,check,fname,MaxLns_o)
 		p=p*stpmax/maxval(abs(p))
 	endif
 
-	slope=dot_product(g,p)
-	if (slope >= 0.0) print*, 'roundoff problem in lnsrch'
+	slope=dot_product(g,p)  ! corresponds to g^{\prime}(\lambda) in eq. (9.7.9)
+	if (slope >= 0.0) print*, 'roundoff problem in lnsrch'  ! because slope is descent direction, see eq. (9.7.5)
 
-	alamin=tolx/maxval(abs(p(:))/max(abs(xold(:)),1.0))			! Compute \lambda_{min}
+	alamin=tolx/maxval(abs(p(:))/max(abs(xold(:)),1.0))			! Compute \lambda_{min} which depends on Newton step versus x-values
 	alam=1.0														! Always try full Newton step first.
 	do its = 1,MaxLns
-		x(:)=xold(:)+alam*p(:)
+		x(:)=xold(:)+alam*p(:)                                  ! eq. (9.7.6)
 		fvec=fname(x)
 		f=0.5_dp*dot_product(fvec,fvec)
-		if (alam < alamin) then										! Convergence on x
+		if (alam < alamin) then										! Convergence on x. For zero-finding, calling program should verify convergence (could be spurious, e.g. local minimum)
 			x(:)=xold(:)
 			check=.true.
 			return
-		elseif (f <= fold+ALF*alam*slope) then						! Sufficient function decrease.
+		elseif (f <= fold+ALF*alam*slope) then						! Sufficient function decrease, see eq. (9.7.7)
 			return
 		else														! Backtrack.
 			if (alam == 1.0) then									! First time.
@@ -78,12 +79,12 @@ subroutine lnsrch(xold,fold,g,p,x,f,fvec,stpmax,check,fname,MaxLns_o)
 						tmplam=-slope/(b+sqrt(disc))
 					end if
 				end if
-				if (tmplam > 0.5_dp*alam) tmplam=0.5_dp*alam
+				if (tmplam > 0.5_dp*alam) tmplam=0.5_dp*alam ! enforces \lambda_{max}
 			end if
 		end if
 		alam2=alam
 		f2=f
-		alam=max(tmplam,0.1_dp*alam)
+		alam=max(tmplam,0.1_dp*alam)        ! ! enforces \lambda_{min}
 	end do
 
 end subroutine lnsrch
