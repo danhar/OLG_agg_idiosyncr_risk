@@ -22,11 +22,11 @@ contains
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
     ! This subroutine doesn't have a return value, since it sets the parameters globally.
 
-        use params_mod            ,only: n_end_params, tol_calib
-        use numrec_utils          ,only: put_diag
-        use sub_alg_qn
-        use sub_zbrac
-        use fun_zbrent
+        use params_mod   ,only: n_end_params, tol_calib
+        use numrec_utils ,only: put_diag
+        use sub_alg_qn   ,only: s_alg_qn
+        use sub_zbrac    ,only: s_zbrac_array
+        use fun_zbrent   ,only: f_zbrent_array
         !use sub_broyden
 
         character(len=*) ,intent(in) :: projectname, calib_name
@@ -34,7 +34,8 @@ contains
         real(dp)              :: maxstp, brack1, brack2
         logical               :: intialize_jacobi, not_converged, bracket_found
         integer               :: it
-        integer, parameter    :: max_iterations = 100, brac_cover=0.1
+        integer  ,parameter   :: max_iterations = 100
+        real(dp) ,parameter   :: brac_cover=0.1_dp
 
         xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
@@ -47,13 +48,13 @@ contains
 alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
 
             ! First try to bracket a root by extending the bounds
-            brack1 = xvals(1)*(1.0+brac_cover)
-            brack2 = xvals(1)*(1.0-brac_cover)
-            call s_zbrac(calibration_step, brack1, brack2, bracket_found)
+            brack1 = xvals(1)*(1.0-brac_cover)
+            brack2 = xvals(1)*(1.0+brac_cover)
+            call s_zbrac_array(calibration_step, brack1, brack2, bracket_found)
 
             if (bracket_found) then
                 ! Now Brent's bracketing algorithm
-                xvals(1)= f_zbrent(calibration_step, brack1, brack2,tol_calib)
+                xvals(1)= f_zbrent_array(calibration_step, brack1, brack2,tol_calib)
             endif
 
             not_converged = .not. bracket_found
@@ -105,7 +106,7 @@ alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's M
 
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
-            distance = distance_norm(data_targets, model_targets(n_end_params, simvars))
+            distance = data_targets - model_targets(n_end_params, simvars)
 
             ! if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 
@@ -205,6 +206,7 @@ alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's M
 !-------------------------------------------------------------------------------
 
     pure function distance_norm(data_targets, model_targets)
+        ! This function is not needed here!
         real(dp) :: distance_norm
         real(dp), dimension(:), intent(in) :: data_targets, model_targets
 
