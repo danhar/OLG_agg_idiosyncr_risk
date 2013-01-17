@@ -1126,7 +1126,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,216)        ' scale_AR        =  ', scale_AR
     write(21,216)        ' scale_IR        =  ', scale_IR
     write(21,'(a20,i1)') ' n_end_params    =  ', n_end_params
-    write(21,'(a20,a )') ' calib_targets   =  ', trim(adjustl(calib_targets))
+    write(21,'(a20,a )') ' calib_targets   =  ', trim(adjustl(calib_targets))//'.txt'
     write(21,*)
     write(21,*) '------------------------------ Guesses -----------------------------'
     write(21,216) ' r_ms_guess      =  ', r_ms_guess

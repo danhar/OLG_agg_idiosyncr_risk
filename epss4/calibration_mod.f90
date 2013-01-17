@@ -30,13 +30,15 @@ contains
         !use sub_broyden
 
         character(len=*) ,intent(in) :: projectname, calib_name
-        real(dp) ,allocatable :: xvals(:), fvals(:), data_targets(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
-        real(dp)              :: maxstp, brack1, brack2
-        logical               :: intialize_jacobi, not_converged, bracket_found
-        integer               :: it
-        integer  ,parameter   :: max_iterations = 100
-        real(dp) ,parameter   :: brac_cover=0.005_dp
-        logical  ,parameter   :: use_brent_1D = .false.
+        real(dp) ,dimension(:)   ,allocatable :: xvals, fvals, data_targets, norm_vector
+        real(dp) ,dimension(:,:) ,allocatable :: Rmat, QTmat    ! QR decomposition in s_alg_qn
+        real(dp)            :: maxstp, brack1, brack2
+        logical             :: intialize_jacobi, not_converged, bracket_found
+        integer             :: it
+        integer  ,parameter :: max_iterations = 100
+        real(dp) ,parameter :: brac_cover=0.005_dp
+        logical  ,parameter :: use_brent_1D   = .false. ! Brent doesn't work very well b/c of KS guesses and aggregate grids.
+        logical  ,parameter :: norm_params_to_1 = .true.  ! for Broyden
 
         xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
@@ -49,6 +51,7 @@ contains
 
 alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
 
+            print '(t2,a)','- calibration: WARNING: using Brent unreliable with K/S'
             ! First try to bracket a root by extending the bounds
             brack1 = xvals(1)*(1.0-brac_cover)
             brack2 = xvals(1)*(1.0+brac_cover)
@@ -67,6 +70,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         else alg ! Use a Broyden algorithm (s_alg_qn)
 
             ! Initialize root finder
+            if (norm_params_to_1) then
+                norm_vector = xvals
+                xvals = xvals / norm_vector
+            endif
+
             maxstp=.01     ! this is crucial
             intialize_jacobi=.true.
             allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
@@ -105,7 +113,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             real(dp) :: welfare_temp
 
             it = it+1
-            call set_params(param_vec)
+            if (norm_params_to_1) then
+                call set_params(param_vec*norm_vector)
+            else
+                call set_params(param_vec)
+            endif
             print *,''
             print '(a,i3.3)','Calibration iteration ', it
 
@@ -184,6 +196,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         integer  :: io_stat, line
         character(len=80) :: val, param, description
 
+        print '(t2,a)','- calibration: reading calibration targets from model_input/data/calibration_targets/'//filename//'.txt'
         allocate(data_targets(n))
         line = 0
 
@@ -204,7 +217,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         close (unit=301)
 
         if (io_stat .ne. 0) then
-            print '(a,i6)', 'I/O ERROR reading model_input/data/calibration_targets/'//filename//'.txt: IOSTAT=',io_stat
+            print '(a,i6)', 'I/O ERROR: IOSTAT=',io_stat
             stop 'STOP in in calibration_mod:read_data_targets'
         endif
 

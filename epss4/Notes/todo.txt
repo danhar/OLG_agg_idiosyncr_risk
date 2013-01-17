@@ -1,8 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- make update of aggregate grids (in particular capital) better, coz that seems to be the main reason when KS explodes. 
-    More points, and probably finer close to zero because that is where problems arise? 
+- make update of aggregate grids (in particular capital) better, coz that seems to be the main reason when KS explodes. Specifically, Brent's method in calibration_mod
+    seems to suffer and not converge. More points, and probably finer close to zero because that is where problems arise? 
     And because I hit lower bound more often (mean deprecation negative)?
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
