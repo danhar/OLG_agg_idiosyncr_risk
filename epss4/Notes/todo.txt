@@ -1,8 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- replace calibrate_model by n_end_params = 0
-
 - make update of aggregate grids (in particular capital) better, coz that seems to be the main reason when KS explodes. 
     More points, and probably finer close to zero because that is where problems arise? 
     And because I hit lower bound more often (mean deprecation negative)?
@@ -131,6 +129,8 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- replace calibrate_model by n_end_params = 0
+
 - add calibration routine
 
 - parallelize simulation
