@@ -39,6 +39,7 @@ scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = st
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1      Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
 n_end_params     1      Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_std, 4: pi1_delta.
+calib_targets 'paper'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation'.
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .true.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)

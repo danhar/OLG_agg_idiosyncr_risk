@@ -22,7 +22,7 @@ contains
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
     ! This subroutine doesn't have a return value, since it sets the parameters globally.
 
-        use params_mod   ,only: n_end_params, tol_calib
+        use params_mod   ,only: n_end_params, calib_targets, tol_calib
         use numrec_utils ,only: put_diag
         use sub_alg_qn   ,only: s_alg_qn
         use sub_zbrac    ,only: s_zbrac_array
@@ -44,7 +44,7 @@ contains
         print *
         print '(t2,a)','- calibration: starting root finder'
 
-        call read_data_targets(n_end_params, data_targets)
+        call read_data_targets(n_end_params, data_targets, trim(adjustl(calib_targets)))
         it=0
 
 alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
@@ -176,17 +176,18 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
     end function model_targets
 !-------------------------------------------------------------------------------
 
-    subroutine read_data_targets(n, data_targets)
+    subroutine read_data_targets(n, data_targets, filename)
 
         real(dp) ,allocatable ,intent(out):: data_targets(:)
         integer               ,intent(in) :: n
+        character(len=*)      ,intent(in) :: filename
         integer  :: io_stat, line
         character(len=80) :: val, param, description
 
         allocate(data_targets(n))
         line = 0
 
-        open(unit=301, file='model_input/data/data_targets.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
+        open(unit=301, file='model_input/data/calibration_targets/'//filename//'.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
         if (io_stat==0) then
             do
                 read (301,*,iostat=io_stat) val, param, description
@@ -203,7 +204,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         close (unit=301)
 
         if (io_stat .ne. 0) then
-            print '(a,i6)', 'I/O ERROR reading model_input/data_targets.txt: IOSTAT=',io_stat
+            print '(a,i6)', 'I/O ERROR reading model_input/data/calibration_targets/'//filename//'.txt: IOSTAT=',io_stat
             stop 'STOP in in calibration_mod:read_data_targets'
         endif
 

@@ -17,6 +17,7 @@ module params_mod
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
+    character(len=100) :: calib_targets
 
 !-------------------------------------------------------------------------------------------------
 ! The following are 'derived parameters' calculated from the previous (read) parameters
@@ -95,6 +96,8 @@ subroutine SetDefaultValues()
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
+    ! Character
+    calib_targets='presentation'
 end subroutine SetDefaultValues
 
 subroutine ReadCalibration(calib_name)
@@ -171,6 +174,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) run_counter_start
             case ('n_end_params')
                 read (parval,*) n_end_params
+            case ('calib_targets')
+                read (parval,*) calib_targets
             case ('surv_rates')
                 read (parval,*) surv_rates
             case ('def_contrib')
@@ -1121,6 +1126,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,216)        ' scale_AR        =  ', scale_AR
     write(21,216)        ' scale_IR        =  ', scale_IR
     write(21,'(a20,i1)') ' n_end_params    =  ', n_end_params
+    write(21,'(a20,a )') ' calib_targets   =  ', trim(adjustl(calib_targets))
     write(21,*)
     write(21,*) '------------------------------ Guesses -----------------------------'
     write(21,216) ' r_ms_guess      =  ', r_ms_guess
