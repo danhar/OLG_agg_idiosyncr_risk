@@ -26,7 +26,7 @@ contains
         use numrec_utils ,only: put_diag
         use sub_alg_qn   ,only: s_alg_qn
         use sub_zbrac    ,only: s_zbrac_array
-        use fun_zbrent   ,only: f_zbrent_array
+        use fun_zbrent   ,only: zbrent
         !use sub_broyden
 
         character(len=*) ,intent(in) :: projectname, calib_name
@@ -35,7 +35,8 @@ contains
         logical               :: intialize_jacobi, not_converged, bracket_found
         integer               :: it
         integer  ,parameter   :: max_iterations = 100
-        real(dp) ,parameter   :: brac_cover=0.1_dp
+        real(dp) ,parameter   :: brac_cover=0.005_dp
+        logical  ,parameter   :: use_brent_1D = .false.
 
         xvals = get_params(n_end_params)
         allocate(fvals(n_end_params))
@@ -44,8 +45,9 @@ contains
         print '(t2,a)','- calibration: starting root finder'
 
         call read_data_targets(n_end_params, data_targets)
+        it=0
 
-alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
+alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algorithm, i.e. Brent's Method (s_zbrent)
 
             ! First try to bracket a root by extending the bounds
             brack1 = xvals(1)*(1.0-brac_cover)
@@ -53,17 +55,18 @@ alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's M
             call s_zbrac_array(calibration_step, brack1, brack2, bracket_found)
 
             if (bracket_found) then
+                print '(t2,a)','- calibration: bracketed a root, starting Brent'
                 ! Now Brent's bracketing algorithm
-                xvals(1)= f_zbrent_array(calibration_step, brack1, brack2,tol_calib)
+                call zbrent(calibration_step, brack1, brack2,tol_calib, bracket_found, fvals(1))
+                xvals(1)= brack2
+            else
+                print '(t2,a)','- calibration: ERROR, could not bracket root'
             endif
-
             not_converged = .not. bracket_found
-            fvals = -1.0
 
         else alg ! Use a Broyden algorithm (s_alg_qn)
 
-            ! Initialize root finder Broyden
-            it=0
+            ! Initialize root finder
             maxstp=.01     ! this is crucial
             intialize_jacobi=.true.
             allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
@@ -74,14 +77,16 @@ alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's M
             ! Start root finder
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
-                 reevalj=.true.,check=not_converged,rstit0=20,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
+                 reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
         endif alg
 
+        print *, ''
         if (not_converged) then
             print *,' CRITICAL ERROR: Calibration didnt converge, fvals =', fvals
         else
-            print *,' Calibration converged, fvals =', fvals
+            print *,' *** Calibration converged ***   fvals =', fvals
         endif
+        print *, ''
 
         call write2file(not_converged,fvals, calib_name)
 
@@ -225,10 +230,10 @@ alg:    if (n_end_params == 1) then ! Use a bracketing algorithm, i.e. Brent's M
         if (not_converged) then
             prefix = 'ERROR_'
         else
-            prefix = ''
+            prefix = 'success_'
         endif
 
-        open(unit=301, file='model_output/'//prefix//cal_id(calib_name)//'_calibration.txt', status = 'replace')
+        open(unit=301, file='model_output/'//prefix//'calibration_'//cal_id(calib_name)//'.txt', status = 'replace')
         write(301,*) 'not_converged = ', not_converged
         write(301,*) 'fvals = ', fvals
         close(301)

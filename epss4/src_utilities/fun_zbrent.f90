@@ -1,7 +1,7 @@
 module fun_zbrent
     implicit none
     private
-    public f_zbrent, f_zbrent_array
+    public f_zbrent, zbrent
 
 contains
 !---------------------------------------------------------------------------
@@ -102,12 +102,17 @@ pure real(dp) function f_zbrent(func,x1,x2,tol_o) result(zbrent)
 end function f_zbrent
 !---------------------------------------------------------------------------
 
-real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
-! Same as above, only that it func takes an array with a scalar element
-! and is not pure
+subroutine zbrent(func,x1,x2,tol_o, converged, fb)
+! Same as above, with following differences:
+! - is a subroutine that returns root in x2, logical converged, and function value
+! - func takes an array(!) with a scalar element
+! - is not pure
     use kinds
-    real(dp), intent(in) :: x1,x2
+    real(dp), intent(in) :: x1
+    real(dp), intent(inout) :: x2 ! returns final value
     real(dp), intent(in), optional :: tol_o
+    logical , intent(out) :: converged
+    real(dp), intent(out) :: fb
     interface
         function func(x)
         use kinds
@@ -119,7 +124,7 @@ real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
     integer, parameter :: ITMAX=1000
     real(dp), parameter :: EPS=epsilon(x1)
     integer :: iter
-    real(dp) :: a,b,c,d,e,fa,fb,fc,p,q,r,s,tol1,tol, xm
+    real(dp) :: a,b,c,d,e,fa,fc,p,q,r,s,tol1,tol, xm
 
     if (present(tol_o)) then
        tol=tol_o
@@ -127,6 +132,7 @@ real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
        tol=(x1+x2)/2.0_dp * 1.0e-8_dp
     endif
 
+    converged = .false.
     a=x1
     b=x2
     fa=sum(func([a])) ! hack to make it a scalar
@@ -155,7 +161,8 @@ real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
         tol1=2.0_dp*EPS*abs(b)+0.5_dp*tol
         xm=0.5_dp*(c-b)
         if (abs(xm) <= tol1 .or. fb == 0.0) then
-            zbrent=b
+            x2=b
+            converged = .true.
             return
         end if
         if (abs(e) >= tol1 .and. abs(fa) > abs(fb)) then
@@ -188,8 +195,8 @@ real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
         fb=sum(func([b])) !Hack to make it a scalar
     end do
     print*, 'f_zbrent: ERROR, exceeded maximum iterations'
-    zbrent=b
-end function f_zbrent_array
+    x2=b
+end subroutine zbrent
 !---------------------------------------------------------------------------
 
 end module fun_zbrent

@@ -1,7 +1,11 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- add calibration routine
+- replace calibrate_model by n_end_params = 0
+
+- make update of aggregate grids (in particular capital) better, coz that seems to be the main reason when KS explodes. 
+    More points, and probably finer close to zero because that is where problems arise? 
+    And because I hit lower bound more often (mean deprecation negative)?
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
@@ -127,6 +131,8 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- add calibration routine
+
 - parallelize simulation
 
 - make simvars class and coeffs class. see unformatted_io and laws_of_motion

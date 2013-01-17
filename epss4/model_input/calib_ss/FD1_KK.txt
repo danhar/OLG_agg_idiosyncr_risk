@@ -105,7 +105,6 @@ mu_ms_guess     4.3e-2      OPTIONAL (only used if opt_initial_ms_guess=1) initi
 !    e.g. after the !--- , because there are no spaces or other separators to separate words.
 ! (2) The 'collateral constraint' uses today's prices for both assets (it does not include the risk-free rate)
 ! (3) If collateral_constraint == .false and kappa_in_01 == .true. then the agent can borrow for consumption (but not for investing in stock).
-calibrate_model         .true.      Calibrate endogenous parameters to data. The next options regulate the details.
 ! (4) tau_experiment = .true. increases tau +2% after first run, sets partial_equilibrium=.true., runs again, computes consumption equivalent variation (CEV).
 !     If combined with run_n_times, then each run will perform this experiment (e.g. with different scale_AR). Only first run is GE. 
 !----------------------------------------------------------------------------------------------------------------------------/
