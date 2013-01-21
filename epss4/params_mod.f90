@@ -1216,8 +1216,16 @@ subroutine params_set_real(param_name, new_value)
            else
                del_std = new_value
            endif
-
-
+        case ('pi1_delta')
+           if (pi1_delta < 0.0) then
+               print* , 'params_set: pi1_delta < 0.0, setting to 0.0'
+               pi1_delta = 0.0
+           elseif (pi1_delta > 1.0) then
+               print* , 'params_set: pi1_delta > 1.0, setting to 1.0'
+               pi1_delta = 1.0
+           else
+               pi1_delta = new_value
+           endif
 		case default
 		    print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
 		end select

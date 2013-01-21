@@ -203,14 +203,14 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         open(unit=301, file='model_input/data/calibration_targets/'//filename//'.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
         if (io_stat==0) then
             do
+                line = line + 1
+                if (line > n) exit
                 read (301,*,iostat=io_stat) val, param, description
                 if (io_stat/=0) then
                     print '(a,i6)', 'calibration_mod:read_data_targets: An error occured reading line', line
                     exit
                 endif
                 if (scan(val,'!')>0) cycle
-                line = line + 1
-                if (line > n) exit
                 read (val,*) data_targets(line)
             enddo
         end if
