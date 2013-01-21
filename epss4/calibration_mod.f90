@@ -35,7 +35,7 @@ contains
         real(dp)            :: maxstp, brack1, brack2
         logical             :: intialize_jacobi, not_converged, bracket_found
         integer             :: it
-        integer  ,parameter :: max_iterations = 100
+        integer  ,parameter :: max_iterations = 500
         real(dp) ,parameter :: brac_cover=0.005_dp
         logical  ,parameter :: use_brent_1D   = .false. ! Brent doesn't work very well b/c of KS guesses and aggregate grids.
         logical  ,parameter :: norm_params_to_1 = .true.  ! for Broyden
@@ -90,9 +90,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
         print *, ''
         if (not_converged) then
-            print *,' CRITICAL ERROR: Calibration didnt converge, fvals =', fvals
+            print *,' CRITICAL ERROR: Calibration didnt converge ' !, fvals =', fvals
         else
-            print *,' *** Calibration converged ***   fvals =', fvals
+            print *,' *** Calibration converged *** ' !  fvals =', fvals
         endif
         print *, ''
 
@@ -198,20 +198,20 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
         print '(t2,a)','- calibration: reading calibration targets from model_input/data/calibration_targets/'//filename//'.txt'
         allocate(data_targets(n))
-        line = 0
+        line = 1
 
         open(unit=301, file='model_input/data/calibration_targets/'//filename//'.txt', status='OLD', form='formatted',iostat=io_stat, action='read')
         if (io_stat==0) then
             do
-                line = line + 1
                 if (line > n) exit
                 read (301,*,iostat=io_stat) val, param, description
+                if (scan(val,'!')>0) cycle
                 if (io_stat/=0) then
                     print '(a,i6)', 'calibration_mod:read_data_targets: An error occured reading line', line
                     exit
                 endif
-                if (scan(val,'!')>0) cycle
                 read (val,*) data_targets(line)
+                line = line + 1
             enddo
         end if
         close (unit=301)

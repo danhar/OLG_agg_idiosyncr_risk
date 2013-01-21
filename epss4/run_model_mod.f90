@@ -56,7 +56,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         ms_grids = ms_guess
     endif
     output_path = construct_path(dir,calib_name)
-    if (.not. calibrating) syserr = system('mkdir '//output_path) ! Creates directory for output files
+    syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
     allocate(simvars(1)) ! only one core used for mean shock

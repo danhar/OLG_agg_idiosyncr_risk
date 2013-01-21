@@ -689,12 +689,12 @@ subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
 end subroutine set_apmax
 !-------------------------------------------------------------------------------------------------
 
-pure function set_pi_z(pi1_zeta, p1_delta, n_zeta, nz)
+pure function set_pi_z(pi1_zeta, pi1_delta, n_zeta, nz)
     use fun_kronprod
     real(dp) ,dimension(nz,nz):: set_pi_z
-    real(dp) ,intent(in)      :: pi1_zeta, p1_delta
+    real(dp) ,intent(in)      :: pi1_zeta, pi1_delta
     integer  ,intent(in)      :: n_zeta, nz
-    real(dp)                  :: pi_zeta(n_zeta,n_zeta), pi_delta(n_delta,n_delta)
+    real(dp)                  :: pi_zeta(n_zeta,n_zeta)
     real(dp)                  :: pi_1, w_KK, pi_delta_vec(nz) ! only for Kubler Kruger spec
     real(dp) ,dimension(nz,nz):: pi_KK, id, pi_zeta_kron, pi_delta_kron
     integer                   :: i
@@ -1126,7 +1126,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,216)        ' scale_AR        =  ', scale_AR
     write(21,216)        ' scale_IR        =  ', scale_IR
     write(21,'(a20,i1)') ' n_end_params    =  ', n_end_params
-    write(21,'(a20,a )') ' calib_targets   =  ', trim(adjustl(calib_targets))//'.txt'
+    write(21,'(a20,a )') ' calib_targets   =  ', 'model_input/data/calibration_targets/'//trim(adjustl(calib_targets))//'.txt'
     write(21,*)
     write(21,*) '------------------------------ Guesses -----------------------------'
     write(21,216) ' r_ms_guess      =  ', r_ms_guess
