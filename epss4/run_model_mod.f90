@@ -66,11 +66,8 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 
     ! Check distribution and save results
     if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
-    if (.not. partial_equilibrium) then
-        syserr = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
-        call ms_grids%write_unformatted('ms')
-    endif
     if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
+    if (.not. partial_equilibrium) call ms_grids%write_unformatted('ms')
 
     ms_rf_temp = simvars(1)%rf(1)
     deallocate(simvars)

@@ -24,6 +24,7 @@ program EPSS
     print*, ' '
    	print*, 'Starting program ', projectname
     print*, ' '
+    sys_error = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
 
     do
         call SetDefaultValues
