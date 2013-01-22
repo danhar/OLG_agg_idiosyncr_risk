@@ -119,7 +119,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
     endif
     output_path = construct_path(dir,calib_name)
-    if (.not. calibrating) syserr = system('mkdir '//output_path)
+    syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
 
     call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
     if (err%not_converged) call err%print2stderr(dir)
@@ -128,7 +128,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     ! Check distribution and save results
     print*, ' '
     if (.not. calibrating) call CheckPhi(Phi,output_path)
-    if (.not. partial_equilibrium) call save_unformatted(grids, coeffs, simvars)
+    if (.not. partial_equilibrium .and. .not. err%not_converged) call save_unformatted(grids, coeffs, simvars)
     if (.not. calibrating) call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
     if (.not. calibrating) then

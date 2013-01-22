@@ -38,6 +38,7 @@ program EPSS
 	    if (n_end_params > 0) then
 	        call params_set_thisrun
             call CheckParams
+            sys_error = system('mkdir model_output/'//cal_id(calib_name)) ! could create different folder with _cal attached?
 	        call calibrate(projectname, calib_name)
         endif
 

@@ -93,7 +93,7 @@ contains
             ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
-                 reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=100,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
+                 reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=59,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
 
             if (err%not_converged) call err%write2file(fvals, output_path)
 
