@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='024_pres_n4f'
+thisrun='027_comp_grid'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=8  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
