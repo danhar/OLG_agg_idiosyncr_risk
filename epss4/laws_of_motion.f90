@@ -62,7 +62,7 @@ end function Forecast
 !-------------------------------------------------------------------------------
 
 pure subroutine Regression(simvars,coeffs)
-    use params_mod   ,only: nt, t_scrap
+    use params_mod   ,only: t_scrap
     use classes_mod  ,only: tSimvars
     use MKL95_LAPACK ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
 
@@ -72,11 +72,12 @@ pure subroutine Regression(simvars,coeffs)
     real(dp) ,dimension(:) ,allocatable    :: kp, mup              ! lhs
     real(dp) ,dimension(2) :: residual_sum_of_squares, total_sum_of_squares
     real(dp)               :: mean
-    integer                :: n_covars, nz, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i
+    integer                :: n_covars, nz, nt, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i
     logical, parameter :: use_gelsy = .false. ! instead of using gels (which had an error in Intel Composer XE 2013 original release)
 
     n_covars = size(coeffs%k,1)
     nz       = size(coeffs%k,2)
+    nt       = size(simvars(1)%z)
 
     do zc=1,nz
         if (pooled_regression) then

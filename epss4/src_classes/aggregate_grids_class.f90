@@ -7,6 +7,7 @@ module aggregate_grids_class
 
     type tAggGrids
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
+        real(dp), private :: min_k=0.5_dp, min_mu = 0.01_dp, cover_k_l = 3.0, cover_k_u = 3.0,cover_mu_l = 2.0, cover_mu_u = 2.0, curv=1.0_dp
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
@@ -88,12 +89,14 @@ contains
         call this%allocate(nk,nmu)
 
 	    lb=factor_k*mean_guess%k(1)*(1.0-cover_k)
+	    if (lb < this%min_k) lb = this%min_k
 	    ub=factor_k*mean_guess%k(1)*(1.0+cover_k)
-	    this%k=MakeGrid(lb,ub,nk)
+	    this%k=MakeGrid(lb,ub,nk, this%curv)
 
 	    lb=factor_mu*mean_guess%mu(1)*(1.0-cover_mu)
+	    if (lb < this%min_mu) lb = this%min_mu
 	    ub=factor_mu*mean_guess%mu(1)*(1.0+cover_mu)
-	    this%mu=MakeGrid(lb,ub,nmu)
+	    this%mu=MakeGrid(lb,ub,nmu, this%curv)
 	end subroutine construct_aggr_grid
 
     elemental subroutine update_grid_with_stats(this, k_mean, mu_mean, k_std, mu_std)
@@ -107,19 +110,18 @@ contains
         real(dp) ,intent(in) :: k_mean, mu_mean, k_std, mu_std
         integer   :: n
         real(dp)                    :: lb, ub       ! lower and upper bound
-        real(dp), parameter :: cover_k_l = 2.0, cover_k_u = 3.0,cover_mu_l = 2.0, cover_mu_u = 2.0, min_k=1.0_dp, min_mu = 0.01_dp
 
-        lb=k_mean -cover_k_l*k_std
-        if (lb < min_k) lb = min_k
-        ub=k_mean +cover_k_u*k_std
+        lb=k_mean - this%cover_k_l*k_std
+        if (lb < this%min_k) lb = this%min_k
+        ub=k_mean +this%cover_k_u*k_std
         n = size(this%k)
-        this%k=MakeGrid(lb,ub,n)
+        this%k=MakeGrid(lb,ub,n, this%curv)
 
-        lb=mu_mean -cover_mu_l*mu_std
-        if (lb < min_mu) lb = min_mu
-        ub=mu_mean +cover_mu_u*mu_std
+        lb=mu_mean -this%cover_mu_l*mu_std
+        if (lb < this%min_mu) lb = this%min_mu
+        ub=mu_mean +this%cover_mu_u*mu_std
         n = size(this%mu)
-        this%mu=MakeGrid(lb,ub,n)
+        this%mu=MakeGrid(lb,ub,n, this%curv)
     end subroutine update_grid_with_stats
 
 end module aggregate_grids_class
