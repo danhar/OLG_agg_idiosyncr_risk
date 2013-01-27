@@ -21,6 +21,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
+    use omp_lib         ,only: OMP_get_max_threads
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use makegrid_mod
 
@@ -65,13 +66,14 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     !---------------------------------------------------------------------------
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
-!$OMP PARALLEL IF(nk>1) DEFAULT(NONE) &
+!$OMP PARALLEL IF(nk>1) DEFAULT(NONE) NUM_THREADS(min(nmu,OMP_get_max_threads()))&
 !$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax) &
 !$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
 muloop: do muc=1,nmu
+!$OMP PARALLEL DO IF(nk>1 .and. OMP_get_max_threads() >= 2*nmu) NUM_THREADS(OMP_get_max_threads()/nmu) SCHEDULE(STATIC) PRIVATE(kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 kloop:      do kc=1,nk
 zloop:          do zc=1,nz
 
@@ -98,6 +100,7 @@ xloop:                  do xc=1,nx
                     enddo etaloop
                 enddo zloop
             enddo kloop
+!$OMP END PARALLEL DO
         enddo muloop
 !$OMP END DO
     enddo jloop
