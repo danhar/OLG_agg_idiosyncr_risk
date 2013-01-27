@@ -21,7 +21,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
-    use omp_lib         ,only: OMP_get_max_threads
+    use omp_lib         ,only: OMP_get_max_threads, OMP_get_num_threads, OMP_get_thread_num
     use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use makegrid_mod
 
@@ -73,8 +73,21 @@ jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
 muloop: do muc=1,nmu
+!$OMP CRITICAL
+print*, 'muc=',muc
+write(*,*) OMP_get_thread_num()
+!$OMP END CRITICAL
+!print*, OMP_get_num_threads()
 !$OMP PARALLEL DO IF(nk>1 .and. OMP_get_max_threads() >= 2*nmu) NUM_THREADS(OMP_get_max_threads()/nmu) SCHEDULE(STATIC) PRIVATE(kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 kloop:      do kc=1,nk
+!$OMP CRITICAL
+!print*, OMP_get_num_threads()
+print*, 'kc=',kc
+write(*,*) OMP_get_thread_num()
+!$OMP END CRITICAL
+if (nk > 1 .and. jc==nj-2) stop
+
+!print*, OMP_get_num_threads()
 zloop:          do zc=1,nz
 
                     call calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp,err%kp (zc,kc,muc),err%mup(zc,kc,muc),err%rfp(zc,kc,muc))
