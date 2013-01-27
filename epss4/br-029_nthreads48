@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # #BSUB-q pub.1h                    # Job queue
-#BSUB-W 36:00                         # Time limit in minutes (or HH:MM)
-#BSUB-n 8            # number of processors / threads
+#BSUB-W 4:00                         # Time limit in minutes (or HH:MM)
+#BSUB-n 48            # number of processors / threads
 # #BSUB-R "rusage[mem=4096]"          # Memory im MB
 # #BSUB-M 4096000                     # Memory requirements in Kbytes
 # #BSUB-R "select[model==Opteron8380]"   # Select CPU Type: OpteronXXXX: 2220 (ok), 8220, 8380 (best), 8384, 6174 (worst)
@@ -11,6 +11,7 @@
 #BSUB-N                             # Send email when ends
 
 thisrun="${PWD##*/}"
+export OMP_NESTED=TRUE
 
 cd $BUILD
 make clean

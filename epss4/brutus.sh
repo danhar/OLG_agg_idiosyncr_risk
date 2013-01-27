@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 
-thisrun='027_comp_curv20'
+thisrun='029_nthreads48'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
-NTHREADS=8  # number of OpenMP threads 
+NTHREADS=48  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
 
