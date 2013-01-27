@@ -71,8 +71,8 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
-muloop: do muc=1,nmu
-kloop:      do kc=1,nk
+kloop:  do kc=1,nk
+muloop:     do muc=1,nmu
 zloop:          do zc=1,nz
 
                     call calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp,err%kp (zc,kc,muc),err%mup(zc,kc,muc),err%rfp(zc,kc,muc))
@@ -97,8 +97,8 @@ xloop:                  do xc=1,nx
                         end do xloop
                     enddo etaloop
                 enddo zloop
-            enddo kloop
-        enddo muloop
+            enddo muloop
+        enddo kloop
 !$OMP END DO
     enddo jloop
 !$OMP END PARALLEL
