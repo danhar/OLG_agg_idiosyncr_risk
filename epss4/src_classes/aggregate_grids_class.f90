@@ -7,7 +7,7 @@ module aggregate_grids_class
 
     type tAggGrids
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
-        real(dp), private :: min_k=0.5_dp, min_mu = 0.01_dp, cover_k_l = 3.0, cover_k_u = 3.0,cover_mu_l = 2.0, cover_mu_u = 2.0, curv=1.0_dp
+        real(dp), private :: min_k=0.5_dp, min_mu = 0.01_dp, cover_k_l = 3.0, cover_k_u = 3.0,cover_mu_l = 2.0, cover_mu_u = 2.0, curv=2.0_dp
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
