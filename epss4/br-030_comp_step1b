@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# #BSUB-q pub.1h                    # Job queue
+#BSUB-W 8:00                         # Time limit in minutes (or HH:MM)
+#BSUB-n 16            # number of processors / threads
+# #BSUB-R "rusage[mem=4096]"          # Memory im MB
+# #BSUB-M 4096000                     # Memory requirements in Kbytes
+# #BSUB-R "select[model==Opteron8380]"   # Select CPU Type: OpteronXXXX: 2220 (ok), 8220, 8380 (best), 8384, 6174 (worst)
+#BSUB-oo bsub_output.txt           # Redirect output to file
+#BSUB-B                             # Send email when begins
+#BSUB-N                             # Send email when ends
+
+thisrun="${PWD##*/}"
+
+cd $BUILD
+make clean
+make all >../shell_output.txt 2>&1
+cd ..
+
+./$BUILD/epss4 >>shell_output.txt 2>&1
+
+mv shell_output.txt ./model_output/shell_output.txt
+tar -cjf results.tar.bz2 model_output model_input
+
+scp results.tar.bz2 isildur@82.130.121.40:~/Tempdh/Brutus/$thisrun
+ssh isildur@82.130.121.40 "cd ~/Tempdh/Brutus/$thisrun; tar -xjf results.tar.bz2; rm results.tar.bz2"
+
+
+
+
+
+
+################### Alternatives #####################
+# Get the name (without .txt) of the current calibration_file used
+# calib_id = "${EPSSDIR%%/*}" 
+
+# Run multiple times with different calibration files as input
+# ./$BUILD/ calib_ep/STY-IR03.txt >>shell_output.txt 2>&1
+# ./$BUILD/ calib_ep/STY2noir.txt >>shell_output.txt 2>&1

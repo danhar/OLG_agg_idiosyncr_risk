@@ -71,7 +71,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 jloop:do jc= nj-1,1,-1
         betatildej = beta*surv(jc)*(1.0+g)**((1.0-theta)/gamm)
 !$OMP DO SCHEDULE(STATIC)
-kloop:  do kc=1,nk
+kloop:  do kc=1,nk          ! Small performance notice: the outermost loop does not correspond to the rightmost state, because I interchanged loops for k and mu, so that OpenMP can work on k.
 muloop:     do muc=1,nmu
 zloop:          do zc=1,nz
 
