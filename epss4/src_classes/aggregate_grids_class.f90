@@ -22,13 +22,16 @@ module aggregate_grids_class
 contains
 
     elemental subroutine allocate_grids(this,nk,nmu)
-        class(tAggGrids), intent(out)  :: this
+        class(tAggGrids), intent(inout)  :: this
         integer,    intent(in)      :: nk,nmu
+        call this%deallocate()
         allocate(this%k(nk),this%mu(nmu))
     end subroutine allocate_grids
 
     elemental subroutine deallocate_grids(this)
-        class(tAggGrids), intent(out)  :: this
+        class(tAggGrids), intent(inout)  :: this
+        if (allocated(this%k)) deallocate(this%k)
+        if (allocated(this%mu)) deallocate(this%mu)
     end subroutine deallocate_grids
 
     subroutine read_unformatted(this,equilibrium_type)
