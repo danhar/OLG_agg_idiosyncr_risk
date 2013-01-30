@@ -7,7 +7,9 @@ module aggregate_grids_class
 
     type tAggGrids
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
-        real(dp), private :: min_k=0.5_dp, min_mu = 0.01_dp, cover_k_l = 3.5, cover_k_u = 3.5,cover_mu_l = 2.5, cover_mu_u = 2.5, curv=1.75_dp
+        real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.01_dp, max_mu = 0.12_dp, &
+                             cover_k_l = 3.5, cover_k_u = 3.5, cover_mu_l = 2.5, cover_mu_u = 2.5, curv=1.75_dp
+        logical , private :: fixed = .true.
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
@@ -88,15 +90,20 @@ contains
 
         call this%allocate(nk,nmu)
 
-	    lb=factor_k*mean_guess%k(1)*(1.0-cover_k)
-	    if (lb < this%min_k) lb = this%min_k
-	    ub=factor_k*mean_guess%k(1)*(1.0+cover_k)
-	    this%k=MakeGrid(lb,ub,nk, this%curv)
+        if (this%fixed) then
+            this%k = MakeGrid(this%min_k ,this%max_k ,nk , this%curv)
+            this%mu= MakeGrid(this%min_mu,this%max_mu,nmu, this%curv)
+        else
+            lb=factor_k*mean_guess%k(1)*(1.0-cover_k)
+            if (lb < this%min_k) lb = this%min_k
+            ub=factor_k*mean_guess%k(1)*(1.0+cover_k)
+            this%k=MakeGrid(lb,ub,nk, this%curv)
 
-	    lb=factor_mu*mean_guess%mu(1)*(1.0-cover_mu)
-	    if (lb < this%min_mu) lb = this%min_mu
-	    ub=factor_mu*mean_guess%mu(1)*(1.0+cover_mu)
-	    this%mu=MakeGrid(lb,ub,nmu, this%curv)
+            lb=factor_mu*mean_guess%mu(1)*(1.0-cover_mu)
+            if (lb < this%min_mu) lb = this%min_mu
+            ub=factor_mu*mean_guess%mu(1)*(1.0+cover_mu)
+            this%mu=MakeGrid(lb,ub,nmu, this%curv)
+        endif
 	end subroutine construct_aggr_grid
 
     elemental subroutine update_grid_with_stats(this, k_mean, mu_mean, k_std, mu_std)
@@ -110,6 +117,8 @@ contains
         real(dp) ,intent(in) :: k_mean, mu_mean, k_std, mu_std
         integer   :: n
         real(dp)                    :: lb, ub       ! lower and upper bound
+
+        if (this%fixed) return  ! fixed grid, no update
 
         lb=k_mean - this%cover_k_l*k_std
         if (lb < this%min_k) lb = this%min_k
