@@ -1,0 +1,1353 @@
+Building file: ../kinds.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "kinds.o" "../kinds.f90"
+Finished building: ../kinds.f90
+ 
+Building file: ../src_utilities/makegrid_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/makegrid_mod.o" "../src_utilities/makegrid_mod.f90"
+Finished building: ../src_utilities/makegrid_mod.f90
+ 
+Building file: ../src_classes/aggregate_grids_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/aggregate_grids_class.o" "../src_classes/aggregate_grids_class.f90"
+Finished building: ../src_classes/aggregate_grids_class.f90
+ 
+Building file: ../src_utilities/fun_kronprod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_kronprod.o" "../src_utilities/fun_kronprod.f90"
+Finished building: ../src_utilities/fun_kronprod.f90
+ 
+Building file: ../src_utilities/markov_chain_approx.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/markov_chain_approx.o" "../src_utilities/markov_chain_approx.f90"
+Finished building: ../src_utilities/markov_chain_approx.f90
+ 
+Building file: ../src_utilities/markov_station_distr.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/markov_station_distr.o" "../src_utilities/markov_station_distr.f90"
+Finished building: ../src_utilities/markov_station_distr.f90
+ 
+Building file: ../src_utilities/fun_zbrent.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_zbrent.o" "../src_utilities/fun_zbrent.f90"
+Finished building: ../src_utilities/fun_zbrent.f90
+ 
+Building file: ../src_utilities/sub_zbrac.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/sub_zbrac.o" "../src_utilities/sub_zbrac.f90"
+Finished building: ../src_utilities/sub_zbrac.f90
+ 
+Building file: ../src_utilities/twostate_exact.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/twostate_exact.o" "../src_utilities/twostate_exact.f90"
+Finished building: ../src_utilities/twostate_exact.f90
+ 
+Building file: ../params_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "params_mod.o" "../params_mod.f90"
+../params_mod.f90(1141): remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
+220 format(a20, es8.2)
+------------------^
+../params_mod.f90(1112): remark #8291: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+7'.
+219 format(a16, es8.2)
+------------------^
+Finished building: ../params_mod.f90
+ 
+Building file: ../income.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "income.o" "../income.f90"
+Finished building: ../income.f90
+ 
+Building file: ../src_utilities/fun_aggregate_diff.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_aggregate_diff.o" "../src_utilities/fun_aggregate_diff.f90"
+Finished building: ../src_utilities/fun_aggregate_diff.f90
+ 
+Building file: ../src_utilities/fun_fdjac.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_fdjac.o" "../src_utilities/fun_fdjac.f90"
+Finished building: ../src_utilities/fun_fdjac.f90
+ 
+Building file: ../src_utilities/fun_locate.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_locate.o" "../src_utilities/fun_locate.f90"
+Finished building: ../src_utilities/fun_locate.f90
+ 
+Building file: ../src_utilities/fun_lininterp.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/fun_lininterp.o" "../src_utilities/fun_lininterp.f90"
+Finished building: ../src_utilities/fun_lininterp.f90
+ 
+Building file: ../src_classes/policies_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/policies_class.o" "../src_classes/policies_class.f90"
+Finished building: ../src_classes/policies_class.f90
+ 
+Building file: ../src_utilities/interpolate_xgrid.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/interpolate_xgrid.o" "../src_utilities/interpolate_xgrid.f90"
+Finished building: ../src_utilities/interpolate_xgrid.f90
+ 
+Building file: ../src_utilities/markovchain_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/markovchain_mod.o" "../src_utilities/markovchain_mod.f90"
+Finished building: ../src_utilities/markovchain_mod.f90
+ 
+Building file: ../src_utilities/numrec_utils.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/numrec_utils.o" "../src_utilities/numrec_utils.f90"
+Finished building: ../src_utilities/numrec_utils.f90
+ 
+Building file: ../src_utilities/partial_sorting.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/partial_sorting.o" "../src_utilities/partial_sorting.f90"
+Finished building: ../src_utilities/partial_sorting.f90
+ 
+Building file: ../src_utilities/sub_linesearch.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/sub_linesearch.o" "../src_utilities/sub_linesearch.f90"
+Finished building: ../src_utilities/sub_linesearch.f90
+ 
+Building file: ../src_utilities/sub_alg_qn.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/sub_alg_qn.o" "../src_utilities/sub_alg_qn.f90"
+Finished building: ../src_utilities/sub_alg_qn.f90
+ 
+Building file: ../src_utilities/sub_broyden.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/sub_broyden.o" "../src_utilities/sub_broyden.f90"
+Finished building: ../src_utilities/sub_broyden.f90
+ 
+Building file: ../src_utilities/sub_zbrak.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/sub_zbrak.o" "../src_utilities/sub_zbrak.f90"
+Finished building: ../src_utilities/sub_zbrak.f90
+ 
+Building file: ../src_utilities/unbiased_correlations.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_utilities/unbiased_correlations.o" "../src_utilities/unbiased_correlations.f90"
+Finished building: ../src_utilities/unbiased_correlations.f90
+ 
+Building file: ../src_classes/coefficients_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/coefficients_class.o" "../src_classes/coefficients_class.f90"
+Finished building: ../src_classes/coefficients_class.f90
+ 
+Building file: ../src_classes/error_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/error_class.o" "../src_classes/error_class.f90"
+Finished building: ../src_classes/error_class.f90
+ 
+Building file: ../src_classes/lifecycles_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/lifecycles_class.o" "../src_classes/lifecycles_class.f90"
+Finished building: ../src_classes/lifecycles_class.f90
+ 
+Building file: ../src_classes/simvars_class.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/simvars_class.o" "../src_classes/simvars_class.f90"
+../src_classes/simvars_class.f90(60): warning #6843: A dummy argument with an explicit INTENT(OUT) declaration is not given an explicit value.   [THIS]
+    elemental subroutine deallocate_simvars(this)
+--------------------------------------------^
+Finished building: ../src_classes/simvars_class.f90
+ 
+Building file: ../statistics.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "statistics.o" "../statistics.f90"
+Finished building: ../statistics.f90
+ 
+Building file: ../src_classes/classes_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "src_classes/classes_mod.o" "../src_classes/classes_mod.f90"
+Finished building: ../src_classes/classes_mod.f90
+ 
+Building file: ../distribution.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "distribution.o" "../distribution.f90"
+Finished building: ../distribution.f90
+ 
+Building file: ../laws_of_motion.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "laws_of_motion.o" "../laws_of_motion.f90"
+Finished building: ../laws_of_motion.f90
+ 
+Building file: ../household_solution_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "household_solution_mod.o" "../household_solution_mod.f90"
+Finished building: ../household_solution_mod.f90
+ 
+Building file: ../save_results_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "save_results_mod.o" "../save_results_mod.f90"
+Finished building: ../save_results_mod.f90
+ 
+Building file: ../simulation_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "simulation_mod.o" "../simulation_mod.f90"
+Finished building: ../simulation_mod.f90
+ 
+Building file: ../krusell_smith_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "krusell_smith_mod.o" "../krusell_smith_mod.f90"
+Finished building: ../krusell_smith_mod.f90
+ 
+Building file: ../mean_shock_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "mean_shock_mod.o" "../mean_shock_mod.f90"
+Finished building: ../mean_shock_mod.f90
+ 
+Building file: ../run_model_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "run_model_mod.o" "../run_model_mod.f90"
+Finished building: ../run_model_mod.f90
+ 
+Building file: ../calibration_mod.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "calibration_mod.o" "../calibration_mod.f90"
+Finished building: ../calibration_mod.f90
+ 
+Building file: ../main.f90
+Invoking: Intel(R) Intel(R) 64 Fortran Compiler
+ifort -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include/intel64/lp64" -I"/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/include" -openmp -fp-model fast=2 -check none -c -assume realloc_lhs -no-prec-div -xHost -o "main.o" "../main.f90"
+../main.f90(59): remark #8290: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+3'.
+                    write(runchar,'(a3,f4.2)') ',IR', risk_scale(rc)
+----------------------------------------^
+../main.f90(63): remark #8290: Recommended relationship between field width 'W' and the number of fractional digits 'D' in this edit descriptor is 'W>=D+3'.
+                    write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
+----------------------------------------^
+Finished building: ../main.f90
+ 
+Building target: epss4
+Invoking: Intel(R) Fortran Linker
+ifort  -o "epss4"  ./src_utilities/fun_aggregate_diff.o ./src_utilities/fun_fdjac.o ./src_utilities/fun_kronprod.o ./src_utilities/fun_lininterp.o ./src_utilities/fun_locate.o ./src_utilities/fun_zbrent.o ./src_utilities/interpolate_xgrid.o ./src_utilities/makegrid_mod.o ./src_utilities/markov_chain_approx.o ./src_utilities/markov_station_distr.o ./src_utilities/markovchain_mod.o ./src_utilities/numrec_utils.o ./src_utilities/partial_sorting.o ./src_utilities/sub_alg_qn.o ./src_utilities/sub_broyden.o ./src_utilities/sub_linesearch.o ./src_utilities/sub_zbrac.o ./src_utilities/sub_zbrak.o ./src_utilities/twostate_exact.o ./src_utilities/unbiased_correlations.o  ./src_classes/aggregate_grids_class.o ./src_classes/classes_mod.o ./src_classes/coefficients_class.o ./src_classes/error_class.o ./src_classes/lifecycles_class.o ./src_classes/policies_class.o ./src_classes/simvars_class.o  ./calibration_mod.o ./distribution.o ./household_solution_mod.o ./income.o ./kinds.o ./krusell_smith_mod.o ./laws_of_motion.o ./main.o ./mean_shock_mod.o ./params_mod.o ./run_model_mod.o ./save_results_mod.o ./simulation_mod.o ./statistics.o   -lmkl_intel_lp64 -lmkl_intel_thread -liomp5 -lpthread -lm -lmkl_core -L/cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/lib/intel64 /cluster/apps/intel/composer_xe_2013.0.079/composer_xe_2013.0.079/mkl/lib/intel64/libmkl_lapack95_lp64.a
+Finished building target: epss4
+ 
+  
+ Starting program epss4
+  
+ - main: Reading calibration file calib_ss/FD1_KK.txt
+ WARNING: stat_dist_z =  0.4300 0.0700 0.0700 0.4300
+ 
+ - calibration: starting root finder
+ - calibration: reading calibration targets from model_input/data/calibration_targets/computation.txt
+ 
+Calibration iteration 001
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  6078  ( 13.6%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =175073  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =    91  (  0.6%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =170675  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  5.161705E-02
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =171679  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    19  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =171691  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =171780  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =170518  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =171123  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =170316  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =170901  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =170257  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    17  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =171863  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =170673  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    17  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =171115  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    19  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =170505  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =173316  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =172897  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =169360  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    17  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =170352  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =170742  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    17  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =170885  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    19  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =170722  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =170724  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =170691  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =170602  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =170276  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =170282  (  2.4%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =159300  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  1.706667E-03
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =160002  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  2.173665E-03
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =161284  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  1.370900E-03
+ - krusell_smith: solving for policies,  it 030
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =159014  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    5:  3.035966E-04
+ - krusell_smith: solving for policies,  it 031
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =160115  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    6:  1.689406E-05
+ - krusell_smith: solving for policies,  it 032
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =159202  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    7:  2.405955E-06
+ - krusell_smith: solving for policies,  it 033
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =159101  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    8:  1.383010E-07
+ - krusell_smith: solving for policies,  it 034
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =160230  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    9:  3.897034E-09
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  3.405699E-02
+ 
+Calibration iteration 002
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5084  ( 11.3%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =163625  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     1  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   320  (  2.0%)
+ Warning: simulate_economy: # mu not in grid =     4  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =159877  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  5.273219E-03
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =159531  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =158630  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =160194  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =160279  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =159758  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =160181  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =159043  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =159539  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =159890  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =159146  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =159611  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =160745  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =158316  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     5  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =156898  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =158842  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =159875  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =159860  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =159870  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =159867  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =159874  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =159871  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =159854  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =159873  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =159866  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =161026  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =158232  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  1.331720E-03
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =159881  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 030
+ Warning: policyfunctions: # cons_interp < 0 =158908  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  1.336820E-03
+ - krusell_smith: solving for policies,  it 031
+ Warning: policyfunctions: # cons_interp < 0 =158902  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 032
+ Warning: policyfunctions: # cons_interp < 0 =159368  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 033
+ Warning: policyfunctions: # cons_interp < 0 =160555  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    16  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 034
+ Warning: policyfunctions: # cons_interp < 0 =161792  (  2.3%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 035
+ Warning: policyfunctions: # cons_interp < 0 =159032  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  1.332211E-03
+ - krusell_smith: solving for policies,  it 036
+ Warning: policyfunctions: # cons_interp < 0 =161014  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 037
+ Warning: policyfunctions: # cons_interp < 0 =160737  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     5  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 038
+ Warning: policyfunctions: # cons_interp < 0 =159238  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    5:  1.250004E-03
+ - krusell_smith: solving for policies,  it 039
+ Warning: policyfunctions: # cons_interp < 0 =161090  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 040
+ Warning: policyfunctions: # cons_interp < 0 =160541  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    6:  9.631053E-04
+ - krusell_smith: solving for policies,  it 041
+ Warning: policyfunctions: # cons_interp < 0 =159510  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    7:  1.105405E-03
+ - krusell_smith: solving for policies,  it 042
+ Warning: policyfunctions: # cons_interp < 0 =161621  (  2.3%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    8:  7.879438E-04
+ - krusell_smith: solving for policies,  it 043
+ Warning: policyfunctions: # cons_interp < 0 =160893  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    9:  3.190108E-05
+ - krusell_smith: solving for policies,  it 044
+ Warning: policyfunctions: # cons_interp < 0 =159932  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration   10:  4.791301E-08
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ 
+Calibration iteration 003
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  4897  ( 10.9%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =162811  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     5  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   285  (  1.8%)
+ Warning: simulate_economy: # mu not in grid =     2  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =158256  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  1.313640E-03
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =160094  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =160910  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =159947  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =158121  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =158312  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =157228  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =158658  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =157699  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =158300  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =157226  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =157577  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =157805  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =160167  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =160886  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =160072  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =158257  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =158247  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =158258  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =158276  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =158265  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =158286  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =158245  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =158240  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =158246  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =158415  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  9.025916E-06
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =159648  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  1.108039E-07
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =160326  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  3.305964E-08
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ 
+Calibration iteration 004
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5347  ( 11.9%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =162305  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   295  (  1.8%)
+ Warning: simulate_economy: # mu not in grid =     2  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =159927  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  1.310407E-04
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =159492  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =158785  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =159322  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =160236  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =160417  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =160092  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =160188  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     4  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =158866  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     5  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =159064  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     4  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =160360  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =160400  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =159911  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =161638  (  2.3%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =161428  (  2.3%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =161814  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =159909  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =159917  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =160062  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =160069  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =159928  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =159925  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =160065  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =159920  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =159921  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =159575  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  5.962438E-06
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =158396  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  2.302841E-07
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =159903  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  7.973413E-09
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ 
+Calibration iteration 005
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5381  ( 12.0%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =164343  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   294  (  1.8%)
+ Warning: simulate_economy: # mu not in grid =     2  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =159102  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  1.225212E-04
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =158680  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =159804  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =159691  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =160628  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =160871  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =160721  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =158930  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =158841  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =158565  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =159199  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =158918  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =159215  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =159952  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =160015  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =159123  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =159091  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =159076  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =159075  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =159090  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =159100  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =159092  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =159066  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =159098  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =159088  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =159020  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  6.303849E-07
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =159867  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  4.221857E-09
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ sub_alg_qn: done with Jacobi initialization
+ 
+Calibration iteration 006
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5321  ( 11.9%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =158557  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     3  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   327  (  2.0%)
+ Warning: simulate_economy: # mu not in grid =     5  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =154441  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  1.042603E-02
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =152454  (  2.1%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =154047  (  2.1%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =153285  (  2.1%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =154984  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =155249  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =155448  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =154334  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =154764  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =154316  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =154654  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =155151  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =154756  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =153696  (  2.1%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =154166  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    15  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =154828  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =154435  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =154436  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =154436  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =154441  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =154441  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =154458  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =154436  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =154441  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =154441  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =157644  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    14  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  3.957218E-04
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =158739  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  1.070839E-05
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =159597  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  1.073404E-07
+ - krusell_smith: solving for policies,  it 030
+ Warning: policyfunctions: # cons_interp < 0 =157492  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    5:  5.256183E-09
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  1.938562E-02
+ 
+Calibration iteration 007
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5321  ( 11.9%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =161679  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     2  (  0.0%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   301  (  1.9%)
+ Warning: simulate_economy: # mu not in grid =     3  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =156829  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  4.682538E-03
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =157905  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =157140  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =158256  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =157655  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =157185  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =156987  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =156446  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =156461  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =156859  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =156313  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 013
+ Warning: policyfunctions: # cons_interp < 0 =156265  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 014
+ Warning: policyfunctions: # cons_interp < 0 =156193  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 015
+ Warning: policyfunctions: # cons_interp < 0 =158038  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 016
+ Warning: policyfunctions: # cons_interp < 0 =156583  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 017
+ Warning: policyfunctions: # cons_interp < 0 =157854  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    13  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 018
+ Warning: policyfunctions: # cons_interp < 0 =156835  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 019
+ Warning: policyfunctions: # cons_interp < 0 =156814  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 020
+ Warning: policyfunctions: # cons_interp < 0 =156820  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 021
+ Warning: policyfunctions: # cons_interp < 0 =156835  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 022
+ Warning: policyfunctions: # cons_interp < 0 =156834  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 023
+ Warning: policyfunctions: # cons_interp < 0 =156824  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 024
+ Warning: policyfunctions: # cons_interp < 0 =156789  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 025
+ Warning: policyfunctions: # cons_interp < 0 =156830  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 026
+ Warning: policyfunctions: # cons_interp < 0 =156841  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: done with Jacobi initialization
+ - krusell_smith: solving for policies,  it 027
+ Warning: policyfunctions: # cons_interp < 0 =158074  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     8  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    2:  1.145547E-04
+ - krusell_smith: solving for policies,  it 028
+ Warning: policyfunctions: # cons_interp < 0 =161391  (  2.3%)
+ Warning: policyfunctions: # kappa not found =     6  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  9.871086E-07
+ - krusell_smith: solving for policies,  it 029
+ Warning: policyfunctions: # cons_interp < 0 =160563  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    11  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    4:  3.915214E-08
+  
+  *** Model solution successful during calibration of calib_ss/FD1_KK.txt
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    3:  6.440365E-03
+ 
+Calibration iteration 008
+  
+ - run_model: mean shock GENERAL equilibrium
+ sub_broyden: computing finite difference Jacobian
+ Warning: policyfunctions: # cons_interp < 0 =  5103  ( 11.4%)
+  
+ - run_model: Krusell-Smith GENERAL equilibrium
+ laws_of_motion:initialize_coeffs: estimating from old simvars
+ - krusell_smith: solving for policies,  it 001
+ Warning: policyfunctions: # kp  not in grid =    10  (  1.6%)
+ Warning: policyfunctions: # cons_interp < 0 =159078  (  2.2%)
+ - krusell_smith: simulating
+ Warning: simulate_economy: # K  not in grid =   324  (  2.0%)
+ Warning: simulate_economy: # mu not in grid =     5  (  0.0%)
+ 
+ - krusell_smith: updating aggregate grid and starting root finder
+ - krusell_smith: solving for policies,  it 002
+ Warning: policyfunctions: # cons_interp < 0 =156347  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ sub_alg_qn: maxval(abs(fvec(:))) in iteration    1:  6.680057E-03
+ - krusell_smith: solving for policies,  it 003
+ Warning: policyfunctions: # cons_interp < 0 =156617  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    12  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 004
+ Warning: policyfunctions: # cons_interp < 0 =156827  (  2.2%)
+ Warning: policyfunctions: # kappa not found =    10  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 005
+ Warning: policyfunctions: # cons_interp < 0 =156792  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     4  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 006
+ Warning: policyfunctions: # cons_interp < 0 =155306  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 007
+ Warning: policyfunctions: # cons_interp < 0 =155438  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 008
+ Warning: policyfunctions: # cons_interp < 0 =155958  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 009
+ Warning: policyfunctions: # cons_interp < 0 =156652  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 010
+ Warning: policyfunctions: # cons_interp < 0 =156299  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     7  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 011
+ Warning: policyfunctions: # cons_interp < 0 =156288  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
+ - krusell_smith: solving for policies,  it 012
+ Warning: policyfunctions: # cons_interp < 0 =155988  (  2.2%)
+ Warning: policyfunctions: # kappa not found =     9  (  0.0%)
+ - krusell_smith: simulating
