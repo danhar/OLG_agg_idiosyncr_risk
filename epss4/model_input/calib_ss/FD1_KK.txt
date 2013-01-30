@@ -55,12 +55,12 @@ n_eta           2       grid for idiosyncratic stochastic state eta
 n_zeta          2       aggregate productivity shocks
 n_delta         2       depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
-nk              10      grid for aggregate capital (per capita) k
-nmu             8       grid for ex-ante expected equity premium (mu)
+nk              16      grid for aggregate capital (per capita) k
+nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3       coefficients in law of motion, for every state z
 nt              2000    simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000    In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       4       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
