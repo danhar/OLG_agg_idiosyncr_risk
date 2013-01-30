@@ -8,6 +8,8 @@
     Then rfp =rp(1) + 1e-4. Note the expectation given the bad state today, because that state has a lower expected return.
     Check whether I also need to correct this rfp-error in the simulations.
 
+- check again convergence criteria (maybe divide distance to normalize)
+
 - bequests to the young
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu

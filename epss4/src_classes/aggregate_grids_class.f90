@@ -1,5 +1,6 @@
 module aggregate_grids_class
     use kinds,  only : dp
+
     implicit none
     private
 
@@ -7,9 +8,9 @@ module aggregate_grids_class
 
     type tAggGrids
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
-        real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.01_dp, max_mu = 0.12_dp, &
+        real(dp) :: min_k=0.5_dp, max_k=16.0, min_mu = 0.01_dp, max_mu = 0.12_dp, &
                              cover_k_l = 3.5, cover_k_u = 3.5, cover_mu_l = 2.5, cover_mu_u = 2.5, curv=1.75_dp
-        logical , private :: fixed = .false.
+        logical :: fixed = .true., infer_max_mu= .true.
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
@@ -22,13 +23,16 @@ module aggregate_grids_class
 contains
 
     elemental subroutine allocate_grids(this,nk,nmu)
-        class(tAggGrids), intent(out)  :: this
+        class(tAggGrids), intent(inout)  :: this
         integer,    intent(in)      :: nk,nmu
+        call this%deallocate()
         allocate(this%k(nk),this%mu(nmu))
     end subroutine allocate_grids
 
     elemental subroutine deallocate_grids(this)
-        class(tAggGrids), intent(out)  :: this
+        class(tAggGrids), intent(inout)  :: this
+        if (allocated(this%k)) deallocate(this%k)
+        if (allocated(this%mu)) deallocate(this%mu)
     end subroutine deallocate_grids
 
     subroutine read_unformatted(this,equilibrium_type)
@@ -82,7 +86,7 @@ contains
 	! Create the grids for the aggregate variables k and mu
 		use makegrid_mod
 
-        class(tAggGrids) ,intent(out):: this
+        class(tAggGrids) ,intent(inout):: this ! The reason for inout and not just out is that one cannot put the procedure calc_max_mu here, b/c circular dependency.
         type(tAggGrids) ,intent(in) :: mean_guess
 	    real(dp)        ,intent(in) :: factor_k, factor_mu, cover_k, cover_mu
 	    integer         ,intent(in) :: nk, nmu

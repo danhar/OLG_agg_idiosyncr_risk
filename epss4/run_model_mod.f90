@@ -12,6 +12,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
+    use income            ,only: calc_max_mu ! can't put this into tAggGrid class because circular dependency...
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, & ! logicals
 	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
@@ -116,6 +117,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
         coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
+        call calc_max_mu(grids)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
     endif
     output_path = construct_path(dir,calib_name)
