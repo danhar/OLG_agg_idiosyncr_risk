@@ -1,13 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- Given that I have more points now, I think I should keep aggregate grids fixed.
-
--I get many error rfp in equilibrium_short.txt. I think the reason is that the grid for mu is too large. 
-    I could try pre-calculating the upper bound for mu from the inverse of f_riskfree_rate, i.e. sth like mu_max = E(r|z1) - rp(1) -1e-4. 
-    Then rfp =rp(1) + 1e-4. Note the expectation given the bad state today, because that state has a lower expected return.
-    Check whether I also need to correct this rfp-error in the simulations.
-
 - bequests to the young
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -135,6 +128,12 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-I get many error rfp in equilibrium_short.txt. I calculated upper bound for mu from the inverse of f_riskfree_rate, i.e. mu_max = E(r|z1) - rp(1) -1e-4. 
+    Then rfp =rp(1) + 1e-4. Note the expectation given the bad state today, because that state has a lower expected return.
+    Did this in version 032-mu_grid, but discontinued, because mu_max so small that many errors in simulations.
+
+- Given that I have more points now, I now keep aggregate grids fixed.
+
 - made construction and update of aggregate grids (in particular capital) better: exponential grid, and more points 
     (for the latter, had to interchange the loops in household_solution, so that OpenMP works on capital grid).
 

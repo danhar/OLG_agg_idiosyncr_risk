@@ -159,7 +159,7 @@ contains
             coeffs_old    = coeffs
             call Regression(simvars,coeffs)
 
-            coeff_dif%k  = (coeffs%k  - coeffs_old%k)  !/(coeffs_old%k+1.0)
+            coeff_dif%k  = (coeffs%k  - coeffs_old%k)  !/(coeffs_old%k+1.0) - this normalization is not necessary with root-finding. Also, it doesn't correspond to Judd (1998), p. 43: there, one takes the norm of the denominator.
             coeff_dif%mu = (coeffs%mu - coeffs_old%mu) !/(coeffs_old%mu+1.0)
 
             distance = coeff_dif%makevector()
