@@ -87,7 +87,7 @@ tc1:    if (tc == 1) then
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
             ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
         endif ex
 
 mu:     if (partial_equilibrium) then
@@ -114,7 +114,7 @@ mu:     if (partial_equilibrium) then
 	        if (.not. exogenous_xgrid) then
 		        xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
 		        ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
 	        endif
 
 	        apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
@@ -221,7 +221,7 @@ contains
 
             if (.not. exogenous_xgrid) then
                 xgridtt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
-                Phit      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
+                Phit      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
             else
                 Phit = Phi
             endif

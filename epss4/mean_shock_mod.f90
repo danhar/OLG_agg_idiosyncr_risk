@@ -30,7 +30,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     character(len=*), intent(in)   :: output_path
 	real(dp) ,dimension(2)		   :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
 	real(dp) ,dimension(:), allocatable  :: m_etagrid, w
-	real(dp)                       :: mean_zeta, mean_delta ! mean shocks
+	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
 	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
 	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, value_ms ! mean shock projections
 	integer         	           :: i, nz		        ! index
@@ -58,6 +58,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     ! Initial guesses
     xvars(1)   = grids%k (1)
     xvars(2)   = grids%mu(1)
+    bequests_ms = 0.04_dp   ! This guess is updated below using Phi.
 
 	if (partial_equilibrium) then
 	    fvals = ms_equilibrium(xvars)
@@ -89,6 +90,7 @@ contains
     function ms_equilibrium(msvars) result(distance)
     ! Solve for the MSE, i.e. where k'=k and mu'=mu given that all realizations are at the mean_z.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
+    ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
         use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
@@ -134,7 +136,10 @@ contains
         r_ms          = f_stock_return(grid%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
+
+        ! Update the guess for bequests (instead of finding a fixed-point in (Phi,bequests)
+        bequests_ms   = f_bequests(rf_ms, r_ms, stocks_ms, apgrid_ms, Phi)
 
         ! Aggregate
 
@@ -150,6 +155,7 @@ contains
     subroutine get_equilibrium_values(fine,v_fine,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, errs)
     ! Solve for the MSE one time given the MSE value for k and mu in order to get the (other) equilibrium objects.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
+    ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
         use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
@@ -198,7 +204,7 @@ contains
         r_ms          = f_stock_return(grids%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
 
     end subroutine get_equilibrium_values
 

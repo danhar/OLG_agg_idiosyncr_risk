@@ -1,6 +1,6 @@
 module distribution
     use kinds
-    use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta
+    use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta, bequests_to_newborn
     implicit none
     private
 
@@ -18,13 +18,13 @@ contains
 ! - subroutine check_Phi_small(Phi,dir)
 !-------------------------------------------------------------------------------
 
-pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
+pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
 ! Calculate the transition of Phi
     use fun_locate
 
     real(dp) ,dimension(:,:,:) ,allocatable ,target     :: Phi                  ! new distribution
     real(dp) ,dimension(:,:,:) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
-    real(dp)                   ,intent(in) :: rf, r, netwage, pens ! today's risk-free rate, risky return, net wage, pensions
+    real(dp)                   ,intent(in) :: rf, r, netwage, pens, bequests ! today's risk-free rate, risky return, net wage, pensions
     real(dp) ,dimension(:,:,:) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
     real(dp) ,dimension(:)     ,intent(in) :: etagrid              ! idiosyncratic income shocks today
     real(dp) ,dimension(:,:,:) ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
@@ -45,6 +45,7 @@ pure function TransitionPhi(rf,r,netwage,pens,xgrid,apgrid,stocks,etagrid, Phitm
     Phi         = 0.0
     ! Generation jc=1
     y           = netwage*ej(1)*etagrid
+    if (bequests_to_newborn) y = y + bequests
     do ec = 1,n_eta ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
 	    x           = y(ec)             ! agents born with zero assets
 	    ix          = f_locate(xgrid(:,ec,1),x)

@@ -15,7 +15,7 @@ module params_mod
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
-                          loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
+                          bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
     character(len=100) :: calib_targets
 
@@ -94,7 +94,7 @@ subroutine SetDefaultValues()
     run_n_times=1; run_counter_start=1; n_end_params=0
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
-    loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
+    bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
     ! Character
     calib_targets='presentation'
@@ -673,7 +673,11 @@ subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
     jmax =jr-1
 
     guess         = k
-    apmax(n_eta,nz,1)      = guess/2.0    ! calc wage?
+    if (bequests_to_newborn) then
+        apmax(n_eta,nz,1)      = guess*1.5    ! calc wage?
+    else
+        apmax(n_eta,nz,1)      = guess/2.0    ! calc wage?
+    endif
     apmax(n_eta,nz,nj)     = guess*2.0    ! determins max cons of nj, and apmax(:,nj-1)
     apmax(n_eta,nz,jmax)   = guess*factor
     apmax(n_eta,nz,jmax:1:-1)     = -MakeGrid(-apmax(n_eta,nz,jmax),-apmax(n_eta,nz,1),jmax, 1.0/curv)

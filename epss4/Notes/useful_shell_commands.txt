@@ -9,3 +9,7 @@ To find and replace:
 
 find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ep -name "*.txt" -exec sed -i 's/5000/2500/g' {} \;
 find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ss -name "*.txt" -exec sed -i 's/5000/2500/g' {} \;
+
+
+To count lines of code:
+cloc epss4/ 
