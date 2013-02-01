@@ -1,6 +1,6 @@
 module distribution
     use kinds
-    use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta, bequests_to_newborn
+    use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta, bequests_to_newborn, L_N_ratio
     implicit none
     private
 
@@ -45,7 +45,7 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
     Phi         = 0.0
     ! Generation jc=1
     y           = netwage*ej(1)*etagrid
-    if (bequests_to_newborn) y = y + bequests
+    if (bequests_to_newborn) y = y + bequests * L_N_ratio/pop_frac(1) ! transform from per efficient worker to per efficient capita, then distribute to newborn
     do ec = 1,n_eta ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
 	    x           = y(ec)             ! agents born with zero assets
 	    ix          = f_locate(xgrid(:,ec,1),x)
@@ -70,7 +70,7 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
 		            ix          = f_locate(xgrid(:,ec, jc),x)
 		            wx          = (x-xgrid(ix,ec,jc))/(xgrid(ix+1,ec,jc)-xgrid(ix,ec,jc))
 		            wx          = max(min(wx,1.0),0.0)
-	                Phi(ix  ,ec,jc) = Phi(ix  ,ec,jc) + pi_eta(emc, ec) * (1.0 - wx)*Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc)
+	                Phi(ix  ,ec,jc) = Phi(ix  ,ec,jc) + pi_eta(emc, ec) * (1.0 - wx)*Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc) ! Instead of multyplying with pop_frac(jc), better to divede by (1.0 + n), bc *difference* in cohort sizes
 	                Phi(ix+1,ec,jc) = Phi(ix+1,ec,jc) + pi_eta(emc, ec) *        wx *Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc)
 	            enddo
             enddo

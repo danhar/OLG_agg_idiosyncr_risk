@@ -5,8 +5,15 @@ module fun_aggregate_diff
 contains
 
     pure real(dp) function f_aggregate_diff(output,  invest, C,bequests)
+        use params_mod ,only: bequests_to_newborn
         real(dp), intent(in) :: output, invest, C, bequests
-        f_aggregate_diff = (output - C - invest - bequests)/output
+
+        if (bequests_to_newborn) then
+            f_aggregate_diff = (output - C - invest)/output
+        else
+            f_aggregate_diff = (output - C - invest - bequests)/output
+        endif
+
     end function f_aggregate_diff
 
     pure function f_bequests(rf, r, stocks, ap, Phi)

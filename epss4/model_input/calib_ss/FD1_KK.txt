@@ -38,8 +38,8 @@ ccv             .true.  Turn on/off countercyclical variance of idiosyncratic in
 scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1      Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     4      Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_std, 4: pi1_delta.
-calib_targets 'presentation'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation'
+n_end_params     0      Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_std, 4: pi1_delta.
+calib_targets 'computation'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc'
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .true.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)
@@ -55,12 +55,12 @@ n_eta           2       grid for idiosyncratic stochastic state eta
 n_zeta          2       aggregate productivity shocks
 n_delta         2       depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
-nk              16      grid for aggregate capital (per capita) k
-nmu             10       grid for ex-ante expected equity premium (mu)
+nk              8      grid for aggregate capital (per capita) k
+nmu             8       grid for ex-ante expected equity premium (mu)
 n_coeffs        3       coefficients in law of motion, for every state z
-nt              5000    simulation periods, like in Gomes/Michaelides(2007)
+nt              2000    simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000    In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       4       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       2       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
