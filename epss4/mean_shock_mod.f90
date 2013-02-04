@@ -58,7 +58,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     ! Initial guesses
     xvars(1)   = grids%k (1)
     xvars(2)   = grids%mu(1)
-    bequests_ms = 0.04_dp   ! This guess is updated below using Phi.
+    bequests_ms = 0.03_dp   ! This guess was the mean shock value in previous runs
 
 	if (partial_equilibrium) then
 	    fvals = ms_equilibrium(xvars)
@@ -90,7 +90,7 @@ contains
     function ms_equilibrium(msvars) result(distance)
     ! Solve for the MSE, i.e. where k'=k and mu'=mu given that all realizations are at the mean_z.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
-    ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
+    ! Update: if I update the bequests_ms this is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
         use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
@@ -139,7 +139,7 @@ contains
         Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
 
         ! Update the guess for bequests (instead of finding a fixed-point in (Phi,bequests)
-        bequests_ms   = f_bequests(rf_ms, r_ms, stocks_ms, apgrid_ms, Phi)
+        ! bequests_ms   = f_bequests(rf_ms, r_ms, stocks_ms, apgrid_ms, Phi) ! This update seemed to create problems for the rootfinder.
 
         ! Aggregate
 

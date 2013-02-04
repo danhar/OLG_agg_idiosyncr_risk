@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='033_paper_tfp'
+thisrun='033_pc3'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
