@@ -846,7 +846,12 @@ use omp_lib           ,only: OMP_get_max_threads
     if (detailed_euler_errs) print*, 'WARNING: detailed_euler_errs=.true., but not implemented, check error_class'
 
     if (zeta_mean .ne. 1.0) print*, 'WARNING: zeta_mean .ne. 1.0'
-    if (zeta_std > 0.1_dp) print*, 'WARNING: zeta_std > 0.1'
+    if (zeta_std > 0.1_dp) then
+        print*, 'WARNING: zeta_std > 0.1'
+    elseif (zeta_std < 0.0_dp) then
+        print*, 'ERROR: zeta_std < 0.0'
+        call critical_stop
+    endif
     if (zeta_mean - zeta_std <= 0.0) then
         print*, 'ERROR: zeta_mean - zeta_std <= 0.0'
         call critical_stop
@@ -1017,8 +1022,8 @@ use omp_lib           ,only: OMP_get_max_threads
     if (n_end_params < 0) then
         print*, 'ERROR: n_end_params < 0'
         call critical_stop
-    elseif (n_end_params > 4) then
-        print*, 'ERROR: n_end_params > 4 not implemented'
+    elseif (n_end_params > 5) then
+        print*, 'ERROR: n_end_params > 5 not implemented'
         call critical_stop
     endif
 
@@ -1214,21 +1219,31 @@ subroutine params_set_real(param_name, new_value)
                theta = new_value
            endif
         case ('del_std')
-           if (del_std < 0.0) then
+           if (new_value < 0.0) then
                print* , 'params_set: del_std < 0.0, setting to 0.0'
                del_std = 0.0
            else
                del_std = new_value
            endif
         case ('pi1_delta')
-           if (pi1_delta < 0.0) then
+           if (new_value < 0.0) then
                print* , 'params_set: pi1_delta < 0.0, setting to 0.0'
                pi1_delta = 0.0
-           elseif (pi1_delta > 1.0) then
+           elseif (new_value > 1.0) then
                print* , 'params_set: pi1_delta > 1.0, setting to 1.0'
                pi1_delta = 1.0
            else
                pi1_delta = new_value
+           endif
+        case ('zeta_std')
+           if (new_value < 0.0) then
+               print* , 'params_set: zeta_std < 0.0, setting to 0.0'
+               zeta_std = 0.0
+           elseif (zeta_mean - new_value <= 0.0) then
+               print* , 'params_set: zeta_mean - zeta_std <= 0.0, setting zeta_std = zeta_mean + 1e-4'
+               zeta_std = zeta_mean + 1e-4_dp
+           else
+               zeta_std = new_value
            endif
 		case default
 		    print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name

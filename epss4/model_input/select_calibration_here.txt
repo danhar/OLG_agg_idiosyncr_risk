@@ -1,8 +1,8 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
-!calib_ep/GM1noIR.txt
 !calib_ss/FD1_KK.txt
-calib_ss/paper.txt
+!calib_ss/paper.txt
+calib_ss/pc.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.

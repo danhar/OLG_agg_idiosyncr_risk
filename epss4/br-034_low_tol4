@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# #BSUB-q pub.7d                    # Job queue
+# #BSUB-q pub.7d                    # Job queue 1h, 8h, 36h, 7d
 #BSUB-W 36:00                         # Time limit in minutes (or HH:MM)
 #BSUB-n 16            # number of processors / threads
 # #BSUB-R "rusage[mem=4096]"          # Memory im MB

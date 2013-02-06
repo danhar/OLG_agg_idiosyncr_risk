@@ -133,7 +133,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 !-------------------------------------------------------------------------------
 
     pure function get_params(n)
-        use params_mod ,only: beta, theta, del_std, pi1_delta
+        use params_mod ,only: beta, theta, del_std, pi1_delta, zeta_std
         real(dp) ,allocatable ,dimension(:) :: get_params
         integer ,intent(in) :: n
 
@@ -142,6 +142,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 1) get_params(2) = theta
         if (n > 2) get_params(3) = del_std
         if (n > 3) get_params(4) = pi1_delta
+        if (n > 4) get_params(5) = zeta_std
 
     end function get_params
 !-------------------------------------------------------------------------------
@@ -157,6 +158,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 1) call params_set('theta',param_vec(2))
         if (n > 2) call params_set('del_std',param_vec(3))
         if (n > 3) call params_set('pi1_delta',param_vec(4))
+        if (n > 4) call params_set('zeta_std',param_vec(5))
 
         ! The following two calls set 'derived' parameters, e.g. gamma, which is a function of theta
         call calibration_set_derived_params()
@@ -171,7 +173,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         real(dp) ,allocatable:: model_targets(:)
         integer        ,intent(in) :: n
         type(tSimvars) ,intent(in) :: simvars(:)
-        type(tStats) :: K_Y, ex_ret, r, zeta
+        type(tStats) :: K_Y, ex_ret, r, zeta, netwage
 
         allocate(model_targets(n))
 
@@ -179,11 +181,13 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         ex_ret%name='ex_ret'; call ex_ret%calc_stats(simvars)
         r%name='r'; call r%calc_stats(simvars)
         zeta%name='zeta'; call zeta%calc_stats(simvars)
+        netwage%name='netwage'; call netwage%calc_stats(simvars)
 
         model_targets(1) = K_Y%avg_exerr_()
         if (n > 1) model_targets(2) = ex_ret%avg_exerr_()
         if (n > 2) model_targets(3) = r%std_()
         if (n > 3) model_targets(4) = corr(zeta,r)
+        if (n > 4) model_targets(5) = netwage%std_()
 
     end function model_targets
 !-------------------------------------------------------------------------------
