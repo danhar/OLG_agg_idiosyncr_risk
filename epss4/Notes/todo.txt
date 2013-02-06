@@ -13,6 +13,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- have an option to skip the mean shock equilibrium (use opt_initial_ms_guess for this)
 - splines to interpolate stocks and bonds? and consumption in euler equations?
 - implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
 - make params_mod readable by Matlab and read it in
