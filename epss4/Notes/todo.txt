@@ -1,8 +1,10 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- target std(w)
-- target r with del_mean
+
+- correct survival probs
+
+- target r with del_mean, outcomment target std(w)?
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
@@ -130,6 +132,8 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- target std(w) (didnt help much)
+
 - bequests to the young
 
 -I get many error rfp in equilibrium_short.txt. I calculated upper bound for mu from the inverse of f_riskfree_rate, i.e. mu_max = E(r|z1) - rp(1) -1e-4. 

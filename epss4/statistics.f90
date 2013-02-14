@@ -21,6 +21,7 @@ module statistics
         procedure :: avg_
         procedure :: max_exerr_
         procedure :: std_
+        procedure :: cv_
         procedure :: get_namelength
         procedure :: get_digits2display
         procedure :: writing_format
@@ -229,6 +230,12 @@ contains
         real(dp) :: result
             result = this%std
     end function std_
+
+    pure function cv_(this) result(result)
+        class(tStats) ,intent(in)    :: this
+        real(dp) :: result
+            result = this%cv
+    end function cv_
 
     pure integer function get_namelength(this)
         class(tStats) ,intent(in) :: this

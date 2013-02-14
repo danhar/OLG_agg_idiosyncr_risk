@@ -187,7 +187,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 1) model_targets(2) = ex_ret%avg_exerr_()
         if (n > 2) model_targets(3) = r%std_()
         if (n > 3) model_targets(4) = corr(zeta,r)
-        if (n > 4) model_targets(5) = netwage%std_()
+        if (n > 4) model_targets(5) = netwage%cv_()
 
     end function model_targets
 !-------------------------------------------------------------------------------

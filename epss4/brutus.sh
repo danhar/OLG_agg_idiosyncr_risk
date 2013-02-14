@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='034_low_tol4'
+thisrun='deratio_cal5_tfp0001'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
