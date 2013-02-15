@@ -857,6 +857,13 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
+    if (del_mean < 0.0) then
+        print*, 'ERROR: del_mean < 0.0'
+        call critical_stop
+    elseif (del_mean  > 0.2_dp) then
+        print*, 'WARNING: del_mean > 0.2'
+    endif
+
     if (del_std < 0.0) then
         print*, 'ERROR: del_std < 0.0'
         call critical_stop
@@ -1229,6 +1236,13 @@ subroutine params_set_real(param_name, new_value)
                psi = 0.01
            else
                theta = new_value
+           endif
+        case ('del_mean')
+           if (new_value < 0.0) then
+               print* , 'params_set: del_mean < 0.0, setting to 0.0'
+               del_mean = 0.0
+           else
+               del_mean = new_value
            endif
         case ('del_std')
            if (new_value < 0.0) then

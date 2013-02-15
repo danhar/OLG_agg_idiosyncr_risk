@@ -2,8 +2,6 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- correct survival probs
-
 - target r with del_mean, outcomment target std(w)?
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
@@ -132,6 +130,8 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- correct survival probs
+
 - target std(w) (didnt help much)
 
 - bequests to the young
