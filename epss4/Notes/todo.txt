@@ -2,7 +2,7 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- target r with del_mean, outcomment target std(w)?
+- option to perform whole welfare decomposition and save results
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
@@ -130,6 +130,9 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- target r with del_mean, warn for std(w)?
+
 - correct survival probs
 
 - target std(w) (didnt help much)
