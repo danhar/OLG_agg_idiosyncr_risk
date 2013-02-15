@@ -1030,7 +1030,9 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'ERROR: n_end_params < 0'
         call critical_stop
     elseif (n_end_params > 5) then
-        print*, 'ERROR: n_end_params > 5 not implemented'
+        print*, 'Warning: n_end_params > 5, i.e. std(w) or cv(w) is a target!'
+    elseif (n_end_params > 6) then
+        print*, 'ERROR: n_end_params > 6 not implemented'
         call critical_stop
     endif
 

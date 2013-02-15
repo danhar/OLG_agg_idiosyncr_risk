@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='035-del08cal'
+thisrun='036-cal'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
