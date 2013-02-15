@@ -750,7 +750,7 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if (theta == 1.0) then
-        print*, 'ERROR: theta == 1.0 not implemented (yields gamma = 0)!'
+        print*, 'ERROR: theta == 1.0, yields gamma = 0, so 1/gamma not defined!'
         call critical_stop
     endif
 
@@ -1025,6 +1025,18 @@ use omp_lib           ,only: OMP_get_max_threads
     elseif (n_end_params > 5) then
         print*, 'ERROR: n_end_params > 5 not implemented'
         call critical_stop
+    endif
+
+    if (any(surv < 0.0)) then
+        print*, 'ERROR: some survival probs < 0'
+        call critical_stop
+    elseif (any(surv == 0.0)) then
+        if (1.0/gamm < 0.0) then
+            print*, 'ERROR: some survival probs = 0 and 1/gamma < 0'
+            call critical_stop
+        else
+            print*, 'Warning: some survival probs = 0 (but 1/gamma > 0)'
+        endif
     endif
 
 contains

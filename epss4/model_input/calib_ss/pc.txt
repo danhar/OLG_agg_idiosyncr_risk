@@ -1,6 +1,6 @@
 ! Calibration file SocSec Project. Change values but not format.
 ! Short description of this specific calibration:
-! Matches target file paper.txt
+! Matches target file std_w.txt.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
