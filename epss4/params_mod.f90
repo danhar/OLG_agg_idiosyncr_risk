@@ -1007,8 +1007,8 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'ATTENTION: scale_AR = -1.0, i.e. no aggregate risk'
     endif
 
-    if (run_counter_start < 1 .and. .not. twosided_experiment) then
-        print*, 'WARNING: run_counter_start < 1 .and. .not. twosided_experiment, setting to 1'
+    if (run_counter_start < 1 .and. .not. (twosided_experiment .or. welfare_decomposition)) then
+        print*, 'WARNING: run_counter_start < 1 .and. .not. (twosided_experiment .or. welfare_decomposition), setting to 1'
         run_counter_start = 1
     endif
 
@@ -1017,8 +1017,8 @@ use omp_lib           ,only: OMP_get_max_threads
         run_n_times = run_counter_start
     endif
 
-    if ((scale_IR_orig == 0.0 .or. scale_IR_orig == -1.0) .and. (scale_AR_orig == 0.0 .or. scale_AR_orig == -1.0) .and. run_n_times > 1 ) then
-        print*, 'ERROR: scale_IR =0 or -1, scale_AR = 0 or -1, and run_n_times > 1.'
+    if ((scale_IR_orig == 0.0 .or. scale_IR_orig == -1.0) .and. (scale_AR_orig == 0.0 .or. scale_AR_orig == -1.0) .and. run_n_times > 1 .and. .not. welfare_decomposition) then
+        print*, 'ERROR: scale_IR =0 or -1, scale_AR = 0 or -1, and run_n_times > 1, and not welfare_decomposition.'
         print*, '       -> set run_n_times = 1 or specify experiment.'
         call critical_stop
     endif

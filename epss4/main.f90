@@ -62,12 +62,12 @@ program EPSS
                     risk_scale(rc)= 1.0 + scale_AR
                     write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
                 elseif (rc ==0) then
-                    write(runchar,'(a4,f4.2)') ',tau',tau
+                    write(runchar,'(a4,f3.2)') ',tau',tau
                 elseif (rc ==1) then
                     if (tau< tau_increment) cycle
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
-                    write(runchar,'(a4,f4.2)') ',tau',tau
+                    write(runchar,'(a4,f3.2)') ',tau',tau
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     if (.not. surv_rates) cycle
                     call params_set('surv_rates', .false.)
@@ -89,7 +89,7 @@ program EPSS
                     if (scale_AR == -1.0 .and. scale_IR == -1.0) cycle
                     call params_set('scale_AR', -1.0_dp)
                     call params_set('scale_IR', -1.0_dp)
-                    write(runchar,'(a5)') ',norisk'
+                    write(runchar,'(a7)') ',norisk'
                 else
                     print*, '-main: WARNING: rc=',rc,', but scale_IR =', scale_IR, ', scale_AR=', scale_AR
                     exit
