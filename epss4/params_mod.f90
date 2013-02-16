@@ -162,6 +162,10 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) tau
             case ('tau_experiment')
                 read (parval,*) tau_experiment
+            case ('welfare_decomposition')
+                read (parval,*) welfare_decomposition
+            case ('mean_return_type')
+                read (parval,*) mean_return_type
             case ('ccv')
                 read (parval,*) ccv
             case ('scale_AR')
@@ -964,6 +968,22 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (rho > 1.0 .or. rho < 0.0) then
         print*, 'ERROR: rho out of range, rho = ', rho
+        call critical_stop
+    endif
+
+    select case(mean_return_type)
+        case('mean_mpk','weighted_aggregate_return','median_portf_return','median_portf_share')
+        ! continue
+        case default
+            print*, 'ERROR: mean_return_type must take one of the following values:'
+            print*, 'mean_mpk,weighted_aggregate_return,median_portf_return,median_portf_share'
+            call critical_stop
+    end select
+
+
+    if (welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)) then
+        print*, 'ERROR: welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)'
+        print*, 'But can either do welfare_decomposition or scaling experiment!'
         call critical_stop
     endif
 

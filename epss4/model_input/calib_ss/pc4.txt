@@ -34,11 +34,11 @@ n               0.011   population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 tau             0.02    tax rate. Alternatives: .12
 tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
-welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 5.
+welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
+mean_return_type  'mean_mpk'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share
 ccv             .true.  Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
-mean_return_type  'mean_mpk'      average return in no AR economy, applied only if scale_AR=-1. Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share
 run_n_times      1      Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
 n_end_params     5      Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'del_mean'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean'
