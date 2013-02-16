@@ -532,25 +532,39 @@ contains
     subroutine set_demographics()
     ! Sets productivity profile, survival rates, and calculates pop ratios
         integer, parameter :: iounit=124
+        logical, parameter :: adjust_nj = .true. ! if true, then set nj to life expectancy if surv_rates = .false., else leave nj as it is
         real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
         real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
         real(dp)          :: P, L , Pop ! Pensioners, Labor (efficiency units), Total population
         integer           :: jc
 
-        if (allocated(ej)) deallocate(ej,surv)
-        allocate(ej(nj), surv(nj), mass_j(nj))
-        allocate(age_prod_profile(2,nj+econ_life_start), cond_mort_rates(2,nj+econ_life_start))
+        if (allocated(surv)) deallocate(surv)
+        allocate(surv(nj))
+        if (allocated(cond_mort_rates)) deallocate(cond_mort_rates)
+        allocate(cond_mort_rates(2,nj+econ_life_start))
 
         ! input of conditional mortality rates
-        if (surv_rates) then
-            open(iounit,file='model_input/data/mortality_rates_US.txt', action='read') ! starts at age 0
-            read(iounit,*) cond_mort_rates
-            close(iounit)
-            surv(1)    = 1.0    ! agents born into model survive birth
-            surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
-        else
+        open(iounit,file='model_input/data/mortality_rates_US.txt', action='read') ! starts at age 0
+        read(iounit,*) cond_mort_rates
+        close(iounit)
+        surv(1)    = 1.0    ! agents born into model survive birth
+        surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
+
+        if (.not. surv_rates) then
+            if (adjust_nj) then
+                nj = sum(surv)
+                print*, 'Warning: params_mod: setting nj to life expectancy, nj=', nj
+            endif
+            deallocate(surv)
+            allocate(surv(nj))
             surv       = 1.0
         endif
+
+        if (allocated(ej)) deallocate(ej)
+        if (allocated(mass_j)) deallocate(mass_j)
+        allocate(ej(nj), mass_j(nj))
+        if (allocated(age_prod_profile)) deallocate(age_prod_profile)
+        allocate(age_prod_profile(2,nj+econ_life_start))
 
         ! input of age-earnings profiles of Hugget/Ventura/Yaron
         open(iounit,file='model_input/data/hvyageearn.txt', action='read')
