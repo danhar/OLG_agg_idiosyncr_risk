@@ -26,10 +26,11 @@ module simvars_class
         procedure :: delta
         procedure :: K_Y
         procedure :: ex_ret
+        procedure :: mpk
         procedure :: bequest_rate
     end type tSimvars
 
-    ! The following procedures cannot be typ-bound procedure because they need to operate on an array of type tSimvars.
+    ! The following procedures cannot be type-bound procedure because they need to operate on an array of type tSimvars.
     interface read_unformatted
         module procedure read_unformatted_array
     end interface read_unformatted
@@ -129,6 +130,8 @@ contains
             get = this%bequests(lb:ub)
         case ('ex_ret')
             get = this%ex_ret(lb,ub)
+        case ('mpk')
+            get = this%mpk(lb,ub)
         case ('K_Y')
             get = this%K_Y(lb,ub)
         case ('bequests,%')
@@ -237,6 +240,29 @@ contains
 
         ex_ret = this%r(lb:ub) - this%rf(lb:ub)
     end function ex_ret
+
+    pure function mpk(this,lb_o,ub_o)
+        ! marginal product of capital
+        use income, only: f_net_mpk
+        real(dp), allocatable :: mpk(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%r)
+        endif
+
+        mpk = f_net_mpk(this%K(lb:ub), this%zeta(lb,ub), this%delta(lb,ub))
+    end function mpk
 
     pure function bequest_rate(this,lb_o,ub_o)
         use params_mod ,only: alpha

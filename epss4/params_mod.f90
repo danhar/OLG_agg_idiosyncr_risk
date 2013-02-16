@@ -17,7 +17,7 @@ module params_mod
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
-    character(len=100) :: calib_targets
+    character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
 ! The following are 'derived parameters' calculated from the previous (read) parameters
@@ -97,7 +97,7 @@ subroutine SetDefaultValues()
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
     ! Character
-    calib_targets='presentation'
+    calib_targets='presentation'; mean_return_type='mean_mpk'
 end subroutine SetDefaultValues
 
 subroutine ReadCalibration(calib_name)

@@ -13,7 +13,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, & ! logicals
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
 	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
@@ -48,7 +48,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         if (scale_AR == -1.0) then
             print*,'- run_model: setting ms_grids%mu = 0.0, ms_grids%k = average over simulations'
             ms_grids%mu =0.0
-            ms_grids%k = inverted_average_mpk()
+            ms_grids%k = inverted_mean_return(mean_return_type)
         endif
     else
         print*,'- run_model: mean shock GENERAL equilibrium'
@@ -183,35 +183,46 @@ contains
     end function calc_average_welfare
 
 !-------------------------------------------------------------------------------
-    real(dp) function inverted_average_mpk() !average_of_simulations()
+    real(dp) function inverted_mean_return(mean_return_type)
         use statistics        ,only: tStats
+        use simvars_class ,only: read_unformatted
         use params_mod, only: del_mean, de_ratio
-        use income, only: f_net_mpk, alpha, delta, zeta
-        type(tSimvars) ,allocatable :: s_temp(:)
-        type(tStats)   :: k_stats, mpk_stats
-        real(dp), dimension(nt) :: mpk
-        real(dp) :: rf, r
+        use income, only: f_net_mpk, alpha
+        character(len=*) ,intent(in)  :: mean_return_type
+        type(tSimvars) ,allocatable :: simvars_ge(:)
+        type(tStats)   :: mpk, r, rf, r_pf_median, r_pf_kappa_med
+        real(dp) :: mean_return
         integer :: tc
 
-        call read_unformatted(s_temp)
+        call read_unformatted(simvars_ge)
 
-        !call k_stats%calc_stats(s_temp%K, s_temp%err_mu, s_temp%err_K)
+        select case(mean_return_type)
+        case('mean_mpk')
+            mpk%name='mpk'; call mpk%calc_stats(simvars_ge)
+            mean_return = mpk%avg_exerr_()
+!           mean_return = real(3.07358605E-02,dp) ! old value
+        case('weighted_aggregate_return')
+            r%name='r';   call r%calc_stats(simvars_ge)
+            rf%name='rf'; call rf%calc_stats(simvars_ge)
+!            rf = real(1.84343749E-02,dp)   ! old value
+!            r  = real(7.48861757E-02,dp)   ! old value
+            mean_return = (r%avg_exerr_()+rf%avg_exerr_()*de_ratio)/(1.0+de_ratio)
+        case('median_portf_return')
+            r_pf_median%name='r_pf_median';   call r_pf_median%calc_stats(simvars_ge)
+            mean_return = r_pf_median%avg_exerr_()
+            ! mean_return = real(1.23087113E-01,dp)  ! This is the value for pfrw: portfolio return unweighted
+        case('median_portf_share') ! not sure this one is smart or correct
+            r_pf_kappa_med%name='r_pf_kappa_med';   call r_pf_kappa_med%calc_stats(simvars_ge)
+            r%name='r';   call r%calc_stats(simvars_ge)
+            rf%name='rf'; call rf%calc_stats(simvars_ge)
+            mean_return = r_pf_kappa_med%avg_exerr_() * r%avg_exerr_()+ (1.0 - r_pf_kappa_med%avg_exerr_())* rf%avg_exerr_()
 
-!        do tc = 1,nt
-!            mpk(tc) = f_net_mpk(s_temp%K(tc), zeta(s_temp%z(tc)), delta(s_temp%z(tc)))
-!        enddo
-!        call mpk_stats%calc_stats(mpk, s_temp%err_mu, s_temp%err_K)
-!        inverted_average_mpk = (alpha/(mpk_stats%avg_()+del_mean))**(1.0/(1.0-alpha))
+            ! mean_return = real(1.06801078E-01,dp) ! this is the value for pfr: portfolio return (with pop weights)
+        end select
 
-        rf = real(1.84343749E-02,dp)
-        r  = real(7.48861757E-02,dp)
-        mpk(1) = (r+rf*de_ratio)/(1.0+de_ratio)
-        mpk(1) = real(3.07358605E-02,dp)
-        !real(1.23087113E-01,dp) ! This is the value for pfrw: portfolio return unweighted
-        !real(1.06801078E-01,dp) ! this is the value for pfr: portfolio return (with pop weights)
-        inverted_average_mpk = (alpha/(mpk(1)+del_mean))**(1.0/(1.0-alpha))
+        inverted_mean_return = (alpha/(mean_return+del_mean))**(1.0/(1.0-alpha))
 
-    end function inverted_average_mpk !average_of_simulations
+    end function inverted_mean_return
 !-------------------------------------------------------------------------------
 
     subroutine save_unformatted(grids, coeffs, simvars)

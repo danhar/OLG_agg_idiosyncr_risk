@@ -6,7 +6,7 @@ module income
 
 contains
 
-    pure real(dp) function f_net_mpk(k,zeta, delta)
+    elemental real(dp) function f_net_mpk(k,zeta, delta)
         real(dp),intent(in) :: k, zeta, delta     ! k is capital per capita
         f_net_mpk= zeta*alpha*k**(alpha-1.0) - delta
     end function f_net_mpk
