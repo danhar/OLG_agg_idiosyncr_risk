@@ -62,12 +62,12 @@ program EPSS
                     risk_scale(rc)= 1.0 + scale_AR
                     write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
                 elseif (rc ==0) then
-                    write(runchar,'(a4,f3.2)') ',tau',tau
+                    write(runchar,'(a4)') ',GE0'
                 elseif (rc ==1) then
                     if (tau< tau_increment) cycle
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
-                    write(runchar,'(a4,f3.2)') ',tau',tau
+                    write(runchar,'(a4)') ',GE1'
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     if (.not. surv_rates) cycle
                     call params_set('surv_rates', .false.)
@@ -108,7 +108,8 @@ program EPSS
     	    if (tau_experiment) then
     	        call params_set('partial_equilibrium', .true.)
     	        call params_set('tau', tau+ tau_increment) ! better make function increase tau and put tau_increment in params
-    	        calib_name = calib_name//',tau'
+    	        write(runchar,'(a4,f3.2)') ',tau',tau
+    	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
                 call SaveParams(projectname, calib_name)
     	        call run_model(projectname, calib_name, welfare(rc,2))

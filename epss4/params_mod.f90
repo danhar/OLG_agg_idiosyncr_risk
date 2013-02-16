@@ -552,6 +552,9 @@ contains
 
         if (.not. surv_rates) then
             if (adjust_nj) then
+                do jc=2,nj
+                    surv(jc) = surv(jc-1)*surv(jc)  ! unconditional survival rates
+                enddo
                 nj = sum(surv)
                 print*, 'Warning: params_mod: setting nj to life expectancy, nj=', nj
             endif

@@ -244,7 +244,7 @@ contains
         type(tCoeffs)   ,intent(out) :: coeffs
         type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
 
-        call grids%read_unformatted('ks')
+        call grids%read_unformatted('ge')
         call coeffs%read_unformatted
 
         call read_unformatted(simvars)
