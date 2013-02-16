@@ -3,8 +3,8 @@
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
-	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, SaveParams, cal_id, params_set, params_set_thisrun, &
-	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, dp
+	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, SaveParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, &
+	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
@@ -61,6 +61,35 @@ program EPSS
                     call params_set('scale_AR', scale_AR_orig*real(rc-1,dp))
                     risk_scale(rc)= 1.0 + scale_AR
                     write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
+                elseif (rc ==0) then
+                    write(runchar,'(a4,f4.2)') ',tau',tau
+                elseif (rc ==1) then
+                    if (tau< tau_increment) cycle
+                    call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
+                    call params_set('partial_equilibrium', .false.)
+                    write(runchar,'(a4,f4.2)') ',tau',tau
+                elseif (rc ==2) then ! the following are for the welfare decomposition
+                    if (.not. surv_rates) cycle
+                    call params_set('surv_rates', .false.)
+                    write(runchar,'(a7)') ',noSURV'
+                elseif (rc ==3) then
+                    if (.not. ccv) cycle
+                    call params_set('ccv', .false.)
+                    write(runchar,'(a6)') ',noCCV'
+                elseif (rc ==4) then
+                    if (scale_IR == -1.0) cycle
+                    call params_set('scale_IR', -1.0_dp)
+                    write(runchar,'(a5)') ',noIR'
+                elseif (rc ==5) then
+                    if (scale_AR == -1.0) cycle
+                    call params_set('scale_AR', -1.0_dp)
+                    call params_set('scale_IR', 0.0_dp)
+                    write(runchar,'(a5)') ',noAR'
+                elseif (rc ==6) then
+                    if (scale_AR == -1.0 .and. scale_IR == -1.0) cycle
+                    call params_set('scale_AR', -1.0_dp)
+                    call params_set('scale_IR', -1.0_dp)
+                    write(runchar,'(a5)') ',norisk'
                 else
                     print*, '-main: WARNING: rc=',rc,', but scale_IR =', scale_IR, ', scale_AR=', scale_AR
                     exit
@@ -87,8 +116,12 @@ program EPSS
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
 	        endif
 	    enddo
-        if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,risk_scale,'welfare')
-        if(size(welfare,1)>1) call plot('cev_regression')
+	    if (welfare_decomposition) then
+	        call write2file(welfare,cev,'welfare')
+	    else
+            if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,'welfare',risk_scale)
+            if(size(welfare,1)>1) call plot('cev_regression')
+        endif
     enddo
 
     call system_clock(end_time,count_rate)
@@ -174,38 +207,60 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
     end subroutine get_calibration_name
 !-------------------------------------------------------------------------------
 
-    subroutine write2file(welfare, cev, scaling, filename)
-        real(dp) ,intent(in) :: welfare(:,:), cev(:), scaling(:)
+    subroutine write2file(welfare, cev, filename, scaling)
+        real(dp) ,intent(in) :: welfare(0:,1:), cev(0:)
+        real(dp) ,intent(in) ,optional :: scaling(0:)
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
+        real(dp) :: IR, AR, LCI, CCV, SR
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
         open(21,file='model_output/'//filename//'_'//cal_id_temp//'.txt')
-        if (size(welfare,1) > 1) then
-	        if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0) then
-	            write(21,'(a56)') ' IR      welfare,tau_0    welfare,tau_1              cev'
-	        elseif (scale_AR_orig .ne. 0.0 .and. scale_AR_orig .ne. -1.0) then
-	            write(21,'(a56)') ' AR      welfare,tau_0    welfare,tau_1              cev'
-	        else
-		        write(21,'(a)') ' WARNING: Experiments correctly set?'
-		        write(21,'(a4,i2,a16,f5.2,a11,f5.2)') ' rc=',rc,', but scale_IR =', scale_IR, ', scale_AR=', scale_AR
-	            write(21,'(a56)') ' risk?   welfare,tau_0    welfare,tau_1              cev'
-	        endif
+
+        if (.not. present(scaling)) then
+
+            write(21,'(a,f5.2)') 'Welfare change in GE: ', welfare(0,1)-welfare(1,1)
+            write(21,*)
+            write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)  g_c(CCV)  g_c(SR)'
+            write(21,'(x,6(3x,f5.2,3x))') cev(6:1)
+            write(21,*)
+
+            IR = cev(5)-cev(6)
+            AR = cev(4)-cev(6)
+            LCI= cev(3)-(cev(6) + IR + AR)
+            CCV= cev(2) - cev(3)
+            SR = cev(1) - cev(2)
+
+            write(21,'(a)') ' g_c(0,0)   dg_c(IR)   dg_c(AR)   dg_c(LCI)  dg_c(CCV)  dg_c(SR)'
+            write(21,'(x,6(3x,f5.2,3x))') cev(6), IR, AR, LCI, CCV, SR
+
         else
-            if (scale_AR_orig == -1.0 .and. scale_IR_orig == -1.0) then
-                write(21,'(a56)') 'norisk   welfare,tau_0    welfare,tau_1              cev'
+            if (size(welfare,1) > 1) then
+                if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0) then
+                    write(21,'(a56)') ' IR      welfare,tau_0    welfare,tau_1              cev'
+                elseif (scale_AR_orig .ne. 0.0 .and. scale_AR_orig .ne. -1.0) then
+                    write(21,'(a56)') ' AR      welfare,tau_0    welfare,tau_1              cev'
+                else
+                    write(21,'(a)') ' WARNING: Experiments correctly set?'
+                    write(21,'(a4,i2,a16,f5.2,a11,f5.2)') ' rc=',rc,', but scale_IR =', scale_IR, ', scale_AR=', scale_AR
+                    write(21,'(a56)') ' risk?   welfare,tau_0    welfare,tau_1              cev'
+                endif
             else
-                write(21,'(a56)') ' risk    welfare,tau_0    welfare,tau_1              cev'
+                if (scale_AR_orig == -1.0 .and. scale_IR_orig == -1.0) then
+                    write(21,'(a56)') 'norisk   welfare,tau_0    welfare,tau_1              cev'
+                else
+                    write(21,'(a56)') ' risk    welfare,tau_0    welfare,tau_1              cev'
+                endif
             endif
+            do i=0,size(welfare,1)-1
+                if (tau_experiment) then
+                    write(21,'(f5.2,2x,3(es15.6,2x))') scaling(i), welfare(i,1), welfare(i,2), cev(i)
+                else
+                    write(21,'(f5.2,2x,es15.6,2x)') scaling(i), welfare(i,1)
+                endif
+            enddo
         endif
-        do i=1,size(welfare,1)
-	        if (tau_experiment) then
-	            write(21,'(f5.2,2x,3(es15.6,2x))') scaling(i), welfare(i,1), welfare(i,2), cev(i)
-	        else
-	            write(21,'(f5.2,2x,es15.6,2x)') scaling(i), welfare(i,1)
-	        endif
-        enddo
         close(21)
 
     end subroutine write2file

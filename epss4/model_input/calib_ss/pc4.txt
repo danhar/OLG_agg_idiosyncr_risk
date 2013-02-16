@@ -34,6 +34,7 @@ n               0.011   population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 tau             0.02    tax rate. Alternatives: .12
 tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
+welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 5.
 ccv             .true.  Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.

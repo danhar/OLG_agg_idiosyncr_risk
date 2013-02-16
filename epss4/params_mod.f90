@@ -16,7 +16,7 @@ module params_mod
                           n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
-                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment
+                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment, welfare_decomposition
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ subroutine SetDefaultValues()
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
-    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.
+    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
     ! Character
     calib_targets='presentation'; mean_return_type='mean_mpk'
 end subroutine SetDefaultValues
@@ -269,7 +269,6 @@ end subroutine ReadCalibration
 subroutine SetRemainingParams()
 ! This is called from main.f90 right in the beginning
     use markov_station_distr
-    integer, parameter :: iounit=124
     integer :: seedsize
 
     gamm = (1.0-theta)/(1.0-1.0/psi)
@@ -285,8 +284,6 @@ subroutine SetRemainingParams()
         allocate(seed(seedsize))
         call random_seed(get=seed)
     endif
-
-    call set_demographics()
 
     pi_z = set_pi_z(pi1_zeta,pi1_delta, n_zeta, nz)
 
@@ -308,66 +305,18 @@ subroutine SetRemainingParams()
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     end select
 
+    if (welfare_decomposition) then
+        run_counter_start = 0
+        run_n_times = 6
+        tau_experiment = .true.
+    endif
+
 contains
-
-    subroutine set_demographics()
-    ! Sets productivity profile, survival rates, and calculates pop ratios
-
-        real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
-        real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
-        real(dp)          :: P, L , Pop ! Pensioners, Labor (efficiency units), Total population
-        integer           :: jc
-
-        if (allocated(ej)) deallocate(ej,surv)
-        allocate(ej(nj), surv(nj), mass_j(nj))
-        allocate(age_prod_profile(2,nj+econ_life_start), cond_mort_rates(2,nj+econ_life_start))
-
-        ! input of conditional mortality rates
-        if (surv_rates) then
-            open(iounit,file='model_input/data/mortality_rates_US.txt', action='read') ! starts at age 0
-            read(iounit,*) cond_mort_rates
-            close(iounit)
-            surv(1)    = 1.0    ! agents born into model survive birth
-            surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
-        else
-            surv       = 1.0
-        endif
-
-        ! input of age-earnings profiles of Hugget/Ventura/Yaron
-        open(iounit,file='model_input/data/hvyageearn.txt', action='read')
-        read(iounit,*) age_prod_profile
-        close(iounit)
-
-        ! Translate productivity profiles into model
-        ej=0.0
-        do jc=1,jr-1
-            ej(jc)  = age_prod_profile(2, jc + econ_life_start) ! because age_prod_profile(econ_life_start) would correspond to j=0
-        end do
-        ! Normalization, so that centered around 1 and sum to jr-1
-        ej=ej/sum(ej)*real(jr-1,dp)
-
-        deallocate(age_prod_profile, cond_mort_rates)
-
-        ! Calculate population ratios and fractions
-        mass_j(1)=(1.0 + n)**(nj-1)
-        do jc=2,nj
-            mass_j(jc) = mass_j(jc-1)/(1.0 + n) * surv(jc)
-        enddo
-        Pop = sum(mass_j)                       ! total Population size
-        L   = sum(mass_j(1:jr-1)*ej(1:jr-1))    ! Labor (in efficiency units)
-        P   = sum(mass_j(jr:nj))                ! Pensioners
-
-        P_L_ratio = P/L
-        L_N_ratio = L/Pop
-        pop_frac  = mass_j/Pop
-
-    end subroutine set_demographics
-!-------------------------------------------------------------------------------------------------
-
+!-------------------------------------------------------------------------------
     subroutine set_defined_benefits
-        open(iounit, file='model_input/last_results/def_benefits.unformatted', form='unformatted', action='read')
-        read(iounit) def_benefits
-        close(iounit)
+        open(124, file='model_input/last_results/def_benefits.unformatted', form='unformatted', action='read')
+        read(124) def_benefits
+        close(124)
         print*, 'sub_setvars: setting def_benefits = ', def_benefits
     end subroutine set_defined_benefits
 !-------------------------------------------------------------------------------------------------
@@ -563,6 +512,8 @@ end subroutine SetRemainingParams
 subroutine params_set_thisrun()
     real(dp) :: zeta_std_scaled, del_std_scaled
 
+    call set_demographics()
+
     zeta_std_scaled = zeta_std*(1.0 + scale_AR)
     del_std_scaled  = del_std *(1.0 + scale_AR)
     zeta =[zeta_mean-zeta_std_scaled, zeta_mean-zeta_std_scaled, zeta_mean+zeta_std_scaled, zeta_mean+zeta_std_scaled]
@@ -574,6 +525,59 @@ subroutine params_set_thisrun()
 
 contains
 !-------------------------------------------------------------------------------
+    subroutine set_demographics()
+    ! Sets productivity profile, survival rates, and calculates pop ratios
+        integer, parameter :: iounit=124
+        real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
+        real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
+        real(dp)          :: P, L , Pop ! Pensioners, Labor (efficiency units), Total population
+        integer           :: jc
+
+        if (allocated(ej)) deallocate(ej,surv)
+        allocate(ej(nj), surv(nj), mass_j(nj))
+        allocate(age_prod_profile(2,nj+econ_life_start), cond_mort_rates(2,nj+econ_life_start))
+
+        ! input of conditional mortality rates
+        if (surv_rates) then
+            open(iounit,file='model_input/data/mortality_rates_US.txt', action='read') ! starts at age 0
+            read(iounit,*) cond_mort_rates
+            close(iounit)
+            surv(1)    = 1.0    ! agents born into model survive birth
+            surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
+        else
+            surv       = 1.0
+        endif
+
+        ! input of age-earnings profiles of Hugget/Ventura/Yaron
+        open(iounit,file='model_input/data/hvyageearn.txt', action='read')
+        read(iounit,*) age_prod_profile
+        close(iounit)
+
+        ! Translate productivity profiles into model
+        ej=0.0
+        do jc=1,jr-1
+            ej(jc)  = age_prod_profile(2, jc + econ_life_start) ! because age_prod_profile(econ_life_start) would correspond to j=0
+        end do
+        ! Normalization, so that centered around 1 and sum to jr-1
+        ej=ej/sum(ej)*real(jr-1,dp)
+
+        deallocate(age_prod_profile, cond_mort_rates)
+
+        ! Calculate population ratios and fractions
+        mass_j(1)=(1.0 + n)**(nj-1)
+        do jc=2,nj
+            mass_j(jc) = mass_j(jc-1)/(1.0 + n) * surv(jc)
+        enddo
+        Pop = sum(mass_j)                       ! total Population size
+        L   = sum(mass_j(1:jr-1)*ej(1:jr-1))    ! Labor (in efficiency units)
+        P   = sum(mass_j(jr:nj))                ! Pensioners
+
+        P_L_ratio = P/L
+        L_N_ratio = L/Pop
+        pop_frac  = mass_j/Pop
+
+    end subroutine set_demographics
+!-------------------------------------------------------------------------------------------------
 
     subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, nz, ccv)
         use markov_chain_approx
@@ -1286,6 +1290,8 @@ subroutine params_set_integer(param_name, new_value)
         select case (param_name)
         case ('run_counter_start')
             run_counter_start = new_value
+        case ('run_n_times')
+            run_n_times = new_value
         case default
             print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
         end select
@@ -1297,6 +1303,12 @@ subroutine params_set_logical(param_name, new_value)
     select case (param_name)
         case ('partial_equilibrium')
             partial_equilibrium = new_value
+        case ('tau_experiment')
+            tau_experiment = new_value
+        case ('surv_rates')
+            surv_rates = new_value
+        case ('ccv')
+            ccv = new_value
     end select
 end subroutine params_set_logical
 
