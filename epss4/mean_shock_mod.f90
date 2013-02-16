@@ -14,7 +14,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use kinds
     use classes_mod ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs
     use laws_of_motion  ,only: Initialize
-    use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium
+    use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates
     use income
 	use sub_broyden
     use fun_locate
@@ -58,7 +58,11 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     ! Initial guesses
     xvars(1)   = grids%k (1)
     xvars(2)   = grids%mu(1)
-    bequests_ms = 0.03_dp   ! This guess was the mean shock value in previous runs
+    if(surv_rates) then
+        bequests_ms = 0.03_dp   ! This guess was the mean shock value in previous runs
+    else
+        bequests_ms = 0.0
+    endif
 
 	if (partial_equilibrium) then
 	    fvals = ms_equilibrium(xvars)

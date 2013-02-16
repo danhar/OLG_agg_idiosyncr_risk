@@ -623,6 +623,7 @@ subroutine calibration_set_derived_params()
 
     gamm = (1.0-theta)/(1.0-1.0/psi)
     delta=[del_mean + del_std, del_mean - del_std, del_mean + del_std, del_mean - del_std]
+    zeta =[zeta_mean-zeta_std, zeta_mean-zeta_std, zeta_mean+zeta_std, zeta_mean+zeta_std]
 
     pi_z = set_pi_z(pi1_zeta,pi1_delta, n_zeta, nz)
 
