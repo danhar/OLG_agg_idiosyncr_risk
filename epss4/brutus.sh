@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='037-test'
-BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
+thisrun='038-ies09nocal'
+BUILD=Build_Parallel_Debug #Parallel_Optim #Optimmax #Debugmax #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"

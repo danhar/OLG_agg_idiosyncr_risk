@@ -62,7 +62,7 @@ contains
         integer :: io_stat
 
         open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
-        write(55) size(this%k)
+        write(55) size(this%k,1), size(this%k,2)
         close(55)
 
         if (io_stat .ne. 0) then

@@ -6,7 +6,7 @@
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           8.019   coefficient of relative risk aversion
-psi             1.500   elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
+psi             0.900   elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
 beta            0.958   discount factor
 alpha           0.320   capital share
 g               0.018   growth rate of technology
