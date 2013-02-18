@@ -221,20 +221,21 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
         if (.not. present(scaling)) then
 
-            write(21,'(a,f5.2)') 'Welfare change in GE: ', welfare(0,1)/welfare(1,1) -1.0
+            write(21,*) 'All cev reported in %'
+            write(21,'(a,f6.2)') 'Welfare change in GE: ', (welfare(0,1)/welfare(1,1) -1.0)*100.0
             write(21,*)
             write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)  g_c(CCV)  g_c(SR)'
-            write(21,'(x,6(3x,f5.2,3x))') cev(6:1:-1)
+            write(21,'(x,6(3x,f6.2,3x))') (cev(6:1:-1))*100.0
             write(21,*)
 
-            IR = cev(5)-cev(6)
-            AR = cev(4)-cev(6)
-            LCI= cev(3)-(cev(6) + IR + AR)
-            CCV= cev(2) - cev(3)
-            SR = cev(1) - cev(2)
+            IR = (cev(5)-cev(6))*100.0
+            AR = (cev(4)-cev(6))*100.0
+            LCI= (cev(3)-(cev(6) + IR + AR))*100.0
+            CCV= (cev(2) - cev(3))*100.0
+            SR = (cev(1) - cev(2))*100.0
 
             write(21,'(a)') ' g_c(0,0)   dg_c(IR)   dg_c(AR)   dg_c(LCI)  dg_c(CCV)  dg_c(SR)'
-            write(21,'(x,6(3x,f5.2,3x))') cev(6), IR, AR, LCI, CCV, SR
+            write(21,'(x,6(3x,f6.2,3x))') cev(6), IR, AR, LCI, CCV, SR
 
         else
             if (size(welfare,1) > 1) then
