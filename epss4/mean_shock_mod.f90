@@ -258,7 +258,7 @@ contains
         do i= 1,nz  ! can't I just save z and then call simulate_economy?
             simvars%z(i+1)     = i
             simvars%K(i+1)     = sum(policies%apgrid(:,:,i,:,1,1)*Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
-            if (simvars%K(i+1) < 1e-4_dp) simvars%K(i+1) = 1e-4_dp  ! This can happen particularly in the partial equilibrium experiments. It corresponds to the aggregate grid bounds check in the true simulations.
+            if (simvars%K(i+1) < 0.1_dp) simvars%K(i+1) = 0.1_dp  ! This can happen particularly in the partial equilibrium experiments. It corresponds to the aggregate grid bounds check in the true simulations.
             simvars%mu(i+1)    = simvars%mu(1)            ! Keep mu constant, could keep rf constant instead
 	        simvars%output(i+1)= zeta(i)*simvars%K(i+1)**alpha
 	        simvars%stock(i+1) = sum(policies%stocks(:,:,i,:,1,1)*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.

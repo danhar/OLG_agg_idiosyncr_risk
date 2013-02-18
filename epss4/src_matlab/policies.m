@@ -4,7 +4,7 @@ close all;
 
 if (isempty(gplot_all))    
     visibility = 'on ';
-    dir = 'GM1unconst/ge';  % 'ge'
+    dir = 'FD1_KK/msge';  % 'ge'
 else
     visibility = 'off';
     dir = getenv('EPSSDIR');
@@ -20,6 +20,7 @@ xgridM=dlmread('xgrid_mean.txt');
 %cons = dlmread('cons_mean.txt');
 cons = xgridM - apgrid;
 
+[nj,nx] = size(apgrid);
 j0= 0; %21;
 
 scrsz = get(0,'ScreenSize');
@@ -33,8 +34,11 @@ else
     markersize = 9;
 end
 
-
-for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57] 
+jplot=[1,10:10:nj];
+if (jplot(end) ~= nj) 
+    jplot= [jplot,nj];
+end
+for j=jplot%[39, 40, 41,42,43,44] % %[40,45,50,57] 
     gen_str=num2str(j+j0);
     xgrid=xgridM(j,:);
 
@@ -55,6 +59,8 @@ for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57]
     set(gca,'FontSize',fontsize);
     if (min(kappa(j,:)) < max(kappa(j,:)))
         axis([xgrid(1) xgrid(end) min(kappa(j,:)) max(kappa(j,:))])
+    else
+        axis([xgrid(1) xgrid(end) -1 1])
     end
         
     %title(['\kappa^{',gen_str,'}(x), ',dir]);
@@ -64,15 +70,23 @@ for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57]
     h=legend(['ap^{',gen_str,'}(x)'],'Location','SouthEast');
     %xlabel('x','FontSize',fontsize); ylabel(['ap^{',gen_str,'}(x)'],'FontSize',fontsize);
     set(gca,'FontSize',fontsize);
-    axis([xgrid(1) xgrid(end) min(apgrid(j,:)) max(apgrid(j,:))])
+    if (min(apgrid(j,:)) < max(apgrid(j,:)))
+        axis([xgrid(1) xgrid(end) min(apgrid(j,:)) max(apgrid(j,:))])
+    else
+        axis([xgrid(1) xgrid(end) -1 1])
+    end    
     %title(['ap^{',gen_str,'}(x), ',dir]);
     
     subplot(2,2,4)
     plot(xgrid,stocks(j,:),'LineWidth',linewidth);
     h=legend(['stocks^{',gen_str,'}(x)'],'Location','SouthEast');
     %xlabel('x','FontSize',fontsize); ylabel(['stocks^{',gen_str,'}(x)'],'FontSize',fontsize);
-    set(gca,'FontSize',fontsize);
-    axis([xgrid(1) xgrid(end) min(stocks(j,:)) max(stocks(j,:))])
+    set(gca,'FontSize',fontsize);    
+    if (min(stocks(j,:)) < max(stocks(j,:)))
+        axis([xgrid(1) xgrid(end) min(stocks(j,:)) max(stocks(j,:))])        
+    else
+        axis([xgrid(1) xgrid(end) -1 1])
+    end
     %title(['stocks^{',gen_str,'}(x), ',dir]);
     
     if (plot_bonds)
@@ -82,7 +96,11 @@ for j=[01,10,20,30,40,50,60]%[39, 40, 41,42,43,44] % %[40,45,50,57]
         h=legend(['bonds^{',gen_str,'}(x)'],'Location','SouthEast');
      %   xlabel('x','FontSize',fontsize); ylabel(['stocks^{',gen_str,'}(x)'],'FontSize',fontsize);
         set(gca,'FontSize',fontsize);
-        axis([xgrid(1) xgrid(end) min(bonds) max(bonds)])
+        if (min(bonds) < max(bonds))
+            axis([xgrid(1) xgrid(end) min(bonds) max(bonds)])            
+        else
+            axis([xgrid(1) xgrid(end) -1 1])
+        end
 %        title(['bonds^{',gen_str,'}(x), ',dir]);
     end
     

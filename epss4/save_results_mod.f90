@@ -250,7 +250,7 @@ contains
     integer :: nx, i2
 
     nx = size(pol%apgrid,1)
-201 format(<nx> (f10.6,1x))
+201 format(<nx> (f10.5,1x))
 !    open(20, file=path//'/cons.txt', status = 'replace')
 !    write(20,201) cons
 !    close(20)
@@ -285,7 +285,7 @@ contains
     close(60)
 
     open(60, file=path//'/stocks_mean.txt',   status = 'replace')
-    write(60,160) stocks_mean
+    write(60,201) stocks_mean
     close(60)
 
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
@@ -349,9 +349,9 @@ contains
         write(21,369) ' z        ', simvars(i)%z
     369 format(a10,<size(simvars(i)%z)> (i2,8x))
         write(21,371) ' K        ', simvars(i)%K
-    371 format(a10,<size(simvars(i)%K)> (f9.6,1x))
+    371 format(a10,<size(simvars(i)%K)> (f9.5,1x))
         write(21,370) ' mu       ', simvars(i)%mu
-    370 format(a10,<size(simvars(i)%z)> (f9.6,1x))
+    370 format(a10,<size(simvars(i)%z)> (f9.5,1x))
         write(21,370) ' output   ', simvars(i)%output
         write(21,370) ' invest   ', simvars(i)%invest
         write(21,370) ' stock    ', simvars(i)%stock

@@ -13,15 +13,13 @@ end
 
 cd('../model_output/')
 % jr = dlmread('params.txt','', [40 11 40 13]);
-jr =43;
+
 cd(dir)
 apgrid=dlmread('apgrid_mean.txt');
-
 scrsz = get(0,'ScreenSize');
 
 for j=[1,35]
     gen_str=num2str(j);
-    i= floor((j+1)/jr)+1;
     figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
     plot(apgrid(j,:),0,'x');
     set(gca,'FontSize',16);

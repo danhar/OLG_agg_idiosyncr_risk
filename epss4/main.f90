@@ -221,10 +221,10 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
         if (.not. present(scaling)) then
 
-            write(21,'(a,f5.2)') 'Welfare change in GE: ', welfare(0,1)-welfare(1,1)
+            write(21,'(a,f5.2)') 'Welfare change in GE: ', welfare(0,1)/welfare(1,1) -1.0
             write(21,*)
             write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)  g_c(CCV)  g_c(SR)'
-            write(21,'(x,6(3x,f5.2,3x))') cev(6:1)
+            write(21,'(x,6(3x,f5.2,3x))') cev(6:1:-1)
             write(21,*)
 
             IR = cev(5)-cev(6)

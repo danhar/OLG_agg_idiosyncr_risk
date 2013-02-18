@@ -90,7 +90,7 @@ subroutine SetDefaultValues()
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
-    nj=64; jr=44; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
+    nj=70; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=0
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
@@ -525,7 +525,7 @@ subroutine params_set_thisrun()
 
     call set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, nz, ccv)
 
-    call set_apmax(ms_guess%k(1), apmax_factor, scale_IR ,apmax_curv)
+    call set_apmax(ms_guess%k(1), apmax_factor, scale_IR ,apmax_curv)  ! This must be called after set_demographics()
 
 contains
 !-------------------------------------------------------------------------------
@@ -533,10 +533,11 @@ contains
     ! Sets productivity profile, survival rates, and calculates pop ratios
         integer, parameter :: iounit=124
         logical, parameter :: adjust_nj = .true. ! if true, then set nj to life expectancy if surv_rates = .false., else leave nj as it is
+        logical, save      :: already_adjusted_nj = .false.
         real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
         real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
         real(dp)          :: P, L , Pop ! Pensioners, Labor (efficiency units), Total population
-        integer           :: jc
+        integer           :: jc, ju ! counter and upper bound for generation j
 
         if (allocated(surv)) deallocate(surv)
         allocate(surv(nj))
@@ -551,11 +552,12 @@ contains
         surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
 
         if (.not. surv_rates) then
-            if (adjust_nj) then
+            if (adjust_nj .and. .not. already_adjusted_nj) then
                 do jc=2,nj
                     surv(jc) = surv(jc-1)*surv(jc)  ! unconditional survival rates
                 enddo
                 nj = sum(surv)
+                already_adjusted_nj = .true.
                 print*, 'Warning: params_mod: setting nj to life expectancy, nj=', nj
             endif
             deallocate(surv)
@@ -575,12 +577,13 @@ contains
         close(iounit)
 
         ! Translate productivity profiles into model
+        ju = min(nj,jr-1) ! can happen if we change nj
         ej=0.0
-        do jc=1,jr-1
+        do jc=1,ju
             ej(jc)  = age_prod_profile(2, jc + econ_life_start) ! because age_prod_profile(econ_life_start) would correspond to j=0
         end do
         ! Normalization, so that centered around 1 and sum to jr-1
-        ej=ej/sum(ej)*real(jr-1,dp)
+        ej=ej/sum(ej)*real(ju,dp)
 
         deallocate(age_prod_profile, cond_mort_rates)
 
@@ -590,8 +593,12 @@ contains
             mass_j(jc) = mass_j(jc-1)/(1.0 + n) * surv(jc)
         enddo
         Pop = sum(mass_j)                       ! total Population size
-        L   = sum(mass_j(1:jr-1)*ej(1:jr-1))    ! Labor (in efficiency units)
-        P   = sum(mass_j(jr:nj))                ! Pensioners
+        L   = sum(mass_j(1:ju)*ej(1:ju))    ! Labor (in efficiency units)
+        if (jr <=nj) then
+            P   = sum(mass_j(jr:nj))                ! Pensioners
+        else
+            p   = 0.0
+        endif
 
         P_L_ratio = P/L
         L_N_ratio = L/Pop
@@ -696,7 +703,11 @@ subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
 
     if (allocated(apmax)) deallocate(apmax)
     allocate(apmax(n_eta,nz,nj))
-    jmax =jr-1
+    if (jr > nj) then
+        jmax = nj
+    else
+        jmax =jr-1
+    endif
 
     guess         = k
     if (bequests_to_newborn) then
@@ -707,7 +718,7 @@ subroutine set_apmax(k, factor_o, scale_IR_o, curv_o)
     apmax(n_eta,nz,nj)     = guess*2.0    ! determins max cons of nj, and apmax(:,nj-1)
     apmax(n_eta,nz,jmax)   = guess*factor
     apmax(n_eta,nz,jmax:1:-1)     = -MakeGrid(-apmax(n_eta,nz,jmax),-apmax(n_eta,nz,1),jmax, 1.0/curv)
-    apmax(n_eta,nz,jmax+1:nj-1)   = MakeGrid(apmax(n_eta,nz,jmax),apmax(n_eta,nz,nj),nj-jmax-1, curv) !curv, 2.0_dp
+    if(jr < nj) apmax(n_eta,nz,jmax+1:nj-1)   = MakeGrid(apmax(n_eta,nz,jmax),apmax(n_eta,nz,nj),nj-jmax-1, curv) !curv, 2.0_dp
 
     do zc=1,nz
         zc_fact = (1.0 - shrink_factor_z/real(nz-1,dp)*real(nz -zc,dp))
@@ -835,9 +846,8 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'WARNING: nx_factor > 100 : might run out of mem/ take long time'
     endif
 
-    if (jr>nj+1) then
-        print*, 'ERROR: jr > nj+1'
-        call critical_stop
+    if (jr>=nj) then
+        print*, 'WARNING: jr >= nj'
     endif
 
     if (n<0.0) then
@@ -853,7 +863,7 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'ERROR: ej < 0'
         call critical_stop
     endif
-    if (abs(sum(ej) - real(jr-1,dp)) > crit) print*, 'WARNING: sum(ej) .ne. jr-1'
+    if (abs(sum(ej) - real(min(jr-1,nj),dp)) > crit) print*, 'WARNING: sum(ej) .ne. jr-1'
 
     if (abs(sum(pop_frac)-1.0) > crit) then
         print*, 'ERROR: sum(pop_frac) \= 1'
