@@ -68,6 +68,7 @@ program EPSS
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
                     write(runchar,'(a4)') ',GE1'
+                    sys_error = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     if (.not. surv_rates) cycle
                     call params_set('surv_rates', .false.)
@@ -230,12 +231,12 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
             IR = (cev(5)-cev(6))*100.0
             AR = (cev(4)-cev(6))*100.0
-            LCI= (cev(3)-(cev(6) + IR + AR))*100.0
+            LCI= (cev(3)*100.0-(cev(6)*100.0 + IR + AR))
             CCV= (cev(2) - cev(3))*100.0
             SR = (cev(1) - cev(2))*100.0
 
             write(21,'(a)') ' g_c(0,0)   dg_c(IR)   dg_c(AR)   dg_c(LCI)  dg_c(CCV)  dg_c(SR)'
-            write(21,'(x,6(3x,f6.2,3x))') cev(6), IR, AR, LCI, CCV, SR
+            write(21,'(x,6(3x,f6.2,3x))') cev(6)*100.0, IR, AR, LCI, CCV, SR
 
         else
             if (size(welfare,1) > 1) then
