@@ -2,7 +2,7 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- set nj to expected life expectancy if no survival rates
+- put ies as calibration target
 
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
         but do I actually need that or is it specified in logs?
@@ -134,6 +134,7 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- set nj to expected life expectancy if no survival rates
 
 - option to perform whole welfare decomposition and save results
 

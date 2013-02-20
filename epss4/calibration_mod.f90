@@ -133,7 +133,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 !-------------------------------------------------------------------------------
 
     pure function get_params(n)
-        use params_mod ,only: beta, theta, del_mean, del_std, pi1_delta, zeta_std
+        use params_mod ,only: beta, theta, del_mean, del_std, pi1_delta, psi, zeta_std
         real(dp) ,allocatable ,dimension(:) :: get_params
         integer ,intent(in) :: n
 
@@ -143,7 +143,8 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 2) get_params(3) = del_mean
         if (n > 3) get_params(4) = del_std
         if (n > 4) get_params(5) = pi1_delta
-        if (n > 5) get_params(6) = zeta_std
+        if (n > 5) get_params(6) = psi
+        if (n > 6) get_params(7) = zeta_std
 
     end function get_params
 !-------------------------------------------------------------------------------
@@ -160,7 +161,8 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 2) call params_set('del_mean',param_vec(3))
         if (n > 3) call params_set('del_std',param_vec(4))
         if (n > 4) call params_set('pi1_delta',param_vec(5))
-        if (n > 5) call params_set('zeta_std',param_vec(6))
+        if (n > 5) call params_set('psi',param_vec(6))
+        if (n > 6) call params_set('zeta_std',param_vec(7))
 
         ! The following two calls set 'derived' parameters, e.g. gamma, which is a function of theta
         call calibration_set_derived_params()
@@ -171,6 +173,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
     pure function model_targets(n, simvars)
         use classes_mod ,only: tSimvars, tStats
         use statistics  ,only: corr
+        use params_mod  ,only: psi
 
         real(dp) ,allocatable:: model_targets(:)
         integer        ,intent(in) :: n
@@ -190,7 +193,8 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         if (n > 2) model_targets(3) = r%avg_exerr_()
         if (n > 3) model_targets(4) = r%std_()
         if (n > 4) model_targets(5) = corr(zeta,r)
-        if (n > 5) model_targets(6) = netwage%cv_()
+        if (n > 5) model_targets(6) = psi
+        if (n > 6) model_targets(7) = netwage%cv_()
 
     end function model_targets
 !-------------------------------------------------------------------------------

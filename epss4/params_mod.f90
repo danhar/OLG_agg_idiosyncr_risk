@@ -1082,9 +1082,11 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'ERROR: n_end_params < 0'
         call critical_stop
     elseif (n_end_params > 5) then
-        print*, 'Warning: n_end_params > 5, i.e. std(w) or cv(w) is a target!'
+        print*, 'Warning: n_end_params > 5, i.e. psi is a target!'
     elseif (n_end_params > 6) then
-        print*, 'ERROR: n_end_params > 6 not implemented'
+        print*, 'Warning: n_end_params > 6, i.e. coefficient of variation cv(w) is a target!'
+    elseif (n_end_params > 7) then
+        print*, 'ERROR: n_end_params > 7 not implemented'
         call critical_stop
     endif
 
@@ -1277,19 +1279,19 @@ subroutine params_set_real(param_name, new_value)
         case ('theta')
            if (new_value == 1.0) then
                print* , 'params_set: theta = 1.0 not implemented, setting to 1.01'
-               theta = 1.01
+               theta = 1.01_dp
            else
                theta = new_value
            endif
        case ('psi')
            if (new_value == 1.0) then
                print* , 'params_set: gamma not defined for psi = 1.0, setting psi = 1.01'
-               psi = 1.01
-           elseif (new_value == 1.0) then
+               psi = 0.09_dp !1.01
+           elseif (new_value == 0.0) then
                print* , 'params_set: gamma not defined for psi = 0.0, setting psi = 0.01'
-               psi = 0.01
+               psi = 0.01_dp
            else
-               theta = new_value
+               psi = new_value
            endif
         case ('del_mean')
            if (new_value < 0.0) then
