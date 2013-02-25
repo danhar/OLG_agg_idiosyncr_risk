@@ -13,3 +13,6 @@ find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ss -name 
 
 To count lines of code:
 cloc epss4/ 
+
+To check space used on Brutus $HOME
+quota | awk 'NR==1, /home/ { next } int($1)>0 {printf("%4.2f GB\n"),$1/2^20}'

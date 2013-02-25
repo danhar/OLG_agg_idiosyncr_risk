@@ -549,8 +549,7 @@ contains
         read(iounit,*) cond_mort_rates
         close(iounit)
         surv(1)    = 1.0    ! agents born into model survive birth
-        surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 2 : econ_life_start + nj)  ! coz cond_mort_rates(econ_life_start) is for being born
-
+        surv(2:nj) = 1.0 - cond_mort_rates(2,econ_life_start + 1 : econ_life_start + nj -1)  ! In the xls file, the probability written next to age 22 is for reaching 23.
         if (.not. surv_rates) then
             if (adjust_nj .and. .not. already_adjusted_nj) then
                 do jc=2,nj
