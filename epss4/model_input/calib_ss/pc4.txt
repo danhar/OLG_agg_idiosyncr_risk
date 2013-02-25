@@ -24,7 +24,7 @@ nu_sigma_l      0.125   standard deviation of idiosyncratic shocks in upswing, f
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Demographics    
 !----------------------------------------------------------------------------------------------------------------------------/
-nj              70      maximum model age (max biological age: econ_life_start -1 + nj)
+nj              80      maximum model age (max biological age: econ_life_start -1 + nj)
 jr              45      model retirement age (biological retirement age: econ_life_start -1 + jr)
 econ_life_start 21      biological age at j=1
 n               0.011   population growth rate
