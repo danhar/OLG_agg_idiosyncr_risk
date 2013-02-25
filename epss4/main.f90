@@ -64,30 +64,24 @@ program EPSS
                 elseif (rc ==0) then
                     write(runchar,'(a4)') ',GE0'
                 elseif (rc ==1) then
-                    if (tau< tau_increment) cycle
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
                     write(runchar,'(a4)') ',GE1'
                     sys_error = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
                 elseif (rc ==2) then ! the following are for the welfare decomposition
-                    if (.not. surv_rates) cycle
                     call params_set('surv_rates', .false.)
                     write(runchar,'(a7)') ',noSURV'
                 elseif (rc ==3) then
-                    if (.not. ccv) cycle
                     call params_set('ccv', .false.)
                     write(runchar,'(a6)') ',noCCV'
                 elseif (rc ==4) then
-                    if (scale_IR == -1.0) cycle
                     call params_set('scale_IR', -1.0_dp)
                     write(runchar,'(a5)') ',noIR'
                 elseif (rc ==5) then
-                    if (scale_AR == -1.0) cycle
                     call params_set('scale_AR', -1.0_dp)
                     call params_set('scale_IR', 0.0_dp)
                     write(runchar,'(a5)') ',noAR'
                 elseif (rc ==6) then
-                    if (scale_AR == -1.0 .and. scale_IR == -1.0) cycle
                     call params_set('scale_AR', -1.0_dp)
                     call params_set('scale_IR', -1.0_dp)
                     write(runchar,'(a7)') ',norisk'
