@@ -849,6 +849,10 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'WARNING: jr >= nj'
     endif
 
+    if (jr>46) then
+        print*, 'WARNING: jr >= 46; age productivity will be extrapolated from data!'
+    endif
+
     if (n<0.0) then
         print*, 'WARNING: n < 0'
     endif
