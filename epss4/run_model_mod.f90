@@ -218,6 +218,9 @@ contains
             mean_return = r_pf_kappa_med%avg_exerr_() * r%avg_exerr_()+ (1.0 - r_pf_kappa_med%avg_exerr_())* rf%avg_exerr_()
 
             ! mean_return = real(1.06801078E-01,dp) ! this is the value for pfr: portfolio return (with pop weights)
+        case('Siegel2002') ! empirical estimate from Siegel (2002)
+            mean_return = 0.042_dp
+
         end select
 
         inverted_mean_return = (alpha/(mean_return+del_mean))**(1.0/(1.0-alpha))

@@ -1002,11 +1002,11 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     select case(mean_return_type)
-        case('mean_mpk','weighted_aggregate_return','median_portf_return','median_portf_share')
+        case('mean_mpk','weighted_aggregate_return','median_portf_return','median_portf_share','Siegel2002')
         ! continue
         case default
             print*, 'ERROR: mean_return_type must take one of the following values:'
-            print*, 'mean_mpk,weighted_aggregate_return,median_portf_return,median_portf_share'
+            print*, 'mean_mpk,weighted_aggregate_return,median_portf_return,median_portf_share,Siegel2002'
             call critical_stop
     end select
 

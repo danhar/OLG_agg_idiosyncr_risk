@@ -5,16 +5,16 @@
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta           8.019   coefficient of relative risk aversion
-psi             1.500   elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.958   discount factor
+theta           7.946   coefficient of relative risk aversion
+psi             0.500   elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
+beta            0.926   discount factor
 alpha           0.320   capital share
 g               0.018   growth rate of technology
 de_ratio        0.660   debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000   mean of productivity shocks
 zeta_std        0.029   standard deviation of productivity shocks
-del_mean        0.080   mean of depreciation shocks
-del_std         0.122   std of depreciation shocks
+del_mean        0.082   mean of depreciation shocks
+del_std         0.121   std of depreciation shocks
 pi1_zeta        0.941   first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.867   first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952   autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
@@ -35,7 +35,7 @@ n               0.011   population growth rate
 tau             0.02    tax rate. Alternatives: .12
 tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
 welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
-mean_return_type  'mean_mpk'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
+mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
 ccv             .true.  Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
@@ -62,7 +62,7 @@ nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3       coefficients in law of motion, for every state z
 nt              4000    simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000    In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       4       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       8       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
@@ -88,7 +88,7 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
 tol_coeffs      1e-5        stopping value for coeffs
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
 
