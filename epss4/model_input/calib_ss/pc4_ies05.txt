@@ -46,8 +46,8 @@ twosided_experiment .false. If true (and run_n_times>1), the risk experiments ar
 surv_rates      .true.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)
 partial_equilibrium     .false.     If true, no GE computed, GE values read from file
-collateral_constraint   .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
-kappa_in_01             .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
+collateral_constraint   .true.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
+kappa_in_01             .true.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
