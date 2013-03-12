@@ -32,7 +32,7 @@ n               0.011   population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
-tau             0.02    tax rate. Alternatives: .12
+tau             0.02    tax rate. This value is used in the calibration baseline. Alternatives: .12
 tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
 welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
 mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
@@ -46,8 +46,8 @@ twosided_experiment .false. If true (and run_n_times>1), the risk experiments ar
 surv_rates      .true.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)
 partial_equilibrium     .false.     If true, no GE computed, GE values read from file
-collateral_constraint   .true.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
-kappa_in_01             .true.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
+collateral_constraint   .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
+kappa_in_01             .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
@@ -62,7 +62,7 @@ nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3       coefficients in law of motion, for every state z
 nt              4000    simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000    In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       8       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       4       In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
@@ -88,7 +88,7 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
+tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
 tol_coeffs      1e-5        stopping value for coeffs
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
 

@@ -188,7 +188,7 @@ contains
                  value_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
 
         ! Projection of policies / grids on mean shock
-        xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
+        xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0; value_ms =0.0;
         do i=1,size(fine%xgrid,3)
             xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)
             apgrid_ms = apgrid_ms + w(i)* fine%apgrid(:,:,i,:,1,1)
