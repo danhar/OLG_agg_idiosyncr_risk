@@ -1342,6 +1342,9 @@ subroutine params_set_integer(param_name, new_value)
             run_counter_start = new_value
         case ('run_n_times')
             run_n_times = new_value
+        case ('nap')
+            nap = new_value
+            nx  = nap   ! should this be more explicit, i.e. its own case?
         case default
             print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
         end select

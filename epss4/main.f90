@@ -111,6 +111,7 @@ program EPSS
     	        call params_set('tau', tau- tau_increment)
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
 	        endif
+
 	    enddo
 	    if (welfare_decomposition) then
 	        call write2file(welfare,cev,'welfare')

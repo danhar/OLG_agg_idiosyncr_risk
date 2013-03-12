@@ -250,7 +250,7 @@ contains
     integer :: nx, i2
 
     nx = size(pol%apgrid,1)
-201 format(<nx> (f10.5,1x))
+201 format(<nx> (f11.6,1x))
 !    open(20, file=path//'/cons.txt', status = 'replace')
 !    write(20,201) cons
 !    close(20)

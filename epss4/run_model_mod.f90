@@ -12,9 +12,9 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
-	use params_mod        ,only: construct_path, set_apmax, & ! procedures
+	use params_mod        ,only: construct_path, set_apmax, params_set,& ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
-	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
+	                             dp, nk,nmu, nz, nap, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
@@ -30,6 +30,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	logical           :: calibrating
 	character(:),allocatable :: dir, output_path
+	integer,parameter :: nap_factor_no_AR = 20
 
     call system_clock(start_time)
     if (present(simvars_o)) then
@@ -59,6 +60,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
+    call params_set('nap', nap*nap_factor_no_AR)
     allocate(simvars(1)) ! only one core used for mean shock
     call solve_meanshock(coeffs, ms_grids, policies, simvars(1), lifecycles, Phi, xgrid_ms, value, err, output_path)
     if (err%not_converged) call err%print2stderr(dir)
@@ -71,6 +73,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 
     ms_rf_temp = simvars(1)%rf(1)
     deallocate(simvars)
+    call params_set('nap', nap/nap_factor_no_AR)
     print*, ' '
 
     if (scale_AR == -1.0) then
