@@ -1010,6 +1010,14 @@ use omp_lib           ,only: OMP_get_max_threads
             call critical_stop
     end select
 
+     select case(calib_targets)
+        case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe')
+        ! continue
+        case default
+            print*, 'ERROR: calib_targets must take one of the following values:'
+            print*, 'paper, presentation, computation, pc, std_w, del_mean, sharpe'
+            call critical_stop
+    end select
 
     if (welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)) then
         print*, 'ERROR: welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)'

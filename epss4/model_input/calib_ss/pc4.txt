@@ -32,16 +32,16 @@ n               0.011   population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
-tau             0.02    tax rate. Alternatives: .12
+tau             0.02    tax rate. This value is used in the calibration baseline. Alternatives: .12
 tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
 welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
-mean_return_type  'mean_mpk'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
+mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
 ccv             .true.  Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0     scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0     scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1      Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
 n_end_params     0      Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
-calib_targets 'del_mean'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean'
+calib_targets 'sharpe'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe'
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .true.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)

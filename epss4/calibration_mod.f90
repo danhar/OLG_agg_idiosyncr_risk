@@ -123,7 +123,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
             call run_model(projectname, calib_name, welfare_temp, simvars)
 
-            distance = data_targets - model_targets(n_end_params, simvars)
+            distance = data_targets - model_targets(n_end_params, simvars, trim(adjustl(calib_targets)))
 
             ! if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
 
@@ -139,9 +139,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
         allocate(get_params(n))
         get_params(1) = beta
-        if (n > 1) get_params(2) = theta
-        if (n > 2) get_params(3) = del_mean
-        if (n > 3) get_params(4) = del_std
+        if (n > 1) get_params(2) = del_std
+        if (n > 2) get_params(3) = theta
+        if (n > 3) get_params(4) = del_mean
         if (n > 4) get_params(5) = pi1_delta
         if (n > 5) get_params(6) = zeta_std
 
@@ -156,9 +156,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         n=size(param_vec)
 
         call params_set('beta',param_vec(1))
-        if (n > 1) call params_set('theta',param_vec(2))
-        if (n > 2) call params_set('del_mean',param_vec(3))
-        if (n > 3) call params_set('del_std',param_vec(4))
+        if (n > 1) call params_set('del_std',param_vec(2))
+        if (n > 2) call params_set('theta',param_vec(3))
+        if (n > 3) call params_set('del_mean',param_vec(4))
         if (n > 4) call params_set('pi1_delta',param_vec(5))
         if (n > 5) call params_set('zeta_std',param_vec(6))
 
@@ -168,29 +168,41 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
     end subroutine set_params
 !-------------------------------------------------------------------------------
 
-    pure function model_targets(n, simvars)
+    pure function model_targets(n, simvars, targetname)
         use classes_mod ,only: tSimvars, tStats
         use statistics  ,only: corr
 
         real(dp) ,allocatable:: model_targets(:)
         integer        ,intent(in) :: n
         type(tSimvars) ,intent(in) :: simvars(:)
-        type(tStats) :: K_Y, ex_ret, r, zeta, netwage
+        character(len=*)      ,intent(in) :: targetname
+        type(tStats) :: K_Y, ex_ret, r, rf, zeta, netwage, cons_grow
 
         allocate(model_targets(n))
 
         K_Y%name='K_Y'; call K_Y%calc_stats(simvars)
         ex_ret%name='ex_ret'; call ex_ret%calc_stats(simvars)
         r%name='r'; call r%calc_stats(simvars)
+        rf%name='rf'; call rf%calc_stats(simvars)
         zeta%name='zeta'; call zeta%calc_stats(simvars)
         netwage%name='netwage'; call netwage%calc_stats(simvars)
+        cons_grow%name='cons_grow'; call cons_grow%calc_stats(simvars)
 
-        model_targets(1) = K_Y%avg_exerr_()
-        if (n > 1) model_targets(2) = ex_ret%avg_exerr_()
-        if (n > 2) model_targets(3) = r%avg_exerr_()
-        if (n > 3) model_targets(4) = r%std_()
-        if (n > 4) model_targets(5) = corr(zeta,r)
-        if (n > 5) model_targets(6) = netwage%cv_()
+        select case (targetname)
+        case('sharpe')
+            model_targets(1) = rf%avg_exerr_()
+            if (n > 1) model_targets(2) = cons_grow%std_()
+            if (n > 2) model_targets(3) = ex_ret%avg_exerr_()/ex_ret%std_()
+            if (n > 3) model_targets(4) = K_Y%avg_exerr_()
+            if (n > 4) model_targets(5) = corr(zeta,r)
+        case default
+            model_targets(1) = K_Y%avg_exerr_()
+            if (n > 1) model_targets(2) = r%std_()
+            if (n > 2) model_targets(3) = ex_ret%avg_exerr_()
+            if (n > 3) model_targets(4) = r%avg_exerr_()
+            if (n > 4) model_targets(5) = corr(zeta,r)
+            if (n > 5) model_targets(6) = netwage%cv_()
+        end select
 
     end function model_targets
 !-------------------------------------------------------------------------------
