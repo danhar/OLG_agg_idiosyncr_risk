@@ -1,36 +1,36 @@
- Project epss4, calibration calib_ss/pc4.txt,GE0
+ Project epss4, calibration calib_ss/pc4_ies05.txt,GE0
  -------------------------- Prefs and Tech --------------------------
- theta        = 7.9457
+ theta        = 7.9460
  psi          = .5000
- gamma        = 6.9457
- beta         = .9257
+ gamma        = 6.9460
+ beta         = .9260
  alpha        = .3200
  de_ratio     = .6600
  g            = .0180
  zeta_mean    = 1.0000
  zeta_std     = .0290
- del_mean     = .0823
+ del_mean     = .0820
  del_std      = .1210
  
  ------------------- Soc. Sec. & Demographics -----------------------
  tau          = .0200
  def_benefits = .0000
- nj           =  70
+ nj           =  80
  jr           =  45
  n            = .0110
- P_L_ratio    = .2476
- L_N_ratio    = .7911
+ P_L_ratio    = .2690
+ L_N_ratio    = .7775
  
  ----------------------- Stochastic processes -----------------------
  pi_zeta(1,1) = .9410
- pi_delta(1,1)= .8689
+ pi_delta(1,1)= .8670
  
- pi_z         = .8176 .1234 .0077 .0513
-                .8176 .1234 .0077 .0513
-                .0513 .0077 .1234 .8176
-                .0513 .0077 .1234 .8176
+ pi_z         = .8158 .1252 .0078 .0512
+                .8158 .1252 .0078 .0512
+                .0512 .0078 .1252 .8158
+                .0512 .0078 .1252 .8158
 
- stat_dist_z  = .4345 .0655 .0655 .4345
+ stat_dist_z  = .4335 .0665 .0665 .4335
  
  pi_eta       = .9741 .0259
                 .0259 .9741
@@ -68,13 +68,13 @@
  opt_zbrak       =  F
  scale_AR        =  .0000
  scale_IR        =  .0000
- n_end_params    =  5
+ n_end_params    =  0
  calib_targets   =  model_input/data/calibration_targets/del_mean.txt
  
  ------------------------------ Guesses -----------------------------
  r_ms_guess      =  .0630
- mu_ms_guess     =  .0413
- k_ms_guess      =  3.1032
+ mu_ms_guess     =  .0364
+ k_ms_guess      =  2.8371
  apmax_factor    =  22.0000
  apmax_curv      =  1.0000
  
