@@ -75,7 +75,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
                 xvals = xvals / norm_vector
             endif
 
-            maxstp=.2_dp     ! this is crucial
+            maxstp=.05_dp     ! this is crucial. 0.2_dp for IES=0.5, .05_dp for IES=1.5
             intialize_jacobi=.true.
             allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
             Rmat  = 0.0
