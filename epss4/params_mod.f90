@@ -1011,11 +1011,11 @@ use omp_lib           ,only: OMP_get_max_threads
     end select
 
      select case(calib_targets)
-        case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe')
+        case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', 'nosharpe')
         ! continue
         case default
             print*, 'ERROR: calib_targets must take one of the following values:'
-            print*, 'paper, presentation, computation, pc, std_w, del_mean, sharpe'
+            print*, 'paper, presentation, computation, pc, std_w, del_mean, sharpe, nosharpe'
             call critical_stop
     end select
 

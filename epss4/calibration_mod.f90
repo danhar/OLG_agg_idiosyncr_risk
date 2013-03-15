@@ -40,7 +40,7 @@ contains
         logical  ,parameter :: use_brent_1D   = .false. ! Brent doesn't work very well b/c of KS guesses and aggregate grids.
         logical  ,parameter :: norm_params_to_1 = .true.  ! for Broyden
 
-        xvals = get_params(n_end_params)
+        xvals = get_params(n_end_params, trim(adjustl(calib_targets)))
         allocate(fvals(n_end_params))
 
         print *
@@ -114,9 +114,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
             it = it+1
             if (norm_params_to_1) then
-                call set_params(param_vec*norm_vector)
+                call set_params(param_vec*norm_vector, trim(adjustl(calib_targets)))
             else
-                call set_params(param_vec)
+                call set_params(param_vec,  trim(adjustl(calib_targets)))
             endif
             print *,''
             print '(a,i3.3)','Calibration iteration ', it
@@ -132,35 +132,55 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
     end subroutine calibrate
 !-------------------------------------------------------------------------------
 
-    pure function get_params(n)
+    pure function get_params(n, targetname)
         use params_mod ,only: beta, theta, del_mean, del_std, pi1_delta, zeta_std
         real(dp) ,allocatable ,dimension(:) :: get_params
-        integer ,intent(in) :: n
+        integer          ,intent(in) :: n
+        character(len=*) ,intent(in) :: targetname
 
         allocate(get_params(n))
+
         get_params(1) = beta
-        if (n > 1) get_params(2) = del_std
-        if (n > 2) get_params(3) = theta
-        if (n > 3) get_params(4) = del_mean
-        if (n > 4) get_params(5) = pi1_delta
-        if (n > 5) get_params(6) = zeta_std
+        select case (targetname)
+        case('nosharpe')
+            if (n > 1) get_params(2) = del_std
+            if (n > 2) get_params(3) = del_mean
+            if (n > 3) get_params(4) = pi1_delta
+            if (n > 4) get_params(5) = zeta_std
+        case default
+            if (n > 1) get_params(2) = del_std
+            if (n > 2) get_params(3) = theta
+            if (n > 3) get_params(4) = del_mean
+            if (n > 4) get_params(5) = pi1_delta
+            if (n > 5) get_params(6) = zeta_std
+        end select
 
     end function get_params
 !-------------------------------------------------------------------------------
 
-    subroutine set_params(param_vec)
+    subroutine set_params(param_vec, targetname)
         use params_mod ,only: params_set, calibration_set_derived_params
-        real(dp) ,dimension(:) ,intent(in):: param_vec
+        real(dp) ,dimension(:) ,intent(in) :: param_vec
+        character(len=*)       ,intent(in) :: targetname
         integer :: n
 
         n=size(param_vec)
 
         call params_set('beta',param_vec(1))
-        if (n > 1) call params_set('del_std',param_vec(2))
-        if (n > 2) call params_set('theta',param_vec(3))
-        if (n > 3) call params_set('del_mean',param_vec(4))
-        if (n > 4) call params_set('pi1_delta',param_vec(5))
-        if (n > 5) call params_set('zeta_std',param_vec(6))
+
+        select case (targetname)
+        case('nosharpe')
+            if (n > 1) call params_set('del_std',param_vec(2))
+            if (n > 2) call params_set('del_mean',param_vec(3))
+            if (n > 3) call params_set('pi1_delta',param_vec(4))
+            if (n > 4) call params_set('zeta_std',param_vec(5))
+        case default
+            if (n > 1) call params_set('del_std',param_vec(2))
+            if (n > 2) call params_set('theta',param_vec(3))
+            if (n > 3) call params_set('del_mean',param_vec(4))
+            if (n > 4) call params_set('pi1_delta',param_vec(5))
+            if (n > 5) call params_set('zeta_std',param_vec(6))
+        end select
 
         ! The following two calls set 'derived' parameters, e.g. gamma, which is a function of theta
         call calibration_set_derived_params()
@@ -195,6 +215,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             if (n > 2) model_targets(3) = ex_ret%avg_exerr_()/ex_ret%std_()
             if (n > 3) model_targets(4) = K_Y%avg_exerr_()
             if (n > 4) model_targets(5) = corr(zeta,r)
+        case('nosharpe')
+            model_targets(1) = rf%avg_exerr_()
+            if (n > 1) model_targets(2) = cons_grow%std_()
+            if (n > 2) model_targets(3) = K_Y%avg_exerr_()
+            if (n > 3) model_targets(4) = corr(zeta,r)
         case default
             model_targets(1) = K_Y%avg_exerr_()
             if (n > 1) model_targets(2) = r%std_()
