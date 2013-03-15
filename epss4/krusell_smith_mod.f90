@@ -52,6 +52,15 @@ contains
         xvals = coeffs%makevector()
         xgrid_mean_new = xgrid_ms ! First grid is mean shock grid. Could remove if Phi was derived type carrying its own grid.
 
+        ! The following block is useful for debugging Krusell Smith
+        if (save_all_iterations) then   ! write the headers into the file for saving intermediate coeffs
+            open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
+            write(132,*)
+            write(132,'(t8,a91)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3)     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3)'
+            write(132,*)
+            close(132)
+        endif
+
         fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
 
         if (.not. partial_equilibrium) then
@@ -80,15 +89,6 @@ contains
             Rmat  = 0.0
             QTmat = 0.0
             call put_diag(1.0/0.5_dp,Rmat)
-
-            ! The following block is useful for debugging Krusell Smith
-            if (save_all_iterations) then   ! write the headers into the file for saving intermediate coeffs
-                open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
-                write(132,*)
-                write(132,'(t8,a91)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3)     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3)'
-                write(132,*)
-                close(132)
-            endif
 
             ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.

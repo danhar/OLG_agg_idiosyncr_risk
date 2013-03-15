@@ -7,9 +7,9 @@ module aggregate_grids_class
 
     type tAggGrids
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
-        real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.01_dp, max_mu = 0.12_dp, &
-                             cover_k_l = 3.5, cover_k_u = 3.5, cover_mu_l = 2.5, cover_mu_u = 2.5, curv=1.75_dp
-        logical , private :: fixed = .true.
+        real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.0001_dp, max_mu = 0.12_dp, & ! min_mu = 0.01_dp
+                             cover_k_l = 5.0, cover_k_u = 5.0, cover_mu_l = 2.5, cover_mu_u = 2.5, curv=1.75_dp
+        logical , private :: fixed = .false.
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
@@ -134,6 +134,9 @@ contains
         ub=mu_mean +this%cover_mu_u*mu_std
         n = size(this%mu)
         this%mu=MakeGrid(lb,ub,n, this%curv)
+
+        this%fixed = .true. ! only update once, in particular do not update when calc new GE after experiment.
+
     end subroutine update_grid_with_stats
 
 end module aggregate_grids_class

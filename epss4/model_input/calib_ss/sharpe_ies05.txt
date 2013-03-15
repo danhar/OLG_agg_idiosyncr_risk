@@ -5,7 +5,7 @@
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta          12.0556   coefficient of relative risk aversion
+theta           4.0   coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
 beta            0.9265   discount factor
 alpha           0.32     capital share
@@ -60,9 +60,9 @@ n_delta         2        depreciations shocks
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3        coefficients in law of motion, for every state z
-nt              3000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
