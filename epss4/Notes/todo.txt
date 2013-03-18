@@ -2,10 +2,14 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-- set nj to expected life expectancy if no survival rates
+- add option in calibration files: maxstep for the calibration routine: it is .2 for IES=0.5 and .05 for IES=1.5
+
+- add option in calibration file to set lower and upper bound of aggregate grids directly?
 
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
         but do I actually need that or is it specified in logs?
+
+- implement check if stockmarket also clears
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
@@ -134,6 +138,7 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- set nj to expected life expectancy if no survival rates
 
 - option to perform whole welfare decomposition and save results
 

@@ -7,9 +7,10 @@ NTHREADS=16  # number of OpenMP threads
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
 
-mkdir --parents ~/Tempdh/Brutus/$thisrun/model_input_old
+mkdir --parents ~/Tempdh/Brutus/$thisrun
 cd $MYDIR
-cp -r model_input/* ~/Tempdh/Brutus/$thisrun/model_input_old
+tar -zcf code.tar.gz *.f90 br* ch* src* model_input/last_results/*.*
+mv code.tar.gz ~/Tempdh/Brutus/$thisrun
 rm $BUILD/*.o $BUILD/*.mod $BUILD/src_utilities/*.o $BUILD/src_utilities/*.mod
 mv br-* br-$thisrun
 sed -i "s/epss\w*/$projectname/g" br-$thisrun
