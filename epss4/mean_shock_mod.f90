@@ -64,10 +64,10 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
         bequests_ms = 0.0
     endif
 
-	if (partial_equilibrium) then
+	if (partial_equilibrium .or. grids%fixed) then
 	    fvals = ms_equilibrium(xvars)
 	else ! Find capital and mu for the mean shock general equilibrium
-		call s_broyden(ms_equilibrium,xvars,fvals,err%not_converged, get_fd_jac_o=.true.,tolf_o=1e-2_dp)  ! ,maxstp_o=.8_dp,tolf_o=1e-10_dp
+		call s_broyden(ms_equilibrium,xvars,fvals,err%not_converged, get_fd_jac_o=.true.,tolf_o=1e-2_dp, maxlnsrch_o=5)  ! ,maxstp_o=.8_dp,tolf_o=1e-10_dp
 		if (err%not_converged) call err%write2file(fvals, output_path)
     endif
 
