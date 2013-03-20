@@ -43,7 +43,7 @@ run_n_times      1       Run program n times with this calibration (if n>1 apply
 n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'nosharpe'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
-surv_rates      .false.   false = no survival rates
+surv_rates      .true.   false = no survival rates
 def_contrib     .true.   true=tau exogenous, false=benefits exogenous (not yet fully implemented)
 partial_equilibrium      .false.     If true, no GE computed, GE values read from file
 collateral_constraint    .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
@@ -62,7 +62,7 @@ nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3        coefficients in law of motion, for every state z
 nt              3000     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
