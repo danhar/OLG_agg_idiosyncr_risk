@@ -95,7 +95,7 @@ subroutine SetDefaultValues()
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
-    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.false.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
+    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
     ! Character
     calib_targets='presentation'; mean_return_type='mean_mpk'
 end subroutine SetDefaultValues

@@ -8,12 +8,13 @@ module coefficients_class
     type tCoeffs
         real(dp), dimension(:,:), allocatable :: k, mu, r_squared  ! coefficients for laws of motion, and residual sum of squares
         logical           :: normalize
-        real(dp), private :: norm_factor_small = 10.0, norm_factor_large = 100.0 ! Could normalize everytime with a different value (e.g. I could normalize all coeffs = 1.0 every time in the krusell-smith alg)
+        real(dp), dimension(:,:), allocatable, private :: k_initial, mu_initial
     contains
         procedure :: allocate
         procedure :: deallocate
         procedure :: read_unformatted
         procedure :: write_unformatted
+        procedure :: save_initial_values
         procedure :: maketype
         procedure :: makevector
     end type tCoeffs
@@ -80,13 +81,21 @@ contains
     end subroutine write_unformatted
 !-------------------------------------------------------------------------------
 
+    pure subroutine save_initial_values(this)
+        class(tCoeffs)         ,intent(inout):: this
+        this%k_initial = this%k
+        this%mu_initial = this%mu
+    end subroutine save_initial_values
+
+!-------------------------------------------------------------------------------
+
     pure subroutine maketype(this, coeff_vec)
         use params_mod ,only: n_coeffs, pooled_regression, pi1_delta, nz
-        class(tCoeffs)         ,intent(out):: this
+        class(tCoeffs)         ,intent(inout):: this
         real(dp), dimension(:) ,intent(in) :: coeff_vec
         integer :: zc
 
-        call this%allocate(n_coeffs,nz)
+        if (.not. allocated(this%k)) call this%allocate(n_coeffs,nz)
         this%r_squared = 0.0
 
         if (pooled_regression) then
@@ -112,12 +121,8 @@ contains
         endif
 
         if (this%normalize) then
-            this%mu(1,:) = this%mu(1,:)/this%norm_factor_small
-            this%mu(2,:) = this%mu(2,:)/this%norm_factor_large
-            if (n_coeffs >= 3) then
-                this%k(3,:) = this%k(3,:)/this%norm_factor_small
-                this%mu(3,:) = this%mu(3,:)/this%norm_factor_large
-            endif
+            this%mu = this%mu*this%mu_initial
+            this%k = this%k*this%k_initial
         endif
 
     end subroutine maketype
@@ -135,12 +140,8 @@ contains
         coeffs = this
 
         if (this%normalize) then
-            coeffs%mu(1,:) = coeffs%mu(1,:)*this%norm_factor_small
-            coeffs%mu(2,:) = coeffs%mu(2,:)*this%norm_factor_large
-            if (n_coeffs >= 3) then
-                coeffs%k(3,:) = coeffs%k(3,:)*this%norm_factor_small
-                coeffs%mu(3,:) = coeffs%mu(3,:)*this%norm_factor_large
-            endif
+            coeffs%mu = this%mu/this%mu_initial
+            coeffs%k = this%k/this%k_initial
         endif
 
         if (pooled_regression) then

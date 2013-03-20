@@ -44,6 +44,7 @@ contains
         integer               :: n, i
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
+        call coeffs%save_initial_values()
 
         n= size(coeffs%makevector())
         allocate(xvals(n), fvals(n))
@@ -80,7 +81,8 @@ contains
 
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
-                maxstp=1.0_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                call coeffs%save_initial_values()
+                maxstp=.7_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
             else
                 maxstp=10.0     ! this is large and arbitrary
             endif
