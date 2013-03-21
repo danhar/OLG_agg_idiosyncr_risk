@@ -1,10 +1,10 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
 !calib_ss/paper.txt
-!calib_ss/pc4.txt
+calib_ss/pc4.txt
 !calib_ss/pc4_ies05.txt
 !calib_ss/sharpe_ies05.txt
-calib_ss/sharpe_ies15.txt
+!calib_ss/sharpe_ies15.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.
