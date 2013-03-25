@@ -91,6 +91,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
 tol_coeffs      1e-5        stopping value for coeffs
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
+maxstp_cal      0.2         maximum length of Newton step in calibration routine (differs depending on IES)
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Initial guesses

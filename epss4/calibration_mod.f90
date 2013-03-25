@@ -22,7 +22,7 @@ contains
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
     ! This subroutine doesn't have a return value, since it sets the parameters globally.
 
-        use params_mod   ,only: n_end_params, calib_targets, tol_calib
+        use params_mod   ,only: n_end_params, calib_targets, tol_calib, maxstp_cal
         use numrec_utils ,only: put_diag
         use sub_alg_qn   ,only: s_alg_qn
         use sub_zbrac    ,only: s_zbrac_array
@@ -75,7 +75,6 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
                 xvals = xvals / norm_vector
             endif
 
-            maxstp=.2_dp     ! this is crucial. 0.2_dp for IES=0.5, .02_dp for IES=1.5
             intialize_jacobi=.true.
             allocate(Rmat(n_end_params,n_end_params), QTmat(n_end_params,n_end_params))
             Rmat  = 0.0
@@ -85,7 +84,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             ! Start root finder
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(calibration_step,fvals,xvals,n_end_params,QTmat,Rmat,intialize_jacobi, &
-                 reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp,tol_f=tol_calib)
+                 reevalj=.true.,check=not_converged,rstit0=10,MaxLns=5,max_it=max_iterations,maxstp=maxstp_cal,tol_f=tol_calib)
         endif alg
 
         print *, ''
