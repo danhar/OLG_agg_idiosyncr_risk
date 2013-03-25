@@ -68,11 +68,12 @@ contains
             print *
             print '(t2,a)','- krusell_smith: updating aggregate grid and starting root finder'
 
-            ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good
+            ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good)
             K%name ='K' ; call K%calc_stats(simvars)
             mu%name='mu'; call mu%calc_stats(simvars)
             rf%name='rf'; call rf%calc_stats(simvars)
-            call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
+            ! call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
+            call grids%update(K%min_(), K%max_(), mu%min_(), mu%max_())
             forall (i = 1:size(simvars))
                 simvars(i)%K(1) = K%avg_()
                 simvars(i)%mu(1) = mu%avg_()

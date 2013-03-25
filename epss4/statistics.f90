@@ -20,6 +20,8 @@ module statistics
         procedure :: avg_exerr_ ! should make this without final subscript, and the variables with
         procedure :: avg_
         procedure :: max_exerr_
+        procedure :: max_
+        procedure :: min_
         procedure :: std_
         procedure :: cv_
         procedure :: get_namelength
@@ -224,6 +226,18 @@ contains
         real(dp) :: result
             result = this%max_exerr
     end function max_exerr_
+
+    pure function max_(this) result(result)
+        class(tStats) ,intent(in)    :: this
+        real(dp) :: result
+            result = this%absmax
+    end function max_
+
+    pure function min_(this) result(result)
+        class(tStats) ,intent(in)    :: this
+        real(dp) :: result
+            result = this%absmin
+    end function min_
 
     pure function std_(this) result(result)
         class(tStats) ,intent(in)    :: this

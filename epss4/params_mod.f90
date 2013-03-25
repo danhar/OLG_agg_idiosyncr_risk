@@ -90,7 +90,7 @@ subroutine SetDefaultValues()
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
-    nj=70; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
+    nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=0
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
@@ -1320,12 +1320,14 @@ subroutine params_set_real(param_name, new_value)
                del_std = new_value
            endif
         case ('pi1_delta')
-           if (new_value < 0.0) then
-               print* , 'params_set: pi1_delta < 0.0, setting to 0.0'
-               pi1_delta = 0.0
-           elseif (new_value > 1.0) then
-               print* , 'params_set: pi1_delta > 1.0, setting to 1.0'
-               pi1_delta = 1.0
+           ! The following if clauses do not use 0.0 and 1.0 resp, because that seemed to lead to problems in the calibration,
+           ! when the following calibration step tried to estimate the coefficients of the LOMs
+           if (new_value < 0.01_dp) then
+               print* , 'params_set: pi1_delta < 0.01, setting to 0.01'
+               pi1_delta = 0.01_dp
+           elseif (new_value > 0.99_dp) then
+               print* , 'params_set: pi1_delta > 0.99, setting to 0.99'
+               pi1_delta = 0.99_dp
            else
                pi1_delta = new_value
            endif
