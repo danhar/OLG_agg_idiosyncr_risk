@@ -10,7 +10,7 @@ module params_mod
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
 	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, rho, n, tau, scale_AR, scale_IR, &
-	                      factor_k, factor_mu, cover_k, cover_mu, apmax_factor, cmin, kappamax, &
+	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           n_coeffs, nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params
@@ -87,7 +87,7 @@ subroutine SetDefaultValues()
     ! Reals
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
-    factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
+    factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
     nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; n_coeffs=3; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
@@ -238,6 +238,14 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) cover_k
             case ('cover_mu')
                 read (parval,*) cover_mu
+            case ('k_min')
+                read (parval,*) k_min
+            case ('k_max')
+                read (parval,*) k_max
+            case ('mu_min')
+                read (parval,*) mu_min
+            case ('mu_max')
+                read (parval,*) mu_max
             case ('apmax_factor')
                 read (parval,*) apmax_factor
             case ('cmin')
@@ -990,6 +998,15 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
+    if (k_min >= k_max) then
+        print*, 'ERROR: k_min >= k_max'
+        call critical_stop
+    endif
+    if (mu_min >= mu_max) then
+        print*, 'ERROR: mu_min >= mu_max'
+        call critical_stop
+    endif
+
     if (psi == 1.0 .or. psi == 0.0) then
         print*, 'ERROR: gamma not defined for psi = ', psi
         call critical_stop
@@ -1198,6 +1215,7 @@ subroutine SaveParams(projectname, calib_name)
     write(21,218) ' nx_factor    = ', nx_factor
     write(21,217) ' cover_k      = ', cover_k
     write(21,217) ' cover_mu     = ', cover_mu
+    write(21,'(a16, 4(f0.6,x))') ' k,mu min,max = ', k_min, k_max, mu_min, mu_max
 217 format(a16, 2(f0.6,x))
     write(21,219) ' cmin         = ', cmin
 219 format(a16, es8.2)

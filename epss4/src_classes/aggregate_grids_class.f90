@@ -9,10 +9,11 @@ module aggregate_grids_class
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
         real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.0001_dp, max_mu = 0.12_dp, & ! min_mu = 0.01_dp
                              cover_k_l = 7.0, cover_k_u = 7.0, cover_mu_l = 4.0, cover_mu_u = 4.0, curv=1.75_dp
-        logical :: fixed = .false.
+        logical :: fixed = .true.
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
+        procedure :: set_params
         procedure :: read_unformatted
         procedure :: write_unformatted
         procedure :: construct =>construct_aggr_grid
@@ -33,6 +34,15 @@ contains
         if (allocated(this%k)) deallocate(this%k)
         if (allocated(this%mu)) deallocate(this%mu)
     end subroutine deallocate_grids
+
+    elemental subroutine set_params(this,k_min,k_max,mu_min,mu_max)
+        class(tAggGrids), intent(inout)  :: this
+        real(dp), intent(in) :: k_min,k_max,mu_min,mu_max
+        this%min_k = k_min
+        this%max_k = k_max
+        this%min_mu= mu_min
+        this%max_mu= mu_max
+    end subroutine set_params
 
     subroutine read_unformatted(this,equilibrium_type)
         class(tAggGrids) ,intent(out) :: this
@@ -85,13 +95,11 @@ contains
 	! Create the grids for the aggregate variables k and mu
 		use makegrid_mod
 
-        class(tAggGrids) ,intent(out):: this
+        class(tAggGrids) ,intent(inout):: this
         type(tAggGrids) ,intent(in) :: mean_guess
 	    real(dp)        ,intent(in) :: factor_k, factor_mu, cover_k, cover_mu
 	    integer         ,intent(in) :: nk, nmu
 	    real(dp)					:: lb, ub		! lower and upper bound
-
-        call this%allocate(nk,nmu)
 
         if (this%fixed) then
             this%k = MakeGrid(this%min_k ,this%max_k ,nk , this%curv)

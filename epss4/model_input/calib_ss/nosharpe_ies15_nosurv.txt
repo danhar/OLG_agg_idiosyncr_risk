@@ -81,6 +81,10 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
+k_min           1.00          
+k_max           8.00
+mu_min          0.001
+mu_max          0.01
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation

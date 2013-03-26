@@ -14,7 +14,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
-	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, pi_z, seed, scale_AR
+	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
@@ -116,6 +116,8 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
         coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
+        call grids%allocate(nk,nmu)
+        call grids%set_params(k_min,k_max,mu_min,mu_max)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
     endif
     output_path = construct_path(dir,calib_name)
