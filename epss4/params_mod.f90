@@ -1087,10 +1087,6 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
-    if (n_end_params > 0 .and. partial_equilibrium) then
-        print*, 'WARNING: Calibrating in partial equilibrium'
-    endif
-
     if (n_end_params < 0) then
         print*, 'ERROR: n_end_params < 0'
         call critical_stop

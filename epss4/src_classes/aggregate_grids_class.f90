@@ -9,7 +9,7 @@ module aggregate_grids_class
         real(dp), allocatable, dimension(:) :: k, mu ! Aggregate grids
         real(dp), private :: min_k=0.5_dp, max_k=16.0, min_mu = 0.0001_dp, max_mu = 0.12_dp, & ! min_mu = 0.01_dp
                              cover_k_l = 7.0, cover_k_u = 7.0, cover_mu_l = 4.0, cover_mu_u = 4.0, curv=1.75_dp
-        logical :: fixed = .true.
+        logical :: fixed = .false.
     contains
         procedure :: allocate => allocate_grids
         procedure :: deallocate => deallocate_grids
