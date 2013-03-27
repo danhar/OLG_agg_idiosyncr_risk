@@ -7,16 +7,16 @@
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.9783   discount factor
+beta            0.9859   discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.0990   mean of depreciation shocks
-del_std         0.0762   std of depreciation shocks
+del_mean        0.1019   mean of depreciation shocks
+del_std         0.0802   std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.8816   first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.8854   first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -60,9 +60,9 @@ n_delta         2        depreciations shocks
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
 n_coeffs        3        coefficients in law of motion, for every state z
-nt              3000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
@@ -81,6 +81,10 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
+k_min           1.00        Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           13.00
+mu_min          0.001
+mu_max          0.025
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
@@ -88,9 +92,9 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
-tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
-tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
+tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/

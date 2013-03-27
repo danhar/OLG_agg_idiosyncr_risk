@@ -1,11 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-- add option in calibration files: maxstep for the calibration routine: it is .2 for IES=0.5 and .02 for IES=1.5
-
-- add option in calibration file to set lower and upper bound of aggregate grids directly?
-
+- save results so that Matlab can always read (see errors in shell_output.txt)
+ 
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
         but do I actually need that or is it specified in logs?
 
@@ -21,11 +18,12 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- have an option to skip the mean shock equilibrium (use opt_initial_ms_guess for this)
 - splines to interpolate stocks and bonds? and consumption in euler equations?
 - implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
+- give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
 - clean up initialize_coeffs, remove agg_grid_o
+- have an option to skip the mean shock equilibrium (use opt_initial_ms_guess for this)
 - move value into policies
 - make interpolateXgrid a (type-bound?) function
 - make nx, n_eta, nz ... private in params_mod? nx should be relatively easy! 
@@ -138,6 +136,10 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- add option in calibration files: maxstep for the calibration routine: it is .2 for IES=0.5 and .02 for IES=1.5
+
+- add option in calibration file to set lower and upper bound of aggregate grids directly?
+
 - set nj to expected life expectancy if no survival rates
 
 - option to perform whole welfare decomposition and save results
