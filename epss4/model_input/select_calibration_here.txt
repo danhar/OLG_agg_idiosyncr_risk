@@ -6,9 +6,9 @@
 !calib_ss/sharpe_ies05.txt
 !calib_ss/sharpe_ies15.txt
 !calib_ss/nosharpe_ies05.txt
-!calib_ss/nosharpe_ies05_nosurv.txt
+calib_ss/nosharpe_ies05_nosurv.txt
 !calib_ss/nosharpe_ies15.txt
-calib_ss/nosharpe_ies15_nosurv.txt
+!calib_ss/nosharpe_ies15_nosurv.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.

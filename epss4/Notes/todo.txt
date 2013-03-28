@@ -3,15 +3,15 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
-- implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
-        but do I actually need that or is it specified in logs?
-
-- implement check if stockmarket also clears
-
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
        At the moment very hackish to distinguish forecasting mu' from k'. 
 - in save_results_mod, write regressors (k, k**2, etc) on top of each separately (for k' and mu')
+
+- implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
+        but do I actually need that or is it specified in logs?
+
+- implement check if stockmarket also clears
 
 - add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
 
