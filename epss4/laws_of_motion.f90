@@ -1,11 +1,11 @@
 module laws_of_motion
     use kinds      ,only: dp
     use classes_mod,only: tCoeffs
-    use params_mod ,only: pooled_regression, loms_in_logs
+    use params_mod ,only: pooled_regression, loms_in_logs, lom_k_version, lom_mu_version
 
     implicit none
     private
-    public Initialize, Regression, Forecast
+    public Initialize, Regression, Forecast_k, Forecast_mu
 
     interface Initialize
         module procedure initialize_coeffs
@@ -19,46 +19,79 @@ contains
 ! - function initialize_coeffs(dir,n_coeffs, agg_grid_o) result(coeffs)
 !-------------------------------------------------------------------------------
 
-pure real(dp) function Forecast(coeffs, k_in, mu_o)
-    real(dp) ,intent(in)           :: coeffs(:), k_in
-    real(dp) ,intent(in), optional :: mu_o
-    real(dp)                       :: mu, k
-
-    if (present(mu_o)) then
-        mu= mu_o
-    else
-        mu = 0.0    ! ATTENTION, HACKISH
-    endif
+pure real(dp) function Forecast_k(coeffs, k_in, mu)
+    real(dp) ,intent(in)           :: coeffs(:), k_in, mu
+    real(dp)                       :: k
 
     if (loms_in_logs) then
         k = log(k_in)
     else
         k = k_in
     endif
+! Taking logs of mu didn't seemed counterproductive in tests
 
-    select case (size(coeffs))
+    select case (lom_k_version)
+    case(1)
+        Forecast_k = coeffs(1) + coeffs(2)*k
     case(2)
-        Forecast = coeffs(1) + coeffs(2)*k
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*k**2
     case(3)
-!        if (present(mu_in_o)) then
-!            Forecast = coeffs(1) + coeffs(2)*k + coeffs(3)*mu
-!        else
-            Forecast = coeffs(1) + coeffs(2)*k + coeffs(3)*k**2
-!        endif
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu
     case(4)
-        Forecast = coeffs(1) + coeffs(2)*k + coeffs(3)*mu + coeffs(4)*k*mu
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu + coeffs(4)*k*mu
     case(5)
-        Forecast = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
-                             + coeffs(4)*k**2 + coeffs(5)*mu**2
+        Forecast_k = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
+                               + coeffs(4)*k**2 + coeffs(5)*mu**2
     case(6)
-        Forecast = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
-                             + coeffs(4)*k**2 + coeffs(5)*mu**2 + coeffs(6)*k*mu
+        Forecast_k = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
+                               + coeffs(4)*k**2 + coeffs(5)*mu**2 + coeffs(6)*k*mu
+    case default
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*k**2
     end select
 
-    if (loms_in_logs .and. .not. present(mu_o)) Forecast = exp(Forecast)    ! VERY HACKISH to avoid exp of mu
-    if (present(mu_o) .and. all(coeffs == 0.0) ) Forecast = mu ! This is hackish, should do better. It handles the cases ms and STY
+    if (loms_in_logs) Forecast_k = exp(Forecast_k)
 
-end function Forecast
+end function Forecast_k
+!-------------------------------------------------------------------------------
+
+pure real(dp) function Forecast_mu(coeffs, kp_in, mu)
+! kp_in comes from Forecast_k(). One could also pass the derived type coeffs and call Forecast_k here when needed.
+    real(dp) ,intent(in)           :: coeffs(:), kp_in, mu
+    real(dp)                       :: kp
+
+    if (loms_in_logs) then
+        kp = log(kp_in)
+    else
+        kp = kp_in
+    endif
+! Taking logs of mu didn't seemed counterproductive in tests
+
+    if (coeffs(1) == 0.0 .and. coeffs(2) == 1.0) then
+        Forecast_mu = mu ! Handles mean shock case and STY calibration
+        return
+    endif
+
+    select case (lom_mu_version)
+    ! At the moment, cases structured like in Forecast_k, but could change it.
+    case(1)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp
+    case(2)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*kp**2
+    case(3)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu
+    case(4)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu + coeffs(4)*kp*mu
+    case(5)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp    + coeffs(3)*mu    &
+                                + coeffs(4)*kp**2 + coeffs(5)*mu**2
+    case(6)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp    + coeffs(3)*mu    &
+                                + coeffs(4)*kp**2 + coeffs(5)*mu**2 + coeffs(6)*kp*mu
+    case default
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*kp**2
+    end select
+
+end function Forecast_mu
 !-------------------------------------------------------------------------------
 
 pure subroutine Regression(simvars,coeffs)
@@ -122,7 +155,7 @@ pure subroutine Regression(simvars,coeffs)
 
         if (loms_in_logs) then
             kp            = log(kp)
-!            mup           = log(mup)
+        ! Taking log of mu seemed counterproductive
         endif
 
         mean = sum(kp) /real(sum(n_zc),dp)
@@ -218,6 +251,7 @@ function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) r
     coeffs%mu        = 0.0
 ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
         coeffs%k(2,:)  = 1.0     ! same for loms_in_logs
+        coeffs%mu(2,:)  = 1.0
 
     elseif (dir == 'ge') then
         if (present(estimate_from_simvars_o)) then
@@ -346,7 +380,7 @@ ir2:                    if ((1.0 + scale_IR) > 0.1_dp) then
                 endif
 
             elseif (pi1_delta == 1.0) then ! STY
-                if (loms_in_logs) then ! NEED TO IMPLEMENT
+                if (loms_in_logs) then ! not implemented
                     coeffs%k(1,:)  = 1.770695 !log(agg_grid_o%k(1))*(1-coeffs%k(2,:))
                     coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid_o%mu(1))*(1-coeffs%mu(3,:))
                 else
@@ -374,7 +408,7 @@ ir2:                    if ((1.0 + scale_IR) > 0.1_dp) then
                                          2.630511E-02, -8.020631E-03,  1.855730E-03, &
                                          3.444827E-02, -1.608870E-02,  3.809692E-03],&
                                shape(coeffs%mu))
-                else    ! NEED TO IMPLEMENT
+                else    ! not implemented
                     coeffs%k(1,:)  = 1.770695 !log(agg_grid_o%k(1))*(1-coeffs%k(2,:))
                     coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid_o%mu(1))*(1-coeffs%mu(3,:))
                 endif

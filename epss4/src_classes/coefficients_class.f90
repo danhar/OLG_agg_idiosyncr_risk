@@ -110,8 +110,7 @@ contains
             this%k(:,3) = this%k(:,2)
             this%k(:,4) = coeff_vec(n_coeffs+1:2*n_coeffs)
             this%mu(:,1)= coeff_vec(2*n_coeffs+1:3*n_coeffs)
-            this%mu(:,2) = 0.0
-            this%mu(:,3) = this%mu(:,2)
+            this%mu(:,2:3) = this%k(:,2:3)
             this%mu(:,4)= coeff_vec(3*n_coeffs+1:4*n_coeffs)
         else
             do zc=1, nz

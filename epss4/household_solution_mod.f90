@@ -109,7 +109,7 @@ end subroutine olg_backwards_recursion
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! Forecast kp, mup, and get corresonding prices  (might want to move into laws_of_motion)
     use params_mod     ,only: nz, pi_z, jr, ej, etagrid
-    use laws_of_motion ,only: Forecast
+    use laws_of_motion ,only: Forecast_k, Forecast_mu
     use income
 
     type(tCoeffs)   ,intent(in)  :: coeffs ! coefficients for laws of motion
@@ -126,7 +126,7 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     nk = size(grids%k)
     nmu= size(grids%mu)
 
-    kp  = Forecast(coeffs%k(:,zc), grids%k(kc))
+    kp  = Forecast_k(coeffs%k(:,zc), grids%k(kc), grids%mu(muc))
     if (kp  > grids%k(nk)) then
         if (kp - grids%k(nk) > crit) err_k = .true.
         kp  = grids%k(nk)
@@ -136,7 +136,7 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     endif
 
     do zpc = 1,nz
-        mup(zpc) = Forecast(coeffs%mu(:,zpc), kp, grids%mu(muc)) !grids%mu(muc) is hackish to distinguish for ms and STY
+        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, grids%mu(muc)) !grids%mu(muc) is hackish to distinguish for ms and STY
     enddo
     if (any(mup - grids%mu(nmu) > crit) .or. any(grids%mu(1) - mup > crit)) err_mu = .true.
     where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! obsolete comment: This takes care of the wrong forecasts in the mean shock equilibrium
