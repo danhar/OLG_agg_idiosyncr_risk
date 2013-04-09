@@ -11,6 +11,10 @@ module laws_of_motion
         module procedure initialize_coeffs
     end interface Initialize
 
+    type tMask
+        logical, private, dimension(:), allocatable :: z, zp
+    end type tMask
+
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order: (would be nice in submodules)
@@ -101,14 +105,16 @@ pure subroutine Regression(simvars,coeffs)
 
     type(tSimvars)           ,intent(in)   :: simvars(:)
     type(tCoeffs)            ,intent(inout):: coeffs   ! inout coz some coeffs might not be updated
-    real(dp) ,dimension(:,:) ,allocatable  :: cov_k, cov_mu  ! covariates, rhs
-    real(dp) ,dimension(:) ,allocatable    :: kp, mup              ! lhs
+    type(tMask)                            :: mask(size(simvars))
+    real(dp) ,dimension(:,:) ,allocatable  :: cov_k, cov_mu  ! covariates, i.e. rhs
+    real(dp) ,dimension(:) ,allocatable    :: k_z, kp_z, kp_zp, mu_z, mu_zp, mup_zp              ! lhs
     real(dp) ,dimension(2) :: residual_sum_of_squares, total_sum_of_squares
     real(dp)               :: mean
-    integer                :: n_covars, nz, nt, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i
+    integer                :: n_covars_k, n_covars_mu, nz, nt, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i, shape(2)
     logical, parameter :: use_gelsy = .false. ! instead of using gels (which had an error in Intel Composer XE 2013 original release)
 
-    n_covars = size(coeffs%k,1)
+    n_covars_k  = size(coeffs%k,1)
+    n_covars_mu = size(coeffs%mu,1)
     nz       = size(coeffs%k,2)
     nt       = size(simvars(1)%z)
 
@@ -116,85 +122,93 @@ pure subroutine Regression(simvars,coeffs)
         if (pooled_regression) then
             n_zc = nt-t_scrap
             n_zpc = n_zc
-
-            allocate(cov_k (sum(n_zc), n_covars), kp (sum(n_zc) ))
-            allocate(cov_mu(sum(n_zpc),n_covars), mup(sum(n_zpc)))
-            cov_k(:,1)  = 1.0
-            cov_k(:,2)  = [(simvars(i)%K (t_scrap:nt-1), i=1,size(simvars))]
-            if (loms_in_logs) cov_k(:,2) = log(cov_k(:,2))
-            if (n_covars > 2) cov_k(:,3) = cov_k(:,2)**2
-            kp          = [(simvars(i)%K (t_scrap+1:nt), i=1,size(simvars))]
-
-            cov_mu(:,1) = 1.0
-            cov_mu(:,2) = [(simvars(i)%K (t_scrap+1:nt), i=1,size(simvars))]
-            if (loms_in_logs) cov_mu(:,2) = log(cov_mu(:,2))
-            if (n_covars > 2) cov_mu(:,3) = cov_mu(:,2)**2 !simvars%mu(t_scrap:nt-1)
-            mup         = [(simvars(i)%mu(t_scrap+1:nt), i=1,size(simvars))]
+            do i=1,size(simvars)
+                mask(i)%z  = .true. ! select all
+                mask(i)%zp = .true. ! select all
+            enddo
         else
             do i=1,size(simvars)
-                n_zc(i)   = count(simvars(i)%z(t_scrap:nt-1)==zc)
-                n_zpc(i)  = count(simvars(i)%z(t_scrap+1:nt)==zc)
+                n_zc(i)    = count(simvars(i)%z(t_scrap:nt-1)==zc)
+                n_zpc(i)   = count(simvars(i)%z(t_scrap+1:nt)==zc)
+                mask(i)%z  = [simvars(i)%z(t_scrap:nt-1)==zc]
+                mask(i)%zp = [simvars(i)%z(t_scrap+1:nt)==zc]
             enddo
-            if (sum(n_zc) < 2) cycle     ! coeffs stay the same
-
-            allocate(cov_k (sum(n_zc), n_covars), kp (sum(n_zc) ))
-            allocate(cov_mu(sum(n_zpc),n_covars), mup(sum(n_zpc)))
-
-            cov_k(:,1)  = 1.0
-            cov_k(:,2)  = [(pack(simvars(i)%K (t_scrap:nt-1), simvars(i)%z(t_scrap:nt-1)==zc), i=1,size(simvars))]
-            if (loms_in_logs) cov_k (:,2) = log(cov_k (:,2))
-            if (n_covars > 2) cov_k(:,3)  = cov_k(:,2)**2
-            kp          = [(pack(simvars(i)%K (t_scrap+1:nt), simvars(i)%z(t_scrap:nt-1)==zc), i=1,size(simvars))]
-
-            cov_mu(:,1) = 1.0
-            cov_mu(:,2) = [(pack(simvars(i)%K (t_scrap+1:nt), simvars(i)%z(t_scrap+1:nt)==zc), i=1,size(simvars))]
-            if (loms_in_logs) cov_mu(:,2) = log(cov_mu(:,2))
-            if (n_covars > 2) cov_mu(:,3) = cov_mu(:,2)**2 !pack(simvars%mu(t_scrap:nt-1), simvars%z(t_scrap+1:nt)==zc)
-            mup         = [(pack(simvars(i)%mu(t_scrap+1:nt), simvars(i)%z(t_scrap+1:nt)==zc), i=1,size(simvars))]
+            if (sum(n_zc) < 2) cycle     ! coeffs stay the same. Takes care of STY calibration, or degenerate cases.
         endif
 
+!        allocate(kp_z(sum(n_zc)), mup_zp(sum(n_zpc)))
+
+        k_z    = [(pack(simvars(i)%K (t_scrap:nt-1), mask(i)%z ), i=1,size(simvars))]
+        kp_z   = [(pack(simvars(i)%K (t_scrap+1:nt), mask(i)%z ), i=1,size(simvars))]
+        kp_zp  = [(pack(simvars(i)%K (t_scrap+1:nt), mask(i)%zp), i=1,size(simvars))]
+        mu_z   = [(pack(simvars(i)%mu(t_scrap:nt-1), mask(i)%z ), i=1,size(simvars))]
+        mu_zp  = [(pack(simvars(i)%mu(t_scrap:nt-1), mask(i)%zp), i=1,size(simvars))] ! Because lom for mu conditions on shock tomorrow!
+        mup_zp = [(pack(simvars(i)%mu(t_scrap+1:nt), mask(i)%zp), i=1,size(simvars))]
+
         if (loms_in_logs) then
-            kp            = log(kp)
+            k_z   = log(k_z)
+            kp_z  = log(kp_z)
+            kp_zp = log(kp_zp)
         ! Taking log of mu seemed counterproductive
         endif
 
-        mean = sum(kp) /real(sum(n_zc),dp)
-        total_sum_of_squares(1) = dot_product((kp -mean), (kp -mean))
-        mean = sum(mup)/real(sum(n_zpc),dp)
-        total_sum_of_squares(2) = dot_product((mup-mean), (mup-mean))
+        mean = sum(kp_z) /real(sum(n_zc),dp)
+        total_sum_of_squares(1) = dot_product((kp_z -mean), (kp_z -mean))
+        mean = sum(mup_zp)/real(sum(n_zpc),dp)
+        total_sum_of_squares(2) = dot_product((mup_zp-mean), (mup_zp-mean))
 
-        if (n_covars == 4) then
-            cov_k (:,4) = cov_k (:,2) *cov_k (:,3)
-            cov_mu(:,4) = cov_mu(:,2) *cov_mu(:,3)
-        elseif (n_covars == 5) then
-            cov_k(:,4)  = cov_k (:,2)**2
-            cov_k(:,5)  = cov_k (:,3)**2
-            cov_mu(:,4) = cov_mu(:,2)**2
-            cov_mu(:,5) = cov_mu(:,3)**2
-        elseif (n_covars == 6) then
-            cov_k(:,4)  = cov_k (:,2)**2
-            cov_k(:,5)  = cov_k (:,3)**2
-            cov_k(:,6)  = cov_k (:,2)*cov_k (:,3)
-            cov_mu(:,4) = cov_mu(:,2)**2
-            cov_mu(:,5) = cov_mu(:,3)**2
-            cov_mu(:,6) = cov_mu(:,2)*cov_mu(:,3)
-        endif
+        allocate(cov_k(sum(n_zc),n_covars_k), cov_mu(sum(n_zpc),n_covars_mu))
+
+        shape = [size(cov_k,1),n_covars_k-1]
+        cov_k(:,1) = 1.0
+        select case(lom_k_version)
+        case(1)
+            cov_k(:,2:) = reshape([  k_z                                   ],shape)
+        case(2)
+            cov_k(:,2:) = reshape([  k_z, k_z**2                           ],shape)
+        case(3)
+            cov_k(:,2:) = reshape([  k_z, mu_z                             ],shape)
+        case(4)
+            cov_k(:,2:) = reshape([  k_z, mu_z, k_z*mu_z                   ],shape)
+        case(5)
+            cov_k(:,2:) = reshape([  k_z, mu_z, k_z**2, mu_z**2            ],shape)
+        case(6)
+            cov_k(:,2:) = reshape([  k_z, mu_z, k_z**2, mu_z**2, k_z*mu_z  ],shape)
+        case default
+            cov_k(:,2:) = reshape([  k_z, k_z**2                           ],shape)
+        end select
+
+        shape = [size(cov_mu,1),n_covars_mu-1]
+        cov_mu(:,1) = 1.0
+        select case(lom_mu_version)
+        case(1)
+            cov_mu(:,2:) = reshape([  kp_zp                                          ],shape)
+        case(2)
+            cov_mu(:,2:) = reshape([  kp_zp, kp_zp**2                                ],shape)
+        case(3)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp                                   ],shape)
+        case(4)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp*mu_zp                      ],shape)
+        case(5)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp**2, mu_zp**2               ],shape)
+        case(6)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp**2, mu_zp**2, kp_zp*mu_zp  ],shape)
+        case default
+            cov_mu(:,2:) = reshape([  kp_zp, kp_zp**2                                ],shape)
+        end select
 
         if (use_gelsy) then ! This helps to check results. Intel Composer XE 13.0 had a bug in gels
-            call gelsy(cov_k,kp, info=info) ! should print or return info
+            call gelsy(cov_k,kp_z    ,info=info) ! should print or return info
+            call gelsy(cov_mu,mup_zp ,info=info)
         else
-            call gels(cov_k,kp, info=info) ! should print or return info
+            call gels(cov_k,kp_z     ,info=info) ! should print or return info
+            call gels(cov_mu,mup_zp  ,info=info)
         endif
-        coeffs%k(:,zc)  = kp(1:n_covars)
-        if (use_gelsy) then
-            call gelsy(cov_mu,mup, info=info)
-        else
-            call gels(cov_mu,mup, info=info)
-        endif
-        coeffs%mu(:,zc) = mup(1:n_covars)
+        coeffs%k(:,zc)  = kp_z  (1:n_covars_k )
+        coeffs%mu(:,zc) = mup_zp(1:n_covars_mu)
 
-        residual_sum_of_squares(1) = dot_product(kp (n_covars+1:),kp (n_covars+1:))
-        residual_sum_of_squares(2) = dot_product(mup(n_covars+1:),mup(n_covars+1:))
+        residual_sum_of_squares(1) = dot_product(kp_z  (n_covars_k +1:),kp_z  (n_covars_k +1:))
+        residual_sum_of_squares(2) = dot_product(mup_zp(n_covars_mu+1:),mup_zp(n_covars_mu+1:))
         if (total_sum_of_squares(1) == 0.0) then
             coeffs%r_squared(1,zc) = 1.0
         else
@@ -205,7 +219,7 @@ pure subroutine Regression(simvars,coeffs)
         else
             coeffs%r_squared(2,zc) = 1.0-residual_sum_of_squares(2)/total_sum_of_squares(2)
         endif
-        deallocate(cov_mu, cov_k,kp, mup)
+        deallocate(cov_mu, cov_k)
     enddo
 ! ---------------------Usage of LAPACK / Intel MKL routine gels --------------------
 ! gels(a, b [,trans] [,info])

@@ -136,7 +136,7 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     endif
 
     do zpc = 1,nz
-        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, grids%mu(muc)) !grids%mu(muc) is hackish to distinguish for ms and STY
+        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, grids%mu(muc))
     enddo
     if (any(mup - grids%mu(nmu) > crit) .or. any(grids%mu(1) - mup > crit)) err_mu = .true.
     where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! obsolete comment: This takes care of the wrong forecasts in the mean shock equilibrium
