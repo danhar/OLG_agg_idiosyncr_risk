@@ -67,6 +67,7 @@ Object orientation:
     Then I can have an allocatable type params in main, see how many runs we have (depends on experiment / number of calibs), then allocate and have a params
     for each, which I then pass by argument to start_solution, which has a scalar type params as input.
 - Type results, which contains all the results we are interested in, can print them in formatted and unformatted way. This is helpful for e.g. the no AR economy to read in directly the values.
+- Merge coefficients_class into laws_of_motion. Maybe class laws_of_motion which has a component coefficients_class.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (C) To do later/ ideas

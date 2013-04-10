@@ -12,7 +12,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     use kinds
     use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs, tStats, tStats_logical
     use statistics      ,only: cov
-    use params_mod      ,only: n_eta, nj,nz, n_coeffs, pop_frac, construct_path, loms_in_logs
+    use params_mod      ,only: n_eta, nj,nz, n_coeffs, pop_frac, construct_path
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir
 
@@ -164,34 +164,7 @@ contains
     write(21,*)
     write(21,*) 'Laws of motion'
     write(21,*) repeat('-',63)
-    if (n_coeffs == 2) then
-        if (loms_in_logs) then
-            write(21,123) '            ',   'constant',   '  log(k)',   '   R^2  '
-        else
-            write(21,123) '            ',   'constant',   '      k ',   '   R^2  '
-        endif
-    elseif (n_coeffs == 3) then
-        if (loms_in_logs) then
-            write(21,123) '            ',   'constant',   '  log(k)',   '      mu',   '   R^2  '
-        else
-            write(21,123) '            ',   'constant',   '      k ',   '      mu',   '   R^2  '
-        endif
-    endif
-
-167 format(a<nl+1>,<n_coeffs>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
-    if (loms_in_logs) then
-        write(21,167)    " log(k')   "    , coeffs%k(:,1), coeffs%r_squared(1,1)
-    else
-        write(21,167)    " k'        "    , coeffs%k(:,1), coeffs%r_squared(1,1)
-    endif
-    do i=2,nz
-        write(21,167) repeat(' ',nl+1), coeffs%k(:,i), coeffs%r_squared(1,i)
-    enddo
-    write(21,*)
-    write(21,167)    ' mu        '    , coeffs%mu(:,1), coeffs%r_squared(2,1)
-    do i=2,nz
-        write(21,167) repeat(' ',nl+1), coeffs%mu(:,i), coeffs%r_squared(2,i)
-    enddo
+    call coeffs%write(21, show_digits)
 
     write(21,*)
     write(21,*) 'Lifecycle statistics   (Cond. = conditional on survival)' ! in per capita units
