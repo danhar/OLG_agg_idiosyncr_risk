@@ -177,7 +177,7 @@ contains
     subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
         use save_results_mod
         use ifport     ,only: system     ! Intel Fortran portability library
-        use params_mod ,only: pooled_regression, n_coeffs, construct_path
+        use params_mod ,only: pooled_regression, construct_path
 
         integer         ,intent(in) :: it
         real(dp)        ,intent(in) :: distance(:)
@@ -200,7 +200,7 @@ contains
         write(132,'(a10,i3.3,a24,es13.6,a29,es13.6)')   &
         'iteration ', it, ' :  max(abs(distance) = ', maxval(abs(distance)), ',  0.5*(distance*distance) = ', 0.5_dp*dot_product(distance,distance)
         write(132,333) 'in:   ', coeffs_old%k(:,1),'   ---   ', coeffs_old%mu(:,1)
-333     format(a6,<n_coeffs>(es13.6,x),a9,<n_coeffs>(es13.6,x))
+333     format(a6,<size(coeffs_old%k)>(es13.6,x),a9,<size(coeffs_old%mu)>(es13.6,x))
         if (.not. pooled_regression) then
             do zc=2,size(coeffs_old%k,2)
                 write(132,333) '      ', coeffs_old%k(:,zc),'   ---   ', coeffs_old%mu(:,zc)

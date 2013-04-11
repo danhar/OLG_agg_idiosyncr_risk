@@ -14,7 +14,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use kinds
     use classes_mod ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs
     use laws_of_motion  ,only: Initialize
-    use params_mod      ,only: n_coeffs,alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates
+    use params_mod      ,only: alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates
     use income
 	use sub_broyden
     use fun_locate
@@ -37,7 +37,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 
     nz = size(stat_dist_z)
     allocate(w(nz))
-    coeffs          = Initialize('msge',n_coeffs,nz)
+    coeffs          = Initialize('msge')
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
 	mean_delta		= dot_product(stat_dist_z, delta)
 	i				= f_locate(zeta,mean_zeta)	  ! In 'default', f_locate returns ju-1 if x>xgrid(ju-1) !

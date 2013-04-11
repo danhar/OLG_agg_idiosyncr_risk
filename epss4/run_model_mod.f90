@@ -14,7 +14,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     use simvars_class     ,only: read_unformatted, write_unformatted
 	use params_mod        ,only: construct_path, set_apmax, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
-	                             dp, nk,nmu, nz, n_coeffs, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
+	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
@@ -115,7 +115,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
             simvars(i)%rf(1) = ms_rf_temp       ! starting value for simulation
         enddo
         ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
-        coeffs = Initialize(dir, n_coeffs,nz, estimate_from_simvars, ms_grids)
+        coeffs = Initialize(dir, estimate_from_simvars, ms_grids)
         call grids%allocate(nk,nmu)
         call grids%set_params(k_min,k_max,mu_min,mu_max)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
@@ -244,7 +244,6 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine read_unformatted_ks(grids, coeffs, simvars)
-        use params_mod  ,only: n_coeffs, nz
         type(tAggGrids) ,intent(out) :: grids
         type(tCoeffs)   ,intent(out) :: coeffs
         type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)

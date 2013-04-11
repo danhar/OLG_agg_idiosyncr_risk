@@ -20,7 +20,7 @@ contains
 ! Module procedures in order: (would be nice in submodules)
 ! - pure real(dp) function Forecast(coeffs, k_in, mu_in_o)
 ! - pure subroutine Regression(simvars,coeffs)
-! - function initialize_coeffs(dir,n_coeffs, agg_grid_o) result(coeffs)
+! - function initialize_coeffs(dir,agg_grid_o) result(coeffs)
 !-------------------------------------------------------------------------------
 
 pure real(dp) function Forecast_k(coeffs, k_in, mu)
@@ -252,7 +252,7 @@ pure subroutine Regression(simvars,coeffs)
 end subroutine Regression
 !-------------------------------------------------------------------------------
 
-function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) result(coeffs)
+function initialize_coeffs(dir,estimate_from_simvars_o,agg_grid_o) result(coeffs)
     ! Can't make this a type-bound procedure of coeffs because then circular dependency
     use params_mod    ,only: pi1_delta, scale_IR
     use classes_mod   ,only: tSimvars, tAggGrids
@@ -260,20 +260,24 @@ function initialize_coeffs(dir,n_coeffs,nz,estimate_from_simvars_o,agg_grid_o) r
 
     type(tCoeffs)                          :: coeffs
     character(len=*) ,intent(in)           :: dir
-    integer          ,intent(in)           :: n_coeffs, nz
     logical          ,intent(in) ,optional :: estimate_from_simvars_o
     type(tAggGrids)  ,intent(in) ,optional :: agg_grid_o
+    integer :: n_coeffs_k, n_coeffs_mu, nz
     real(dp) ,parameter :: coef_k2_init  = 0.95_dp ! could delete this
     real(dp) ,parameter :: coef_mu3_init = 0.70_dp
     type(tSimvars) ,allocatable :: simvars_old(:)
 
-    call coeffs%allocate(n_coeffs,nz)
+    call coeffs%allocate()
     coeffs%r_squared = 0.0
     coeffs%k         = 0.0
     coeffs%mu        = 0.0
+    n_coeffs_k  = size(coeffs%k ,1)
+    n_coeffs_mu = size(coeffs%mu,1)
+    nz          = size(coeffs%k ,2)
+
 ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
         coeffs%k(2,:)  = 1.0     ! same for loms_in_logs
-        coeffs%mu(2,:)  = 1.0
+        coeffs%mu(2,:) = 1.0
 
     elseif (dir == 'ge') then
         if (present(estimate_from_simvars_o)) then
@@ -288,7 +292,8 @@ ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
         endif
 
         print*, 'laws_of_motion:initialize_coeffs: using hard-coded guess'
-coef:   select case (n_coeffs)
+        if (n_coeffs_k .ne. n_coeffs_mu) stop 'CRITICAL STOP: n_coeffs_k .ne. n_coeffs_mu'
+coef:   select case (n_coeffs_k)
         case(2)
 pi:     if (pi1_delta==1.0) then
 
