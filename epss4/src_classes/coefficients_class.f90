@@ -87,67 +87,71 @@ contains
         class(tCoeffs) ,intent(in) :: this
         integer        ,intent(in) :: unit, show_digits
         integer :: i
-        character(:), allocatable :: fmt1
+        character(:), allocatable :: fmt1, ind_var_1, ind_var_2 ! name of independent variables
         integer, parameter :: nl =11
-        character(len=nl) :: dep_var, ind_var_1, ind_var_2 ! name of dependent and independent variables
+        character(len=nl) :: dep_var ! name of dependent variables
 
         if (loms_in_logs) then
-            dep_var   = " log(k') | "
-            ind_var_1 = " log(k) "
-            ind_var_2 = " log(k')"
+            dep_var   = " log(k')   "
+            ind_var_1 = "log(k)"
+            ind_var_2 = "log(k')"
         else
-            dep_var   = "     k'  | "
-            ind_var_1 = "     k  "
-            ind_var_2 = "     k' "
+            dep_var   = "     k'    "
+            ind_var_1 = "k"
+            ind_var_2 = "k'"
         endif
 
         select case(lom_k_version)
         case(1)
-            write(unit,166) dep_var, 'constant', ind_var_1                                                  ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1                                                  ,'R^2'
         case(2)
-            write(unit,166) dep_var, 'constant', ind_var_1, ind_var_1//'^2'                                 ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1, ind_var_1//'^2'                                 ,'R^2'
         case(3)
-            write(unit,166) dep_var, 'constant', ind_var_1, 'mu'                                            ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2', 'mu'                           ,'R^2'
         case(4)
-            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'*mu'                          ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1, 'mu'                                            ,'R^2'
         case(5)
-            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'^2', 'mu^2'                   ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'*mu'                          ,'R^2'
         case(6)
-            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'^2', 'mu^2', ind_var_1//'*mu' ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'^2', 'mu^2'                   ,'R^2'
+        case(7)
+            write(unit,166) dep_var, 'constant', ind_var_1, 'mu', ind_var_1//'^2', 'mu^2', ind_var_1//'*mu' ,'R^2'
         case default
-            write(unit,166) dep_var, 'constant', ind_var_1, ind_var_1//'^2'                                 ,'   R^2  '
+            write(unit,166) dep_var, 'constant', ind_var_1, ind_var_1//'^2'                                 ,' R^2  '
         end select
-166     format(a<nl>,tr1,a<show_digits+6>,<size(this%k,2)-1>a<show_digits+10>,a<show_digits+8>)
+166     format(a<nl>,tr1,a<show_digits+6>,<size(this%k,1)-1>a<show_digits+10>,a<show_digits+8>)
 
         do i=1,size(this%k,2)
-            write(unit,167) " z = ",i, this%k(:,i), this%r_squared(1,i)
+            write(unit,167) " z  =",i, this%k(:,i), this%r_squared(1,i)
         enddo
-167     format(a5,i2,tr4,<size(this%k,2)>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
+167     format(a5,i2,tr4,<size(this%k,1)>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
         write(unit,*)
 
         dep_var   = "    mu'  |"
         select case(lom_mu_version)
         case(1)
-            write(unit,168) dep_var, 'constant', ind_var_2                                                  ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2                                                  ,'R^2'
         case(2)
-            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2'                                 ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2'                                 ,'R^2'
         case(3)
-            write(unit,168) dep_var, 'constant', ind_var_2, 'mu'                                            ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2', 'mu'                           ,'R^2'
         case(4)
-            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'*mu'                          ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, 'mu'                                            ,'R^2'
         case(5)
-            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'^2', 'mu^2'                   ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'*mu'                          ,'R^2'
         case(6)
-            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'^2', 'mu^2', ind_var_2//'*mu' ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'^2', 'mu^2'                   ,'R^2'
+        case(7)
+            write(unit,168) dep_var, 'constant', ind_var_2, 'mu', ind_var_2//'^2', 'mu^2', ind_var_2//'*mu' ,'R^2'
         case default
-            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2'                                 ,'   R^2  '
+            write(unit,168) dep_var, 'constant', ind_var_2, ind_var_2//'^2'                                 ,'R^2'
         end select
-168     format(a<nl>,tr1,a<show_digits+6>,<size(this%mu,2)-1>a<show_digits+10>,a<show_digits+8>)
+168     format(a<nl>,tr1,a<show_digits+6>,<size(this%mu,1)-1>a<show_digits+10>,a<show_digits+8>)
 
         do i=1,size(this%mu,2)
-            write(unit,169) " z' = ",i, this%mu(:,i), this%r_squared(2,i)
+            write(unit,169) " z' =",i, this%mu(:,i), this%r_squared(2,i)
         enddo
-169     format(a5,i2,tr4,<size(this%mu,2)>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
+169     format(a5,i2,tr4,<size(this%mu,1)>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
         write(unit,*)
 
     end subroutine write_results

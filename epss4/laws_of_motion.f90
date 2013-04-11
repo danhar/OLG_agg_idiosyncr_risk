@@ -40,13 +40,15 @@ pure real(dp) function Forecast_k(coeffs, k_in, mu)
     case(2)
         Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*k**2
     case(3)
-        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*k**2 + coeffs(4)*mu
     case(4)
-        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu + coeffs(4)*k*mu
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu
     case(5)
+        Forecast_k = coeffs(1) + coeffs(2)*k + coeffs(3)*mu + coeffs(4)*k*mu
+    case(6)
         Forecast_k = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
                                + coeffs(4)*k**2 + coeffs(5)*mu**2
-    case(6)
+    case(7)
         Forecast_k = coeffs(1) + coeffs(2)*k    + coeffs(3)*mu    &
                                + coeffs(4)*k**2 + coeffs(5)*mu**2 + coeffs(6)*k*mu
     case default
@@ -82,13 +84,15 @@ pure real(dp) function Forecast_mu(coeffs, kp_in, mu)
     case(2)
         Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*kp**2
     case(3)
-        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*kp**2 + coeffs(4)*mu
     case(4)
-        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu + coeffs(4)*kp*mu
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu
     case(5)
+        Forecast_mu = coeffs(1) + coeffs(2)*kp + coeffs(3)*mu + coeffs(4)*kp*mu
+    case(6)
         Forecast_mu = coeffs(1) + coeffs(2)*kp    + coeffs(3)*mu    &
                                 + coeffs(4)*kp**2 + coeffs(5)*mu**2
-    case(6)
+    case(7)
         Forecast_mu = coeffs(1) + coeffs(2)*kp    + coeffs(3)*mu    &
                                 + coeffs(4)*kp**2 + coeffs(5)*mu**2 + coeffs(6)*kp*mu
     case default
@@ -167,12 +171,14 @@ pure subroutine Regression(simvars,coeffs)
         case(2)
             cov_k(:,2:) = reshape([  k_z, k_z**2                           ],shape)
         case(3)
-            cov_k(:,2:) = reshape([  k_z, mu_z                             ],shape)
+            cov_k(:,2:) = reshape([  k_z, k_z**2, mu_z                     ],shape)
         case(4)
-            cov_k(:,2:) = reshape([  k_z, mu_z, k_z*mu_z                   ],shape)
+            cov_k(:,2:) = reshape([  k_z, mu_z                             ],shape)
         case(5)
-            cov_k(:,2:) = reshape([  k_z, mu_z, k_z**2, mu_z**2            ],shape)
+            cov_k(:,2:) = reshape([  k_z, mu_z, k_z*mu_z                   ],shape)
         case(6)
+            cov_k(:,2:) = reshape([  k_z, mu_z, k_z**2, mu_z**2            ],shape)
+        case(7)
             cov_k(:,2:) = reshape([  k_z, mu_z, k_z**2, mu_z**2, k_z*mu_z  ],shape)
         case default
             cov_k(:,2:) = reshape([  k_z, k_z**2                           ],shape)
@@ -186,12 +192,14 @@ pure subroutine Regression(simvars,coeffs)
         case(2)
             cov_mu(:,2:) = reshape([  kp_zp, kp_zp**2                                ],shape)
         case(3)
-            cov_mu(:,2:) = reshape([  kp_zp, mu_zp                                   ],shape)
+            cov_mu(:,2:) = reshape([  kp_zp, kp_zp**2, mu_zp                         ],shape)
         case(4)
-            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp*mu_zp                      ],shape)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp                                   ],shape)
         case(5)
-            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp**2, mu_zp**2               ],shape)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp*mu_zp                      ],shape)
         case(6)
+            cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp**2, mu_zp**2               ],shape)
+        case(7)
             cov_mu(:,2:) = reshape([  kp_zp, mu_zp, kp_zp**2, mu_zp**2, kp_zp*mu_zp  ],shape)
         case default
             cov_mu(:,2:) = reshape([  kp_zp, kp_zp**2                                ],shape)

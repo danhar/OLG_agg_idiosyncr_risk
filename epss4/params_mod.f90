@@ -827,14 +827,6 @@ use omp_lib           ,only: OMP_get_max_threads
         print*, 'WARNING: ms_guess%mu(1)>0.2'
     endif
 
-    if (n_coeffs>3) then
-        print*, 'ERROR: n_coeffs>3, check laws_of_motion:initialize_coeffs AND :Regression!'
-        call critical_stop
-    elseif (n_coeffs<2) then
-        print*, 'ERROR: n_coeffs<2, check laws_of_motion:initialize_coeffs AND :Regression!'
-        call critical_stop
-    endif
-
     if (nz /= 4) then
         print*, 'ERROR: nz /= 4'
         call critical_stop
@@ -885,15 +877,6 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (abs(sum(pop_frac)-1.0) > crit) then
         print*, 'ERROR: sum(pop_frac) \= 1'
-        call critical_stop
-    endif
-
-    if (n_coeffs > 6) then
-        print*, 'ERROR: n_coeffs > 6'
-        print*, '       covariates not defined in sub_regression'
-        call critical_stop
-    elseif(n_coeffs < 2) then
-        print*, 'ERROR: n_coeffs < 2'
         call critical_stop
     endif
 
