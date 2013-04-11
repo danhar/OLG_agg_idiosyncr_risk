@@ -1213,8 +1213,8 @@ subroutine SaveParams(projectname, calib_name)
     write(21,'(a20,l1)') ' collat_constr   =  ', collateral_constraint
     write(21,'(a20,l1)') ' kappa_in_01     =  ', kappa_in_01
     write(21,'(a20,l1)') ' exogenous_xgrid =  ', exogenous_xgrid
-    write(21,'(a20,i2)') ' lom_k_version   =  ', lom_k_version
-    write(21,'(a20,i2)') ' lom_mu_version   =  ', lom_mu_version
+    write(21,'(a19,i2)') ' lom_k_version   = ' , lom_k_version
+    write(21,'(a19,i2)') ' lom_mu_version  = ' , lom_mu_version
     write(21,'(a20,l1)') ' loms_in_logs    =  ', loms_in_logs
     write(21,'(a20,l1)') ' pooled_regress  =  ', pooled_regression
     write(21,'(a20,l1)') ' surv_rates      =  ', surv_rates
@@ -1357,6 +1357,10 @@ subroutine params_set_integer(param_name, new_value)
             run_counter_start = new_value
         case ('run_n_times')
             run_n_times = new_value
+        case ('lom_k_version')
+            lom_k_version = new_value
+        case ('lom_mu_version')
+            lom_mu_version = new_value
         case default
             print '(a,a)', 'params_mod:params_set: Cannot set parameter ',param_name
         end select

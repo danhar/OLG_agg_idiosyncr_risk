@@ -94,16 +94,26 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine read_unformatted(this)
+        use params_mod, only: params_set
         class(tCoeffs) ,intent(out) :: this
-        integer :: ncoeffs_k, ncoeffs_mu,nz , io_stat, io_stat2
+        integer :: ncoeffs_k, ncoeffs_mu,nz , io_stat, io_stat2, lom_k_version_read, lom_mu_version_read
 
         open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
-        read(55,iostat=io_stat2) ncoeffs_k, ncoeffs_mu, nz
-        if (io_stat2 .ne. 0) then
-            read(55,iostat=io_stat2) ncoeffs_k, nz
-            ncoeffs_mu = ncoeffs_k
-        endif
+        read(55,iostat=io_stat2) ncoeffs_k, ncoeffs_mu, nz, lom_k_version_read, lom_mu_version_read
         close(55)
+
+        if (io_stat2 == 0) then
+            call params_set('lom_k_version', lom_k_version_read)
+            call params_set('lom_mu_version', lom_mu_version_read)
+        else
+            open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+            read(55,iostat=io_stat2) ncoeffs_k, nz
+            close(55)
+            ncoeffs_mu = ncoeffs_k
+            print*, 'WARNING: couldnt read ncoeffs_mu, lom_k_version.'
+            print*, 'Setting ncoeffs_mu = ncoeffs_k and using lom_k_version from calib file.'
+        endif
+
 
         if (io_stat == 0 .and. io_stat2 == 0) then
             call this%allocate(ncoeffs_k, ncoeffs_mu, nz)
@@ -122,11 +132,12 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine write_unformatted(this)
+        use params_mod ,only: lom_k_version, lom_mu_version
         class(tCoeffs) ,intent(in) :: this
         integer :: io_stat
 
         open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
-        write(55) size(this%k,1), size(this%mu,1), size(this%k,2)
+        write(55) size(this%k,1), size(this%mu,1), size(this%k,2), lom_k_version, lom_mu_version
         close(55)
 
         if (io_stat .ne. 0) then
@@ -189,7 +200,7 @@ contains
 167     format(a5,i2,tr4,<size(this%k,1)>(es<show_digits+7>.<show_digits>,3x),'|',f<show_digits+4>.<show_digits+2>)
         write(unit,*)
 
-        dep_var   = "    mu'  |"
+        dep_var   = "    mu'   "
         select case(lom_mu_version)
         case(1)
             write(unit,168) dep_var, 'constant', ind_var_2                                                  ,'R^2'
