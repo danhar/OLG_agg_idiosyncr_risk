@@ -59,15 +59,15 @@ n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
-nt              3000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nt              5000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
 nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
 !----------------------------------------------------------------------------------------------------------------------------/
-lom_k_version           3           laws of motion
-lom_mu_version          3           laws of motion
+lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
+lom_mu_version          3           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
 pooled_regression       .false.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs

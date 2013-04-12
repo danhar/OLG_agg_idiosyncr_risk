@@ -57,7 +57,7 @@ contains
         if (save_all_iterations) then   ! write the headers into the file for saving intermediate coeffs
             open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
             write(132,*)
-            write(132,'(t8,a91)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3)     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3)'
+            write(132,'(t8,a)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3) , ...     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3) , ...'
             write(132,*)
             close(132)
         endif
@@ -83,7 +83,7 @@ contains
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
                 call coeffs%save_initial_values()
-                maxstp=.9_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                maxstp=1.9_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
             else
                 maxstp=10.0     ! this is large and arbitrary
             endif
@@ -96,7 +96,7 @@ contains
             ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
-                 reevalj=.true.,check=err%not_converged,rstit0=10,MaxLns=5,max_it=39,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
+                 reevalj=.true.,check=err%not_converged,rstit0=15,MaxLns=5,max_it=59,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
 
             if (err%not_converged) call err%write2file(fvals, output_path)
 
@@ -200,7 +200,7 @@ contains
         write(132,'(a10,i3.3,a24,es13.6,a29,es13.6)')   &
         'iteration ', it, ' :  max(abs(distance) = ', maxval(abs(distance)), ',  0.5*(distance*distance) = ', 0.5_dp*dot_product(distance,distance)
         write(132,333) 'in:   ', coeffs_old%k(:,1),'   ---   ', coeffs_old%mu(:,1)
-333     format(a6,<size(coeffs_old%k)>(es13.6,x),a9,<size(coeffs_old%mu)>(es13.6,x))
+333     format(a6,<size(coeffs_old%k,1)>(es13.6,x),a9,<size(coeffs_old%mu,1)>(es13.6,x))
         if (.not. pooled_regression) then
             do zc=2,size(coeffs_old%k,2)
                 write(132,333) '      ', coeffs_old%k(:,zc),'   ---   ', coeffs_old%mu(:,zc)
