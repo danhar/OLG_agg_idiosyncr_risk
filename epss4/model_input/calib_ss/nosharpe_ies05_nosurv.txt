@@ -67,13 +67,13 @@ nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the 
 ! Numerical options and parameters
 !----------------------------------------------------------------------------------------------------------------------------/
 lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
-lom_mu_version          3           functional form of law of motion
+lom_mu_version          7           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
 pooled_regression       .false.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
 opt_initial_ms_guess    0           select which guesses for mean shock r and mu to use (0,1,2). 0: use previous ms equilibrium values saved in model_input/last_results/grids_ms.unformatted; 1: use parameter-sensitive hard-coded guesses; 2: use user-supplied guess in this calibration file
 exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations), which is finer than the one used in household solutions (by nx_factor below). Should always be used.
-save_all_iterations     .true.     during KS iteratins, save all results
+save_all_iterations     .false.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbren               .true.      true: use Brent's method (IMSL or NR, need outcomment), false: use Mueller's method (IMSL zreal)
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
