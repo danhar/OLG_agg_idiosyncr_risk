@@ -277,10 +277,7 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     ! This subroutine will pass the asset euler equation as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
-    use params_mod ,only: opt_zbren, tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio, g
-!    use zreal_int      ! IMSL Math.pdf, p. 1195f: Mullers Method to find roots (like secant but quadratic).
-                           ! expects array as input (i.e. define scalar as dimension(1)).
-!    use zbren_int      ! IMSL Math.pdf, p. 1192f: Brent's method to find roots
+    use params_mod ,only: kappa_search_robust, tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio, g
     use fun_zbrent     ! NR: Brent method
     use sub_zbrac      ! NR: outwards bracketing
     use sub_zbrak      ! NR: inwards bracketing
@@ -333,8 +330,9 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
         !kappa2=((xgrid(1,1,jc+1)-yp(nz))*(1.0+g)/ap-(1.0+rfp(zc)))/(rp(zc,nz)-rfp(zc))
     endif
 
-    ! Now find root, depending on root finder
-    if (opt_zbren) then ! Brent's Method
+    ! Now find root
+
+    if (kappa_search_robust) then ! this is the slow but secure variant
         bracket_found=.false.
 
         if (asseteuler_f(kappa1)*asseteuler_f(kappa2)<0.0) then
@@ -382,17 +380,16 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
             error=.true.
         endif
 
-    else    ! Mueller's Method
-        kappa_start=(kappa1+kappa2)/2
-        ! maybe I should scale as mentioned in the IMSL documentation, since some kappa<1
-        !call d_zreal(asseteuler_f,kappa_result,xguess=kappa_start,itmax=1000,info=zreal_its,errabs=tol_asset_eul,errrel=tol_asset_eul)
-        if (zreal_its(1)>1000) then
-            error=.true.
-            kappa_out=kappa_start(1) !p%kappa(xc-1,ec,zc,jc,kc,muc)
+    else  ! This is faster and doesn't change results
+        kappa_brack1 = 10000.0*sign(1.0,ap)
+        kappa_brack2 = -10.0*sign(1.0,ap)
+
+        if (asseteuler_f(kappa_brack1)*asseteuler_f(kappa_brack2)<0.0) then
+            kappa_out= f_zbrent(asseteuler_f,kappa_brack1,kappa_brack2,tol_asset_eul)
+        elseif (abs(asseteuler_f(kappa_brack1)) < abs(asseteuler_f(kappa_brack2))) then
+            kappa_out = kappa_brack1
         else
-            kappa_out=kappa_result(1)
-            !kappa(xc,zc,jc)=min(max(kappa_result(1),kappa1),kappa2)
-            !kappa(xc,zc,jc)=min(max(kappa_result(1),-kappamax),kappamax)
+            kappa_out = kappa_brack2
         endif
     endif
 
