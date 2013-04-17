@@ -8,13 +8,10 @@
 
 - implement check if stockmarket also clears
 
-- add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
-
+- splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- splines to interpolate stocks and bonds? and consumption in euler equations?
-- implement a newton-rootfinder for kappa (as alternative in sub_policyfunctions and sub_simulate_ge)
 - give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
 - clean up initialize_coeffs, remove agg_grid_o
@@ -132,6 +129,8 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- This didn't work: add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
+
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu
     this makes it much easier to test for optimal lom, and have different loms for each. Try [kp, mup] =Forecast()
        At the moment very hackish to distinguish forecasting mu' from k'. 

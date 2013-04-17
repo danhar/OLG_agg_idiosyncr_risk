@@ -17,7 +17,7 @@ module params_mod
                           lom_k_version, lom_mu_version
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, &
-                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbren, opt_zbrak, tau_experiment, welfare_decomposition
+                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ subroutine SetDefaultValues()
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
-    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbren=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
+    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
     ! Character
     calib_targets='presentation'; mean_return_type='mean_mpk'
 end subroutine SetDefaultValues
@@ -229,8 +229,6 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) save_all_iterations
             case ('detailed_euler_errs')
                 read (parval,*) detailed_euler_errs
-            case ('opt_zbren')
-                read (parval,*) opt_zbren
             case ('opt_zbrak')
                 read (parval,*) opt_zbrak
             case ('factor_k')
@@ -1220,7 +1218,6 @@ subroutine SaveParams(projectname, calib_name)
     write(21,'(a20,l1)') ' loms_in_logs    =  ', loms_in_logs
     write(21,'(a20,l1)') ' pooled_regress  =  ', pooled_regression
     write(21,'(a20,l1)') ' surv_rates      =  ', surv_rates
-    write(21,'(a20,l1)') ' opt_zbren       =  ', opt_zbren
     write(21,'(a20,l1)') ' opt_zbrak       =  ', opt_zbrak
     write(21,216)        ' scale_AR        =  ', scale_AR
     write(21,216)        ' scale_IR        =  ', scale_IR
