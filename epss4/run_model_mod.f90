@@ -123,7 +123,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     output_path = construct_path(dir,calib_name)
     syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
 
-    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
+    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 

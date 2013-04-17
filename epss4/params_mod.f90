@@ -1112,6 +1112,8 @@ use omp_lib           ,only: OMP_get_max_threads
         endif
     endif
 
+    if (save_all_iterations) print*, 'Warning: saving results in every iteration (disk space)!'
+
 contains
     subroutine critical_stop()
         stop '*********STOP********* in params_mod:CheckParams'

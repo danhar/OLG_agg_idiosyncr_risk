@@ -9,11 +9,11 @@ module krusell_smith_mod
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
-! - subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err)
+! - subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err, calibrating)
 ! -- (internal) function krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
 !-------------------------------------------------------------------------------
-    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err)
+    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
     ! Set up environment to use rootfinder for coefficients of loms (KS),
     ! then pass the function krusell_smith as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
@@ -30,6 +30,7 @@ contains
         type(tSimvars)  ,intent(inout) :: simvars(:)
         real(dp)        ,intent(inout) :: Phi(:,:,:)
         real(dp)        ,intent(in)    :: xgrid_ms(:,:,:) ! Could remove if Phi was derived type carrying its own grid.
+        logical         ,intent(in)    :: calibrating
         type(tPolicies) ,intent(out)   :: policies
         type(tLifecycle),intent(out)   :: lifecycles
         type(tErrors)   ,intent(out)   :: err
@@ -41,7 +42,7 @@ contains
         real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
-        integer               :: n, i
+        integer               :: n, i, max_iter, recomp_jacobian
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
         call coeffs%save_initial_values()
@@ -87,6 +88,15 @@ contains
             else
                 maxstp=10.0     ! this is large and arbitrary
             endif
+
+            if (calibrating) then
+                max_iter = 39
+                recomp_jacobian = 10
+            else
+                max_iter = 499
+                recomp_jacobian = 15
+            endif
+
             intialize_jacobi=.true.
             allocate(Rmat(n,n), QTmat(n,n))
             Rmat  = 0.0
@@ -96,7 +106,7 @@ contains
             ! Start root finder over coefficients of laws of motion
             !call s_broyden(solve_krusellsmith, xvals, fvals,not_converged, tolf_o=tol_coeffs, maxstp_o = 0.5_dp, maxlnsrch_o=5) !df_o=Rmat,get_fd_jac_o=.true.
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
-                 reevalj=.true.,check=err%not_converged,rstit0=15,MaxLns=5,max_it=129,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
+                 reevalj=.true.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
 
             if (err%not_converged) call err%write2file(fvals, output_path)
 
