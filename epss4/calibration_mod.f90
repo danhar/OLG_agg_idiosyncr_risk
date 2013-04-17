@@ -141,7 +141,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
 
         get_params(1) = beta
         select case (targetname)
-        case('nosharpe','no_ep')
+        case('nosharpe','no_ep','I_Y')
             if (n > 1) get_params(2) = del_std
             if (n > 2) get_params(3) = del_mean
             if (n > 3) get_params(4) = pi1_delta
@@ -168,7 +168,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         call params_set('beta',param_vec(1))
 
         select case (targetname)
-        case('nosharpe','no_ep')
+        case('nosharpe','no_ep','I_Y')
             if (n > 1) call params_set('del_std',param_vec(2))
             if (n > 2) call params_set('del_mean',param_vec(3))
             if (n > 3) call params_set('pi1_delta',param_vec(4))
@@ -195,11 +195,12 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         integer        ,intent(in) :: n
         type(tSimvars) ,intent(in) :: simvars(:)
         character(len=*)      ,intent(in) :: targetname
-        type(tStats) :: K_Y, ex_ret, r, rf, zeta, netwage, cons_grow
+        type(tStats) :: K_Y, I_Y, ex_ret, r, rf, zeta, netwage, cons_grow
 
         allocate(model_targets(n))
 
         K_Y%name='K_Y'; call K_Y%calc_stats(simvars)
+        I_Y%name='I_Y'; call I_Y%calc_stats(simvars)
         ex_ret%name='ex_ret'; call ex_ret%calc_stats(simvars)
         r%name='r'; call r%calc_stats(simvars)
         rf%name='rf'; call rf%calc_stats(simvars)
@@ -218,6 +219,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             model_targets(1) = rf%avg_exerr_()
             if (n > 1) model_targets(2) = cons_grow%std_()
             if (n > 2) model_targets(3) = K_Y%avg_exerr_()
+            if (n > 3) model_targets(4) = corr(zeta,r)
+        case('I_Y')
+            model_targets(1) = rf%avg_exerr_()
+            if (n > 1) model_targets(2) = cons_grow%std_()
+            if (n > 2) model_targets(3) = I_Y%avg_exerr_()
             if (n > 3) model_targets(4) = corr(zeta,r)
         case('no_ep')
             model_targets(1) = K_Y%avg_exerr_()

@@ -1,0 +1,10 @@
+! This file contains the target values from the data.
+! It implements the very conservative calibration without the Sharpe ratio, but keeping the variance of consumption growth.
+
+! Do not change the sequence of the entries in the following table.
+! First column contains the value, second column the 'associated moment' (with the strongest impact), the third column a description.
+
+0.023	beta	 	Average risk-free rate (Shiller)
+0.030   del_std     Std. consumption growth (NIPA)
+0.2     del_mean    Investment-output ratio (NIPA)
+0.50	pi1_delta	Corr.(TFP, returns) (NIPA, Shiller)

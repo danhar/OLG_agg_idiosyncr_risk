@@ -25,6 +25,7 @@ module simvars_class
         procedure :: zeta
         procedure :: delta
         procedure :: K_Y
+        procedure :: I_Y
         procedure :: ex_ret
         procedure :: mpk
         procedure :: bequest_rate
@@ -134,6 +135,8 @@ contains
             get = this%mpk(lb,ub)
         case ('K_Y')
             get = this%K_Y(lb,ub)
+        case ('I_Y')
+            get = this%I_Y(lb,ub)
         case ('bequests,%')
             get = this%bequest_rate(lb,ub)
         case ('cons_grow')
@@ -218,6 +221,28 @@ contains
 
         K_Y = this%K(lb:ub)**(1.0-alpha)
     end function K_Y
+
+    pure function I_Y(this,lb_o,ub_o)
+        ! Investment-output-ratio
+        real(dp), allocatable :: I_Y(:)
+        class(tSimvars) ,intent(in) :: this
+        integer, intent(in), optional :: lb_o, ub_o
+        integer :: lb, ub
+
+        if (present(lb_o)) then
+            lb = lb_o
+        else
+            lb = 1
+        endif
+
+        if (present(ub_o)) then
+            ub = ub_o
+        else
+            ub = size(this%output)
+        endif
+
+        I_Y = this%invest(lb:ub)/this%output(lb:ub)
+    end function I_Y
 
     pure function ex_ret(this,lb_o,ub_o)
         ! Excess returns
