@@ -11,7 +11,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
     use kinds
     use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs, tStats, tStats_logical
-    use statistics      ,only: cov
+    use statistics      ,only: cov, corr
     use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir
@@ -28,7 +28,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
-    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, K_Y, welfare, &
+    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
     type(tStats_logical) :: err_K, err_mu
     character(:), allocatable :: path
@@ -70,6 +70,7 @@ contains
         pension%name='pension'; call pension%calc_stats(simvars)
         tau%name='tau'; call tau%calc_stats(simvars)
         K_Y%name='K_Y'; call K_Y%calc_stats(simvars)
+        I_Y%name='I_Y'; call I_Y%calc_stats(simvars)
         welfare%name='welfare'; call welfare%calc_stats(simvars)
         Phi_1%name='Phi_1'; call Phi_1%calc_stats(simvars)
         Phi_nx%name='Phi_nx'; call Phi_nx%calc_stats(simvars)
@@ -129,6 +130,7 @@ contains
     call invest%write(21,'investm',prec)
     call mu%write(21,'mu',prec)
     call ex_ret%write(21,'Ex_ret',prec)
+    write(21,fmt1)' Sharpe    ', ex_ret%avg_exerr_()/ex_ret%std_()
     call r%write(21,'r',prec)
     call rf%write(21,'rf',prec)
     if (prec == 'long') call r_pf_median%write(21,'rpf_med',prec)
@@ -139,6 +141,7 @@ contains
     call pension%write(21,'pension',prec)
     call tau%write(21,'tau',prec)
     call zeta%write(21,'zeta',prec)
+    call I_Y%write(21,'I_Y',prec)
     call K_Y%write(21,'K_Y',prec)
     call welfare%write(21,'welfare',prec)
 
@@ -149,17 +152,32 @@ contains
     endif
 
     write(21,*)
-    write(21,*) 'Covariances'
+    write(21,*) 'Correlations'
     write(21,*) repeat('-',63)
     write(21,123)'            ',       '       r',             ' netwage',          '    zeta',            '  output',            '  invest',            '  ex_ret'
-    write(21,fmt1)' r         ', r%std_()**2
-    write(21,fmt1)' netwage   ', cov(netwage  ,r), netwage%std_()**2
-    write(21,fmt1)' zeta      ', cov(zeta     ,r), cov(zeta     ,netwage), zeta%std_()**2
-    write(21,fmt1)' output    ', cov(output   ,r), cov(output   ,netwage), cov(output   ,zeta), output%std_()**2
-    write(21,fmt1)' invest    ', cov(invest   ,r), cov(invest   ,netwage), cov(invest   ,zeta), cov(invest   ,output), invest%std_()**2
-    write(21,fmt1)' cons      ', cov(cons     ,r), cov(cons     ,netwage), cov(cons     ,zeta), cov(cons     ,output), cov(cons     ,invest), cov(cons     ,ex_ret)
-    write(21,fmt1)' cons_grow ', cov(cons_grow,r), cov(cons_grow,netwage), cov(cons_grow,zeta), cov(cons_grow,output), cov(cons_grow,invest), cov(cons_grow,ex_ret)
-    write(21,fmt1)' delta     ', cov(delta    ,r), cov(delta    ,netwage), cov(delta    ,zeta), cov(delta    ,output), cov(delta    ,invest), cov(delta    ,ex_ret)
+    write(21,fmt1)' r         ', 1.0
+    write(21,fmt1)' netwage   ', corr(netwage  ,r), 1.0
+    write(21,fmt1)' zeta      ', corr(zeta     ,r), corr(zeta     ,netwage), 1.0
+    write(21,fmt1)' output    ', corr(output   ,r), corr(output   ,netwage), corr(output   ,zeta), 1.0
+    write(21,fmt1)' invest    ', corr(invest   ,r), corr(invest   ,netwage), corr(invest   ,zeta), corr(invest   ,output), 1.0
+    write(21,fmt1)' cons      ', corr(cons     ,r), corr(cons     ,netwage), corr(cons     ,zeta), corr(cons     ,output), corr(cons     ,invest), corr(cons     ,ex_ret)
+    write(21,fmt1)' cons_grow ', corr(cons_grow,r), corr(cons_grow,netwage), corr(cons_grow,zeta), corr(cons_grow,output), corr(cons_grow,invest), corr(cons_grow,ex_ret)
+    write(21,fmt1)' delta     ', corr(delta    ,r), corr(delta    ,netwage), corr(delta    ,zeta), corr(delta    ,output), corr(delta    ,invest), corr(delta    ,ex_ret)
+
+    if (prec == 'long') then
+        write(21,*)
+        write(21,*) 'Covariances'
+        write(21,*) repeat('-',63)
+        write(21,123)'            ',       '       r',             ' netwage',          '    zeta',            '  output',            '  invest',            '  ex_ret'
+        write(21,fmt1)' r         ', r%std_()**2
+        write(21,fmt1)' netwage   ', cov(netwage  ,r), netwage%std_()**2
+        write(21,fmt1)' zeta      ', cov(zeta     ,r), cov(zeta     ,netwage), zeta%std_()**2
+        write(21,fmt1)' output    ', cov(output   ,r), cov(output   ,netwage), cov(output   ,zeta), output%std_()**2
+        write(21,fmt1)' invest    ', cov(invest   ,r), cov(invest   ,netwage), cov(invest   ,zeta), cov(invest   ,output), invest%std_()**2
+        write(21,fmt1)' cons      ', cov(cons     ,r), cov(cons     ,netwage), cov(cons     ,zeta), cov(cons     ,output), cov(cons     ,invest), cov(cons     ,ex_ret)
+        write(21,fmt1)' cons_grow ', cov(cons_grow,r), cov(cons_grow,netwage), cov(cons_grow,zeta), cov(cons_grow,output), cov(cons_grow,invest), cov(cons_grow,ex_ret)
+        write(21,fmt1)' delta     ', cov(delta    ,r), cov(delta    ,netwage), cov(delta    ,zeta), cov(delta    ,output), cov(delta    ,invest), cov(delta    ,ex_ret)
+    endif
 
     write(21,*)
     write(21,*) 'Laws of motion'

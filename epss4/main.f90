@@ -208,7 +208,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
         real(dp) ,intent(in) ,optional :: scaling(0:)
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
-        real(dp) :: IR, AR, LCI, CCV, SR
+        real(dp) :: GE, PE, IR, AR, LCI, CCV, SR
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
@@ -216,11 +216,15 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
         if (.not. present(scaling)) then
 
-            write(21,*) 'All cev reported in %'
-            write(21,'(a,f6.2)') 'Welfare change in GE: ', (welfare(0,1)/welfare(1,1) -1.0)*100.0
+            GE = (welfare(0,1)/welfare(1,1) -1.0)*100.0
+            PE = cev(1)*100.0
+            write(21,*) 'Welfare changes, reported in % CEV'
             write(21,*)
-            write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)  g_c(CCV)  g_c(SR)'
-            write(21,'(x,6(3x,f6.2,3x))') (cev(6:1:-1))*100.0
+            write(21,'(a)') '     GE     PE  CrowdOut '
+            write(21,'(3(f7.2))') GE, PE, PE-GE
+            write(21,*)
+            write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)     g_c(SR)'
+            write(21,'(6(3x,f6.2,3x))') (cev(6:1:-1))*100.0
             write(21,*)
 
             IR = (cev(5)-cev(6))*100.0
@@ -229,8 +233,12 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             CCV= (cev(2) - cev(3))*100.0
             SR = (cev(1) - cev(2))*100.0
 
-            write(21,'(a)') ' g_c(0,0)   dg_c(IR)   dg_c(AR)   dg_c(LCI)  dg_c(CCV)  dg_c(SR)'
-            write(21,'(x,6(3x,f6.2,3x))') cev(6)*100.0, IR, AR, LCI, CCV, SR
+            write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR)'
+            write(21,'(6(3x,f6.2,3x))') cev(6)*100.0, IR, AR, LCI, CCV, SR
+
+            write(21,*)
+            write(21,'(a)') ' dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
+            write(21,'(t13,f6.2,tr22,f6.2)') LCI/AR, (LCI + CCV)/PE
 
         else
             if (size(welfare,1) > 1) then
