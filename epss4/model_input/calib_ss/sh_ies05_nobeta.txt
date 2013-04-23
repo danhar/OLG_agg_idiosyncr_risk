@@ -5,18 +5,18 @@
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta           3.0      coefficient of relative risk aversion
+theta          11.7180   coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.9859   discount factor
+beta            0.986   discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.1019   mean of depreciation shocks
-del_std         0.0802   std of depreciation shocks
+del_mean        0.0213   mean of depreciation shocks
+del_std         0.0522   std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.8854   first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.8264   first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -41,7 +41,7 @@ scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = s
 scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
 n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
-calib_targets 'I_Y'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y
+calib_targets 'no_beta'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
 def_contrib     .true.   true=tau exogenous, false=benefits exogenous (not yet fully implemented)
@@ -81,10 +81,10 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
-k_min           0.010        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           16.00       max
-mu_min          0.0001
-mu_max          0.02
+k_min           4.00        Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           23.00
+mu_min          0.01
+mu_max          0.05
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
@@ -95,7 +95,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
 tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_cal      0.07         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
+maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Initial guesses
