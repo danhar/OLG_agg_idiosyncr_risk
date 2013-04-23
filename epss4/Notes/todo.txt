@@ -1,6 +1,9 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
+    Put second-least-need target second-to-last.
+
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
