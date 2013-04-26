@@ -1,4 +1,4 @@
-! Calibration file SocSec Project. Change values but not format.
+! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
 ! Like pc3.txt with new options
 
@@ -82,9 +82,9 @@ factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           2.00        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           24.00
-mu_min          0.000
-mu_max          0.01
+k_max           20.00       max
+mu_min          0.0001      min for expected equity premium
+mu_max          0.01        max
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation

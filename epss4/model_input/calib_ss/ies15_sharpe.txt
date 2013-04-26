@@ -1,4 +1,4 @@
-! Calibration file SocSec Project. Change values but not format.
+! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
 ! Like pc3.txt with new options
 
@@ -83,8 +83,8 @@ cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternat
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           2.0        Bounds for aggregate grid, if grid is fixed exogenously  
 k_max           10.00       max
-mu_min          0.001
-mu_max          0.04
+mu_min          0.001       min for expected equity premium
+mu_max          0.04        max
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
