@@ -98,7 +98,7 @@ subroutine SetDefaultValues()
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.
     ! Character
-    calib_targets='presentation'; mean_return_type='mean_mpk'
+    calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
 
 subroutine ReadCalibration(calib_name)
@@ -1014,7 +1014,8 @@ use omp_lib           ,only: OMP_get_max_threads
     end select
 
      select case(calib_targets)
-        case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', 'nosharpe', 'no_ep', 'I_Y', 'no_beta')
+        case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', 'nosharpe', 'no_ep', 'I_Y', 'no_beta', &
+              'baseline','sharpe_ratio','equity_premium')
         ! continue
         case default
             print*, 'ERROR: calib_targets must take one of the following values:'

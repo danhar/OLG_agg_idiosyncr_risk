@@ -1,15 +1,10 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
-!calib_ss/paper.txt
-!calib_ss/pc4.txt
-!calib_ss/pc4_ies05.txt
-!calib_ss/sharpe_ies05.txt
-calib_ss/ies15_sharpe.txt
-!calib_ss/nosharpe_ies05.txt
-!calib_ss/nosharpe_ies05_nosurv.txt
-!calib_ss/nosharpe_ies15.txt
-!calib_ss/nosharpe_ies15_nosurv.txt
-!calib_ss/sh_ies05_nobeta.txt
+!calib_ss/baseline.txt
+!calib_ss/base_sharpe.txt
+!calib_ss/ies15.txt
+!calib_ss/ies15_sharpe.txt
+calib_ss/ies15_ep.txt
 !calib_ss/survival_risk.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
@@ -18,70 +13,11 @@ In the following, the available calibration files are listed, together with a sh
 --------------------------------------------------------------------------------------------------------------
 1. Social Security project (folder calib_ss):
 --------------------------------------------------------------------------------------------------------------
-
-calib_ss/FD1_KK.txt (BASELINE CALIBRATION)
-FD1: finite difference spec 1, see Table 2 of epsocsec_09Oct11.pdf, KK experiment (baseline tau=0.0)
-
-calib_ss/FD1_HL.txt
-FD1: finite difference spec 1, see Table 2 of epsocsec_09Oct11.pdf, HL experiment (baseline tau=0.12)
-
-calib_ss/FD2_KK.txt
-FD2: finite difference spec 2, see Table 2 of epsocsec_09Oct11.pdf, KK experiment (baseline tau=0.0)
-
-calib_ss/FD2_HL.txt
-FD2: finite difference spec 2, see Table 2 of epsocsec_09Oct11.pdf, HL experiment (baseline tau=0.12)
-
-calib_ss/LT_KK.txt
-LT: linear trend spec, see Table 2 of epsocsec_09Oct11.pdf, KK experiment (baseline tau=0.0)
-
-calib_ss/LT_HL.txt
-LT: linear trend spec, see Table 2 of epsocsec_09Oct11.pdf, HL experiment (baseline tau=0.12)
-
-calib_ss/KK_KK.txt
-KK: Kubler,Krueger AER 2006 calibration, KK experiment (baseline tau=0.0)
-
-calib_ss/STY_KK.txt
-STY: Storesletten, Telmer, Yaron RED 2007 calibration, KK experiment (baseline tau=0.0)
+/old:
 
 --------------------------------------------------------------------------------------------------------------
 2. Equity premium project (folder calib_ep):
 --------------------------------------------------------------------------------------------------------------
-
-calib_ep/GM1.txt
-GM: Gomes, Michaelides RFS 2008
-
-calib_ep/GM2.txt
-GM: Gomes, Michaelides RFS 2008
-But with 'realistic' aggregate shock process, estimated in epsocsec_09Oct11.pdf
-
-calib_ep/FD1.txt
-FD1: finite difference spec 1, see Table 2 of epsocsec_09Oct11.pdf
-
-calib_ep/FD1noccv.txt
-same as FD1.txt, just no ccv
-
-calib_ep/FD1noccv,IR05.txt
-no ccv, 50% IR
-
-calib_ep/FD1noir.txt
-same as FD1.txt, just no idiosyncratic risk (noir)
-
-calib_ep/STY.txt
-STY: Storesletten, Telmer, Yaron RED 2007 calibration
-
-calib_ep/STYnoccv.txt
-same as calib_ep/STY.txt but without CCV
-
-calib_ep/STYnoir.txt
-same as calib_ep/STY.txt but without idiosyncratic risk
-
-calib_ep/STY2.txt
-same as STY.txt, but with realistic aggregate shock process
-estimated in epsocsec_30Aug11.pdf
-
-calib_ep/STY2noccv.txt
-
-calib_ep/STY2noir.txt
 
 
 
