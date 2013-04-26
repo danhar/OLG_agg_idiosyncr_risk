@@ -42,6 +42,7 @@ contains
         real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
+        logical, parameter    :: get_new_simvars = .false. ! set to true to have a partial equilibrium run which helps to adjust aggregate grids before starting rootfinder
         integer               :: n, i, max_iter, recomp_jacobian
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
@@ -63,7 +64,7 @@ contains
             close(132)
         endif
 
-        fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
+        if (partial_equilibrium .or. get_new_simvars) fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
 
         if (.not. partial_equilibrium) then
             print *
