@@ -1,0 +1,95 @@
+ Project epss4, calibration calib_ss/pc4_ies05.txt,GE0
+ -------------------------- Prefs and Tech --------------------------
+ theta        = 7.9460
+ psi          = .5000
+ gamma        = 6.9460
+ beta         = .9260
+ alpha        = .3200
+ de_ratio     = .6600
+ g            = .0180
+ zeta_mean    = 1.0000
+ zeta_std     = .0290
+ del_mean     = .0820
+ del_std      = .1210
+ 
+ ------------------- Soc. Sec. & Demographics -----------------------
+ tau          = .0200
+ def_benefits = .0000
+ nj           =  80
+ jr           =  45
+ n            = .0110
+ P_L_ratio    = .2690
+ L_N_ratio    = .7775
+ 
+ ----------------------- Stochastic processes -----------------------
+ pi_zeta(1,1) = .9410
+ pi_delta(1,1)= .8670
+ 
+ pi_z         = .8158 .1252 .0078 .0512
+                .8158 .1252 .0078 .0512
+                .0512 .0078 .1252 .8158
+                .0512 .0078 .1252 .8158
+
+ stat_dist_z  = .4335 .0665 .0665 .4335
+ 
+ pi_eta       = .9741 .0259
+                .0259 .9741
+
+ etagri       = .4224 .4224 .6194 .6194
+                1.5776 1.5776 1.3806 1.3806
+
+ stat_dist_eta= .5000 .5000
+ 
+ ------------------------------ Grids -------------------------------
+ nap          =  20
+ nx           =  20
+ n_eta        =   2
+ nz           =   4
+ nk           =  16
+ nmu          =  10
+ nt           =  4000
+ tscrap       =  1000
+ nx_factor    =   4
+ cover_k      = .850000
+ cover_mu     = .800000
+ cmin         = 1.00E-06
+ No. threads  =  16
+ 
+ ----------------------------- Options ------------------------------
+ ccv             =  T
+ def_contrib     =  T
+ collat_constr   =  F
+ kappa_in_01     =  F
+ exogenous_xgrid =  T
+ loms_in_logs    =  T
+ pooled_regress  =  F
+ surv_rates      =  T
+ opt_zbren       =  T
+ opt_zbrak       =  F
+ scale_AR        =  .0000
+ scale_IR        =  .0000
+ n_end_params    =  0
+ calib_targets   =  model_input/data/calibration_targets/del_mean.txt
+ 
+ ------------------------------ Guesses -----------------------------
+ r_ms_guess      =  .0630
+ mu_ms_guess     =  .0364
+ k_ms_guess      =  2.8371
+ apmax_factor    =  22.0000
+ apmax_curv      =  1.0000
+ 
+ ---------------------------- Tolerances ----------------------------
+ tol_asset_eul   =  1.00E-07
+ tol_coeffs      =  1.00E-05
+ tol_calib       =  1.00E-03
+ 
+ 
+ 
+ --------------------------------------------------------------------
+ ----------------------------- Comments -----------------------------
+  This file reports the effectively used values, e.g:
+  - option opt_initial_ms_guess selects how ms_guesses are chosen
+  - value of std(zeta) reported here is zet_sd = zeta_std*(1+scale_AR)
+  - value of collateral_constraint, which might not be available in
+      some calibration files and thus reverts to the default value.
+  This file helps as counter check for the various calibration files.
