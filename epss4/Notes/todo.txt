@@ -12,6 +12,9 @@
 - implement check if stockmarket also clears
 
 - splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
+
+- the prog should look for initial guesses in the subfolder in last_results which corresponds to the calibration name. If not found use the 
+    initial guesses in last_results and issue warning.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

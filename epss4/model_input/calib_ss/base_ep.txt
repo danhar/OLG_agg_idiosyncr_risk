@@ -73,7 +73,7 @@ pooled_regression       .false.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
 opt_initial_ms_guess    0           select which guesses for mean shock r and mu to use (0,1,2). 0: use previous ms equilibrium values saved in model_input/last_results/grids_ms.unformatted; 1: use parameter-sensitive hard-coded guesses; 2: use user-supplied guess in this calibration file
 exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations), which is finer than the one used in household solutions (by nx_factor below). Should always be used.
-save_all_iterations     .false.     during KS iteratins, save all results
+save_all_iterations     .true.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
 
@@ -81,8 +81,8 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
-k_min           1.0         Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           18.00       max
+k_min           2.0         Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           24.00       max
 mu_min          0.01        min for expected equity premium
 mu_max          0.12        max
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
