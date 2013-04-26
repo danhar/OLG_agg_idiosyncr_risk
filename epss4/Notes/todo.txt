@@ -2,7 +2,7 @@
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
-    Put second-least-need target second-to-last.
+    Put second-least-need target second-to-last. Actually, this might be too complicated, because I should rewrite the whole thing anyway, see below.
 
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
@@ -15,6 +15,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- rewrite the calibration_mod, so that it reads in the name of the associated param. This would greatly increase usability, because I only need
+    to change the calibration files by adding or removing or changing params. However, also need an identifier for the associated target in the calibration file.
 - give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
 - clean up initialize_coeffs, remove agg_grid_o

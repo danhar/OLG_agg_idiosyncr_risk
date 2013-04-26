@@ -1,0 +1,12 @@
+! This file contains the target values from the data.
+! It corresponds to the 'positive calibration PC' variant in the paper, and also targets mean return and the standard deviation of wages.
+
+! Do not change the sequence of the entries in the following table.
+! First column contains the value, second column the 'associated moment' (with the strongest impact), the third column a description.
+
+2.65	beta	 	Capital output ratio (NIPA)
+0.168   del_std     Std. of risky return (Shiller)
+0.056	theta		Average equity premium (Shiller)
+0.079   del_mean    Average risky return (Shiller)
+0.50	pi1_delta	Corr.(TFP, returns) (NIPA, Shiller)
+0.10    zeta_std       Std.(wages) (Krueger,Kubler and own calculations)
