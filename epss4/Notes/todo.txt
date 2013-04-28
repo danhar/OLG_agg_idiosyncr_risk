@@ -21,6 +21,9 @@
 - reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.
 - rewrite the calibration_mod, so that it reads in the name of the associated param. This would greatly increase usability, because I only need
     to change the calibration files by adding or removing or changing params. However, also need an identifier for the associated target in the calibration file.
+    Even better: put the end params at the beginning of each calibration file, and next to it the target. read them in like normal parameters, but then write the param name
+    into a temporary character array, increase n_end_params by one, and read the target into a character array. finally, allocate two character arrays of size n_end_params, copy params and targets into them.
+    No need for n_end_params in calibration file.
 - give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
 - clean up initialize_coeffs, remove agg_grid_o

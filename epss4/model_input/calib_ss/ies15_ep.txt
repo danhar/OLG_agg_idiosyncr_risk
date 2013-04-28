@@ -82,7 +82,7 @@ factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           1.0        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           18.00       max
+k_max           20.00       max
 mu_min          0.01      min for expected equity premium
 mu_max          0.12        max
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
@@ -95,7 +95,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
 tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_cal      0.02        maximum length of Newton step in calibration routine (differs depending on IES)
+maxstp_cal      0.03        maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Initial guesses
