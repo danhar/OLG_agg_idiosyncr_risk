@@ -914,9 +914,9 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
-    if (any(abs(stat_dist_z-1.0/real(nz,dp))>crit)) then
-        print '(a,<nz>f7.4)', ' WARNING: stat_dist_z = ', stat_dist_z
-    endif
+!    if (any(abs(stat_dist_z-1.0/real(nz,dp))>crit)) then
+!        print '(a,<nz>f7.4)', ' WARNING: stat_dist_z = ', stat_dist_z
+!    endif
 
     if (abs(dot_product(stat_dist_z,zeta)-1.0)>crit) then
         print*, 'WARNING: dot_product(stat_dist_z,zeta) .ne. 1'
@@ -1111,7 +1111,7 @@ use omp_lib           ,only: OMP_get_max_threads
         endif
     endif
 
-    if (save_all_iterations) print*, 'Warning: saving results in every iteration (disk space)!'
+    if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
 
 contains
     subroutine critical_stop()
@@ -1309,8 +1309,8 @@ subroutine params_set_real(param_name, new_value)
            endif
         case ('del_mean')
            if (new_value < 0.0) then
-               print* , 'params_set: del_mean < 0.0, setting to 0.0'
-               del_mean = 0.0
+               print* , 'WARNING: params_set: del_mean < 0.0' !, setting to 0.0
+               ! del_mean = 0.0
            else
                del_mean = new_value
            endif
