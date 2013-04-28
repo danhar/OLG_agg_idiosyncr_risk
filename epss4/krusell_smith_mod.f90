@@ -91,8 +91,8 @@ contains
             endif
 
             if (calibrating) then
-                max_iter = 39
-                recomp_jacobian = 10
+                max_iter = 44
+                recomp_jacobian = 15
             else
                 max_iter = 499
                 recomp_jacobian = 15
@@ -178,7 +178,10 @@ contains
 
             distance = coeff_dif%makevector()
 
-            if (save_all_iterations) call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
+            if (save_all_iterations) then
+                print *,'- krusell_smith: WARNING: saving intermediate results (disk space)'
+                call save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, calib_name, projectname)
+            endif
 
         end function krusellsmith
 
