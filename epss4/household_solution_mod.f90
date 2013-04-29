@@ -290,7 +290,6 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     real(dp)                :: kappa1, kappa2,kappa_brack1, kappa_brack2  ! temporary variables
     real(dp) ,dimension(1)  :: kappa_result
     real(dp) ,dimension(5)  :: f_test, kappa_test
-    integer  ,dimension(1)  :: zreal_its ! zreal: no of iterations to convergence. need to test convergence
     real(dp) ,dimension(:) ,allocatable :: kappal, kappau !sub_zbrak: lower and upper bounds of segment containing a root
     logical                 :: bracket_found
 

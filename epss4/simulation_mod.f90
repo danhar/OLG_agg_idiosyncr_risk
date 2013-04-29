@@ -27,9 +27,8 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
     real(dp) ,parameter :: tol_mut = 1e-8_dp
-    real(dp)  :: Kt, mut, rt, netwaget, penst, w, brackl, bracku ! variables in period t
+    real(dp)  :: Kt, mut, rt, netwaget, penst, w ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
-    logical   :: brack_found
 
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
     nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)

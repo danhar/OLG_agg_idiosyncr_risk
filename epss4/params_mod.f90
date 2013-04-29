@@ -568,7 +568,7 @@ contains
                 enddo
                 nj = nint(sum(surv))
                 already_adjusted_nj = .true.
-                print*, 'Warning: params_mod: setting nj to life expectancy, nj=', nj
+                write(*,'(a,i3)') 'params_mod: no survival risk, setting nj to life expectancy=', nj
             endif
             deallocate(surv)
             allocate(surv(nj))

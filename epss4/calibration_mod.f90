@@ -32,7 +32,7 @@ contains
         character(len=*) ,intent(in) :: projectname, calib_name
         real(dp) ,dimension(:)   ,allocatable :: xvals, fvals, data_targets, norm_vector
         real(dp) ,dimension(:,:) ,allocatable :: Rmat, QTmat    ! QR decomposition in s_alg_qn
-        real(dp)            :: maxstp, brack1, brack2
+        real(dp)            :: brack1, brack2
         logical             :: intialize_jacobi, not_converged, bracket_found
         integer             :: it
         integer  ,parameter :: max_iterations = 500

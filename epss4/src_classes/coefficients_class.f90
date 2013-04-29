@@ -160,7 +160,7 @@ contains
         class(tCoeffs) ,intent(in) :: this
         integer        ,intent(in) :: unit, show_digits
         integer :: i
-        character(:), allocatable :: fmt1, ind_var_1, ind_var_2 ! name of independent variables
+        character(:), allocatable :: ind_var_1, ind_var_2 ! name of independent variables
         integer, parameter :: nl =11
         character(len=nl) :: dep_var ! name of dependent variables
 
