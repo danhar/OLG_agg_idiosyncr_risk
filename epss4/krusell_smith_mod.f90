@@ -1,6 +1,6 @@
 module krusell_smith_mod
     use kinds
-    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs, tStats
+    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs
 
     implicit none
     private
@@ -24,7 +24,7 @@ contains
         use sub_alg_qn
         !use sub_broyden
 
-        type(tAggGrids) ,intent(inout) :: grids
+        type(tAggGrids) ,intent(in) :: grids
         character(len=*),intent(in)    :: projectname, calib_name, output_path
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars(:)
@@ -37,12 +37,10 @@ contains
         integer         ,intent(out)   :: it
         real(dp) ,allocatable ,intent(out) :: value(:,:,:,:,:,:)
 
-        type(tStats)          :: K, mu, rf
         real(dp) ,allocatable :: xvals(:), fvals(:), Rmat(:,:), QTmat(:,:)    ! QR decomposition in s_alg_qn
         real(dp) ,allocatable :: xgrid_mean_new(:,:,:)
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
-        logical, parameter    :: get_new_simvars = .false. ! set to true to have a partial equilibrium run which helps to adjust aggregate grids before starting rootfinder
         integer               :: n, i, max_iter, recomp_jacobian
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
@@ -64,23 +62,12 @@ contains
             close(132)
         endif
 
-        if (partial_equilibrium .or. get_new_simvars) fvals = krusellsmith(xvals) ! results for partial equilibrium, or values to adjust aggregate grids before starting K/S rootfinder
+        if (partial_equilibrium) then
+            fvals = krusellsmith(xvals)
 
-        if (.not. partial_equilibrium) then
+        else
             print *
-            print '(t2,a)','- krusell_smith: updating aggregate grid and starting root finder'
-
-            ! Update aggregate grid using statistics of first run (could update more often in internal function krusellsmith, but not clear how / whether good)
-            K%name ='K' ; call K%calc_stats(simvars)
-            mu%name='mu'; call mu%calc_stats(simvars)
-            rf%name='rf'; call rf%calc_stats(simvars)
-            ! call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
-            call grids%update(K%min_(), K%max_(), mu%min_(), mu%max_())
-            forall (i = 1:size(simvars))
-                simvars(i)%K(1) = K%avg_()
-                simvars(i)%mu(1) = mu%avg_()
-                simvars(i)%rf(1) = rf%avg_()
-            end forall
+            print '(t2,a)','- krusell_smith: starting root finder'
 
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file

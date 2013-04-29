@@ -23,7 +23,8 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
     type(tLifecycle)  :: lifecycles
-    type(tSimvars), allocatable:: simvars(:)    ! simulation variables, e.g. zt, kt,...
+    type(tSimvars), allocatable:: simvars(:), simvars_old(:)    ! simulation variables, e.g. zt, kt,...
+    type(tStats)      :: K, mu, rf
     type(tErrors)     :: err
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
     real(dp)          :: ms_rf_temp
@@ -105,20 +106,39 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     else
         print*,'- run_model: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
-        allocate(simvars(OMP_get_max_threads()))
-        call simvars%allocate(nt)
-        call random_seed(put=seed) ! so that same sequence for different experiments
-        do i=1,size(simvars)
-            simvars(i)%z     = MarkovChain(pi_z,nt)
-            simvars(i)%K(1)  = ms_grids%k(1)    ! starting value for simulation
-            simvars(i)%mu(1) = ms_grids%mu(1)   ! starting value for simulation
-            simvars(i)%rf(1) = ms_rf_temp       ! starting value for simulation
-        enddo
-        ! Not simvars%mu(1) = ms_grids%mu(1), because overwritten in simulations. Instead, calc mu0 from agg_grid.
-        coeffs = Initialize(dir, estimate_from_simvars, ms_grids)
         call grids%allocate(nk,nmu)
         call grids%set_params(k_min,k_max,mu_min,mu_max)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
+
+        allocate(simvars(OMP_get_max_threads()))
+        call simvars%allocate(nt)
+        call random_seed(put=seed) ! so that same sequence for different experiments
+
+        if (estimate_from_simvars) then
+            call read_unformatted(simvars_old)
+            K%name ='K' ; call K%calc_stats(simvars_old)
+            mu%name='mu'; call mu%calc_stats(simvars_old)
+            rf%name='rf'; call rf%calc_stats(simvars_old)
+
+            do i=1,size(simvars)
+                simvars(i)%z     = MarkovChain(pi_z,nt)
+                simvars(i)%K(1) = K%avg_()
+                simvars(i)%mu(1) = mu%avg_()
+                simvars(i)%rf(1) = rf%avg_()
+            enddo
+            call grids%update(K%min_(), K%max_(), mu%min_(), mu%max_())
+            ! call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
+        else
+            do i=1,size(simvars)
+                simvars(i)%z     = MarkovChain(pi_z,nt)
+                simvars(i)%K(1)  = ms_grids%k(1)    ! starting value for simulation
+                simvars(i)%mu(1) = ms_grids%mu(1)   ! starting value for simulation
+                simvars(i)%rf(1) = ms_rf_temp       ! starting value for simulation
+            enddo
+        endif
+
+        coeffs = Initialize(dir, estimate_from_simvars, ms_grids)
+
     endif
     output_path = construct_path(dir,calib_name)
     syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
