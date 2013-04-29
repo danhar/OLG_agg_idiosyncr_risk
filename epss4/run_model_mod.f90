@@ -115,6 +115,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         call random_seed(put=seed) ! so that same sequence for different experiments
 
         if (estimate_from_simvars) then
+            print*, '- run_model: using previous simvars to initialize'
             call read_unformatted(simvars_old)
             K%name ='K' ; call K%calc_stats(simvars_old)
             mu%name='mu'; call mu%calc_stats(simvars_old)
@@ -122,22 +123,25 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 
             do i=1,size(simvars)
                 simvars(i)%z     = MarkovChain(pi_z,nt)
-                simvars(i)%K(1) = K%avg_()
+                simvars(i)%K(1)  = K%avg_()
                 simvars(i)%mu(1) = mu%avg_()
                 simvars(i)%rf(1) = rf%avg_()
             enddo
             call grids%update(K%min_(), K%max_(), mu%min_(), mu%max_())
             ! call grids%update(K%avg_(), mu%avg_(), K%std_(), mu%std_())
+
+            coeffs = Initialize(simvars_old)
         else
+            print*, '- run_model: using mean shock values (or hard-coded guesses) to initialize'
             do i=1,size(simvars)
                 simvars(i)%z     = MarkovChain(pi_z,nt)
                 simvars(i)%K(1)  = ms_grids%k(1)    ! starting value for simulation
                 simvars(i)%mu(1) = ms_grids%mu(1)   ! starting value for simulation
                 simvars(i)%rf(1) = ms_rf_temp       ! starting value for simulation
             enddo
-        endif
 
-        coeffs = Initialize(dir, estimate_from_simvars, ms_grids)
+            coeffs = Initialize(ms_grids)
+        endif
 
     endif
     output_path = construct_path(dir,calib_name)

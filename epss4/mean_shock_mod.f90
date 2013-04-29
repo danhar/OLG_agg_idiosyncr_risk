@@ -37,7 +37,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 
     nz = size(stat_dist_z)
     allocate(w(nz))
-    coeffs          = Initialize('msge')
+    coeffs          = Initialize()
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
 	mean_delta		= dot_product(stat_dist_z, delta)
 	i				= f_locate(zeta,mean_zeta)	  ! In 'default', f_locate returns ju-1 if x>xgrid(ju-1) !

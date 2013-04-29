@@ -8,7 +8,7 @@ module laws_of_motion
     public Initialize, Regression, Forecast_k, Forecast_mu
 
     interface Initialize
-        module procedure initialize_coeffs
+        module procedure initialize_coeffs_ms, initialize_coeffs_guess, initialize_coeffs_simvars
     end interface Initialize
 
     type tMask
@@ -20,7 +20,9 @@ contains
 ! Module procedures in order: (would be nice in submodules)
 ! - pure real(dp) function Forecast(coeffs, k_in, mu_in_o)
 ! - pure subroutine Regression(simvars,coeffs)
-! - function initialize_coeffs(dir,agg_grid_o) result(coeffs)
+! - function initialize_coeffs_ms() result(coeffs)
+! - function initialize_coeffs_simvars(simvars) result(coeffs)
+! - function initialize_coeffs_guess(agg_grid) result(coeffs)
 !-------------------------------------------------------------------------------
 
 pure real(dp) function Forecast_k(coeffs, k_in, mu)
@@ -252,20 +254,44 @@ pure subroutine Regression(simvars,coeffs)
 end subroutine Regression
 !-------------------------------------------------------------------------------
 
-function initialize_coeffs(dir,estimate_from_simvars_o,agg_grid_o) result(coeffs)
+pure function initialize_coeffs_ms() result(coeffs)
+    ! Degenerate coefficients for the mean shock equilibrium
+    ! Can't make this a type-bound procedure of coeffs because then circular dependency
+    type(tCoeffs)   :: coeffs
+
+    call coeffs%allocate()
+    coeffs%r_squared = 0.0
+    coeffs%k         = 0.0
+    coeffs%mu        = 0.0
+    coeffs%k(2,:)  = 1.0     ! same for loms_in_logs
+    coeffs%mu(2,:) = 1.0
+
+end function initialize_coeffs_ms
+!-------------------------------------------------------------------------------
+
+pure function initialize_coeffs_simvars(simvars_old) result(coeffs)
+    ! Can't make this a type-bound procedure of coeffs because then circular dependency
+    use classes_mod   ,only: tSimvars
+
+    type(tCoeffs)              :: coeffs
+    type(tSimvars) ,intent(in) :: simvars_old(:)
+
+    call coeffs%allocate()
+    call Regression(simvars_old,coeffs)
+
+end function initialize_coeffs_simvars
+!-------------------------------------------------------------------------------
+
+function initialize_coeffs_guess(agg_grid) result(coeffs)
+    ! This is for putting hard-coded guesses for the coefficients
+    ! Usually only necessary for very first Krusell-Smith runs.
     ! Can't make this a type-bound procedure of coeffs because then circular dependency
     use params_mod    ,only: pi1_delta, scale_IR
-    use classes_mod   ,only: tSimvars, tAggGrids
-    use simvars_class ,only: read_unformatted
+    use classes_mod   ,only: tAggGrids
 
-    type(tCoeffs)                          :: coeffs
-    character(len=*) ,intent(in)           :: dir
-    logical          ,intent(in) ,optional :: estimate_from_simvars_o
-    type(tAggGrids)  ,intent(in) ,optional :: agg_grid_o
+    type(tCoeffs)                :: coeffs
+    type(tAggGrids)  ,intent(in) :: agg_grid
     integer :: n_coeffs_k, n_coeffs_mu, nz
-    real(dp) ,parameter :: coef_k2_init  = 0.95_dp ! could delete this
-    real(dp) ,parameter :: coef_mu3_init = 0.70_dp
-    type(tSimvars) ,allocatable :: simvars_old(:)
 
     call coeffs%allocate()
     coeffs%r_squared = 0.0
@@ -274,25 +300,9 @@ function initialize_coeffs(dir,estimate_from_simvars_o,agg_grid_o) result(coeffs
     n_coeffs_k  = size(coeffs%k ,1)
     n_coeffs_mu = size(coeffs%mu,1)
     nz          = size(coeffs%k ,2)
+!    print*, 'laws_of_motion:initialize_coeffs: using hard-coded guess'
+    if (n_coeffs_k .ne. n_coeffs_mu) stop 'CRITICAL STOP: n_coeffs_k .ne. n_coeffs_mu'
 
-ifdir:  if (dir == 'msge' .or. dir == 'mspe') then
-        coeffs%k(2,:)  = 1.0     ! same for loms_in_logs
-        coeffs%mu(2,:) = 1.0
-
-    elseif (dir == 'ge') then
-        if (present(estimate_from_simvars_o)) then
-            if (estimate_from_simvars_o) then
-                print*, 'laws_of_motion:initialize_coeffs: estimating from old simvars'
-                call read_unformatted(simvars_old)
-                call Regression(simvars_old,coeffs)
-
-                return
-
-            endif
-        endif
-
-        print*, 'laws_of_motion:initialize_coeffs: using hard-coded guess'
-        if (n_coeffs_k .ne. n_coeffs_mu) stop 'CRITICAL STOP: n_coeffs_k .ne. n_coeffs_mu'
 coef:   select case (n_coeffs_k)
         case(2)
 pi:     if (pi1_delta==1.0) then
@@ -386,8 +396,8 @@ ir2:                    if ((1.0 + scale_IR) > 0.1_dp) then
             endif pi
 
             if (loms_in_logs) then
-                coeffs%k(1,:)  = log(agg_grid_o%k(1))*(1-coeffs%k(2,:))
-                coeffs%mu(1,:) = log(agg_grid_o%mu(1))*(1-coeffs%mu(2,:))
+                coeffs%k(1,:)  = log(agg_grid%k(1))*(1-coeffs%k(2,:))
+                coeffs%mu(1,:) = log(agg_grid%mu(1))*(1-coeffs%mu(2,:))
             endif
 
         case(3:) coef ! all higher 3
@@ -408,8 +418,8 @@ ir2:                    if ((1.0 + scale_IR) > 0.1_dp) then
 
             elseif (pi1_delta == 1.0) then ! STY
                 if (loms_in_logs) then ! not implemented
-                    coeffs%k(1,:)  = 1.770695 !log(agg_grid_o%k(1))*(1-coeffs%k(2,:))
-                    coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid_o%mu(1))*(1-coeffs%mu(3,:))
+                    coeffs%k(1,:)  = 1.770695 !log(agg_grid%k(1))*(1-coeffs%k(2,:))
+                    coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid%mu(1))*(1-coeffs%mu(3,:))
                 else
                     coeffs%k = reshape([ 1.598852E-01,  8.942185E-01,  1.191438E+01, &
                                          0.000000E+00,  1.000000E+00,  0.000000E+00, &
@@ -436,13 +446,12 @@ ir2:                    if ((1.0 + scale_IR) > 0.1_dp) then
                                          3.444827E-02, -1.608870E-02,  3.809692E-03],&
                                shape(coeffs%mu))
                 else    ! not implemented
-                    coeffs%k(1,:)  = 1.770695 !log(agg_grid_o%k(1))*(1-coeffs%k(2,:))
-                    coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid_o%mu(1))*(1-coeffs%mu(3,:))
+                    coeffs%k(1,:)  = 1.770695 !log(agg_grid%k(1))*(1-coeffs%k(2,:))
+                    coeffs%mu(1,:) = -7.241165E+01 !log(agg_grid%mu(1))*(1-coeffs%mu(3,:))
                 endif
             endif
         end select coef
-    endif ifdir
- end function initialize_coeffs
-!-------------------------------------------------------------------------------
+ end function initialize_coeffs_guess
+ !-------------------------------------------------------------------------------
 
 end module laws_of_motion
