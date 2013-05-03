@@ -1,6 +1,9 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- calibration routine should save params in each step (so I can see progress or why no progress, and also use the params.txt together with
+    the saved unformatted loms if the calibration should be aborted)
+
 - put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
     Put second-least-need target second-to-last. Actually, this might be too complicated, because I should rewrite the whole thing anyway, see below.
 
