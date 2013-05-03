@@ -110,8 +110,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             real(dp), dimension(size(param_vec)):: distance
             type(tSimvars), allocatable :: simvars(:)
             real(dp) :: welfare_temp
+            character(len=3) :: it_char
 
             it = it+1
+            write(it_char, '(i3.3)') it
+
             if (norm_params_to_1) then
                 call set_params(param_vec*norm_vector, trim(adjustl(calib_targets)))
             else
@@ -120,7 +123,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             print *,''
             print '(a,i3.3)','Calibration iteration ', it
 
-            call run_model(projectname, calib_name, welfare_temp, simvars)
+            call run_model(projectname, calib_name, welfare_temp, simvars, it_char)
 
             distance = data_targets - model_targets(n_end_params, simvars, trim(adjustl(calib_targets)))
 

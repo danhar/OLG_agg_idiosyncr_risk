@@ -7,14 +7,15 @@ contains
 ! - subroutine plot_results(dir,mfile)
 !-------------------------------------------------------------------------------
 subroutine save_results(Phi, simvars, coeffs, grids, lc, &
-                          pol, secs, it, projectname, calib_name, dir, err)
+                          pol, secs, it, projectname, calib_name, dir, err, cal_iter_o)
 
     use kinds
     use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs, tStats, tStats_logical
     use statistics      ,only: cov, corr
     use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path
 
-    intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir
+    intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir, cal_iter_o
+    optional:: cal_iter_o
 
     type(tSimvars)   :: simvars(:) ! (kt, mut, bt,...), first element contains starting values
     type(tCoeffs)    :: coeffs
@@ -23,8 +24,8 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     type(tPolicies)  :: pol
     type(tErrors)    :: err
 	real(dp)         :: Phi(:,:,:), secs !distribution, seconds
-	integer          :: it, i
-    character(len=*) :: dir, projectname, calib_name
+	integer          :: it, i ! it = total iterations in Krusell Smith
+    character(len=*) :: dir, projectname, calib_name, cal_iter_o ! current iteration in calibration routine
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
@@ -32,16 +33,24 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
     type(tStats_logical) :: err_K, err_mu
     character(:), allocatable :: path
+    logical :: calibrating
 
-    path = construct_path(dir, calib_name)
+    if (present(cal_iter_o)) then
+        calibrating = .true.
+        path = 'model_output/'//cal_id(calib_name)
+    else
+        calibrating = .false.
+        path = construct_path(dir, calib_name)
+    endif
+
 !    cons = pol%xgrid -pol%apgrid
 
     call calc_stats()
 
-    call write_stats('short')
+    if (.not. calibrating) call write_stats('short')
     call write_stats('long')
 
-    call write_output_files()
+    if (.not. calibrating) call write_output_files()
 
 contains
 !-------------------------------------------------------------------------------
@@ -111,7 +120,11 @@ contains
 
     nl = K%get_namelength()
     show_digits = K%get_digits2display(prec)
-    open(unit=21, file=path//'/equilibrium_'//prec//'.txt', status = 'replace', action='write')
+    if (calibrating) then
+        open(unit=21, file=path//'/equilibrium_'//prec//cal_iter_o//'.txt', status = 'replace', action='write')
+    else
+        open(unit=21, file=path//'/equilibrium_'//prec//'.txt', status = 'replace', action='write')
+    endif
     write(21,'(a12,a,",",a13,a)') ' Project    ', projectname, ' calibration ', calib_name
     write(21,*)
     write(21,*) 'Aggregate statistics'
