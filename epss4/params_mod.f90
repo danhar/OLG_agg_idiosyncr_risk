@@ -1311,6 +1311,7 @@ subroutine params_set_real(param_name, new_value)
            if (new_value < 0.0) then
                print* , 'WARNING: params_set: del_mean < 0.0' !, setting to 0.0
                ! del_mean = 0.0
+               del_mean = new_value
            else
                del_mean = new_value
            endif

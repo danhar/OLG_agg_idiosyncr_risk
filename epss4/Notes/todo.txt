@@ -1,6 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- put tolerance in simulation into the calibration files
+
 - put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
     Put second-least-need target second-to-last. Actually, this might be too complicated, because I should rewrite the whole thing anyway, see below.
 
