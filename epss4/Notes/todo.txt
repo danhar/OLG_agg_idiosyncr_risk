@@ -143,6 +143,9 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- calibration routine should save params in each step (so I can see progress or why no progress, and also use the params.txt together with
+    the saved unformatted loms if the calibration should be aborted)
+
 - This didn't work: add a kappa_max, which helps to speed up the solution and also for the cases where ap very close to zero
 
 - one procedure to forecast both mup and kp, it takes both coeffs as input and gridpoints k and mu

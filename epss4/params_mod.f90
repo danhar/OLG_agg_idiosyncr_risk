@@ -1141,15 +1141,22 @@ pure function construct_path(dir, calib_name)
 end function construct_path
 
 !-------------------------------------------------------------------------------------------------
-subroutine SaveParams(projectname, calib_name)
+subroutine SaveParams(projectname, calib_name, cal_iter_o)
 ! Save parameters and exogenous variables
     use omp_lib           ,only: OMP_get_max_threads
     character(len=*), intent(in)    :: projectname, calib_name
-    character(:), allocatable :: path
+    character(len=*), intent(in) ,optional :: cal_iter_o
+    character(:), allocatable :: path, filename
 
     path = 'model_output/'//cal_id(calib_name)
 
-    open(unit=21, file=path//'/params.txt', status = 'replace', action='write')
+    if (present(cal_iter_o)) then
+        filename = '/params'//cal_iter_o//'.txt'
+    else
+        filename = '/params.txt'
+    endif
+
+    open(unit=21, file=path//filename, status = 'replace', action='write')
     write(21,'(a9,a,",",a13,a)') ' Project ', projectname, ' calibration ', calib_name
     write(21,*) '-------------------------- Prefs and Tech --------------------------'
     write(21,211) ' theta        = ', theta

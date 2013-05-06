@@ -2,7 +2,7 @@ module run_model_mod
     implicit none
 contains
 
-subroutine run_model(projectname, calib_name, welfare, simvars_o)
+subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
@@ -12,13 +12,14 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
-	use params_mod        ,only: construct_path, set_apmax, & ! procedures
+	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
+	character(len=*) ,intent(in) ,optional :: cal_iter_o
 	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
-	type(tSimvars)   ,intent(out) ,optional, allocatable :: simvars_o(:)
+	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
     type(tCoeffs)     :: coeffs  ! coefficients for laws of motion
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
@@ -38,6 +39,9 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     else
         calibrating =.false.
     endif
+
+    call SaveParams(projectname, calib_name, cal_iter_o)
+
 !-------------------------------------------------------------------------------
 ! Mean Shock (partial or general) Equilibrium (to generate good initial guesses)
 !-------------------------------------------------------------------------------
@@ -57,7 +61,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
         ms_grids = ms_guess
     endif
     output_path = construct_path(dir,calib_name)
-    syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+    if (.not. calibrating) syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
     allocate(simvars(1)) ! only one core used for mean shock
@@ -145,7 +149,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
 
     endif
     output_path = construct_path(dir,calib_name)
-    syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+    if (.not. calibrating) syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
 
     call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
     if (err%not_converged) call err%print2stderr(dir)
@@ -155,7 +159,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o)
     print*, ' '
     if (.not. calibrating) call CheckPhi(Phi,output_path)
     if (.not. partial_equilibrium .and. .not. err%not_converged) call save_unformatted(grids, coeffs, simvars)
-    if (.not. calibrating) call save_and_plot_results(dir, grids, err)
+    call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
     if (.not. calibrating) then
         print*,' **** Completed solution of calibration ', calib_name, ' **** '
@@ -187,14 +191,14 @@ contains
         real(dp) :: secs
         integer  :: end_time, count_rate
 
-        print*, '- run_model: Saving results and plots to folder ./model_output '
+        if (.not. calibrating) print*, '- run_model: Saving results and plots to folder ./model_output '
         call system_clock(end_time,count_rate)
         secs= real(end_time-start_time,dp)/real(count_rate,dp) ! excludes time for saving and plotting results
 
         call save_results(Phi, simvars, coeffs, grids,lifecycles,&
-                             policies, secs, it, projectname, calib_name, dir, err)
+                             policies, secs, it, projectname, calib_name, dir, err, cal_iter_o)
 
-        call plot_results(output_path, 'plot_all')
+        if (.not. calibrating) call plot_results(output_path, 'plot_all')
 
     end subroutine save_and_plot_results
 

@@ -3,7 +3,7 @@
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
-	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, SaveParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, &
+	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, &
 	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
@@ -30,6 +30,7 @@ program EPSS
         call SetDefaultValues
         call get_calibration_name(calib_name, exit_main_loop)
         if (exit_main_loop) exit
+        calib_name_base = calib_name
 
 	    print*, '- main: Reading calibration file '// calib_name
 	    call ReadCalibration(trim(adjustl(calib_name)))
@@ -38,6 +39,8 @@ program EPSS
 	    if (n_end_params > 0) then
 	        call params_set_thisrun
             call CheckParams
+            write(runchar,'(a4)') ',cal'
+            calib_name = trim(calib_name)//trim(runchar)
             sys_error = system('mkdir model_output/'//cal_id(calib_name)) ! could create different folder with _cal attached?
 	        call calibrate(projectname, calib_name)
         endif
@@ -50,7 +53,6 @@ program EPSS
         if (allocated(cev)) deallocate(cev)
         if (tau_experiment)  allocate(cev(run_counter_start:run_n_times))
         write (runchar, *) ' '
-        calib_name_base = calib_name
         do rc=run_counter_start,run_n_times ! always run one time without experiment
             if (run_counter_start/=run_n_times) then
                 if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0) then
@@ -96,7 +98,6 @@ program EPSS
             call params_set_thisrun
 	        call CheckParams
 	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
-	        call SaveParams(projectname, calib_name)
 
     	    call run_model(projectname, calib_name, welfare(rc,1))
 
@@ -106,7 +107,6 @@ program EPSS
     	        write(runchar,'(a4,f3.2)') ',tau',tau
     	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
-                call SaveParams(projectname, calib_name)
     	        call run_model(projectname, calib_name, welfare(rc,2))
     	        call params_set('tau', tau- tau_increment)
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
