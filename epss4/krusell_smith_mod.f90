@@ -78,7 +78,7 @@ contains
             endif
 
             if (calibrating) then
-                max_iter = 44
+                max_iter = 89
                 recomp_jacobian = 15
             else
                 max_iter = 499

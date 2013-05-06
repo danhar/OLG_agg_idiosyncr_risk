@@ -12,7 +12,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     use kinds
     use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs, tStats, tStats_logical
     use statistics      ,only: cov, corr
-    use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path
+    use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path, cal_id
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir, cal_iter_o
     optional:: cal_iter_o

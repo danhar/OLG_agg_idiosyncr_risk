@@ -40,7 +40,7 @@ program EPSS
 	        call params_set_thisrun
             call CheckParams
             write(runchar,'(a4)') ',cal'
-            calib_name = calib_name//runchar
+            calib_name = trim(calib_name)//trim(runchar)
             sys_error = system('mkdir model_output/'//cal_id(calib_name)) ! could create different folder with _cal attached?
 	        call calibrate(projectname, calib_name)
         endif

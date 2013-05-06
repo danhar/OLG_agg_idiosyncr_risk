@@ -26,7 +26,7 @@
 					<folderInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1623462470" name="/" resourcePath="">
 						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1381982486" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
 							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.XCOFF32;org.eclipse.cdt.core.SOM;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.MachO64" id="photran.managedbuild.target.intel.platform.x86_64.base.1293429770" name="Intel(R) 64 Platform" osList="linux" superClass="photran.managedbuild.target.intel.platform.x86_64.base"/>
-							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1448368368" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base">
+							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1448368368" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="photran.managedbuild.target.intel.builder.x86_64.base">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Debugmax"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Build_Optimmax"/>
@@ -121,7 +121,7 @@
 					<folderInfo id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339." name="/" resourcePath="">
 						<toolChain id="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1387304227" name="photran.managedbuild.toolchain.intel.fortran.x86_64.base" superClass="photran.managedbuild.toolchain.intel.fortran.x86_64.base">
 							<targetPlatform archList="x86_64" binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF;org.eclipse.cdt.core.PE;org.eclipse.cdt.core.Cygwin_PE;org.eclipse.cdt.core.XCOFF32;org.eclipse.cdt.core.SOM;org.eclipse.cdt.core.MachO;org.eclipse.cdt.core.MachO64" id="photran.managedbuild.target.intel.platform.x86_64.base.2020006895" name="Intel(R) 64 Platform" osList="linux" superClass="photran.managedbuild.target.intel.platform.x86_64.base"/>
-							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1593058046" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="4" superClass="photran.managedbuild.target.intel.builder.x86_64.base"/>
+							<builder buildPath="${workspace_loc:/epss4/Default}" id="photran.managedbuild.target.intel.builder.x86_64.base.1593058046" keepEnvironmentInBuildfile="true" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="false" superClass="photran.managedbuild.target.intel.builder.x86_64.base"/>
 							<tool id="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.1647259652" name="GCC C Compiler" superClass="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2059878800" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
