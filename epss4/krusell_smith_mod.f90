@@ -72,13 +72,13 @@ contains
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
                 call coeffs%save_initial_values()
-                maxstp=1.9_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                maxstp=3.9_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
             else
                 maxstp=10.0     ! this is large and arbitrary
             endif
 
             if (calibrating) then
-                max_iter = 44
+                max_iter = 74
                 recomp_jacobian = 15
             else
                 max_iter = 499
