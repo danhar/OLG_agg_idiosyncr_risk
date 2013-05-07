@@ -891,8 +891,8 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     if (del_mean < 0.0) then
-        print*, 'ERROR: del_mean < 0.0'
-        call critical_stop
+        print*, 'WARNING: del_mean < 0.0'
+        !call critical_stop
     elseif (del_mean  > 0.2_dp) then
         print*, 'WARNING: del_mean > 0.2'
     endif
