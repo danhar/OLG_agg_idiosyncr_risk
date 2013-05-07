@@ -1133,11 +1133,18 @@ pure function cal_id(calib_name)
     if (pos2 > pos) cal_id = cal_id//temp(pos2:)
 end function cal_id
 !-------------------------------------------------------------------------------------------------
-pure function construct_path(dir, calib_name)
+pure function construct_path(calib_name, dir)
 !	use params_mod, only: cal_id
 	character(:), allocatable :: construct_path
-	character(len=*), intent(in) :: dir, calib_name
-    construct_path= 'model_output/'//cal_id(calib_name)//'/'//dir
+	character(len=*), intent(in) :: calib_name
+	character(len=*), intent(in) ,optional :: dir
+
+	if (present(dir)) then
+        construct_path= 'model_output/'//cal_id(calib_name)//'/'//dir
+    else
+        construct_path= 'model_output/'//cal_id(calib_name)
+    endif
+
 end function construct_path
 
 !-------------------------------------------------------------------------------------------------

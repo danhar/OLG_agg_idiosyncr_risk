@@ -60,7 +60,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         dir    = 'msge'
         ms_grids = ms_guess
     endif
-    output_path = construct_path(dir,calib_name)
+    output_path = construct_path(calib_name,dir)
     if (.not. calibrating) syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
@@ -148,8 +148,13 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         endif
 
     endif
-    output_path = construct_path(dir,calib_name)
-    if (.not. calibrating) syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+
+    if (calibrating) then
+        output_path = construct_path(calib_name)
+    else
+        output_path = construct_path(calib_name,dir)
+        syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+    endif
 
     call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
     if (err%not_converged) call err%print2stderr(dir)

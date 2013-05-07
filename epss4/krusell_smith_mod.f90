@@ -195,7 +195,7 @@ contains
         character(:), allocatable   :: outpath
         character(len=5) :: dir
 
-        outpath= construct_path('ge',calib_name)
+        outpath= construct_path(calib_name)
 
         open(unit=132, file=outpath//'/loms_it.txt', status = 'old', position='append')
         write(132,'(a10,i3.3,a24,es13.6,a29,es13.6)')   &
@@ -218,7 +218,7 @@ contains
         close(132)
 
         write(dir, '(a2,i3.3)') 'it',it
-        outpath= construct_path(dir,calib_name)
+        outpath= construct_path(calib_name,dir)
         syserr = system('mkdir '//outpath)
         secs= 0.0        ! No need to calc here
         call save_results(Phi, simvars, coeffs, grids,lifecycles,&

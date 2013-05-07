@@ -37,10 +37,10 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
     if (present(cal_iter_o)) then
         calibrating = .true.
-        path = 'model_output/'//cal_id(calib_name)
+        path = construct_path(calib_name)
     else
         calibrating = .false.
-        path = construct_path(dir, calib_name)
+        path = construct_path(calib_name,dir)
     endif
 
 !    cons = pol%xgrid -pol%apgrid
