@@ -1023,12 +1023,6 @@ use omp_lib           ,only: OMP_get_max_threads
             call critical_stop
     end select
 
-    if (welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)) then
-        print*, 'ERROR: welfare_decomposition .and. (scale_IR_orig .ne. 0.0 .or. scale_AR_orig .ne. 0.0)'
-        print*, 'But can either do welfare_decomposition or scaling experiment!'
-        call critical_stop
-    endif
-
     if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0 .and. scale_AR_orig .ne. 0.0 .and. scale_AR_orig .ne. -1.0) then
         print*, 'ERROR: scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0 .and. scale_AR_orig .ne. 0.0  .and. scale_AR_orig .ne. -1.0'
         print*, '       -> Set either scale_IR to (-1,0) or scale_AR to (-1,0).'
