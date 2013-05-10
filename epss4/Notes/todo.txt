@@ -1,6 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- Maybe should also normalize targets in calibration rootfinding to unity. Convergence was very slow, and it's a difference of factor 100 whether I want to match K/Y=2.6 or r_f=0.023
+
 - put tolerance in simulation into the calibration files
 
 - put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
@@ -17,6 +19,8 @@
 
 - the prog should look for initial guesses in the subfolder in last_results which corresponds to the calibration name. If not found use the 
     initial guesses in last_results and issue warning.
+    
+- set_apmax conditions on bequests_to_newborn, which is default .true. even if we do not have survival risk. Should check and correct or impove.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
