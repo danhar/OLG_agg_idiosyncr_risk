@@ -5,9 +5,6 @@
 
 - put tolerance in simulation into the calibration files
 
-- put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
-    Put second-least-need target second-to-last. Actually, this might be too complicated, because I should rewrite the whole thing anyway, see below.
-
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
@@ -147,6 +144,9 @@ Remove the optional on errors (everywhere!)
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (E) Done! (started only in Nov. 2012) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
+    Put second-least-need target second-to-last. Actually, this might be too complicated, because I should rewrite the whole thing anyway, see below.
+
 - calibration routine should save params in each step (so I can see progress or why no progress, and also use the params.txt together with
     the saved unformatted loms if the calibration should be aborted)
 

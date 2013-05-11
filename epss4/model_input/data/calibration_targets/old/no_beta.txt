@@ -6,5 +6,5 @@
 
 0.023	del_mean	Average risk-free rate (Shiller)
 0.030   del_std     Std. consumption growth (NIPA)
-0.333   theta       Sharpe ratio (Shiller)
 0.50	pi1_delta	Corr.(TFP, returns) (NIPA, Shiller)
+0.333   theta       Sharpe ratio (Shiller)
