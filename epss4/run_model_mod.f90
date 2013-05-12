@@ -60,30 +60,42 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         dir    = 'msge'
         ms_grids = ms_guess
     endif
-    output_path = construct_path(calib_name,dir)
-    if (.not. calibrating) syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
-    it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
 
+    if (calibrating) then
+        output_path = construct_path(calib_name)
+    else
+        output_path = construct_path(calib_name,dir)
+        syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+    endif
+
+    it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
     allocate(simvars(1)) ! only one core used for mean shock
     call solve_meanshock(coeffs, ms_grids, policies, simvars(1), lifecycles, Phi, xgrid_ms, value, err, output_path)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
     ! Check distribution and save results
-    if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
-    if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
-    if (.not. partial_equilibrium) call ms_grids%write_unformatted('ms')
-
-    ms_rf_temp = simvars(1)%rf(1)
-    deallocate(simvars)
     print*, ' '
+    if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
+    if (.not. partial_equilibrium  .and. .not. err%not_converged) call ms_grids%write_unformatted('ms')
+    if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
 
     if (scale_AR == -1.0) then
-        print*,' **** Completed solution of calibration ', calib_name, ' **** '
-        print*, ' '
-        print*, ' '
+        if (present(simvars_o)) simvars_o = simvars
+        if (.not. calibrating) then
+            print*,' **** Completed solution of calibration ', calib_name, ' **** '
+            print*, ' '
+            print*, ' '
+        else
+            print*,' *** Model solution successful during calibration of ', calib_name
+            call save_and_plot_results(dir, ms_grids, err)
+        endif
+
         return
     endif
+    ms_rf_temp = simvars(1)%rf(1)
+    deallocate(simvars)
+
 !stop 'Stop after ms'
 !-------------------------------------------------------------------------------
 ! Non-stationary (partial or general) Equilibrium (i.e. Krusell/Smith algorithm)
@@ -96,7 +108,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         dir    = 'pe'
         call read_unformatted_ks(grids, coeffs, simvars)
         if (scale_AR == -1.0) then
-            ! This is never executed at the moment because of the conditional return in line 70
+            ! This is never executed at the moment because of the conditional return in line 85
             print*,'scale_AR = -1.0, i.e. no aggregate risk'
             print*,'setting size(grids%mu)=1 with grids%mu= 0, i.e. zero expected equity premium'
             deallocate(grids%mu); allocate(grids%mu(1))

@@ -155,6 +155,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             if (n > 1) get_params(2) = del_std
             if (n > 2) get_params(3) = pi1_delta
             if (n > 3) get_params(4) = theta
+        case('no_AR')
+            get_params(1) = del_mean
+            if (n > 1) get_params(2) = beta
         case default
             get_params(1) = beta
             if (n > 1) get_params(2) = del_std
@@ -188,6 +191,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             if (n > 1) call params_set('del_std',param_vec(2))
             if (n > 2) call params_set('pi1_delta',param_vec(3))
             if (n > 3) call params_set('theta',param_vec(4))
+        case('no_AR')
+            call params_set('del_mean',param_vec(1))
+            if (n > 1) call params_set('beta',param_vec(2))
         case default
             call params_set('beta',param_vec(1))
             if (n > 1) call params_set('del_std',param_vec(2))
@@ -258,6 +264,9 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             if (n > 1) model_targets(2) = r%std_()
             if (n > 2) model_targets(3) = r%avg_exerr_()
             if (n > 3) model_targets(4) = corr(zeta,r)
+        case('no_AR')
+            model_targets(1) = rf%avg_exerr_()
+            if (n > 1) model_targets(2) = K_Y%avg_exerr_()
         case default
             model_targets(1) = K_Y%avg_exerr_()
             if (n > 1) model_targets(2) = r%std_()

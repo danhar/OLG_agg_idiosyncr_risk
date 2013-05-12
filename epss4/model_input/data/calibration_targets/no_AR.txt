@@ -1,0 +1,8 @@
+! This file contains the target values from the data.
+! It implements the very conservative calibration without the Sharpe ratio, but keeping the variance of consumption growth.
+
+! Do not change the sequence of the entries in the following table.
+! First column contains the value, second column the 'associated moment' (with the strongest impact), the third column a description.
+
+0.042	del_mean	Average return (Siegel 2002)
+2.65    beta        Capital output ratio (NIPA)
