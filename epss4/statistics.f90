@@ -293,7 +293,11 @@ contains
             return
         endif
 
-        corr = sum((var1%series - var1%avg)*(var2%series - var2%avg))/(real(size(var1%series)-1,dp)*var1%std*var2%std)
+        if (var1%std == 0.0 .or. var2%std== 0.0 ) then
+            corr = -2.0
+        else
+            corr = sum((var1%series - var1%avg)*(var2%series - var2%avg))/(real(size(var1%series)-1,dp)*var1%std*var2%std)
+        endif
 
     end function corr
 

@@ -14,7 +14,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use kinds
     use classes_mod ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs
     use laws_of_motion  ,only: Initialize
-    use params_mod      ,only: alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates, scale_AR
+    use params_mod      ,only: alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates, scale_AR, tol_coeffs
     use income
 	use sub_broyden
     use fun_locate
@@ -34,6 +34,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
 	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, value_ms ! mean shock projections
 	integer         	           :: i, nz		        ! index
+	logical ,parameter :: normalize_xvars_to_unity = .true.
 
     nz = size(stat_dist_z)
     allocate(w(nz))
@@ -59,10 +60,12 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     if (scale_AR == -1.0) then
         allocate(xvars(1), fvals(1))
         xvars(1)   = grids%k (1)
+        if (normalize_xvars_to_unity) xvars(1) = 1.0
     else
         allocate(xvars(2), fvals(2))
         xvars(1)   = grids%k (1)
         xvars(2)   = grids%mu(1)
+        if (normalize_xvars_to_unity) xvars = 1.0
     endif
 
     if(surv_rates) then
@@ -71,18 +74,29 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
         bequests_ms = 0.0
     endif
 
-	if (partial_equilibrium .or. grids%fixed) then ! if grids%fixed then we do not need a guess for the aggregate grid in GE.
+	if (partial_equilibrium .or. (grids%fixed .and. .not. scale_AR == -1.0)) then
+	! if grids%fixed then we do not need a guess for the aggregate grid in GE.
+	! However, grids%fixed is source-set. For the no AR and case, we want to calc the GE.
 	    fvals = ms_equilibrium(xvars)
 	else ! Find capital and mu for the mean shock general equilibrium
-		call s_broyden(ms_equilibrium,xvars,fvals,err%not_converged, get_fd_jac_o=.true.,tolf_o=1e-2_dp, maxlnsrch_o=5)  ! ,maxstp_o=.8_dp,tolf_o=1e-10_dp
+		call s_broyden(ms_equilibrium,xvars,fvals,err%not_converged, get_fd_jac_o=.true.,tolf_o=tol_coeffs, maxlnsrch_o=5)  ! ,maxstp_o=.8_dp,tolf_o=1e-6_dp
 		if (err%not_converged) call err%write2file(fvals, output_path)
     endif
 
-	grids%k (1) = xvars(1)
+    if (normalize_xvars_to_unity) then
+        grids%k(1) = xvars(1)*grids%k(1)
+    else
+	    grids%k(1) = xvars(1)
+    endif
+
 	if (size(xvars)==1) then
 	    grids%mu(1) = 0.0
 	else
-	    grids%mu(1) = xvars(2)
+	    if (normalize_xvars_to_unity) then
+	        grids%mu(1) = xvars(2)*grids%mu(1)
+	    else
+	        grids%mu(1) = xvars(2)
+        endif
     endif
 
     call get_equilibrium_values(policies,value,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, err)
@@ -125,11 +139,15 @@ contains
         integer                           :: i
 
         call grid%allocate(size(grids%k), size(grids%mu))
+
         grid%k  = msvars(1)
+        if (normalize_xvars_to_unity) grid%k  = msvars(1) *grids%k(1)
+
         if (size(msvars) == 1) then
             grid%mu = 0.0
         else
             grid%mu = msvars(2)
+            if (normalize_xvars_to_unity) grid%mu = msvars(2) *grids%mu(1)
         endif
 
         call olg_backwards_recursion(policies,coeffs, grid, value, errs)
@@ -165,7 +183,7 @@ contains
         kp_ms           = sum(apgrid_ms *Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
         agg_bond_demand = sum((apgrid_ms-stocks_ms)*Phi)
         ! Exess demands
-        distance(1)     = kp_ms - msvars(1)
+        distance(1)     = kp_ms - grid%k(1)
         if (size(distance) > 1) distance(2) = kp_ms * de_ratio/(1.0 + de_ratio) - agg_bond_demand/(L_N_ratio*(1.0+n)*(1.0+g))
 
     end function ms_equilibrium
@@ -245,8 +263,8 @@ contains
 
         call simvars%allocate(nz+1)   ! allocate all simulation variables
         simvars%z(1)    = 0     ! to indicate that these are mean-shock-results
-        simvars%K(1)    = xvars(1)
-        simvars%mu(1)   = xvars(2)
+        simvars%K(1)    = grids%k(1)
+        simvars%mu(1)   = grids%mu(1)
 
         simvars%output(1)= mean_zeta*simvars%K(1)**alpha
         simvars%stock(1) = sum(stocks_ms*Phi)/ L_N_ratio ! different from K(t+1) since it is in today's per capita terms. Thus no (1+g)(1+n) in denominator.
