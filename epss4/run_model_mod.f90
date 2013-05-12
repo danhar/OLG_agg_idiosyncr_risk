@@ -59,6 +59,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         print*,'- run_model: mean shock GENERAL equilibrium'
         dir    = 'msge'
         ms_grids = ms_guess
+        ! call ms_grids%read_unformatted('ms')
     endif
 
     if (calibrating) then
