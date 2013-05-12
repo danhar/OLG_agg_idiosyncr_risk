@@ -81,7 +81,7 @@ program EPSS
                     write(runchar,'(a5)') ',noIR'
                 elseif (rc ==5) then
                     call params_set('scale_AR', -1.0_dp)
-                    call params_set('scale_IR', 0.0_dp)
+                    if (scale_IR_orig .ne. -1.0) call params_set('scale_IR', 0.0_dp)
                     write(runchar,'(a5)') ',noAR'
                 elseif (rc ==6) then
                     call params_set('scale_AR', -1.0_dp)
