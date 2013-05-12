@@ -662,10 +662,15 @@ subroutine calibration_set_derived_params()
     ! calibration_mod changes the values of 'endogenous' parameters, so the parameters that depend
     ! on those have to be updated. This happens here.
     use markov_station_distr
+    real(dp) :: zeta_std_scaled, del_std_scaled
 
     gamm = (1.0-theta)/(1.0-1.0/psi)
-    delta=[del_mean + del_std, del_mean - del_std, del_mean + del_std, del_mean - del_std]
-    zeta =[zeta_mean-zeta_std, zeta_mean-zeta_std, zeta_mean+zeta_std, zeta_mean+zeta_std]
+
+    ! Due to the subroutine SetRemainingParams, the following scaling will only be applied if scale_AR == -1
+    zeta_std_scaled = zeta_std*(1.0 + scale_AR)
+    del_std_scaled  = del_std *(1.0 + scale_AR)
+    zeta =[zeta_mean-zeta_std_scaled, zeta_mean-zeta_std_scaled, zeta_mean+zeta_std_scaled, zeta_mean+zeta_std_scaled]
+    delta=[del_mean + del_std_scaled, del_mean - del_std_scaled, del_mean + del_std_scaled, del_mean - del_std_scaled]
 
     pi_z = set_pi_z(pi1_zeta,pi1_delta, n_zeta, nz)
 
