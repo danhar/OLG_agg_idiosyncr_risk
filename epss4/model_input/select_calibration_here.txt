@@ -7,7 +7,8 @@
 !calib_ss/ies15_sharpe.txt
 !calib_ss/ies15_ep.txt
 !calib_ss/survival_risk.txt
-calib_ss/noIR.txt
+!calib_ss/noIR.txt
+calib_ss/noAR.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.

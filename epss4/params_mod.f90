@@ -1078,11 +1078,6 @@ use omp_lib           ,only: OMP_get_max_threads
 	    call critical_stop
     endif
 
-    if (scale_AR == -1.0 .and. .not. partial_equilibrium) then
-        print*, 'ERROR: scale_AR = -1.0, ie. no aggregate risk, not yet implemented with general equilibrium'
-        call critical_stop
-    endif
-
     if (n_end_params < 0) then
         print*, 'ERROR: n_end_params < 0'
         call critical_stop

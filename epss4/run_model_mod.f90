@@ -51,7 +51,7 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
         dir    = 'mspe'
         call ms_grids%read_unformatted('ms')
         if (scale_AR == -1.0) then
-            print*,'- run_model: setting ms_grids%mu = 0.0, ms_grids%k = average over simulations'
+            print*,'- run_model: setting mu = 0.0, mean return to type '//mean_return_type
             ms_grids%mu =0.0
             ms_grids%k = inverted_mean_return(mean_return_type)
         endif

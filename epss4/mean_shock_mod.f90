@@ -14,7 +14,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     use kinds
     use classes_mod ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs
     use laws_of_motion  ,only: Initialize
-    use params_mod      ,only: alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates
+    use params_mod      ,only: alpha,etagrid,stat_dist_z, partial_equilibrium, surv_rates, scale_AR
     use income
 	use sub_broyden
     use fun_locate
@@ -28,7 +28,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     real(dp) ,allocatable ,intent(out)   :: Phi(:,:,:), value(:,:,:,:,:,:), xgrid_ms(:,:,:)  ! distribution, valuefunction, mean shock xgrid
     type(tErrors)   ,intent(out)   :: err
     character(len=*), intent(in)   :: output_path
-	real(dp) ,dimension(2)		   :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
+	real(dp) ,dimension(:), allocatable  :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
 	real(dp) ,dimension(:), allocatable  :: m_etagrid, w
 	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
 	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
@@ -56,15 +56,22 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 	m_etagrid	    = wz*etagrid(:,1)+(1-wz)*etagrid(:,nz)
 
     ! Initial guesses
-    xvars(1)   = grids%k (1)
-    xvars(2)   = grids%mu(1)
+    if (scale_AR == -1.0) then
+        allocate(xvars(1), fvals(1))
+        xvars(1)   = grids%k (1)
+    else
+        allocate(xvars(2), fvals(2))
+        xvars(1)   = grids%k (1)
+        xvars(2)   = grids%mu(1)
+    endif
+
     if(surv_rates) then
         bequests_ms = 0.03_dp   ! This guess was the mean shock value in previous runs
     else
         bequests_ms = 0.0
     endif
 
-	if (partial_equilibrium .or. grids%fixed) then
+	if (partial_equilibrium .or. grids%fixed) then ! if grids%fixed then we do not need a guess for the aggregate grid in GE.
 	    fvals = ms_equilibrium(xvars)
 	else ! Find capital and mu for the mean shock general equilibrium
 		call s_broyden(ms_equilibrium,xvars,fvals,err%not_converged, get_fd_jac_o=.true.,tolf_o=1e-2_dp, maxlnsrch_o=5)  ! ,maxstp_o=.8_dp,tolf_o=1e-10_dp
@@ -72,7 +79,11 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     endif
 
 	grids%k (1) = xvars(1)
-	grids%mu(1) = xvars(2)
+	if (size(xvars)==1) then
+	    grids%mu(1) = 0.0
+	else
+	    grids%mu(1) = xvars(2)
+    endif
 
     call get_equilibrium_values(policies,value,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, err)
     call err%print2stderr
@@ -115,7 +126,11 @@ contains
 
         call grid%allocate(size(grids%k), size(grids%mu))
         grid%k  = msvars(1)
-        grid%mu = msvars(2)
+        if (size(msvars) == 1) then
+            grid%mu = 0.0
+        else
+            grid%mu = msvars(2)
+        endif
 
         call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
@@ -151,7 +166,7 @@ contains
         agg_bond_demand = sum((apgrid_ms-stocks_ms)*Phi)
         ! Exess demands
         distance(1)     = kp_ms - msvars(1)
-        distance(2)     = kp_ms * de_ratio/(1.0 + de_ratio) - agg_bond_demand/(L_N_ratio*(1.0+n)*(1.0+g))
+        if (size(distance) > 1) distance(2) = kp_ms * de_ratio/(1.0 + de_ratio) - agg_bond_demand/(L_N_ratio*(1.0+n)*(1.0+g))
 
     end function ms_equilibrium
 
