@@ -1005,11 +1005,11 @@ use omp_lib           ,only: OMP_get_max_threads
     endif
 
     select case(mean_return_type)
-        case('mean_mpk','weighted_aggregate_return','median_portf_return','median_portf_share','Siegel2002')
+        case('mean_mpk','weighted_aggregate_return','median_portf_return','median_portf_share','Siegel2002','meanshock_eq_r')
         ! continue
         case default
             print*, 'ERROR: mean_return_type must take one of the following values:'
-            print*, 'mean_mpk,weighted_aggregate_return,median_portf_return,median_portf_share,Siegel2002'
+            print*, 'mean_mpk,weighted_aggregate_return,median_portf_return,median_portf_share,Siegel2002,meanshock_eq_r'
             call critical_stop
     end select
 
@@ -1022,6 +1022,12 @@ use omp_lib           ,only: OMP_get_max_threads
             print*, 'paper, presentation, computation, pc, std_w, del_mean, sharpe, nosharpe, no_ep, I_Y, no_beta'
             call critical_stop
     end select
+
+    if (scale_AR == -1.0 .and. ccv) then
+        print*, 'WARNING: cant have scale_AR=-1.0 and ccv simultaneously.'
+        print*, 'Setting ccv = .false.'
+        ccv = .false.
+    endif
 
     if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0 .and. scale_AR_orig .ne. 0.0 .and. scale_AR_orig .ne. -1.0) then
         print*, 'ERROR: scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0 .and. scale_AR_orig .ne. 0.0  .and. scale_AR_orig .ne. -1.0'

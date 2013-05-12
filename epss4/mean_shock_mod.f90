@@ -285,7 +285,11 @@ contains
         call CheckPhi(Phi, simvars%Phi_1(1), simvars%Phi_nx(1))
         simvars%bequests(1)   = f_bequests(simvars%rf(1), simvars%r(1), stocks_ms, apgrid_ms, Phi)
         simvars%err_aggr(1)   = f_aggregate_diff(simvars%output(1), simvars%invest(1), simvars%C(1), simvars%bequests(1))
-        simvars%B(1)          = fvals(2)
+        if (size(fvals)>1) then
+            simvars%B(1)      = fvals(2)
+        else
+            simvars%B(1)      = simvars%K(1) * de_ratio/(1.0 + de_ratio) - simvars%bonds(1) ! differs from fvals(2)
+        endif
         simvars%err_income(1) = f_income_diff(simvars%K(1), mean_zeta, simvars%r(1), simvars%rf(1), mean_delta)
 
         do i= 1,nz  ! can't I just save z and then call simulate_economy?

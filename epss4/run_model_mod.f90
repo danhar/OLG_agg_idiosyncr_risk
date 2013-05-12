@@ -225,6 +225,7 @@ contains
         use income, only: f_net_mpk, alpha
         character(len=*) ,intent(in)  :: mean_return_type
         type(tSimvars) ,allocatable :: simvars_ge(:)
+        type(tAggGrids)   :: ms_grids_temp
         type(tStats)   :: mpk, r, rf, r_pf_median, r_pf_kappa_med
         real(dp) :: mean_return
         integer :: tc
@@ -256,6 +257,10 @@ contains
         case('Siegel2002') ! empirical estimate from Siegel (2002)
             mean_return = 0.042_dp
 
+        case('meanshock_eq_r') ! rf from previous mean shock equilibrium
+            call ms_grids_temp%read_unformatted('ms')
+            inverted_mean_return = ms_grids_temp%k(1)
+            return
         end select
 
         inverted_mean_return = (alpha/(mean_return+del_mean))**(1.0/(1.0-alpha))
