@@ -233,7 +233,7 @@ contains
                   '   rfp ', count(err%rfp), '  (',real(count(err%rfp),dp)/real(size(err%rfp),dp)*100.0,'%)   '
     write(21,125) ' asset ', count(err%asset), '  (',real(count(err%asset),dp)/real(size(err%asset),dp)*100.0,'%)   ', &
                   '  cons ', count(err%cons) , '  (',real(count(err%cons ),dp)/real(size(err%cons ),dp)*100.0,'%)   '
-    if (err%not_converged) write(21,*)' WARNING: root finder did not converge'
+    if (err%not_converged) write(21,*)'*** WARNING: root finder did not converge! ***'
 
 
     write(21,*)   'Warnings in simulation'
