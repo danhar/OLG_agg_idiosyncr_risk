@@ -1,7 +1,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- Maybe should also normalize targets in calibration rootfinding to unity. Convergence was very slow, and it's a difference of factor 100 whether I want to match K/Y=2.6 or r_f=0.023
+- remove cmin from calibration files. Instead in params_mod, have cmin= min(1e-10, tol_asset_eul), and put a warning if tol_asset_eul<1e-12.
 
 - put tolerance in simulation into the calibration files
 

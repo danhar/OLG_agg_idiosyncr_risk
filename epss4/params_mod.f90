@@ -819,8 +819,8 @@ use omp_lib           ,only: OMP_get_max_threads
     if (ms_guess%mu(1)<-1.0) then
         print*, 'ERROR: ms_guess%mu(1)<-1.0'
         call critical_stop
-    elseif (ms_guess%mu(1) < 1e-4) then
-        print*, 'WARNING: ms_guess%mu(1) <= 1e-4'
+    elseif (ms_guess%mu(1) < 1e-4 .and. ms_guess%mu(1) > 0.0) then
+        print*, 'WARNING: ms_guess%mu(1) very small at ',ms_guess%mu(1)
     elseif (ms_guess%mu(1)>1.0) then
         print*, 'ERROR: ms_guess%mu(1)>1.0'
         call critical_stop
