@@ -42,6 +42,7 @@ subroutine s_alg_qn(fname,fvec,x,n,QTmat,Rmat,intlj,reevalj,check,rstit0,MaxLns,
     fvec=fname(x)
     f=0.5_dp*(dot_product(fvec,fvec))    
 	print '(a53,es13.6)', 'sub_alg_qn: maxval(abs(fvec(:))) in iteration    1: ', maxval(abs(fvec(:)))
+	print '(t50,a3,es13.6)', 'f= ', f
 
     if (any(ieee_is_nan(fvec)) .or. any(.not. ieee_is_finite(fvec))) then
         print *, 'sub_alg_qn: WARNING NaN or Inf encountered'
@@ -127,6 +128,7 @@ subroutine s_alg_qn(fname,fvec,x,n,QTmat,Rmat,intlj,reevalj,check,rstit0,MaxLns,
 		call lnsrch(xold,fold,g,p,x,f,fvec,maxstp,check,fname,MaxLns)
 
 		print '(a47,i4,a2,es13.6)', 'sub_alg_qn: maxval(abs(fvec(:))) in iteration ',its+1, ': ', maxval(abs(fvec(:)))
+        print '(t50,a3,es13.6)', 'f= ', f
 
 	    if (any(ieee_is_nan(fvec)) .or. any(.not. ieee_is_finite(fvec))) then
             print *, 'sub_alg_qn: WARNING NaN or Inf encountered'
