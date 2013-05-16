@@ -7,13 +7,13 @@
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            .995   discount factor
+beta            .9859   discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.1875   mean of depreciation shocks
+del_mean        0.20   mean of depreciation shocks
 del_std         0.1028   std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.9304   first element in transition matrix for delta, pi_delta(1,1)
@@ -40,7 +40,7 @@ ccv             .true.   Turn on/off countercyclical variance of idiosyncratic i
 scale_IR        -1.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     0       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+n_end_params     1       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'sharpe_ratio'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
@@ -69,11 +69,11 @@ nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the 
 lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
 lom_mu_version          2           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
-pooled_regression       .false.     one lom for all z
+pooled_regression       .true.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
 opt_initial_ms_guess    0           select which guesses for mean shock r and mu to use (0,1,2). 0: use previous ms equilibrium values saved in model_input/last_results/grids_ms.unformatted; 1: use parameter-sensitive hard-coded guesses; 2: use user-supplied guess in this calibration file
 exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations), which is finer than the one used in household solutions (by nx_factor below). Should always be used.
-save_all_iterations     .false.     during KS iteratins, save all results
+save_all_iterations     .true.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
 
@@ -93,7 +93,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 
 ! Tolerances (stopping criteria)
 tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
-tol_coeffs      1e-8        stopping value for coeffs (normalized to unity)
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
 tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_cal      0.02         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 

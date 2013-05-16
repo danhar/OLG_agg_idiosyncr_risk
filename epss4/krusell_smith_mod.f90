@@ -19,7 +19,7 @@ contains
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
 
-        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium, save_all_iterations
+        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium, save_all_iterations, construct_path
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
         !use sub_broyden
@@ -55,7 +55,7 @@ contains
 
         ! The following block is useful for debugging Krusell Smith
         if (save_all_iterations) then   ! write the headers into the file for saving intermediate coeffs
-            open(unit=132, file=output_path//'/loms_it.txt', status = 'replace')
+            open(unit=132, file=construct_path(calib_name)//'/loms_it.txt', status = 'replace')
             write(132,*)
             write(132,'(t8,a)') 'coeffs_k(1) , coeffs_k(2) , coeffs_k(3) , ...     ---    coeffs_mu(1), coeffs_mu(2), coeffs_mu(3) , ...'
             write(132,*)
@@ -72,7 +72,7 @@ contains
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
                 call coeffs%save_initial_values()
-                maxstp=.2_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                maxstp=.8_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
             else
                 maxstp=10.0     ! this is large and arbitrary
             endif
