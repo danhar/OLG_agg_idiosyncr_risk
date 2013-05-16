@@ -5,6 +5,8 @@
 
 - put tolerance in simulation into the calibration files
 
+- put maxstep for Krusell_smith in calibration files. In particular, noIR needs maxstep 0.02
+
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
@@ -21,6 +23,7 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- let broyden algorithm report the convergence criterion, not (or better in addition to) the abs max.
 - reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.
 - rewrite the calibration_mod, so that it reads in the name of the associated param. This would greatly increase usability, because I only need
     to change the calibration files by adding or removing or changing params. However, also need an identifier for the associated target in the calibration file.
