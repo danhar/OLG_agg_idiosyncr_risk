@@ -116,7 +116,7 @@ pure subroutine Regression(simvars,coeffs)
     real(dp) ,dimension(:) ,allocatable    :: k_z, kp_z, kp_zp, mu_z, mu_zp, mup_zp              ! lhs
     real(dp) ,dimension(2) :: residual_sum_of_squares, total_sum_of_squares
     real(dp)               :: mean
-    integer                :: n_covars_k, n_covars_mu, nz, nt, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i, shape(2)
+    integer                :: n_covars_k, n_covars_mu, nz, nt, zc, n_zc(size(simvars)), n_zpc(size(simvars)), info, i, shape(2), i2
     logical, parameter :: use_gelsy = .false. ! instead of using gels (which had an error in Intel Composer XE 2013 original release)
 
     n_covars_k  = size(coeffs%k,1)
@@ -129,8 +129,8 @@ pure subroutine Regression(simvars,coeffs)
             n_zc = nt-t_scrap
             n_zpc = n_zc
             do i=1,size(simvars)
-                mask(i)%z  = .true. ! select all
-                mask(i)%zp = .true. ! select all
+                mask(i)%z  = [(.true. , i2=1,n_zc (i))] ! select all
+                mask(i)%zp = [(.true. , i2=1,n_zpc(i))] ! select all
             enddo
         else
             do i=1,size(simvars)
