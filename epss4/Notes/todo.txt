@@ -23,6 +23,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- correct calc of cross-sectional variance of consumption and portfolio return (graphs)
+- calculate Medians and report them in equilibrium_long? In particular for portfolio return
 - reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.
 - rewrite the calibration_mod, so that it reads in the name of the associated param. This would greatly increase usability, because I only need
     to change the calibration files by adding or removing or changing params. However, also need an identifier for the associated target in the calibration file.

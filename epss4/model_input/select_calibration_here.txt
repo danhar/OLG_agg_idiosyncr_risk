@@ -10,6 +10,7 @@
 calib_ss/noIR5.txt
 !calib_ss/noAR.txt
 !calib_ss/norisk.txt
+!calib_ss/tau12.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.

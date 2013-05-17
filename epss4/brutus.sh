@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='062-noIR5beta0995'
+thisrun='063-noIR7crra4'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
