@@ -244,7 +244,7 @@ contains
         integer :: zc, n_coeffs_k, n_coeffs_mu, nz
 
         if (.not. allocated(this%k)) call this%allocate()
-        this%r_squared = 0.0
+        ! this%r_squared = 0.0
 
         n_coeffs_k  = size(this%k ,1)
         n_coeffs_mu = size(this%mu,1)

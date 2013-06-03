@@ -96,6 +96,8 @@ contains
             call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
                  reevalj=.true.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs) ! maxstp=1.0_dp
 
+            call coeffs%maketype(xvals) ! Need to get the xvals that led to the result, not the updated after the last regression.
+
             if (err%not_converged) call err%write2file(fvals, output_path)
 
         endif
