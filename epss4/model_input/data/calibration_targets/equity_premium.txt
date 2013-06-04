@@ -8,3 +8,4 @@
 0.168   del_std     Std. of risky return (Shiller)
 0.50	pi1_delta	Corr.(TFP, returns) (NIPA, Shiller)
 0.056   theta       Average equity premium (Shiller)
+2.65    beta        Capital output ratio (NIPA)
