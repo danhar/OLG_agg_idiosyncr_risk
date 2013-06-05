@@ -43,7 +43,7 @@ contains
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
         integer               :: n, i, max_iter, recomp_jacobian
-        logical, parameter :: ks_newton_alg = .true.
+        logical, parameter :: ks_newton_alg = .false.
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
         call coeffs%save_initial_values()
@@ -98,7 +98,7 @@ contains
                 call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
                      reevalj=.true.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs)
             else
-                maxstp=.20_dp
+                maxstp=.6_dp
                 recomp_jacobian = 0
                 intialize_jacobi=.false.
                 allocate(Rmat(n,n), QTmat(n,n))

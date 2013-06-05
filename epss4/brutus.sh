@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='065-noIR_no_gc_n_beta0985'
+thisrun='066-test_KS_fixpoint_gs2'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
