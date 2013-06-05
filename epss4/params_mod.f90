@@ -37,7 +37,8 @@ module params_mod
 	! Grids (number of discrete grid points)
     integer ,protected ::   &
             nx,             &   ! grid for Cash-at-Hand, nx = nap (= grid for savings aprime)
-            nz                  ! Number of aggregate states, nz = n_zeta*n_delta
+            nz,             &   ! Number of aggregate states, nz = n_zeta*n_delta
+            run_n_times_orig    ! saves the original run_n_times, which might be overwritten if welfare_experiment
     type(tAggGrids) ,protected :: ms_guess      ! Takes the values depending on opt_initial_ms_guess, see subroutine SetRemainingParams() below
     real(dp) ,dimension(:,:,:) ,allocatable ,protected :: apmax ! maximum a prime (savings) for each generation
 
@@ -320,6 +321,7 @@ subroutine SetRemainingParams()
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     end select
 
+    run_n_times_orig = run_n_times ! run_n_times_orig only used in CheckParams now, but can be useful later when enabling run_n_times>1 .and. welfare_decomposition
     if (welfare_decomposition) then
         run_counter_start = 0
         run_n_times = 6
@@ -1062,6 +1064,11 @@ use omp_lib           ,only: OMP_get_max_threads
     if (run_n_times <  run_counter_start) then
         print*, 'WARNING: run_n_times < run_counter_start, setting to run_n_times = run_counter_start'
         run_n_times = run_counter_start
+    endif
+
+    if (run_n_times_orig > 1 .and. welfare_decomposition) then
+        print*, 'ERROR: can have either run_n_times > 1 or welfare_decomposition'
+        call critical_stop
     endif
 
     if ((scale_IR_orig == 0.0 .or. scale_IR_orig == -1.0) .and. (scale_AR_orig == 0.0 .or. scale_AR_orig == -1.0) .and. run_n_times > 1 .and. .not. welfare_decomposition) then
