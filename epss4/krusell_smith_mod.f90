@@ -43,7 +43,7 @@ contains
         real(dp)              :: maxstp
         logical               :: intialize_jacobi
         integer               :: n, i, max_iter, recomp_jacobian
-        logical, parameter :: ks_newton_alg = .false.
+        logical, parameter :: ks_newton_alg = .true.
 
         coeffs%normalize = normalize_coeffs ! Can change it here or in params_mod (hidden from calibration file)
         call coeffs%save_initial_values()
@@ -98,8 +98,9 @@ contains
                 call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
                      reevalj=.true.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs)
             else
-                maxstp=.6_dp
+                maxstp=.1_dp
                 recomp_jacobian = 0
+                max_iter = 400
                 intialize_jacobi=.false.
                 allocate(Rmat(n,n), QTmat(n,n))
                 Rmat  = 0.0
@@ -107,10 +108,10 @@ contains
                 call put_diag(1.0_dp,Rmat)
 
                 ! Start root finder over coefficients of laws of motion
-!                call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
-!                     reevalj=.false.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs)
+                call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
+                     reevalj=.false.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs)
 
-                call alg_gs(krusellsmith,fvals,xvals,n,err%not_converged,maxstp,max_iter,tol_coeffs)
+!                call alg_gs(krusellsmith,fvals,xvals,n,err%not_converged,maxstp,max_iter,tol_coeffs)
             endif
 
             call coeffs%maketype(xvals) ! Need to get the xvals that led to the result, not the updated after the last regression.

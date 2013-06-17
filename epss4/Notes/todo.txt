@@ -33,6 +33,8 @@
     No need for n_end_params in calibration file.
 - give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
+- write t_scrap into simvars, especially the unformatted, because when the old simvars are read to initialize, and the stats are calculated, 
+    then it can happen that the 'new' t_scrap (i.e. in the new calib-file) is larger than the 'old' nt. Concretely, run_model:137 'K%name ='K' ; call K%calc_stats(simvars_old)' can fail.
 - clean up initialize_coeffs, remove agg_grid_o
 - have an option to skip the mean shock equilibrium (use opt_initial_ms_guess for this)
 - move value into policies
