@@ -89,7 +89,7 @@ subroutine SetDefaultValues()
     ! Reals
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
-    factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; cmin=1.0e-6_dp; kappamax=1000.0_dp
+    factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
     ! Integers
     nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
@@ -250,8 +250,6 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) mu_max
             case ('apmax_factor')
                 read (parval,*) apmax_factor
-            case ('cmin')
-                read (parval,*) cmin
             case ('kappamax')
                 read (parval,*) kappamax
             case ('apmax_curv')
@@ -292,6 +290,7 @@ subroutine SetRemainingParams()
     gamm = (1.0-theta)/(1.0-1.0/psi)
     nz   = n_zeta*n_delta
     nx   = nap
+    cmin=min(1.0e-9_dp, tol_asset_eul/10.0_dp)
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -1120,6 +1119,9 @@ use omp_lib           ,only: OMP_get_max_threads
         endif
     endif
 
+    if (tol_asset_eul < 1.0e-12) print*, 'Warning: tol_asset_eul < 1.0e-12. Note: cmin=tol_asset_eul/10.0'
+    if (cmin < 1.0e-14) print*, 'Warning: cmin = < 1.0e-14'
+
     if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
 
 contains
@@ -1227,8 +1229,6 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,217) ' cover_mu     = ', cover_mu
     write(21,'(a16, 4(f0.6,x))') ' k,mu min,max = ', k_min, k_max, mu_min, mu_max
 217 format(a16, 2(f0.6,x))
-    write(21,219) ' cmin         = ', cmin
-219 format(a16, es8.2)
     write(21,218) ' No. threads  = ', OMP_get_max_threads()
     write(21,*)
     write(21,*) '----------------------------- Options ------------------------------'
