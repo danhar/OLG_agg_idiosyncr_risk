@@ -86,6 +86,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 ! Tolerances (stopping criteria)
 tol_coeffs      1e-4        convergence criterion for coeffs
 tol_asset_eul   1e-8        policyfunctions: convergence criterion for kappa in asset_allocation
+maxstp_ks       0.4         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Initial guesses
