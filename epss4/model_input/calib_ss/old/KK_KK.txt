@@ -72,7 +72,6 @@ cover_k         0.80        aggregate grids will cover mean +/-cover_k. Alternat
 cover_mu        0.80        same. Alteratives .3, .4
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
-cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 

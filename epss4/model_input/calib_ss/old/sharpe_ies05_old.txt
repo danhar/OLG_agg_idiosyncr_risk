@@ -87,7 +87,6 @@ mu_min          0.001
 mu_max          0.04
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
-cmin            1e-6        minimum consumption. Also needed to define xmin in last generation
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 

@@ -89,7 +89,6 @@ apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternat
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
-cmin            1e-10        minimum consumption. Also needed to define xmin in last generation
 
 ! Tolerances (stopping criteria)
 tol_asset_eul   1e-9        policyfunctions: stopping value for kappa in asset_allocation
