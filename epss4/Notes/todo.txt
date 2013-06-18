@@ -1,10 +1,6 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- remove cmin from calibration files. Instead in params_mod, have cmin= min(1e-10, tol_asset_eul), and put a warning if tol_asset_eul<1e-12.
-
-- put tolerance in simulation into the calibration files
-
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
@@ -146,8 +142,10 @@ Remove the optional on errors (everywhere!)
 - Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (E) Done! (started only in Nov. 2012) reverse (or mixed and confusing) chronological order
+ (E) Done! (started only in Nov. 2012) reverse chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- remove cmin from calibration files. Instead in params_mod, have cmin= min(1e-10, tol_asset_eul), and put a warning if tol_asset_eul<1e-12.
+
 - put maxstep for Krusell_smith in calibration files. In particular, noIR needs maxstep 0.02
 
 - let broyden algorithm report the convergence criterion, not (or better in addition to) the abs max.
@@ -210,3 +208,8 @@ For example, simvars should read and write output unformatted also, see  subrout
 - make aggregate grids with type-bound procedures. And put makegrid in there?
 
 - update agg_grid in krusell_smith so that doesn't hit borders
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (E2) Done! (started in June 2013) chronological order
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- put tolerance in simulation into the calibration files : instead of this, I set tol_simulation_marketclearing = tol_asset_eul*10_dp

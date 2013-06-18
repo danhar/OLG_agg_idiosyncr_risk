@@ -11,7 +11,7 @@ module params_mod
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
 	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, rho, n, tau, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
-	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
+	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params, &
                           lom_k_version, lom_mu_version
@@ -291,6 +291,7 @@ subroutine SetRemainingParams()
     nz   = n_zeta*n_delta
     nx   = nap
     cmin=min(1.0e-9_dp, tol_asset_eul/10.0_dp)
+    tol_simulation_marketclearing = tol_asset_eul*10_dp
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -1121,6 +1122,7 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (tol_asset_eul < 1.0e-12) print*, 'Warning: tol_asset_eul < 1.0e-12. Note: cmin=tol_asset_eul/10.0'
     if (cmin < 1.0e-14) print*, 'Warning: cmin = < 1.0e-14'
+    if (tol_asset_eul > 1.0e-4) print*, 'Warning: tol_asset_eul > 1.0e-4. Note: tol_simulation_marketclearing=tol_asset_eul*10.0'
 
     if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
 

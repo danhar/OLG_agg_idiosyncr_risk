@@ -6,7 +6,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use kinds           ,only: dp
     use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids
-    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha
+    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
@@ -26,7 +26,6 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     real(dp) ,dimension(:,:)     ,allocatable :: val_j1_t ! value of j=1 for given z and K, and mu
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
-    real(dp) ,parameter :: tol_mut = 1e-8_dp
     real(dp)  :: Kt, mut, rt, netwaget, penst, w ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
 
