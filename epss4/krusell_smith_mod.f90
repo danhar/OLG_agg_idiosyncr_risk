@@ -19,7 +19,7 @@ contains
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
 
-        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium, save_all_iterations, construct_path
+        use params_mod            ,only: normalize_coeffs, tol_coeffs, partial_equilibrium, save_all_iterations, construct_path, maxstp_ks
         use numrec_utils          ,only: put_diag
         use sub_alg_qn
         use alg_gs_mod
@@ -74,9 +74,9 @@ contains
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
                 call coeffs%save_initial_values()
-                maxstp=.4_dp      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                maxstp=maxstp_ks      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
             else
-                maxstp=10.0     ! this is large and arbitrary
+                maxstp=10.0     ! this is large and arbitrary. Not =maxstp_ks here because coeffs%normalize not controlled from calibration file.
             endif
 
             if (calibrating) then
@@ -98,7 +98,7 @@ contains
                 call s_alg_qn(krusellsmith,fvals,xvals,n,QTmat,Rmat,intialize_jacobi, &
                      reevalj=.true.,check=err%not_converged,rstit0=recomp_jacobian,MaxLns=5,max_it=max_iter,maxstp=maxstp,tol_f=tol_coeffs)
             else
-                maxstp=.1_dp
+                maxstp=.1_dp ! Not =maxstp_ks here because coeffs%normalize not controlled from calibration file.
                 recomp_jacobian = 0
                 max_iter = 400
                 intialize_jacobi=.false.

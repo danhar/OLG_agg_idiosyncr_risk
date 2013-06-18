@@ -5,8 +5,6 @@
 
 - put tolerance in simulation into the calibration files
 
-- put maxstep for Krusell_smith in calibration files. In particular, noIR needs maxstep 0.02
-
 - save results so that Matlab can always read (see errors in shell_output.txt)
  
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
@@ -148,8 +146,10 @@ Remove the optional on errors (everywhere!)
 - Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (E) Done! (started only in Nov. 2012) chronological order
+ (E) Done! (started only in Nov. 2012) reverse (or mixed and confusing) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- put maxstep for Krusell_smith in calibration files. In particular, noIR needs maxstep 0.02
+
 - let broyden algorithm report the convergence criterion, not (or better in addition to) the abs max.
 
 - put sharpe ratio (and equity premium) as the last target in each target file, bc that's the one I turn off most. Need adjust calibration_mod.
