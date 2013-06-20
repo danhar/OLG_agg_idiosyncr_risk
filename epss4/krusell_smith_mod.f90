@@ -74,7 +74,7 @@ contains
             ! Initialize root finder
             if (coeffs%normalize) then ! instead of if, could put maxstp in calibration file
                 call coeffs%save_initial_values()
-                maxstp=maxstp_ks      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0
+                maxstp=maxstp_ks      ! This makes sense, because coeffs are normalized to lie between 0.1 and 1.0. However, maxstp > 1 possible.
             else
                 maxstp=10.0     ! this is large and arbitrary. Not =maxstp_ks here because coeffs%normalize not controlled from calibration file.
             endif

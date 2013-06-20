@@ -65,7 +65,8 @@ program EPSS
                     write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
                 elseif (rc ==0) then
                     write(runchar,'(a4)') ',GE0'
-                    if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment) ! in this case the smaller tau was calibrated
+                    ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
+                    if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
                 elseif (rc ==1) then
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
