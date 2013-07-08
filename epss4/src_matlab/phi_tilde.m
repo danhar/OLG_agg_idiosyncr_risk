@@ -42,9 +42,9 @@ else
 end
 
 nx2 = size(xgrid_mean,2);
-if (nx2 ~= nx)
+if (nx2 ~= nx) % usually they differ, bc nx_factor makes finer grids for simulations, and because usually a fixed grid is created for the simulations
     xgrid_new = zeros(nj,nx);
-    c =2;
+    c =2; % 2 is the value used in interpolate_xgrid.f90 (which creates the xgrid for the simulations)
     for j=1:size(xgrid_mean,1)
         xgrid_new(j,1) = xgrid_mean(j,1);
         xgrid_new(j,nx) = xgrid_mean(j,nx2);
@@ -53,6 +53,7 @@ if (nx2 ~= nx)
 		    xgrid_new(j,i) = xgrid_new(j,1) + scalefact*((i-1.0)/(nx-1.0))^c;
         end
     end
+    % This should be very close to the 'true' (average) grid over the simulations
     xgrid_mean = xgrid_new;
 end
 
@@ -69,8 +70,10 @@ end
 print('-depsc', ['graphs/Phi_j']);
 system(['epstopdf graphs/Phi_j.eps']);
 
-% Need to create a grid and interpolate, because I do not have the grid
-% corresponding to Phi, since Phi is average over simulations.
+% Need to create a grid and interpolate, bc
+% (a) first and foremost, want to throw out very small values to get a nice graph
+% (b) as mentioned above, we do not have the grid that exactly corresponds to Phi, bc Phi is average over simulations
+%     However, xgrid_mean should be a very good approximation, so (b) is not the reason for interpolating here
 Phi_interp=zeros(nj,nx_interp);
 xmax=max(max(xgrid_mean(Phi>Phi_cutoff)));
 xmin=min(min(xgrid_mean(Phi>Phi_cutoff)));

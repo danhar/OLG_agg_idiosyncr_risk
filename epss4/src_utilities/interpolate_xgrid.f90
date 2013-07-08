@@ -18,7 +18,7 @@ contains
         use makegrid_mod
         use fun_lininterp
 
-        integer         ,intent(in)    :: nx_factor
+        integer         ,intent(in)    :: nx_factor ! make xgrid finer by this factor
         type(tPolicies) ,intent(in)    :: policies
         real(dp)        ,intent(in)    :: value(:,:,:,:,:,:)
         type(tPolicies) ,intent(out)   :: polx
