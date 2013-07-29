@@ -65,51 +65,100 @@ pure function consumption(this)
 end function consumption
 !-------------------------------------------------------------------------------
 
-pure function mean(this,dimension_o,weight_o) result(mean_policy)
-    ! At the moment, I am not using this anywhere, because typically I want the result to have one dimension less, which is not the case here
+pure function mean(this,dimension,weight_o) result(mean_policy)
+    ! this returns the mean along a dimension. The result has same dimensionality as the original,
+    ! but the same values in the respective dimension.
     class(tPolicies), intent(in)  :: this
     type(tPolicies)               :: mean_policy
-    integer, intent(in), optional:: dimension_o
-    real(dp), intent(in), optional:: weight_o
-    integer :: dimension, nd, dc
-    real(dp) :: weight
-
-    if (.not. present(dimension_o)) then
-        dimension = 3 ! corresponds to aggregate shocks nz
-    else
-        dimension = dimension_o
-    endif
+    integer, intent(in)           :: dimension
+    real(dp), intent(in), optional:: weight_o(:)
+    real(dp) ,dimension(:,:,:,:,:) ,allocatable :: apgrid, stocks, xgrid
+    integer :: nd, dc
+    real(dp) ,allocatable:: weight(:)
 
     nd = size(this%apgrid,dimension)
-
     if (.not. present(weight_o)) then
+        allocate(weight(nd))
         weight = 1.0/nd
     else
         weight = weight_o
     endif
 
     select case (dimension)
-    case (3)
-        call mean_policy%allocate(size(this%apgrid,1),1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
-        mean_policy%apgrid = 0.0
-        mean_policy%stocks = 0.0
-        mean_policy%xgrid  = 0.0
-        do dc = 1,nd
-            mean_policy%apgrid(:,:,1,:,:,:) = mean_policy%apgrid(:,:,1,:,:,:) + weight*this%apgrid(:,:,dc,:,:,:)
-            mean_policy%stocks(:,:,1,:,:,:) = mean_policy%stocks(:,:,1,:,:,:) + weight*this%stocks(:,:,dc,:,:,:)
-            mean_policy%xgrid (:,:,1,:,:,:) = mean_policy%xgrid (:,:,1,:,:,:) + weight*this%xgrid (:,:,dc,:,:,:)
+    case (1)
+        apgrid = weight(1)*this%apgrid(1,:,:,:,:,:)
+        stocks = weight(1)*this%stocks(1,:,:,:,:,:)
+        xgrid  = weight(1)*this%xgrid (1,:,:,:,:,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(dc,:,:,:,:,:)
+            stocks = stocks + weight(dc)*this%stocks(dc,:,:,:,:,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (dc,:,:,:,:,:)
         enddo
+
+    case (2)
+        apgrid = weight(1)*this%apgrid(:,1,:,:,:,:)
+        stocks = weight(1)*this%stocks(:,1,:,:,:,:)
+        xgrid  = weight(1)*this%xgrid (:,1,:,:,:,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,dc,:,:,:,:)
+            stocks = stocks + weight(dc)*this%stocks(:,dc,:,:,:,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,dc,:,:,:,:)
+        enddo
+
+    case (3)
+        apgrid = weight(1)*this%apgrid(:,:,1,:,:,:)
+        stocks = weight(1)*this%stocks(:,:,1,:,:,:)
+        xgrid  = weight(1)*this%xgrid (:,:,1,:,:,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,:,dc,:,:,:)
+            stocks = stocks + weight(dc)*this%stocks(:,:,dc,:,:,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,:,dc,:,:,:)
+        enddo
+
+    case (4)
+        apgrid = weight(1)*this%apgrid(:,:,:,1,:,:)
+        stocks = weight(1)*this%stocks(:,:,:,1,:,:)
+        xgrid  = weight(1)*this%xgrid (:,:,:,1,:,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,dc,:,:)
+            stocks = stocks + weight(dc)*this%stocks(:,:,:,dc,:,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,:,:,dc,:,:)
+        enddo
+
+    case (5)
+        apgrid = weight(1)*this%apgrid(:,:,:,:,1,:)
+        stocks = weight(1)*this%stocks(:,:,:,:,1,:)
+        xgrid  = weight(1)*this%xgrid (:,:,:,:,1,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,:,dc,:)
+            stocks = stocks + weight(dc)*this%stocks(:,:,:,:,dc,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,:,:,:,dc,:)
+        enddo
+
+    case (6)
+        apgrid = weight(1)*this%apgrid(:,:,:,:,:,1)
+        stocks = weight(1)*this%stocks(:,:,:,:,:,1)
+        xgrid  = weight(1)*this%xgrid (:,:,:,:,:,1)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,:,:,dc)
+            stocks = stocks + weight(dc)*this%stocks(:,:,:,:,:,dc)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,:,:,:,:,dc)
+        enddo
+
     case default ! same as case 3
-        call mean_policy%allocate(size(this%apgrid,1),1,size(this%apgrid,5),size(this%apgrid,6)) ! policies for given z, K, and mu
-        mean_policy%apgrid = 0.0
-        mean_policy%stocks = 0.0
-        mean_policy%xgrid  = 0.0
-        do dc = 1,nd
-            mean_policy%apgrid(:,:,1,:,:,:) = mean_policy%apgrid(:,:,1,:,:,:) + weight*this%apgrid(:,:,dc,:,:,:)
-            mean_policy%stocks(:,:,1,:,:,:) = mean_policy%stocks(:,:,1,:,:,:) + weight*this%stocks(:,:,dc,:,:,:)
-            mean_policy%xgrid (:,:,1,:,:,:) = mean_policy%xgrid (:,:,1,:,:,:)  + weight*this%xgrid(:,:,dc,:,:,:)
+        apgrid = weight(1)*this%apgrid(:,:,1,:,:,:)
+        stocks = weight(1)*this%stocks(:,:,1,:,:,:)
+        xgrid  = weight(1)*this%xgrid (:,:,1,:,:,:)
+        do dc = 2,nd
+            apgrid = apgrid + weight(dc)*this%apgrid(:,:,dc,:,:,:)
+            stocks = stocks + weight(dc)*this%stocks(:,:,dc,:,:,:)
+            xgrid  = xgrid  + weight(dc)*this%xgrid (:,:,dc,:,:,:)
         enddo
     end select
+
+    mean_policy%apgrid(:,:,:,:,:,:) = spread(apgrid, dimension, nd)
+    mean_policy%stocks(:,:,:,:,:,:) = spread(stocks, dimension, nd)
+    mean_policy%xgrid (:,:,:,:,:,:) = spread(xgrid , dimension, nd)
 
     call mean_policy%calc_kappa
 end function mean
