@@ -10,7 +10,7 @@ program EPSS
 
     implicit none
 	real(dp)                  :: secs
-	real(dp)     ,allocatable :: welfare(:,:), cev(:), risk_scale(:)
+	real(dp)     ,allocatable :: welfare(:,:), cev(:), welfare_ins(:), risk_scale(:)
 	integer                   :: sys_error, rc, i, start_time, end_time, count_rate
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
@@ -101,7 +101,7 @@ program EPSS
 	        call CheckParams
 	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
 
-    	    call run_model(projectname, calib_name, welfare(rc,1))
+    	    call run_model(projectname, calib_name, welfare(rc,1), welfare_ins)
 
     	    if (tau_experiment) then
     	        call params_set('partial_equilibrium', .true.)
@@ -109,7 +109,7 @@ program EPSS
     	        write(runchar,'(a4,f3.2)') ',tau',tau
     	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
-    	        call run_model(projectname, calib_name, welfare(rc,2))
+    	        call run_model(projectname, calib_name, welfare(rc,2) ,welfare_ins)
     	        call params_set('tau', tau- tau_increment)
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
 	        endif

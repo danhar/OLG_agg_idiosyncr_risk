@@ -2,7 +2,7 @@ module run_model_mod
     implicit none
 contains
 
-subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
+subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, cal_iter_o)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
@@ -12,13 +12,14 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
+    use insurance_effect_mod ,only: calc_insurance_effect
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, & ! logicals and characters
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, calc_insurance_effects,& ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
-	real(dp)         ,intent(out) :: welfare ! expected ex-ante utility of a newborn
+	real(dp)         ,intent(out) :: welfare, welfare_ins(4)! expected ex-ante utility of a newborn
 	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
     type(tCoeffs)     :: coeffs  ! coefficients for laws of motion
     type(tPolicies)   :: policies
@@ -179,6 +180,14 @@ subroutine run_model(projectname, calib_name, welfare, simvars_o, cal_iter_o)
     if (.not. partial_equilibrium .and. .not. err%not_converged) call save_unformatted(grids, coeffs, simvars)
     call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
+
+    welfare_ins =0.0
+    if (.not. calibrating .and. calc_insurance_effects .and. index(calib_name,'GE0')>0) then
+        output_path = construct_path(calib_name,'insurance')
+        syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+        call calc_insurance_effect(policies, value, grids, simvars, Phi, calib_name, projectname, welfare_ins)
+    endif
+
     if (.not. calibrating) then
         print*,' **** Completed solution of calibration ', calib_name, ' **** '
         print*, ' '
