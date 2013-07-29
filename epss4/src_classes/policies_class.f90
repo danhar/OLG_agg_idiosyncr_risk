@@ -12,8 +12,8 @@ module policies_class
         procedure :: deallocate => deallocate_policies
         procedure :: calc_kappa
         procedure :: consumption    ! At the moment, I am not using this anywhere
-        procedure :: mean           ! At the moment, I am not using this anywhere
-        procedure :: interpolate    ! At the moment, I am not using this anywhere
+        procedure :: mean
+        procedure :: interpolate
     end type tPolicies
 
 contains
@@ -156,9 +156,9 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
     end select
 
-    mean_policy%apgrid(:,:,:,:,:,:) = spread(apgrid, dimension, nd)
-    mean_policy%stocks(:,:,:,:,:,:) = spread(stocks, dimension, nd)
-    mean_policy%xgrid (:,:,:,:,:,:) = spread(xgrid , dimension, nd)
+    mean_policy%apgrid = spread(apgrid, dimension, nd)
+    mean_policy%stocks = spread(stocks, dimension, nd)
+    mean_policy%xgrid  = spread(xgrid , dimension, nd)
 
     call mean_policy%calc_kappa
 end function mean
@@ -166,17 +166,14 @@ end function mean
 
 pure function interpolate(this,dim_x, gridx, x) result(pol_int)
     ! linear interpolation for one value in one dimension
-    ! At the moment, I am not using this anywhere, because typically I want the result to have one dimension less, which is not the case here
-    ! For this, would need another type tPolicies5 (or Policies_d5) and
-    ! class(tPolicies),allocatable  :: pol_int ! allocate later
-    ! or
-    ! type(Policies_d5)  :: pol_int
+    ! the interpolated dimension has size 1 when returned
     use fun_locate      ,only: f_locate
 
     class(tPolicies), intent(in)  :: this
     class(tPolicies),allocatable  :: pol_int
     integer, intent(in)           :: dim_x
     real(dp), intent(in) :: x, gridx(:)
+    real(dp), dimension(:,:,:,:,:), allocatable :: apgrid, stocks, xgrid
     integer :: i
     real(dp) :: w
 
@@ -185,17 +182,42 @@ pure function interpolate(this,dim_x, gridx, x) result(pol_int)
     ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
 
     select case (dim_x)
+    case (1)
+        apgrid= (1-w)*this%apgrid(i,:,:,:,:,:) +w*this%apgrid(i+1,:,:,:,:,:)
+        stocks= (1-w)*this%stocks(i,:,:,:,:,:) +w*this%stocks(i+1,:,:,:,:,:)
+        xgrid = (1-w)*this%xgrid (i,:,:,:,:,:) +w*this%xgrid (i+1,:,:,:,:,:)
+    case (2)
+        apgrid= (1-w)*this%apgrid(:,i,:,:,:,:) +w*this%apgrid(:,i+1,:,:,:,:)
+        stocks= (1-w)*this%stocks(:,i,:,:,:,:) +w*this%stocks(:,i+1,:,:,:,:)
+        xgrid = (1-w)*this%xgrid (:,i,:,:,:,:) +w*this%xgrid (:,i+1,:,:,:,:)
+    case (3)
+        apgrid= (1-w)*this%apgrid(:,:,i,:,:,:) +w*this%apgrid(:,:,i+1,:,:,:)
+        stocks= (1-w)*this%stocks(:,:,i,:,:,:) +w*this%stocks(:,:,i+1,:,:,:)
+        xgrid = (1-w)*this%xgrid (:,:,i,:,:,:) +w*this%xgrid (:,:,i+1,:,:,:)
+    case (4)
+        apgrid= (1-w)*this%apgrid(:,:,:,i,:,:) +w*this%apgrid(:,:,:,i+1,:,:)
+        stocks= (1-w)*this%stocks(:,:,:,i,:,:) +w*this%stocks(:,:,:,i+1,:,:)
+        xgrid = (1-w)*this%xgrid (:,:,:,i,:,:) +w*this%xgrid (:,:,:,i+1,:,:)
     case (5)
+        apgrid= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
+        stocks= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
+        xgrid = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
+    case (6)
         call pol_int%allocate(size(this%apgrid,1),size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
-        pol_int%apgrid(:,:,:,:,1,:)= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
-        pol_int%stocks(:,:,:,:,1,:)= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
-        pol_int%xgrid (:,:,:,:,1,:) = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
+        apgrid= (1-w)*this%apgrid(:,:,:,:,:,i) +w*this%apgrid(:,:,:,:,:,i+1)
+        stocks= (1-w)*this%stocks(:,:,:,:,:,i) +w*this%stocks(:,:,:,:,:,i+1)
+        xgrid = (1-w)*this%xgrid (:,:,:,:,:,i) +w*this%xgrid (:,:,:,:,:,i+1)
+
     case default ! same as case 5
-        call pol_int%allocate(size(this%apgrid,1),size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
-        pol_int%apgrid(:,:,:,:,1,:)= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
-        pol_int%stocks(:,:,:,:,1,:)= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
-        pol_int%xgrid (:,:,:,:,1,:) = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
+        apgrid= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
+        stocks= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
+        xgrid = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
     end select
+
+    pol_int%apgrid = spread(apgrid, dim_x, 1)
+    pol_int%stocks = spread(stocks, dim_x, 1)
+    pol_int%xgrid  = spread(xgrid , dim_x, 1)
+
 
     call pol_int%calc_kappa
 end function interpolate
