@@ -1,6 +1,6 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
-!calib_ss/baseline.txt
+calib_ss/baseline.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep.txt
 !calib_ss/ies15.txt
@@ -10,7 +10,7 @@
 !calib_ss/noAR.txt
 !calib_ss/norisk.txt
 !calib_ss/base_bc.txt
-calib_ss/noIR_ep_bc.txt
+!calib_ss/noIR_ep_bc.txt
 !calib_ss/noAR_bc.txt
 !calib_ss/norisk_bc.txt
 !calib_ss/tau12.txt
