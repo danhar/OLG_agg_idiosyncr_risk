@@ -19,7 +19,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
-	real(dp)         ,intent(out) :: welfare, welfare_ins(4)! expected ex-ante utility of a newborn
+	real(dp)         ,intent(out) :: welfare, welfare_ins(:)! expected ex-ante utility of a newborn
 	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
     type(tCoeffs)     :: coeffs  ! coefficients for laws of motion
     type(tPolicies)   :: policies

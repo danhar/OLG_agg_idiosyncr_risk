@@ -10,7 +10,7 @@ program EPSS
 
     implicit none
 	real(dp)                  :: secs
-	real(dp)     ,allocatable :: welfare(:,:), cev(:), welfare_ins(:), risk_scale(:)
+	real(dp)     ,allocatable :: welfare(:,:), cev(:), cev_ins(:,:), welfare_ins(:,:,:), risk_scale(:)
 	integer                   :: sys_error, rc, i, start_time, end_time, count_rate
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
@@ -48,10 +48,15 @@ program EPSS
         if (twosided_experiment .and. run_n_times>1) call params_set('run_counter_start', -1*run_n_times+2)
         if (allocated(welfare)) deallocate(welfare)
         allocate(welfare(run_counter_start:run_n_times,2))
+        if (allocated(welfare_ins)) deallocate(welfare_ins)
+        allocate(welfare_ins(size(welfare,1),size(welfare,2),5))
         if (allocated(risk_scale)) deallocate(risk_scale)
         allocate(risk_scale(run_counter_start:run_n_times))
         if (allocated(cev)) deallocate(cev)
         if (tau_experiment)  allocate(cev(run_counter_start:run_n_times))
+        if (allocated(cev_ins)) deallocate(cev_ins)
+        if (tau_experiment)  allocate(cev_ins(size(cev,1),size(welfare_ins,3)))
+
         write (runchar, *) ' '
         do rc=run_counter_start,run_n_times ! always run one time without experiment
             if (run_counter_start/=run_n_times) then
@@ -101,7 +106,7 @@ program EPSS
 	        call CheckParams
 	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
 
-    	    call run_model(projectname, calib_name, welfare(rc,1), welfare_ins)
+    	    call run_model(projectname, calib_name, welfare(rc,1), welfare_ins(rc,1,:))
 
     	    if (tau_experiment) then
     	        call params_set('partial_equilibrium', .true.)
@@ -109,15 +114,16 @@ program EPSS
     	        write(runchar,'(a4,f3.2)') ',tau',tau
     	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
-    	        call run_model(projectname, calib_name, welfare(rc,2) ,welfare_ins)
+    	        call run_model(projectname, calib_name, welfare(rc,2) ,welfare_ins(rc,2,:))
     	        call params_set('tau', tau- tau_increment)
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
+    	        cev_ins(rc,:) = welfare_ins(rc,2,:)/welfare_ins(rc,1,:) - 1.0
 	        endif
 	    enddo
 	    if (welfare_decomposition) then
-	        call write2file(welfare,cev,'welfare')
+	        call write2file(welfare,cev,cev_ins,'welfare')
 	    else
-            if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,'welfare',risk_scale)
+            if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,cev_ins,'welfare',risk_scale)
             if(size(welfare,1)>1) call plot('cev_regression')
         endif
     enddo
@@ -205,12 +211,12 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
     end subroutine get_calibration_name
 !-------------------------------------------------------------------------------
 
-    subroutine write2file(welfare, cev, filename, scaling)
-        real(dp) ,intent(in) :: welfare(0:,1:), cev(0:)
+    subroutine write2file(welfare, cev, cev_ins, filename, scaling)
+        real(dp) ,intent(in) :: welfare(0:,1:), cev(0:), cev_ins(0:,1:)
         real(dp) ,intent(in) ,optional :: scaling(0:)
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
-        real(dp) :: GE, PE, IR, AR, LCI, CCV, SR
+        real(dp) :: GE, PE, IR, AR, LCI, CCV, SR, LCI_INS, CCV_INS
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
@@ -241,6 +247,13 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             write(21,*)
             write(21,'(a)') ' dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
             write(21,'(t13,f6.2,tr22,f6.2)') LCI/AR, (LCI + CCV)/PE
+            write(21,*)
+            write(21,*)
+            write(21,*) 'New insurance calc, reported in % CEV, not mean adjusted!'
+            write(21,*)
+            write(21,'(a)') ' g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)   g_c(tot)'
+            write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(1,5:1:-1))*100.0 ! CHECK
+            write(21,*)
 
         else
             if (size(welfare,1) > 1) then

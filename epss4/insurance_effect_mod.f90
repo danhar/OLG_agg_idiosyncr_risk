@@ -23,7 +23,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     type(tSimvars)   ,intent(in)  :: simvars_in(:)    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(in)  :: Phi_in(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     character(len=*) ,intent(in)  :: calib_name, projectname
-    real(dp)         ,intent(out) :: welfare(4)
+    real(dp)         ,intent(out) :: welfare(5)
     type(tLifecycle)              :: lifecycles, lifecycles_array(size(simvars_in))         ! lifecycle profiles
     type(tPolicies)               :: pol_fine, pol_minus_risk    ! if (exogenous_xgrid) then this will hold interpolated policies
     type(tStats)                  :: K, mu, netwage, pens, bequests, r, rf
@@ -55,13 +55,18 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     call InterpolateXgrid(nx_factor, policies, value, pol_fine, val_newx)
     xgrid_mean_old = sum(pol_fine%xgrid(:,:,1,:,:,1),4)/size(pol_fine%xgrid,5) ! only an approximation of the grid over which Phi is defined
 
+    write(runchar,'(a6)') ',all'
+    pol_minus_risk = policies
+    val_minus_risk = value
+    call sim_pe(welfare(1))
+
     call params_set('ccv', .false.)
     write(runchar,'(a6)') ',noCCV'
     pol_minus_risk = policies
     val_minus_risk = value
     ! not possible to interpolate policy functions, since ccv doesn't have its own dimension.
     ! So here only remove ccv from income in simulation, use the re-optimized policies and adjust them with aggregate consumption for behavioral response.
-    call sim_pe(welfare(1))
+    call sim_pe(welfare(2))
 
     call params_set('scale_IR', -1.0_dp)
     pol_minus_risk = policies%mean(2,stat_dist_eta)
@@ -73,7 +78,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     val_minus_risk(:,2:,:,:,:,:) = spread(val_minus_risk(:,1,:,:,:,:),2, size(stat_dist_eta)-1)
 
     write(runchar,'(a5)') ',noIR'
-    call sim_pe(welfare(2))
+    call sim_pe(welfare(3))
 
     call params_set('scale_AR', -1.0_dp)
     pol_minus_risk = policies%mean(3,stat_dist_z)
@@ -96,7 +101,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
     if (scale_IR_orig .ne. -1.0) call params_set('scale_IR', 0.0_dp)
     write(runchar,'(a5)') ',noAR'
-    call sim_pe(welfare(3))
+    call sim_pe(welfare(4))
 
     call params_set('scale_AR', -1.0_dp)
     call params_set('scale_IR', -1.0_dp)
@@ -107,7 +112,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     val_minus_risk(:,2:,:,:,:,:) = spread(val_minus_risk(:,1,:,:,:,:),2, size(stat_dist_eta)-1)
 
     write(runchar,'(a7)') ',norisk'
-    call sim_pe(welfare(4))
+    call sim_pe(welfare(5))
 
 
     call params_set('ccv', ccv_thisrun)
@@ -165,7 +170,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
         endif
 
-        call save_and_plot_results(runchar,agg_grid)
+        !call save_and_plot_results(runchar,agg_grid)
     end subroutine sim_pe
 
     !-------------------------------------------------------------------------------
