@@ -59,10 +59,19 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
     call params_set('ccv', .false.)
     write(runchar,'(a6)') ',noCCV'
+    ! not possible to interpolate policy functions, since ccv doesn't have its own dimension.
+    ! So here only remove ccv from income in simulation, use the re-optimized policies and adjust them with aggregate consumption for behavioral response.
     call sim_pe(welfare(1))
 
     call params_set('scale_IR', -1.0_dp)
     pol_minus_risk = policies%mean(2,stat_dist_eta)
+    val_minus_risk = value
+    val_minus_risk = 0.0
+    do i=1,size(stat_dist_eta)
+        val_minus_risk(:,1,:,:,:,:)= val_minus_risk(:,1,:,:,:,:) + stat_dist_eta(i)*value(:,i,:,:,:,:)
+    enddo
+    val_minus_risk(:,2:,:,:,:,:) = spread(val_minus_risk(:,1,:,:,:,:),2, size(stat_dist_eta)-1)
+
     write(runchar,'(a5)') ',noIR'
     call sim_pe(welfare(2))
 
