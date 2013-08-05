@@ -44,8 +44,8 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
     K%name ='K'; call K%calc_stats(simvars_in)
     mu%name='mu'; call mu%calc_stats(simvars_in)
-    netwage%name='wage'; call netwage%calc_stats(simvars_in)
-    pens%name='pens'; call pens%calc_stats(simvars_in)
+    netwage%name='netwage'; call netwage%calc_stats(simvars_in)
+    pens%name='pension'; call pens%calc_stats(simvars_in)
     bequests%name='bequests'; call bequests%calc_stats(simvars_in)
     r%name='r'; call r%calc_stats(simvars_in)
     rf%name='rf'; call rf%calc_stats(simvars_in)
@@ -132,7 +132,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
         call params_set_thisrun
         call CheckParams
-        if (runchar == 'noCCV' .or. runchar=='noIR') then
+        if (runchar == ',noCCV' .or. runchar==',noIR' .or. runchar==',all') then
             if (exogenous_xgrid) then
                 ! This is the standard case which should always be used, because we make the xgrid much finer
                 call InterpolateXgrid(nx_factor, pol_minus_risk, val_minus_risk, pol_fine, val_newx)
@@ -151,7 +151,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(policies, value, agg_grid, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(pol_minus_risk, val_minus_risk, agg_grid, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             endif
@@ -164,7 +164,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
             call InterpolateXgrid(nx_factor, pol_minus_risk, val_minus_risk, pol_fine, val_newx)
 
             ! Alternatively, one could take Phi from the noCCV simulations, which is an average, but I think the following is more correct
-            Phi = TransitionPhi(rf%avg_exerr_(),r%avg_exerr_(),netwage%avg_exerr_(),pens%avg_exerr_(),bequests%avg_exerr_(),pol_minus_risk%xgrid(:,:,1,:,1,1),pol_minus_risk%apgrid(:,:,1,:,1,1),pol_minus_risk%stocks(:,:,1,:,1,1),etagrid(:,1))
+            Phi = TransitionPhi(rf%avg_exerr_(),r%avg_exerr_(),netwage%avg_exerr_(),pens%avg_exerr_(),bequests%avg_exerr_(),pol_fine%xgrid(:,:,1,:,1,1),pol_fine%apgrid(:,:,1,:,1,1),pol_fine%stocks(:,:,1,:,1,1),etagrid(:,1))
 
             welf = sum(val_newx(:,:,1,1,1,1)*Phi(:,:,1))
 
