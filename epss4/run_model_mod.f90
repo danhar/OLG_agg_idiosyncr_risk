@@ -14,7 +14,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
     use simvars_class     ,only: read_unformatted, write_unformatted
     use insurance_effect_mod ,only: calc_insurance_effect
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, calc_insurance_effects,& ! logicals and characters
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, calc_insurance_effects, welfare_decomposition,& ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
@@ -182,7 +182,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
     if (present(simvars_o)) simvars_o = simvars
 
     welfare_ins =0.0
-    if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE0')>0 .or. index(calib_name,',')==0) .and. index(calib_name,'tau')==0) then
+    if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
         call calc_insurance_effect(policies, value, grids, simvars, Phi, calib_name, projectname, welfare_ins)
     endif
 
