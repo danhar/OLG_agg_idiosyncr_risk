@@ -86,9 +86,18 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
 
     select case (dimension)
     case (1)
-        apgrid = weight(1)*this%apgrid(1,:,:,:,:,:)
-        stocks = weight(1)*this%stocks(1,:,:,:,:,:)
-        xgrid  = weight(1)*this%xgrid (1,:,:,:,:,:)
+        ! The following causes a compiler bug
+        ! apgrid = weight(1)*this%apgrid(1,:,:,:,:,:)
+        !stocks = weight(1)*this%stocks(1,:,:,:,:,:)
+        !xgrid  = weight(1)*this%xgrid (1,:,:,:,:,:)
+        ! So instead do in two steps
+        apgrid = this%apgrid(1,:,:,:,:,:)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(1,:,:,:,:,:)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (1,:,:,:,:,:)
+        xgrid  = weight(1)*xgrid
+
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(dc,:,:,:,:,:)
             stocks = stocks + weight(dc)*this%stocks(dc,:,:,:,:,:)
@@ -96,9 +105,15 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case (2)
-        apgrid = weight(1)*this%apgrid(:,1,:,:,:,:)
-        stocks = weight(1)*this%stocks(:,1,:,:,:,:)
-        xgrid  = weight(1)*this%xgrid (:,1,:,:,:,:)
+        ! The following causes a compiler bug
+        ! apgrid = weight(1)*this%apgrid(:,1,:,:,:,:)
+        ! So instead do in two steps
+        apgrid = this%apgrid(:,1,:,:,:,:)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(:,1,:,:,:,:)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (:,1,:,:,:,:)
+        xgrid  = weight(1)*xgrid
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,dc,:,:,:,:)
             stocks = stocks + weight(dc)*this%stocks(:,dc,:,:,:,:)
@@ -106,9 +121,12 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case (3)
-        apgrid = weight(1)*this%apgrid(:,:,1,:,:,:)
-        stocks = weight(1)*this%stocks(:,:,1,:,:,:)
-        xgrid  = weight(1)*this%xgrid (:,:,1,:,:,:)
+        apgrid = this%apgrid(:,:,1,:,:,:)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(:,:,1,:,:,:)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (:,:,1,:,:,:)
+        xgrid  = weight(1)*xgrid
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,:,dc,:,:,:)
             stocks = stocks + weight(dc)*this%stocks(:,:,dc,:,:,:)
@@ -116,9 +134,12 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case (4)
-        apgrid = weight(1)*this%apgrid(:,:,:,1,:,:)
-        stocks = weight(1)*this%stocks(:,:,:,1,:,:)
-        xgrid  = weight(1)*this%xgrid (:,:,:,1,:,:)
+        apgrid = this%apgrid(:,:,:,1,:,:)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(:,:,:,1,:,:)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (:,:,:,1,:,:)
+        xgrid  = weight(1)*xgrid
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,dc,:,:)
             stocks = stocks + weight(dc)*this%stocks(:,:,:,dc,:,:)
@@ -126,9 +147,13 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case (5)
-        apgrid = weight(1)*this%apgrid(:,:,:,:,1,:)
-        stocks = weight(1)*this%stocks(:,:,:,:,1,:)
-        xgrid  = weight(1)*this%xgrid (:,:,:,:,1,:)
+        apgrid = this%apgrid(:,:,:,:,1,:)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(:,:,:,:,1,:)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (:,:,:,:,1,:)
+        xgrid  = weight(1)*xgrid
+
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,:,dc,:)
             stocks = stocks + weight(dc)*this%stocks(:,:,:,:,dc,:)
@@ -136,9 +161,13 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case (6)
-        apgrid = weight(1)*this%apgrid(:,:,:,:,:,1)
-        stocks = weight(1)*this%stocks(:,:,:,:,:,1)
-        xgrid  = weight(1)*this%xgrid (:,:,:,:,:,1)
+        apgrid = this%apgrid(:,:,:,:,:,1)
+        apgrid = weight(1)*apgrid
+        stocks = this%stocks(:,:,:,:,:,1)
+        stocks = weight(1)*stocks
+        xgrid  = this%xgrid (:,:,:,:,:,1)
+        xgrid  = weight(1)*xgrid
+
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,:,:,:,:,dc)
             stocks = stocks + weight(dc)*this%stocks(:,:,:,:,:,dc)
@@ -146,9 +175,13 @@ pure function mean(this,dimension,weight_o) result(mean_policy)
         enddo
 
     case default ! same as case 3
-        apgrid = weight(1)*this%apgrid(:,:,1,:,:,:)
-        stocks = weight(1)*this%stocks(:,:,1,:,:,:)
-        xgrid  = weight(1)*this%xgrid (:,:,1,:,:,:)
+        apgrid = this%apgrid(:,:,1,:,:,:)
+        stocks = this%stocks(:,:,1,:,:,:)
+        xgrid  = this%xgrid (:,:,1,:,:,:)
+        apgrid = weight(1)*apgrid
+        stocks = weight(1)*stocks
+        xgrid  = weight(1)*xgrid
+
         do dc = 2,nd
             apgrid = apgrid + weight(dc)*this%apgrid(:,:,dc,:,:,:)
             stocks = stocks + weight(dc)*this%stocks(:,:,dc,:,:,:)
@@ -167,15 +200,18 @@ end function mean
 pure function interpolate(this,dim_x, gridx, x) result(pol_int)
     ! linear interpolation for one value in one dimension
     ! the interpolated dimension has size 1 when returned
+    ! Due to compiler bugs with allocatable arrays its a bit more complicated than necessary
     use fun_locate      ,only: f_locate
 
-    class(tPolicies), intent(in)  :: this
-    class(tPolicies),allocatable  :: pol_int
-    integer, intent(in)           :: dim_x
+    class(tPolicies), intent(in) :: this
+    type (tPolicies)             :: pol_int
+    integer, intent(in)          :: dim_x
     real(dp), intent(in) :: x, gridx(:)
     real(dp), dimension(:,:,:,:,:), allocatable :: apgrid, stocks, xgrid
-    integer :: i
+    integer :: i, nd
     real(dp) :: w
+
+    nd = size(this%apgrid,dim_x) ! need only because compiler bug
 
     i        = f_locate(gridx, x)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
     w        = (x - gridx(i)) / (gridx(i+1) - gridx(i))
@@ -199,14 +235,21 @@ pure function interpolate(this,dim_x, gridx, x) result(pol_int)
         stocks= (1-w)*this%stocks(:,:,:,i,:,:) +w*this%stocks(:,:,:,i+1,:,:)
         xgrid = (1-w)*this%xgrid (:,:,:,i,:,:) +w*this%xgrid (:,:,:,i+1,:,:)
     case (5)
-        apgrid= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
-        stocks= (1-w)*this%stocks(:,:,:,:,i,:) +w*this%stocks(:,:,:,:,i+1,:)
-        xgrid = (1-w)*this%xgrid (:,:,:,:,i,:) +w*this%xgrid (:,:,:,:,i+1,:)
+        ! The following line doesnt work because of compiler bug
+        ! apgrid= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
+        apgrid= this%apgrid(:,:,:,:,i,:) ! Because of compiler bug
+        stocks= this%stocks(:,:,:,:,i,:)
+        xgrid = this%xgrid (:,:,:,:,i,:)
+        apgrid= (1-w)*apgrid +w*this%apgrid(:,:,:,:,i+1,:)
+        stocks= (1-w)*stocks +w*this%stocks(:,:,:,:,i+1,:)
+        xgrid = (1-w)*xgrid  +w*this%xgrid (:,:,:,:,i+1,:)
     case (6)
-        call pol_int%allocate(size(this%apgrid,1),size(this%apgrid,3),1,size(this%apgrid,6)) ! policies for given z, K, and mu
-        apgrid= (1-w)*this%apgrid(:,:,:,:,:,i) +w*this%apgrid(:,:,:,:,:,i+1)
-        stocks= (1-w)*this%stocks(:,:,:,:,:,i) +w*this%stocks(:,:,:,:,:,i+1)
-        xgrid = (1-w)*this%xgrid (:,:,:,:,:,i) +w*this%xgrid (:,:,:,:,:,i+1)
+        apgrid= this%apgrid(:,:,:,:,:,i)
+        stocks= this%stocks(:,:,:,:,:,i)
+        xgrid = this%xgrid (:,:,:,:,:,i)
+        apgrid= (1-w)*apgrid +w*this%apgrid(:,:,:,:,:,i+1)
+        stocks= (1-w)*stocks +w*this%stocks(:,:,:,:,:,i+1)
+        xgrid = (1-w)*xgrid  +w*this%xgrid (:,:,:,:,:,i+1)
 
     case default ! same as case 5
         apgrid= (1-w)*this%apgrid(:,:,:,:,i,:) +w*this%apgrid(:,:,:,:,i+1,:)
@@ -217,7 +260,6 @@ pure function interpolate(this,dim_x, gridx, x) result(pol_int)
     pol_int%apgrid = spread(apgrid, dim_x, 1)
     pol_int%stocks = spread(stocks, dim_x, 1)
     pol_int%xgrid  = spread(xgrid , dim_x, 1)
-
 
     call pol_int%calc_kappa
 end function interpolate

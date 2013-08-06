@@ -182,9 +182,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
     if (present(simvars_o)) simvars_o = simvars
 
     welfare_ins =0.0
-    if (.not. calibrating .and. calc_insurance_effects .and. index(calib_name,'GE0')>0) then
-        output_path = construct_path(calib_name,'insurance')
-        syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+    if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE0')>0 .or. index(calib_name,',')==0) .and. index(calib_name,'tau')==0) then
         call calc_insurance_effect(policies, value, grids, simvars, Phi, calib_name, projectname, welfare_ins)
     endif
 

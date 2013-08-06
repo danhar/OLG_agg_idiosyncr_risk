@@ -49,13 +49,13 @@ program EPSS
         if (allocated(welfare)) deallocate(welfare)
         allocate(welfare(run_counter_start:run_n_times,2))
         if (allocated(welfare_ins)) deallocate(welfare_ins)
-        allocate(welfare_ins(size(welfare,1),size(welfare,2),5))
+        allocate(welfare_ins(lbound(welfare,1):ubound(welfare,1),lbound(welfare,2):ubound(welfare,2),5))
         if (allocated(risk_scale)) deallocate(risk_scale)
         allocate(risk_scale(run_counter_start:run_n_times))
         if (allocated(cev)) deallocate(cev)
         if (tau_experiment)  allocate(cev(run_counter_start:run_n_times))
         if (allocated(cev_ins)) deallocate(cev_ins)
-        if (tau_experiment)  allocate(cev_ins(size(cev,1),size(welfare_ins,3)))
+        if (tau_experiment)  allocate(cev_ins(lbound(cev,1):ubound(cev,1),lbound(welfare_ins,3):ubound(welfare_ins,3)))
 
         write (runchar, *) ' '
         do rc=run_counter_start,run_n_times ! always run one time without experiment
@@ -247,13 +247,6 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             write(21,*)
             write(21,'(a)') ' dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
             write(21,'(t13,f6.2,tr22,f6.2)') LCI/AR, (LCI + CCV)/PE
-            write(21,*)
-            write(21,*)
-            write(21,*) 'New insurance calc, reported in % CEV, not mean adjusted!'
-            write(21,*)
-            write(21,'(a)') ' g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)   g_c(tot)'
-            write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(1,5:1:-1))*100.0 ! CHECK
-            write(21,*)
 
         else
             if (size(welfare,1) > 1) then
@@ -281,6 +274,15 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
                 endif
             enddo
         endif
+
+        write(21,*)
+        write(21,*)
+        write(21,*) 'New insurance calc, reported in % CEV, not mean adjusted!'
+        write(21,*)
+        write(21,'(a)') ' g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)   g_c(tot)'
+        write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(1,5:1:-1))*100.0 ! CHECK
+        write(21,*)
+
         close(21)
 
     end subroutine write2file

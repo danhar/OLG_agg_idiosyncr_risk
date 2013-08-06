@@ -6,14 +6,13 @@ module insurance_effect_mod
 contains
 
 subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, calib_name, projectname, welfare)
-    use ifport           ,only: system  ! Intel Fortran portability library
     use kinds            ,only: dp
     use classes_mod      ,only: tSimvars, tLifecycle, tPolicies, tAggGrids, tStats
     use lifecycles_class ,only: average
     use simvars_class    ,only: print_error
     use fun_locate
     use params_mod       ,only: exogenous_xgrid, nx_factor, stat_dist_z, stat_dist_eta, ccv, scale_IR, scale_AR, scale_IR_orig, etagrid, &
-                                params_set, params_set_thisrun, CheckParams, construct_path
+                                params_set, params_set_thisrun, CheckParams
     use simulation_mod   ,only: simulate
     use interpolate_xgrid
 
@@ -28,15 +27,12 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     type(tPolicies)               :: pol_fine, pol_minus_risk    ! if (exogenous_xgrid) then this will hold interpolated policies
     type(tStats)                  :: K, mu, netwage, pens, bequests, r, rf
     type(tSimvars) ,allocatable   :: simvars(:)
-    real(dp)       ,allocatable   :: Phi(:,:,:)
-    real(dp), allocatable     :: val_newx(:,:,:,:,:,:), val_minus_risk(:,:,:,:,:,:), xgrid_mean_old(:,:,:), xgrid_mean_new(:,:,:), Phi_spread(:,:,:,:)
+    real(dp)       ,allocatable   :: Phi(:,:,:), xgrid_mean_old(:,:,:), xgrid_mean_new(:,:,:), Phi_spread(:,:,:,:)
+    real(dp), allocatable ,dimension(:,:,:,:,:,:)   :: val_newx, val_minus_risk, val_minus_risk2
     character(len=7)          :: runchar
-    character(:),allocatable  :: output_path
     logical                   :: ccv_thisrun
     real(dp)                  :: scale_IR_thisrun, scale_AR_thisrun, w
-    integer                   :: syserr, i
-
-    output_path = construct_path(calib_name,'insurance')
+    integer                   :: i
 
     ccv_thisrun = ccv
     scale_IR_thisrun = scale_IR
@@ -50,16 +46,16 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     r%name='r'; call r%calc_stats(simvars_in)
     rf%name='rf'; call rf%calc_stats(simvars_in)
 
-    print *,'- insurance_effect: simulating'
-
     call InterpolateXgrid(nx_factor, policies, value, pol_fine, val_newx)
     xgrid_mean_old = sum(pol_fine%xgrid(:,:,1,:,:,1),4)/size(pol_fine%xgrid,5) ! only an approximation of the grid over which Phi is defined
 
-    write(runchar,'(a6)') ',all'
+    print *,'- insurance_effect: simulating all risks'
+    write(runchar,'(a4)') ',all'
     pol_minus_risk = policies
     val_minus_risk = value
     call sim_pe(welfare(1))
 
+    print *,'- insurance_effect: simulating no CCV'
     call params_set('ccv', .false.)
     write(runchar,'(a6)') ',noCCV'
     pol_minus_risk = policies
@@ -68,6 +64,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     ! So here only remove ccv from income in simulation, use the re-optimized policies and adjust them with aggregate consumption for behavioral response.
     call sim_pe(welfare(2))
 
+    print *,'- insurance_effect: simulating no IR'
     call params_set('scale_IR', -1.0_dp)
     pol_minus_risk = policies%mean(2,stat_dist_eta)
     val_minus_risk = value
@@ -80,6 +77,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     write(runchar,'(a5)') ',noIR'
     call sim_pe(welfare(3))
 
+    print *,'- insurance_effect: simulating no AR'
     call params_set('scale_AR', -1.0_dp)
     pol_minus_risk = policies%mean(3,stat_dist_z)
     pol_minus_risk = pol_minus_risk%interpolate(5,agg_grid%k , K%avg_exerr_())
@@ -98,22 +96,23 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     i=f_locate(agg_grid%mu,mu%avg_exerr_())
     w=(mu%avg_exerr_()-agg_grid%mu(i))/(agg_grid%mu(i+1)-agg_grid%mu(i))
     val_minus_risk(:,:,:,:,:,:) = spread((1-w)*val_minus_risk(:,:,:,:,:,i) + w*val_minus_risk(:,:,:,:,:,i+1),6,size(agg_grid%mu))
+    allocate(val_minus_risk2, source=pol_minus_risk%apgrid)
+    val_minus_risk2(:,:,:,:,1,1) = val_minus_risk(:,:,:,:,1,1)
 
     if (scale_IR_orig .ne. -1.0) call params_set('scale_IR', 0.0_dp)
     write(runchar,'(a5)') ',noAR'
     call sim_pe(welfare(4))
 
+    print *,'- insurance_effect: simulating no risk'
     call params_set('scale_AR', -1.0_dp)
     call params_set('scale_IR', -1.0_dp)
     pol_minus_risk = pol_minus_risk%mean(2,stat_dist_eta)
     do i=1,size(stat_dist_eta)
-        val_minus_risk(:,1,:,:,:,:)= val_minus_risk(:,1,:,:,:,:) + stat_dist_eta(i)*value(:,i,:,:,:,:)
+        val_minus_risk2(:,1,:,:,:,:)= val_minus_risk2(:,1,:,:,:,:) + stat_dist_eta(i)*value(:,i,:,:,:,:)
     enddo
-    val_minus_risk(:,2:,:,:,:,:) = spread(val_minus_risk(:,1,:,:,:,:),2, size(stat_dist_eta)-1)
-
+    val_minus_risk2(:,2:,:,:,:,:) = spread(val_minus_risk2(:,1,:,:,:,:),2, size(stat_dist_eta)-1)
     write(runchar,'(a7)') ',norisk'
     call sim_pe(welfare(5))
-
 
     call params_set('ccv', ccv_thisrun)
     call params_set('scale_IR', scale_IR_thisrun)
@@ -125,8 +124,6 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     subroutine sim_pe(welf)
         use distribution           ,only: TransitionPhi
         real(dp) ,intent(out) ::welf
-        output_path=construct_path(calib_name,'insurance')//runchar
-        syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
         Phi     = Phi_in    ! initial values, makes clear that Phi is not output
         simvars = simvars_in
 
@@ -161,7 +158,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
             welf = calc_average_welfare(simvars)
         else
 
-            call InterpolateXgrid(nx_factor, pol_minus_risk, val_minus_risk, pol_fine, val_newx)
+            call InterpolateXgrid(nx_factor, pol_minus_risk, val_minus_risk2, pol_fine, val_newx)
 
             ! Alternatively, one could take Phi from the noCCV simulations, which is an average, but I think the following is more correct
             Phi = TransitionPhi(rf%avg_exerr_(),r%avg_exerr_(),netwage%avg_exerr_(),pens%avg_exerr_(),bequests%avg_exerr_(),pol_fine%xgrid(:,:,1,:,1,1),pol_fine%apgrid(:,:,1,:,1,1),pol_fine%stocks(:,:,1,:,1,1),etagrid(:,1))
@@ -170,7 +167,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
         endif
 
-        !call save_and_plot_results(runchar,agg_grid)
+        !call save_and_plot_results('insurance/'//runchar,agg_grid)
     end subroutine sim_pe
 
     !-------------------------------------------------------------------------------
@@ -186,23 +183,29 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
 
     subroutine save_and_plot_results(dir, grids)
     ! Calc stats and save all results for each run, then plot and save to pdf
+        use ifport             ,only: system  ! Intel Fortran portability library
+        use params_mod         ,only: construct_path
         use coefficients_class ,only: tCoeffs
         use error_class        ,only: tErrors
         use save_results_mod
         character(len=*) ,intent(in)   :: dir
         type(tAggGrids)  ,intent(in)   :: grids
+        character(:),allocatable  :: output_path
         type(tErrors)    :: err_temp
         type(tCoeffs) :: coeffs_temp
         real(dp)      :: secs_temp
-        integer       :: it_temp
+        integer       :: it_temp, syserr
 
         print*, '- insurance_effects_mod: Saving results and plots to folder ./model_output '
+        output_path=construct_path(calib_name,dir)
+        syserr = system('mkdir -p '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
+
         secs_temp = 0.0
         call coeffs_temp%allocate(size(pol_minus_risk%xgrid,5), size(pol_minus_risk%xgrid,6), size(pol_minus_risk%xgrid,3))
         call    err_temp%allocate(size(pol_minus_risk%xgrid,5), size(pol_minus_risk%xgrid,6))
 
         call save_results(Phi, simvars, coeffs_temp, grids,lifecycles,&
-                             pol_minus_risk, secs_temp, it_temp, projectname, calib_name//',insurance', dir, err_temp)
+                             pol_minus_risk, secs_temp, it_temp, projectname, calib_name, dir, err_temp)
 
         call plot_results(output_path, 'plot_all')
 
