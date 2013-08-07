@@ -11,8 +11,9 @@ module coefficients_class
         real(dp), dimension(:,:), allocatable, private :: k_initial, mu_initial
     contains
         generic :: allocate => allocate_ncoeffs, allocate_version
-        procedure , private :: allocate_ncoeffs
-        procedure , private :: allocate_version
+        procedure ,private :: allocate_ncoeffs
+        procedure ,private :: allocate_version
+        procedure ,private :: set_default_values
         procedure :: deallocate
         procedure :: read_unformatted
         procedure :: write_unformatted
@@ -38,6 +39,8 @@ contains
 
         allocate(this%k(ncoeffs_k,nz),this%mu(ncoeffs_mu,nz))
         allocate(this%r_squared(2,nz))
+
+        call this%set_default_values()
     end subroutine allocate_ncoeffs
 
     elemental subroutine allocate_version(this)
@@ -91,6 +94,15 @@ contains
     elemental subroutine deallocate(this)
         class(tCoeffs), intent(out)  :: this
     end subroutine deallocate
+!-------------------------------------------------------------------------------
+
+    elemental subroutine set_default_values(this)
+        class(tCoeffs) ,intent(inout)   :: this
+        this%k=0.0
+        this%mu=0.0
+        this%r_squared=0.0
+        this%normalize=.true.
+    end subroutine set_default_values
 !-------------------------------------------------------------------------------
 
     subroutine read_unformatted(this)

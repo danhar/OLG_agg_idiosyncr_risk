@@ -159,4 +159,7 @@ title('Variance of portfolio return');
 print('-depsc', ['graphs/lifecycles2']);
 system(['epstopdf graphs/lifecycles2.eps']);
 
+if (~isempty(strfind(pwd,'insurance'))) 
+    cd('..')
+end
 cd('../../../src_matlab/')

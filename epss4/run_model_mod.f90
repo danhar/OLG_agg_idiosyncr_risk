@@ -120,6 +120,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
                 simvars(i)%mu = 0.0
             enddo
         endif
+        simvars_old = simvars
 
     else
         print*,'- run_model: Krusell-Smith GENERAL equilibrium'
@@ -183,6 +184,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
 
     welfare_ins =0.0
     if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
+        if (partial_equilibrium) simvars = simvars_old
         call calc_insurance_effect(policies, value, grids, simvars, Phi, calib_name, projectname, welfare_ins)
     endif
 

@@ -108,4 +108,7 @@ for j=jplot%[39, 40, 41,42,43,44] % %[40,45,50,57]
     system(['epstopdf graphs/policies_',gen_str,'.eps']);
 end
 
+if (~isempty(strfind(pwd,'insurance'))) 
+    cd('..')
+end
 cd('../../../src_matlab/')

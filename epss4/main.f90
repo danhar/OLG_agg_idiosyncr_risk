@@ -217,6 +217,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
         real(dp) :: GE, PE, IR, AR, LCI, CCV, SR, LCI_INS, CCV_INS
+        integer  :: cev_ins_index
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
@@ -248,6 +249,8 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             write(21,'(a)') ' dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
             write(21,'(t13,f6.2,tr22,f6.2)') LCI/AR, (LCI + CCV)/PE
 
+            cev_ins_index = 1 ! second run is GE without socsec, lbound is zero
+
         else
             if (size(welfare,1) > 1) then
                 if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0) then
@@ -273,14 +276,15 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
                     write(21,'(f5.2,2x,es15.6,2x)') scaling(i), welfare(i,1)
                 endif
             enddo
+            cev_ins_index = 0 ! only one experiment
         endif
 
         write(21,*)
         write(21,*)
         write(21,*) 'New insurance calc, reported in % CEV, not mean adjusted!'
         write(21,*)
-        write(21,'(a)') ' g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)   g_c(tot)'
-        write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(1,5:1:-1))*100.0 ! CHECK
+        write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
+        write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(cev_ins_index,5:1:-1))*100.0 ! CHECK
         write(21,*)
 
         close(21)

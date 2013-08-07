@@ -35,5 +35,7 @@ title(['Visualising apgrids for all generations, ',dir]);
 print('-depsc', ['graphs/apgrids']);
 system(['epstopdf graphs/apgrids.eps']);
 
-cd('..')
-cd('../../src_matlab/')
+if (~isempty(strfind(pwd,'insurance'))) 
+    cd('..')
+end
+cd('../../../src_matlab/')

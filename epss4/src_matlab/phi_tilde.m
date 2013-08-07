@@ -90,4 +90,7 @@ view([-25 60]);
 print('-depsc', ['graphs/Phi_tilde']);
 system(['epstopdf graphs/Phi_tilde.eps']);
 
+if (~isempty(strfind(pwd,'insurance'))) 
+    cd('..')
+end
 cd('../../../src_matlab/')
