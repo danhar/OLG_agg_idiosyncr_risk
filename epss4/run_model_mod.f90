@@ -21,7 +21,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
 	real(dp)         ,intent(out) :: welfare, welfare_ins(:)! expected ex-ante utility of a newborn
 	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
-    type(tCoeffs)     :: coeffs  ! coefficients for laws of motion
+    type(tCoeffs)     :: coeffs, coeffs_old  ! coefficients for laws of motion
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
     type(tLifecycle)  :: lifecycles
@@ -121,6 +121,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
             enddo
         endif
         simvars_old = simvars
+        coeffs_old  = coeffs
 
     else
         print*,'- run_model: Krusell-Smith GENERAL equilibrium'
@@ -184,8 +185,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
 
     welfare_ins =0.0
     if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
-        if (partial_equilibrium) simvars = simvars_old
-        call calc_insurance_effect(policies, value, grids, simvars, Phi, calib_name, projectname, welfare_ins)
+        if (partial_equilibrium) then
+            simvars = simvars_old
+            coeffs  = coeffs_old
+        endif
+        call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins)
     endif
 
     if (.not. calibrating) then
