@@ -1,5 +1,9 @@
 module insurance_effect_mod
 ! In this module, the pure insurance effect is computed, excluding the mean effect.
+! This is achieved by averaging the existing policy function over the risk that is thrown out.
+! In particular, agents do not re-optimize in the world without the risk.
+! However, the resulting numbers are hard to understand. I do not think there is a bug, I rather think that this experiment is conceptually flawed.
+! So typically, this module will not be entered, because in params_mod, the default value ist calc_insurance_effects = .false.
 ! This module was added very late and implements experiments that are hard to insert into the existing code base.
 ! As a consequence, a lot of code is duplicated here.
     implicit none

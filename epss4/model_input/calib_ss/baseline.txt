@@ -33,8 +33,8 @@ n               0.011    population growth rate
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
 tau             0.02     tax rate. This value is used in the calibration baseline. Alternatives: .12
-tau_experiment  .true.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
-welfare_decomposition .false.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
+tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
+welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
 mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
 ccv             .true.   Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.

@@ -97,7 +97,7 @@ subroutine SetDefaultValues()
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.
-    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; calc_insurance_effects=.true.
+    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; calc_insurance_effects=.false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -1127,6 +1127,8 @@ use omp_lib           ,only: OMP_get_max_threads
     if (tol_asset_eul > 1.0e-4) print*, 'Warning: tol_asset_eul > 1.0e-4. Note: tol_simulation_marketclearing=tol_asset_eul*10.0'
 
     if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
+
+    if (calc_insurance_effects) print*, 'WARNING: calc_insurance_effects = .true., but not sure the module insurance_effects_mod makes sense.'
 
 contains
     subroutine critical_stop()
