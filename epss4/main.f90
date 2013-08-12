@@ -3,7 +3,7 @@
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
-	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, calc_insurance_effect, surv_rates, debugging,&
+	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, calc_insurance_effects, surv_rates, debugging,&
 	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
@@ -221,7 +221,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
         real(dp) ,intent(in) ,optional :: scaling(0:)
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
-        real(dp) :: GE, PE, NR, IR, AR, LCI, CCV, SR, GE_INS, PE_INS, NR_INS IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, GE_MEAN, PE_MEAN, NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN
+        real(dp) :: GE, PE, NR, IR, AR, LCI, CCV, SR, GE_INS, PE_INS, NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, GE_MEAN, PE_MEAN, NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN
         integer  :: cev_ins_index, nr_cev
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
@@ -265,21 +265,21 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             write(21,'(3(f7.2))') GE_MEAN, PE_MEAN, PE_MEAN-GE_MEAN
             write(21,*)
             if (surv_rates .or. debugging) then
-                nr_cev = size(cev)
+                nr_cev = ubound(cev,1)
                 write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)     g_c(SR)'
-                write(21,'(nr_cev(3x,f6.2,3x))') (cev(ubound(cev):1:-1))*100.0
+                write(21,'(<nr_cev>(3x,f6.2,3x))') (cev(nr_cev:1:-1))*100.0
                 write(21,*)
                 write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
             else
-                nr_cev = size(cev)-1
+                nr_cev = ubound(cev,1)-1
                 write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
-                write(21,'(nr_cev(3x,f6.2,3x))') (cev(ubound(cev)-1:1:-1))*100.0
+                write(21,'(<nr_cev>(3x,f6.2,3x))') (cev(nr_cev-1:1:-1))*100.0
                 write(21,*)
                 write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
             endif
-            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR, IR, AR, LCI, CCV, SR, LCI/AR, (LCI + CCV)/PE
-            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
-            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
+            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR, IR, AR, LCI, CCV, SR, LCI/AR, (LCI + CCV)/PE
+            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
+            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
 
             cev_ins_index = 1 ! second run is GE without socsec, lbound is zero
 
@@ -312,7 +312,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
         endif
 
 
-        if (calc_insurance_effect) then
+        if (calc_insurance_effects) then
             write(21,*)
             write(21,*)
             write(21,*) 'New insurance calc, where the risk is removed by averaging the respective policy function.'

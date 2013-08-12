@@ -93,7 +93,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
             print*,' *** Model solution successful during calibration of ', calib_name
             call save_and_plot_results(dir, ms_grids, err)
         endif
-        if (present(agg_cons_o)) agg_cons_o = simvars%C(1)
+        if (present(agg_cons_o)) agg_cons_o = simvars(1)%C(1)
         return
     endif
     ms_rf_temp = simvars(1)%rf(1)
