@@ -1,4 +1,11 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (0) What this branch does 
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+071-return_cons: since the new idea of averaging the policies in the risk dimension did not work, I will keep the old calculation, where households re-optimize,
+                and then make an adjustment with aggregate consumption. For this, mean aggregate consumption needs to be returned to main.f90. Then omega (the ratio
+                of mean aggregate consumption) is computed and multiplied with CEV. 
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - save results so that Matlab can always read (see errors in shell_output.txt)
