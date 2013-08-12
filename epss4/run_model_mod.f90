@@ -2,7 +2,7 @@ module run_model_mod
     implicit none
 contains
 
-subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, cal_iter_o)
+subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, cal_iter_o, agg_cons_o)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
@@ -21,12 +21,13 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
 	real(dp)         ,intent(out) :: welfare, welfare_ins(:)! expected ex-ante utility of a newborn
 	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
+	real(dp)         ,intent(out) ,optional :: agg_cons_o
     type(tCoeffs)     :: coeffs, coeffs_old  ! coefficients for laws of motion
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
     type(tLifecycle)  :: lifecycles
     type(tSimvars), allocatable:: simvars(:), simvars_old(:)    ! simulation variables, e.g. zt, kt,...
-    type(tStats)      :: K, mu, rf
+    type(tStats)      :: K, mu, rf, cons
     type(tErrors)     :: err
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
     real(dp)          :: ms_rf_temp
@@ -92,7 +93,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
             print*,' *** Model solution successful during calibration of ', calib_name
             call save_and_plot_results(dir, ms_grids, err)
         endif
-
+        if (present(agg_cons_o)) agg_cons_o = simvars%C(1)
         return
     endif
     ms_rf_temp = simvars(1)%rf(1)
@@ -183,7 +184,13 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
     call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
 
-    welfare_ins =0.0
+    if (present(agg_cons_o)) then
+        cons%name='cons'
+        call cons%calc_stats(simvars)
+        agg_cons_o = cons%avg_()
+    endif
+
+    welfare_ins =1.0 ! not zero to avoide divide by zero
     if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
         if (partial_equilibrium) then
             simvars = simvars_old

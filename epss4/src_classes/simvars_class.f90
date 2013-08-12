@@ -98,7 +98,7 @@ contains
             get = this%B(lb:ub)
         case ('invest')
             get = this%invest(lb:ub)
-        case ('cons')
+        case ('cons','C')
             get = this%C(lb:ub)
         case ('Phi_1')
             get = this%Phi_1(lb:ub)

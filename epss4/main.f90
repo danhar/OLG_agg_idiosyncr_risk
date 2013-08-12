@@ -3,14 +3,14 @@
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
-	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, &
+	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, calc_insurance_effect, surv_rates, debugging,&
 	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
     implicit none
 	real(dp)                  :: secs
-	real(dp)     ,allocatable :: welfare(:,:), cev(:), cev_ins(:,:), welfare_ins(:,:,:), risk_scale(:)
+	real(dp)     ,allocatable :: welfare(:,:), agg_cons(:,:), cev(:), agg_cons_ratio(:), cev_ins(:,:), welfare_ins(:,:,:), risk_scale(:)
 	integer                   :: sys_error, rc, i, start_time, end_time, count_rate
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
@@ -48,12 +48,15 @@ program EPSS
         if (twosided_experiment .and. run_n_times>1) call params_set('run_counter_start', -1*run_n_times+2)
         if (allocated(welfare)) deallocate(welfare)
         allocate(welfare(run_counter_start:run_n_times,2))
+        agg_cons = welfare
         if (allocated(welfare_ins)) deallocate(welfare_ins)
         allocate(welfare_ins(lbound(welfare,1):ubound(welfare,1),lbound(welfare,2):ubound(welfare,2),5))
         if (allocated(risk_scale)) deallocate(risk_scale)
         allocate(risk_scale(run_counter_start:run_n_times))
         if (allocated(cev)) deallocate(cev)
         if (tau_experiment)  allocate(cev(run_counter_start:run_n_times))
+        if (allocated(agg_cons_ratio)) deallocate(agg_cons_ratio)
+        if (tau_experiment) agg_cons_ratio = cev
         if (allocated(cev_ins)) deallocate(cev_ins)
         if (tau_experiment)  allocate(cev_ins(lbound(cev,1):ubound(cev,1),lbound(welfare_ins,3):ubound(welfare_ins,3)))
 
@@ -106,7 +109,7 @@ program EPSS
 	        call CheckParams
 	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
 
-    	    call run_model(projectname, calib_name, welfare(rc,1), welfare_ins(rc,1,:))
+    	    call run_model(projectname, calib_name, welfare(rc,1), welfare_ins(rc,1,:), agg_cons_o=agg_cons(rc,1))
 
     	    if (tau_experiment) then
     	        call params_set('partial_equilibrium', .true.)
@@ -114,16 +117,18 @@ program EPSS
     	        write(runchar,'(a4,f3.2)') ',tau',tau
     	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
-    	        call run_model(projectname, calib_name, welfare(rc,2) ,welfare_ins(rc,2,:))
+    	        call run_model(projectname, calib_name, welfare(rc,2) ,welfare_ins(rc,2,:), agg_cons_o=agg_cons(rc,2))
     	        call params_set('tau', tau- tau_increment)
     	        cev(rc) = welfare(rc,2)/welfare(rc,1) - 1.0
+    	        agg_cons_ratio(rc) = agg_cons(rc,1)/agg_cons(rc,2)
     	        cev_ins(rc,:) = welfare_ins(rc,2,:)/welfare_ins(rc,1,:) - 1.0
 	        endif
 	    enddo
+	    agg_cons_ratio(0) = agg_cons(1,1)/agg_cons(0,1)
 	    if (welfare_decomposition) then
-	        call write2file(welfare,cev,cev_ins,'welfare')
+	        call write2file(welfare,cev,cev_ins,agg_cons_ratio,'welfare')
 	    else
-            if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,cev_ins,'welfare',risk_scale)
+            if(size(welfare,1)>1 .or. tau_experiment) call write2file(welfare,cev,cev_ins,agg_cons_ratio, 'welfare',risk_scale)
             if(size(welfare,1)>1) call plot('cev_regression')
         endif
     enddo
@@ -211,13 +216,13 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
     end subroutine get_calibration_name
 !-------------------------------------------------------------------------------
 
-    subroutine write2file(welfare, cev, cev_ins, filename, scaling)
-        real(dp) ,intent(in) :: welfare(0:,1:), cev(0:), cev_ins(0:,1:)
+    subroutine write2file(welfare, cev, cev_ins,agg_cons_ratio, filename, scaling)
+        real(dp) ,intent(in) :: welfare(0:,1:), cev(0:), cev_ins(0:,1:), agg_cons_ratio(0:)
         real(dp) ,intent(in) ,optional :: scaling(0:)
         character(len=*) ,intent(in) :: filename
         character(:) ,allocatable :: cal_id_temp
-        real(dp) :: GE, PE, IR, AR, LCI, CCV, SR, LCI_INS, CCV_INS
-        integer  :: cev_ins_index
+        real(dp) :: GE, PE, NR, IR, AR, LCI, CCV, SR, GE_INS, PE_INS, NR_INS IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, GE_MEAN, PE_MEAN, NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN
+        integer  :: cev_ins_index, nr_cev
 
         cal_id_temp = cal_id(calib_name_base)    ! Could remove this line and put cal_id(calib_name) directly into open statement, but compiler bug.
 
@@ -226,28 +231,55 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
         if (.not. present(scaling)) then
 
             GE = (welfare(0,1)/welfare(1,1) -1.0)*100.0
-            PE = cev(1)*100.0
-            write(21,*) 'Welfare changes, reported in % CEV'
-            write(21,*)
-            write(21,'(a)') '     GE     PE  CrowdOut '
-            write(21,'(3(f7.2))') GE, PE, PE-GE
-            write(21,*)
-            write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)     g_c(SR)'
-            write(21,'(6(3x,f6.2,3x))') (cev(6:1:-1))*100.0
-            write(21,*)
-
+            PE =  cev(1)*100.0
+            NR =  cev(6)*100.0
             IR = (cev(5)-cev(6))*100.0
             AR = (cev(4)-cev(6))*100.0
             LCI= (cev(3)*100.0-(cev(6)*100.0 + IR + AR))
             CCV= (cev(2) - cev(3))*100.0
             SR = (cev(1) - cev(2))*100.0
 
-            write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR)'
-            write(21,'(6(3x,f6.2,3x))') cev(6)*100.0, IR, AR, LCI, CCV, SR
+            GE_INS  = (welfare(0,1)/welfare(1,1) * agg_cons_ratio(0) -1.0)*100.0
+            PE_INS  = ((cev(1)+1.0)*agg_cons_ratio(1)-1.0)*100.0
+            NR_INS  = ((cev(6)+1.0)*agg_cons_ratio(6)-1.0)*100.0
+            IR_INS  = ((cev(5)+1.0)*agg_cons_ratio(5)-1.0)*100.0
+            AR_INS  = ((cev(4)+1.0)*agg_cons_ratio(4)-1.0)*100.0
+            LCI_INS = ((cev(3)+1.0)*agg_cons_ratio(3)-1.0 - IR_INS - AR_INS)*100.0
+            CCV_INS = ((cev(2)+1.0)*agg_cons_ratio(2) - (cev(3)+1.0)*agg_cons_ratio(3))*100.0
+            SR_INS  = ((cev(1)+1.0)*agg_cons_ratio(1) - (cev(2)+1.0)*agg_cons_ratio(2))*100.0
 
+            GE_MEAN  = GE - GE_INS
+            PE_MEAN  = PE - PE_INS
+            NR_MEAN  = NR - NR_INS
+            IR_MEAN  = IR - IR_INS
+            AR_MEAN  = AR - AR_INS
+            LCI_MEAN  = LCI - LCI_INS
+            CCV_MEAN  = CCV - CCV_INS
+            SR_MEAN  = SR - SR_INS
+
+            write(21,*) 'Welfare changes, reported in % CEV; first line is total effect, second line insurance effect g_c^{ins}, third line mean effect g_c^{mean}'
             write(21,*)
-            write(21,'(a)') ' dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
-            write(21,'(t13,f6.2,tr22,f6.2)') LCI/AR, (LCI + CCV)/PE
+            write(21,'(a)') '     GE     PE  CrowdOut '
+            write(21,'(3(f7.2))') GE, PE, PE-GE
+            write(21,'(3(f7.2))') GE_INS, PE_INS, PE_INS-GE_INS
+            write(21,'(3(f7.2))') GE_MEAN, PE_MEAN, PE_MEAN-GE_MEAN
+            write(21,*)
+            if (surv_rates .or. debugging) then
+                nr_cev = size(cev)
+                write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)     g_c(SR)'
+                write(21,'(nr_cev(3x,f6.2,3x))') (cev(ubound(cev):1:-1))*100.0
+                write(21,*)
+                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
+            else
+                nr_cev = size(cev)-1
+                write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
+                write(21,'(nr_cev(3x,f6.2,3x))') (cev(ubound(cev)-1:1:-1))*100.0
+                write(21,*)
+                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
+            endif
+            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR, IR, AR, LCI, CCV, SR, LCI/AR, (LCI + CCV)/PE
+            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
+            write(21,'(nr_cev(3x,f6.2,3x),2(6x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
 
             cev_ins_index = 1 ! second run is GE without socsec, lbound is zero
 
@@ -279,13 +311,17 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             cev_ins_index = 0 ! only one experiment
         endif
 
-        write(21,*)
-        write(21,*)
-        write(21,*) 'New insurance calc, reported in % CEV, not mean adjusted!'
-        write(21,*)
-        write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
-        write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(cev_ins_index,5:1:-1))*100.0 ! CHECK
-        write(21,*)
+
+        if (calc_insurance_effect) then
+            write(21,*)
+            write(21,*)
+            write(21,*) 'New insurance calc, where the risk is removed by averaging the respective policy function.'
+            write(21,*) 'Reported in % CEV, not mean adjusted!'
+            write(21,*)
+            write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
+            write(21,'(<size(cev_ins,2)>(3x,f6.2,3x))') (cev_ins(cev_ins_index,5:1:-1))*100.0
+            write(21,*)
+        endif
 
         close(21)
 
