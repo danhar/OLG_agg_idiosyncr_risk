@@ -33,6 +33,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
 	real(dp) ,dimension(:,:,:), allocatable :: value_ms ! mean shock
 	logical ,parameter :: normalize_xvars_to_unity = .true.
+	integer ,parameter :: nx_factor = 20    ! use higher nx_factor than in Krusell smith
 
     coeffs          = Initialize()
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
@@ -83,6 +84,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     endif
 
     call get_equilibrium_values(policies,value,policies_ms, value_ms, Phi, err)
+    xgrid_ms = policies_ms%xgrid(:,:,1,:,1,1)
     call err%print2stderr
 
     call simulate_ms(simvars)
@@ -103,7 +105,7 @@ contains
     ! Solve for the MSE, i.e. where k'=k and mu'=mu given that all realizations are at the mean_z.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
     ! Update: if I update the bequests_ms this is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
-        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
+        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio !, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
@@ -166,7 +168,7 @@ contains
     ! Solve for the MSE one time given the MSE value for k and mu in order to get the (other) equilibrium objects.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
     ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
-        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
+        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio !, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
