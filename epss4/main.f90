@@ -264,7 +264,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             NR_INS  = ((cev(6)+1.0)*agg_cons_ratio(6)-1.0)*100.0
             IR_INS  = ((cev(5)+1.0)*agg_cons_ratio(5)-1.0)*100.0
             AR_INS  = ((cev(4)+1.0)*agg_cons_ratio(4)-1.0)*100.0
-            LCI_INS = ((cev(3)+1.0)*agg_cons_ratio(3)-1.0 - IR_INS - AR_INS)*100.0
+            LCI_INS = ((cev(3)+1.0)*agg_cons_ratio(3)-1.0)*100.0 - IR_INS - AR_INS
             CCV_INS = ((cev(2)+1.0)*agg_cons_ratio(2) - (cev(3)+1.0)*agg_cons_ratio(3))*100.0
             SR_INS  = ((cev(1)+1.0)*agg_cons_ratio(1) - (cev(2)+1.0)*agg_cons_ratio(2))*100.0
 
@@ -277,10 +277,11 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             CCV_MEAN  = CCV - CCV_INS
             SR_MEAN  = SR - SR_INS
 
-            write(21,*) 'Welfare changes, reported in % CEV; first line is total effect, second line insurance effect g_c^{ins}, third line mean effect g_c^{mean}'
+            write(21,'(a)') 'Welfare changes, reported in % of consumption equivalent variation, CEV'
+            write(21,'(a)') 'First line is total effect, second line insurance effect g_c^{ins}, third line mean effect g_c^{mean}'
             write(21,*)
             write(21,'(a)') '     GE     PE  CrowdOut '
-            write(21,'(3(f7.2))') GE, PE, PE-GE
+            write(21,'(3(f7.2))') GE, PE, GE-PE
             write(21,'(3(f7.2))') GE_INS, PE_INS, PE_INS-GE_INS
             write(21,'(3(f7.2))') GE_MEAN, PE_MEAN, PE_MEAN-GE_MEAN
             write(21,*)
@@ -289,20 +290,23 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
                 write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)     g_c(SR)'
                 write(21,'(<nr_cev>(3x,f6.2,3x))') (cev(nr_cev:1:-1))*100.0
                 write(21,*)
-                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
+                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)    dg_c(SR) | dg_c(LCI)/dg_c(AR)   (dg_c(LCI)+dg_c(CCV))/PE'
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR, IR, AR, LCI, CCV, SR, LCI/AR, (LCI + CCV)/PE
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
+
             else
                 nr_cev = ubound(cev,1)-1
                 write(21,'(a)') ' g_c(0,0)   g_c(0,IR)   g_c(AR,0)   g_c(AR,IR)   g_c(CCV)'
-                write(21,'(<nr_cev>(3x,f6.2,3x))') (cev(nr_cev-1:1:-1))*100.0
+                write(21,'(<nr_cev>(3x,f6.2,3x))') (cev(nr_cev+1:2:-1))*100.0
                 write(21,*)
-                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV)      dg_c(LCI)/dg_c(AR)    (dg_c(LCI)+dg_c(CCV))/PE'
+                write(21,'(a)') ' g_c(0,0)    dg_c(IR)    dg_c(AR)   dg_c(LCI)   dg_c(CCV) | dg_c(LCI)/dg_c(AR)   (dg_c(LCI)+dg_c(CCV))/PE'
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR, IR, AR, LCI, CCV, LCI/AR, (LCI + CCV)/PE
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
+                write(21,'(<nr_cev>(3x,f6.2,3x),2(10x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
             endif
-            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR, IR, AR, LCI, CCV, SR, LCI/AR, (LCI + CCV)/PE
-            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR_INS, IR_INS, AR_INS, LCI_INS, CCV_INS, SR_INS, LCI_INS/AR_INS, (LCI_INS + CCV_INS)/PE_INS
-            write(21,'(<nr_cev>(3x,f6.2,3x),2(6x,f6.2))') NR_MEAN, IR_MEAN, AR_MEAN, LCI_MEAN, CCV_MEAN, SR_MEAN, LCI_MEAN/AR_MEAN, (LCI_MEAN + CCV_MEAN)/PE_MEAN
 
             cev_ins_index = 1 ! second run is GE without socsec, lbound is zero
-
         else
             if (size(welfare,1) > 1) then
                 if (scale_IR_orig .ne. 0.0 .and. scale_IR_orig .ne. -1.0) then
