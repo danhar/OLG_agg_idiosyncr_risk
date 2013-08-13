@@ -12,7 +12,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
 	use mean_shock_mod    ,only: solve_meanshock
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
-    use insurance_effect_mod ,only: calc_insurance_effect
+    use alternative_insurance_calc_mod ,only: calc_insurance_effect
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition,& ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR

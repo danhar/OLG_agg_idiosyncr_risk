@@ -1,10 +1,8 @@
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (0) What this branch does 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-071-return_cons: since the new idea of averaging the policies in the risk dimension did not work, I will keep the old calculation, where households re-optimize,
-                and then make an adjustment with aggregate consumption. For this, mean aggregate consumption needs to be returned to main.f90. Then omega (the ratio
-                of mean aggregate consumption) is computed and multiplied with CEV. 
-
+072-meanshock_rev: revisit mean shock equilibrium. Specifically, check whether results change if I use stat_dist_z instead of we, wz. 
+                    Maybe use policy%mean like in insurance_effect_mod 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -220,3 +218,7 @@ For example, simvars should read and write output unformatted also, see  subrout
  (E2) Done! (started in June 2013) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - put tolerance in simulation into the calibration files : instead of this, I set tol_simulation_marketclearing = tol_asset_eul*10_dp
+
+071-return_cons: since the new idea of averaging the policies in the risk dimension did not work, I will keep the old calculation, where households re-optimize,
+                and then make an adjustment with aggregate consumption. For this, mean aggregate consumption needs to be returned to main.f90. Then omega (the ratio
+                of mean aggregate consumption) is computed and multiplied with CEV. 

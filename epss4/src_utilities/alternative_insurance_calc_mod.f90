@@ -1,4 +1,4 @@
-module insurance_effect_mod
+module alternative_insurance_calc_mod
 ! In this module, the pure insurance effect is computed, excluding the mean effect.
 ! This is achieved by averaging the existing policy function over the risk that is thrown out.
 ! In particular, agents do not re-optimize in the world without the risk.
@@ -336,4 +336,4 @@ contains
 
 end subroutine calc_insurance_effect
 
-end module insurance_effect_mod
+end module alternative_insurance_calc_mod
