@@ -28,33 +28,16 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     real(dp) ,allocatable ,intent(out)   :: Phi(:,:,:), value(:,:,:,:,:,:), xgrid_ms(:,:,:)  ! distribution, valuefunction, mean shock xgrid
     type(tErrors)   ,intent(out)   :: err
     character(len=*), intent(in)   :: output_path
-	real(dp) ,dimension(:), allocatable  :: xvars, fvals	! input/output of ms_equilib, passed to sub_broyden
-	real(dp) ,dimension(:), allocatable  :: m_etagrid, w
+    type(tPolicies)                :: policies_ms
+	real(dp) ,dimension(:), allocatable  :: xvars, fvals, m_etagrid	! input/output of ms_equilib, passed to sub_broyden. Mean etagrid.
 	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
-	real(dp)					   :: wz, wd ! weights (distance to mean zeta, mean delta)
-	real(dp) ,dimension(:,:,:), allocatable :: apgrid_ms, stocks_ms, kappa_ms, value_ms ! mean shock projections
-	integer         	           :: i, nz		        ! index
+	real(dp) ,dimension(:,:,:), allocatable :: value_ms ! mean shock
 	logical ,parameter :: normalize_xvars_to_unity = .true.
 
-    nz = size(stat_dist_z)
-    allocate(w(nz))
     coeffs          = Initialize()
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
 	mean_delta		= dot_product(stat_dist_z, delta)
-	i				= f_locate(zeta,mean_zeta)	  ! In 'default', f_locate returns ju-1 if x>xgrid(ju-1) !
-	if (zeta(i+1)==zeta(i)) then   ! this happens e.g. if scale_AR = -1.0
-        wz          = 0.5_dp
-    else
-	    wz			= (mean_zeta-zeta(i))/(zeta(i+1)-zeta(i))
-    endif
-	i				= f_locate(delta,mean_delta)
-	!wd				= (mean_deltam-delta(i))/(delta(i+1)-delta(i))
-	wd				= 0.5_dp ! WARNING: overwriting wd manually, coz delta is not in increasing order
-	w(1)			= (1.0-wd)*(1.0-wz)
-	w(2)			= wd*(1.0-wz)
-	w(3)			= (1.0-wd)*wz
-	w(4)			= wd*wz
-	m_etagrid	    = wz*etagrid(:,1)+(1-wz)*etagrid(:,nz)
+	m_etagrid	    = matmul(etagrid,stat_dist_z)
 
     ! Initial guesses
     if (scale_AR == -1.0) then
@@ -99,7 +82,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
         endif
     endif
 
-    call get_equilibrium_values(policies,value,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, err)
+    call get_equilibrium_values(policies,value,policies_ms, value_ms, Phi, err)
     call err%print2stderr
 
     call simulate_ms(simvars)
@@ -130,11 +113,11 @@ contains
         implicit none
         real(dp) ,dimension(:),intent(in) :: msvars             ! k_ms, mu_ms
         real(dp) ,dimension(size(msvars)) :: distance           ! excess demands
-        type(tPolicies) :: policies, fine
+        type(tPolicies) :: policies, fine, policies_ms
         type(tAggGrids) :: grid
         type(tErrors)   :: errs
         real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: value, v_fine
-        real(dp) ,dimension(:,:,:) ,allocatable :: apgrid_ms, stocks_ms, xgrid_ms, Phi ! mean shock projections and distribution
+        real(dp) ,dimension(:,:,:) ,allocatable :: Phi ! mean shock projections and distribution
         real(dp)                          :: netwage_ms, pens_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
         integer                           :: i
 
@@ -154,17 +137,7 @@ contains
 
         call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
 
-        allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
-
-        ! Projection of policies / grid on mean shock
-        xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0
-        do i=1,size(fine%xgrid,3)
-            xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)
-            apgrid_ms = apgrid_ms + w(i)* fine%apgrid(:,:,i,:,1,1)
-            stocks_ms = stocks_ms + w(i)* fine%stocks(:,:,i,:,1,1)
-        enddo
+        policies_ms = fine%mean(3,stat_dist_z)
 
         ! Prices in mean shock path
         netwage_ms    = f_netwage (grid%k(1), mean_zeta)
@@ -173,15 +146,15 @@ contains
         r_ms          = f_stock_return(grid%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
 
         ! Update the guess for bequests (instead of finding a fixed-point in (Phi,bequests)
         ! bequests_ms   = f_bequests(rf_ms, r_ms, stocks_ms, apgrid_ms, Phi) ! This update seemed to create problems for the rootfinder.
 
         ! Aggregate
 
-        kp_ms           = sum(apgrid_ms *Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
-        agg_bond_demand = sum((apgrid_ms-stocks_ms)*Phi)
+        kp_ms           = sum(policies_ms%apgrid(:,:,1,:,1,1)*Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
+        agg_bond_demand = sum((policies_ms%apgrid(:,:,1,:,1,1)-policies_ms%stocks(:,:,1,:,1,1))*Phi)
         ! Exess demands
         distance(1)     = kp_ms - grid%k(1)
         if (size(distance) > 1) distance(2) = kp_ms * de_ratio/(1.0 + de_ratio) - agg_bond_demand/(L_N_ratio*(1.0+n)*(1.0+g))
@@ -189,7 +162,7 @@ contains
     end function ms_equilibrium
 
 
-    subroutine get_equilibrium_values(fine,v_fine,apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi, errs)
+    subroutine get_equilibrium_values(fine,v_fine,policies_ms, value_ms, Phi, errs)
     ! Solve for the MSE one time given the MSE value for k and mu in order to get the (other) equilibrium objects.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
     ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
@@ -201,11 +174,11 @@ contains
         use income
 
         implicit none
-        type(tPolicies) ,intent(out) :: fine
+        type(tPolicies) ,intent(out) :: fine, policies_ms
         type(tErrors)   ,intent(out) :: errs
         real(dp) ,dimension(:,:,:,:,:,:) ,allocatable ,intent(out) :: v_fine
-        real(dp) ,dimension(:,:,:)       ,allocatable ,intent(out) :: apgrid_ms, stocks_ms, xgrid_ms, kappa_ms, value_ms, Phi ! mean shock projections and distribution
-        type(tPolicies)       :: policies
+        real(dp) ,dimension(:,:,:)       ,allocatable ,intent(out) :: value_ms, Phi ! mean shock projections and distribution
+        type(tPolicies)       :: policies, pol_ms
         real(dp) ,allocatable :: value(:,:,:,:,:,:)
         real(dp)              :: netwage_ms, pens_ms, r_ms, rf_ms
         integer               :: i
@@ -214,25 +187,13 @@ contains
 
         call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
 
-        allocate(apgrid_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 stocks_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 xgrid_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 kappa_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)), &
-                 value_ms (size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4))  )
-
-        ! Projection of policies / grids on mean shock
-        xgrid_ms =0.0; apgrid_ms =0.0; stocks_ms =0.0; value_ms =0.0;
+        policies_ms = fine%mean(3,stat_dist_z)
+        call policies_ms%calc_kappa()
+        allocate(value_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)))
+        value_ms = 0.0
         do i=1,size(fine%xgrid,3)
-            xgrid_ms  = xgrid_ms  + w(i)* fine%xgrid (:,:,i,:,1,1)
-            apgrid_ms = apgrid_ms + w(i)* fine%apgrid(:,:,i,:,1,1)
-            stocks_ms = stocks_ms + w(i)* fine%stocks(:,:,i,:,1,1)
-            value_ms  = value_ms  + w(i)* v_fine(:,:,i,:,1,1) ! I don't need it right here, but in meanshock_wrapper
+            value_ms  = value_ms  + stat_dist_z(i)* v_fine(:,:,i,:,1,1) ! I don't need it right here, but in meanshock_wrapper
         enddo
-        where (apgrid_ms .ne. 0.0)
-            kappa_ms = stocks_ms/apgrid_ms
-        elsewhere
-            kappa_ms = 0.0
-        end where
 
         ! Prices in mean shock path
         netwage_ms    = f_netwage (grids%k(1), mean_zeta)
@@ -241,7 +202,7 @@ contains
         r_ms          = f_stock_return(grids%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,xgrid_ms,apgrid_ms,stocks_ms,m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
 
     end subroutine get_equilibrium_values
 
@@ -259,8 +220,14 @@ contains
 
         type(tSimvars) ,intent(out) :: simvars
         real(dp) ,allocatable       :: r_pf(:,:,:)
-        integer                     :: i
+        integer                     :: i, nz
 
+        associate(xgrid_ms  => policies_ms%xgrid (:,:,1,:,1,1), &
+                  apgrid_ms => policies_ms%apgrid(:,:,1,:,1,1), &
+                  stocks_ms => policies_ms%stocks(:,:,1,:,1,1), &
+                  kappa_ms  => policies_ms%kappa (:,:,1,:,1,1)  )
+
+        nz = size(stat_dist_z)
         call simvars%allocate(nz+1)   ! allocate all simulation variables
         simvars%z(1)    = 0     ! to indicate that these are mean-shock-results
         simvars%K(1)    = grids%k(1)
@@ -323,6 +290,8 @@ contains
 
         simvars%K (nz+2) = simvars%K (1) ! K and rf have one more index in the real simulations.
         simvars%rf(nz+2) = simvars%rf(1)
+
+        end associate
     end subroutine simulate_ms
 
     pure subroutine ms_lc_profiles(lifecycles)
@@ -330,6 +299,12 @@ contains
         use params_mod   ,only        :  g
         type(tLifecycle) ,intent(out) :: lifecycles
         integer                       :: jc
+
+        associate(xgrid_ms  => policies_ms%xgrid (:,:,1,:,1,1), &
+                  apgrid_ms => policies_ms%apgrid(:,:,1,:,1,1), &
+                  stocks_ms => policies_ms%stocks(:,:,1,:,1,1), &
+                  kappa_ms  => policies_ms%kappa (:,:,1,:,1,1)  )
+
         call lifecycles%allocate(size(apgrid_ms,3))
 
         lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
@@ -346,6 +321,8 @@ contains
         elsewhere
             lifecycles%kappa = 0.0
         end where
+
+        end associate
     end subroutine ms_lc_profiles
 
 end subroutine solve_meanshock
