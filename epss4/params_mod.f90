@@ -17,7 +17,7 @@ module params_mod
                           lom_k_version, lom_mu_version
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
-                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, calc_insurance_effects
+                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ subroutine SetDefaultValues()
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.;
-    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; calc_insurance_effects=.false.
+    save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -166,8 +166,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) tau_experiment
             case ('welfare_decomposition')
                 read (parval,*) welfare_decomposition
-            case ('calc_insurance_effects')
-                read (parval,*) calc_insurance_effects
+            case ('alt_insurance_calc')
+                read (parval,*) alt_insurance_calc
             case ('mean_return_type')
                 read (parval,*) mean_return_type
             case ('ccv')
@@ -1128,7 +1128,7 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
 
-    if (calc_insurance_effects) print*, 'WARNING: calc_insurance_effects = .true., but not sure the module insurance_effects_mod makes sense.'
+    if (alt_insurance_calc) print*, 'WARNING: alt_insurance_calc = .true., but not sure the module insurance_effects_mod makes sense.'
 
 contains
     subroutine critical_stop()

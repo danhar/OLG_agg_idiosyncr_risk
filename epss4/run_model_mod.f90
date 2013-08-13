@@ -2,7 +2,7 @@ module run_model_mod
     implicit none
 contains
 
-subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, cal_iter_o, agg_cons_o)
+subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o, cal_iter_o, agg_cons_o)
     use classes_mod
     use ifport            ,only: system  ! Intel Fortran portability library
     use omp_lib           ,only: OMP_get_max_threads
@@ -14,14 +14,14 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
     use simvars_class     ,only: read_unformatted, write_unformatted
     use insurance_effect_mod ,only: calc_insurance_effect
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, calc_insurance_effects, welfare_decomposition,& ! logicals and characters
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition,& ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
-	real(dp)         ,intent(out) :: welfare, welfare_ins(:)! expected ex-ante utility of a newborn
+	real(dp)         ,intent(out) :: welfare
 	type(tSimvars)   ,intent(out) ,optional ,allocatable :: simvars_o(:)
-	real(dp)         ,intent(out) ,optional :: agg_cons_o
+	real(dp)         ,intent(out) ,optional :: agg_cons_o, welfare_ins_o(:)! expected ex-ante utility of a newborn
     type(tCoeffs)     :: coeffs, coeffs_old  ! coefficients for laws of motion
     type(tPolicies)   :: policies
     type(tAggGrids)   :: grids, ms_grids
@@ -190,13 +190,15 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins, simvars_o, c
         agg_cons_o = cons%avg_()
     endif
 
+    if (present(welfare_ins_o)) then
     welfare_ins =1.0 ! not zero to avoide divide by zero
-    if (.not. calibrating .and. calc_insurance_effects .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
-        if (partial_equilibrium) then
-            simvars = simvars_old
-            coeffs  = coeffs_old
+        if (.not. calibrating .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
+            if (partial_equilibrium) then
+                simvars = simvars_old
+                coeffs  = coeffs_old
+            endif
+            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins)
         endif
-        call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins)
     endif
 
     if (.not. calibrating) then
