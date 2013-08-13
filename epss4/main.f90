@@ -137,17 +137,18 @@ program EPSS
 	    agg_cons_ratio(0) = agg_cons(1,1)/agg_cons(0,1)
 	    if (welfare_decomposition) then
 	        if (alt_insurance_calc) then
-	            call write2file(welfare,cev,cev_ins,agg_cons_ratio,'welfare')
+	            call write2file(welfare,cev,agg_cons_ratio,'welfare',cev_ins)
             else
                 call write2file(welfare,cev,agg_cons_ratio,'welfare')
             endif
 	    else
             if(size(welfare,1)>1 .or. tau_experiment) then
                 if (alt_insurance_calc) then
-                    call write2file(welfare,cev,cev_ins,agg_cons_ratio, 'welfare',risk_scale)
+                    call write2file(welfare,cev,agg_cons_ratio, 'welfare',cev_ins,risk_scale)
                 else
                     call write2file(welfare,cev,agg_cons_ratio, 'welfare',scaling_o=risk_scale)
                 endif
+            endif
             if(size(welfare,1)>1) call plot('cev_regression')
         endif
     enddo
@@ -235,7 +236,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
     end subroutine get_calibration_name
 !-------------------------------------------------------------------------------
 
-    subroutine write2file(welfare, cev, cev_ins_o,agg_cons_ratio, filename, scaling_o)
+    subroutine write2file(welfare, cev, agg_cons_ratio, filename, cev_ins_o, scaling_o)
         real(dp) ,intent(in) :: welfare(0:,1:), cev(0:), agg_cons_ratio(0:)
         real(dp) ,intent(in) ,optional :: scaling_o(0:), cev_ins_o(0:,1:)
         character(len=*) ,intent(in) :: filename
@@ -247,7 +248,7 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 
         open(21,file='model_output/'//filename//'_'//cal_id_temp//'.txt')
 
-        if (.not. present(scaling)) then
+        if (.not. present(scaling_o)) then
 
             GE = (welfare(0,1)/welfare(1,1) -1.0)*100.0
             PE =  cev(1)*100.0
@@ -322,9 +323,9 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             endif
             do i=0,size(welfare,1)-1
                 if (tau_experiment) then
-                    write(21,'(f5.2,2x,3(es15.6,2x))') scaling(i), welfare(i,1), welfare(i,2), cev(i)
+                    write(21,'(f5.2,2x,3(es15.6,2x))') scaling_o(i), welfare(i,1), welfare(i,2), cev(i)
                 else
-                    write(21,'(f5.2,2x,es15.6,2x)') scaling(i), welfare(i,1)
+                    write(21,'(f5.2,2x,es15.6,2x)') scaling_o(i), welfare(i,1)
                 endif
             enddo
             cev_ins_index = 0 ! only one experiment

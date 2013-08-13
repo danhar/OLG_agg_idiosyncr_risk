@@ -191,13 +191,13 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     endif
 
     if (present(welfare_ins_o)) then
-    welfare_ins =1.0 ! not zero to avoide divide by zero
+    welfare_ins_o =1.0 ! not zero to avoide divide by zero
         if (.not. calibrating .and. (index(calib_name,'GE1')>0 .or. .not. welfare_decomposition)) then
             if (partial_equilibrium) then
                 simvars = simvars_old
                 coeffs  = coeffs_old
             endif
-            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins)
+            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins_o)
         endif
     endif
 
