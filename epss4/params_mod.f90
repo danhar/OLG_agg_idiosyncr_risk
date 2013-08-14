@@ -1143,16 +1143,17 @@ contains
 end subroutine CheckParams
 
 !-------------------------------------------------------------------------------------------------
-pure function cal_id(calib_name)
+pure function cal_id(calib_name, base_o)
 	character(:), allocatable :: cal_id, temp
 	character(len=*), intent(in) :: calib_name
+	character(len=*), optional, intent(in) :: base_o
 	integer :: pos, pos2
     pos  = scan(calib_name,'/')
     temp = calib_name(pos+1:)
     pos  = scan(temp,'.')
     cal_id = temp(:pos-1)
     pos2 = index(temp,',')
-    if (pos2 > pos) cal_id = cal_id//temp(pos2:)
+    if (pos2 > pos .and. .not. present(base_o)) cal_id = cal_id//temp(pos2:)
 end function cal_id
 !-------------------------------------------------------------------------------------------------
 pure function construct_path(calib_name, dir)

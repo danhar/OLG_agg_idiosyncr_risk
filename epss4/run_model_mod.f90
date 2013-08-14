@@ -53,7 +53,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (partial_equilibrium) then
         print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
-        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau0.00'
+        if (index(calib_name,'tau.04')>0) then
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.02'
+        else
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.00'
+        endif
         call ms_grids%read_unformatted('ms',input_path)
         if (scale_AR == -1.0) then
             print*,'- run_model: setting mu = 0.0, mean return to type '//mean_return_type
@@ -85,7 +89,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
     if (.not. partial_equilibrium  .and. .not. err%not_converged) then
         write(tau_char,'(f4.2)') tau
-        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau'//tau_char
+        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%write_unformatted('ms',input_path)
     endif
     if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
@@ -116,7 +120,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if(partial_equilibrium) then
         print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
-        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau0.00'
+        if (index(calib_name,'tau.04')>0) then
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.02'
+        else
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.00'
+        endif
         call read_unformatted_ks(grids, coeffs, simvars,input_path)
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 85
@@ -146,7 +154,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         if (estimate_from_simvars) then
             print*, '- run_model: using previous simvars to initialize'
             write(tau_char,'(f4.2)') tau
-            input_path = 'model_input/last_results/'//cal_id(calib_name)//'/tau'//tau_char
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
             call read_unformatted(simvars_old,input_path)
             K%name ='K' ; call K%calc_stats(simvars_old)
             mu%name='mu'; call mu%calc_stats(simvars_old)
@@ -192,7 +200,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (.not. calibrating) call CheckPhi(Phi,output_path)
     if (.not. partial_equilibrium .and. .not. err%not_converged) then
         write(tau_char,'(f4.2)') tau
-        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau'//tau_char
+        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call save_unformatted(grids, coeffs, simvars,input_path)
     endif
     call save_and_plot_results(dir, grids, err)

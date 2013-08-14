@@ -376,7 +376,7 @@ contains
         character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
 
-        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
         read(55) array_size, nt
         close(55)
 

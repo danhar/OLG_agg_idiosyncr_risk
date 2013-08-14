@@ -30,7 +30,7 @@ program EPSS
         call get_calibration_name(calib_name, exit_main_loop)
         if (exit_main_loop) exit
 
-        ! copy the input to new in case we start directly with partial equilibrium (which means that new is not computed)
+        ! copy the input to new, because that is the directory that will be worked with
         sys_error = system('cp -r model_input/last_results/'//cal_id(calib_name)//'/tau* model_input/last_results/'//cal_id(calib_name)//'/new/')
         calib_name_base = calib_name
 
@@ -283,8 +283,8 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
             write(21,*)
             write(21,'(a)') '     GE     PE  CrowdOut '
             write(21,'(3(f7.2))') GE, PE, GE-PE
-            write(21,'(3(f7.2))') GE_INS, PE_INS, PE_INS-GE_INS
-            write(21,'(3(f7.2))') GE_MEAN, PE_MEAN, PE_MEAN-GE_MEAN
+            write(21,'(3(f7.2))') GE_INS, PE_INS, GE_INS-PE_INS
+            write(21,'(3(f7.2))') GE_MEAN, PE_MEAN, GE_MEAN-PE_MEAN
             write(21,*)
             if (surv_rates .or. debugging) then
                 nr_cev = ubound(cev,1)
