@@ -144,12 +144,13 @@ contains
     end subroutine read_unformatted
 !-------------------------------------------------------------------------------
 
-    subroutine write_unformatted(this)
+    subroutine write_unformatted(this, input_path)
         use params_mod ,only: lom_k_version, lom_mu_version
         class(tCoeffs) ,intent(in) :: this
+        character(*)   ,intent(in) :: input_path
         integer :: io_stat
 
-        open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
+        open(55,file=input_path//'/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
         write(55) size(this%k,1), size(this%mu,1), size(this%k,2), lom_k_version, lom_mu_version
         close(55)
 
@@ -157,7 +158,7 @@ contains
             print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
         endif
 
-        open(55,file='model_input/last_results/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
+        open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) this%k, this%mu, this%r_squared
         close(55)
 

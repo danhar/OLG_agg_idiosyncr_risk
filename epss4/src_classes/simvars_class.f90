@@ -404,12 +404,13 @@ contains
 
     end subroutine read_unformatted_array
 
-    subroutine write_unformatted_array(this)
+    subroutine write_unformatted_array(this, input_path)
         ! One can't use standard derived type IO because of the allocatable components.
         class(tSimvars) ,intent(in) :: this(:)
+        character(*)    ,intent(in) :: input_path
         integer :: i, io_stat
 
-        open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
+        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) size(this), size(this(1)%z)
         close(55)
 
@@ -417,7 +418,7 @@ contains
             print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
         endif
 
-        open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
+        open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         do i=1,size(this)
             write(55) this(i)%z, &    ! integer
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &

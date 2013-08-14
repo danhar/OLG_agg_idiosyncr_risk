@@ -68,12 +68,12 @@ contains
 
     end subroutine read_unformatted
 
-    subroutine write_unformatted(this,equilibrium_type)
+    subroutine write_unformatted(this,equilibrium_type,input_path)
         class(tAggGrids) ,intent(in) :: this
-        character(len=*) ,intent(in)  :: equilibrium_type
+        character(len=*) ,intent(in)  :: equilibrium_type, input_path
         integer :: io_stat
 
-        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
+        open(55,file=input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
         write(55) size(this%k), size(this%mu)
         close(55)
 
@@ -81,7 +81,7 @@ contains
             print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
         endif
 
-        open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
+        open(55,file=input_path//'/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) this%k, this%mu
         close(55)
 

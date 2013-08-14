@@ -83,7 +83,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     ! Check distribution and save results
     print*, ' '
     if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
-    if (.not. partial_equilibrium  .and. .not. err%not_converged) call ms_grids%write_unformatted('ms')
+    if (.not. partial_equilibrium  .and. .not. err%not_converged) then
+        write(tau_char,'(f4.2)') tau
+        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau'//tau_char
+        call ms_grids%write_unformatted('ms',input_path)
+    endif
     if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
 
     if (scale_AR == -1.0) then
@@ -186,7 +190,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     ! Check distribution and save results
     print*, ' '
     if (.not. calibrating) call CheckPhi(Phi,output_path)
-    if (.not. partial_equilibrium .and. .not. err%not_converged) call save_unformatted(grids, coeffs, simvars)
+    if (.not. partial_equilibrium .and. .not. err%not_converged) then
+        write(tau_char,'(f4.2)') tau
+        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau'//tau_char
+        call save_unformatted(grids, coeffs, simvars,input_path)
+    endif
     call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
 
@@ -224,7 +232,7 @@ contains
 ! - subroutine save_and_plot_results(dir, grids, err)
 ! - pure real(dp) function calc_average(simvars%welfare)
 ! - real(dp) function average_of_simulations()
-! - subroutine save_unformatted(grids, coeffs, simvars)
+! - subroutine save_unformatted(grids, coeffs, simvars, input_path)
 ! - subroutine read_unformatted(grids, coeffs, simvars, input_path)
 !-------------------------------------------------------------------------------
 
@@ -309,15 +317,16 @@ contains
     end function inverted_mean_return
 !-------------------------------------------------------------------------------
 
-    subroutine save_unformatted(grids, coeffs, simvars)
+    subroutine save_unformatted(grids, coeffs, simvars,input_path)
         type(tAggGrids) ,intent(in) :: grids
         type(tCoeffs)   ,intent(in) :: coeffs
         type(tSimvars)  ,intent(in) :: simvars(:)
+        character(*)    ,intent(in)  :: input_path
 
-        call grids%write_unformatted('ge')
-        call coeffs%write_unformatted
+        call grids%write_unformatted('ge',input_path)
+        call coeffs%write_unformatted(input_path)
 
-        call write_unformatted(simvars)
+        call write_unformatted(simvars,input_path)
 
     end subroutine save_unformatted
 !-------------------------------------------------------------------------------
