@@ -371,8 +371,9 @@ contains
         endif
     end function delta
 
-    subroutine read_unformatted_array(this)
+    subroutine read_unformatted_array(this, input_path)
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
+        character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
 
         open(55,file='model_input/last_results/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
@@ -384,7 +385,7 @@ contains
             allocate(this(array_size))
             call this%allocate(nt)
 
-            open(55,file='model_input/last_results/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+            open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
             ! Could I use standard derived type IO?
             do i=1,size(this)
                read(55) this(i)%z, &    ! integer

@@ -44,19 +44,19 @@ contains
         this%max_mu= mu_max
     end subroutine set_params
 
-    subroutine read_unformatted(this,equilibrium_type)
+    subroutine read_unformatted(this,equilibrium_type, input_path)
         class(tAggGrids) ,intent(out) :: this
-        character(len=*) ,intent(in)  :: equilibrium_type
+        character(len=*) ,intent(in)  :: equilibrium_type, input_path
         integer :: nk, nmu, io_stat
 
-        open(55,file='model_input/last_results/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        open(55,file=input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
         read(55) nk, nmu
         close(55)
 
         if (io_stat == 0) then
             call this%allocate(nk,nmu)
 
-            open(55,file='model_input/last_results/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='read')
+            open(55,file=input_path//'/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='read')
             read(55) this%k, this%mu
             close(55)
         endif

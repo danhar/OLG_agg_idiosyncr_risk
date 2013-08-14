@@ -105,12 +105,13 @@ contains
     end subroutine set_default_values
 !-------------------------------------------------------------------------------
 
-    subroutine read_unformatted(this)
+    subroutine read_unformatted(this,input_path)
         use params_mod, only: params_set
         class(tCoeffs) ,intent(out) :: this
+        character(*)   ,intent(in)  :: input_path
         integer :: ncoeffs_k, ncoeffs_mu,nz , io_stat, io_stat2, lom_k_version_read, lom_mu_version_read
 
-        open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        open(55,file=input_path//'/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
         read(55,iostat=io_stat2) ncoeffs_k, ncoeffs_mu, nz, lom_k_version_read, lom_mu_version_read
         close(55)
 
@@ -118,7 +119,7 @@ contains
             call params_set('lom_k_version', lom_k_version_read)
             call params_set('lom_mu_version', lom_mu_version_read)
         else
-            open(55,file='model_input/last_results/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+            open(55,file=input_path//'/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
             read(55,iostat=io_stat2) ncoeffs_k, nz
             close(55)
             ncoeffs_mu = ncoeffs_k
@@ -130,7 +131,7 @@ contains
         if (io_stat == 0 .and. io_stat2 == 0) then
             call this%allocate(ncoeffs_k, ncoeffs_mu, nz)
 
-            open(55,file='model_input/last_results/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='read')
+            open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='read')
             read(55) this%k, this%mu, this%r_squared
             close(55)
         endif

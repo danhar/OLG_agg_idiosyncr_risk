@@ -284,10 +284,13 @@ subroutine ReadCalibration(calib_name)
 end subroutine ReadCalibration
 !-------------------------------------------------------------------------------------------------
 
-subroutine SetRemainingParams()
+subroutine SetRemainingParams(calib_name)
 ! This is called from main.f90 right in the beginning
     use markov_station_distr
-    integer :: seedsize
+    character(*) ,intent(in)  :: calib_name
+    character(:) ,allocatable :: input_path
+    character(4) :: tau_char
+    integer      :: seedsize
 
     gamm = (1.0-theta)/(1.0-1.0/psi)
     nz   = n_zeta*n_delta
@@ -313,7 +316,9 @@ subroutine SetRemainingParams()
 
     select case (opt_initial_ms_guess)
     case (0) ! use previous ms equilibrium values saved in ./input/last_results/
-        call ms_guess%read_unformatted('ms')
+        write(tau_char,'(f4.2)') tau ! At the moment, this procedure is called before tau is changed, so that here we only get the initial tau.
+        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/tau'//tau_char
+        call ms_guess%read_unformatted('ms',input_path)
     case (1) ! use parameter-sensitive hard-coded guesses
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
     case (2) ! use user-supplied guess in this calibration file

@@ -13,9 +13,9 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
     use alternative_insurance_calc_mod ,only: calc_insurance_effect
-	use params_mod        ,only: construct_path, set_apmax, SaveParams, & ! procedures
+	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition,& ! logicals and characters
-	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR
+	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
@@ -33,7 +33,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     real(dp)          :: ms_rf_temp
 	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
 	logical           :: calibrating
-	character(:),allocatable :: dir, output_path
+	character(:),allocatable :: dir, output_path, input_path
+	character(4)      :: tau_char
 
     call system_clock(start_time)
     if (present(simvars_o)) then
@@ -47,15 +48,17 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
 !-------------------------------------------------------------------------------
 ! Mean Shock (partial or general) Equilibrium (to generate good initial guesses)
 !-------------------------------------------------------------------------------
+
     print*, ' '
     if (partial_equilibrium) then
         print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
-        call ms_grids%read_unformatted('ms')
+        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau0.00'
+        call ms_grids%read_unformatted('ms',input_path)
         if (scale_AR == -1.0) then
             print*,'- run_model: setting mu = 0.0, mean return to type '//mean_return_type
             ms_grids%mu =0.0
-            ms_grids%k = inverted_mean_return(mean_return_type)
+            ms_grids%k = inverted_mean_return(mean_return_type, input_path)
         endif
     else
         print*,'- run_model: mean shock GENERAL equilibrium'
@@ -109,7 +112,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if(partial_equilibrium) then
         print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
-        call read_unformatted_ks(grids, coeffs, simvars)
+        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/new/tau0.00'
+        call read_unformatted_ks(grids, coeffs, simvars,input_path)
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 85
             print*,'scale_AR = -1.0, i.e. no aggregate risk'
@@ -137,7 +141,9 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
 
         if (estimate_from_simvars) then
             print*, '- run_model: using previous simvars to initialize'
-            call read_unformatted(simvars_old)
+            write(tau_char,'(f4.2)') tau
+            input_path = 'model_input/last_results/'//cal_id(calib_name)//'/tau'//tau_char
+            call read_unformatted(simvars_old,input_path)
             K%name ='K' ; call K%calc_stats(simvars_old)
             mu%name='mu'; call mu%calc_stats(simvars_old)
             rf%name='rf'; call rf%calc_stats(simvars_old)
@@ -219,7 +225,7 @@ contains
 ! - pure real(dp) function calc_average(simvars%welfare)
 ! - real(dp) function average_of_simulations()
 ! - subroutine save_unformatted(grids, coeffs, simvars)
-! - subroutine read_unformatted(grids, coeffs, simvars)
+! - subroutine read_unformatted(grids, coeffs, simvars, input_path)
 !-------------------------------------------------------------------------------
 
     subroutine save_and_plot_results(dir, grids, err)
@@ -253,19 +259,19 @@ contains
     end function calc_average_welfare
 
 !-------------------------------------------------------------------------------
-    real(dp) function inverted_mean_return(mean_return_type)
+    real(dp) function inverted_mean_return(mean_return_type, input_path)
         use statistics        ,only: tStats
         use simvars_class ,only: read_unformatted
         use params_mod, only: del_mean, de_ratio
         use income, only: f_net_mpk, alpha
-        character(len=*) ,intent(in)  :: mean_return_type
+        character(len=*) ,intent(in)  :: mean_return_type, input_path
         type(tSimvars) ,allocatable :: simvars_ge(:)
         type(tAggGrids)   :: ms_grids_temp
         type(tStats)   :: mpk, r, rf, r_pf_median, r_pf_kappa_med
         real(dp) :: mean_return
         integer :: tc
 
-        call read_unformatted(simvars_ge)
+        call read_unformatted(simvars_ge, input_path)
 
         select case(mean_return_type)
         case('mean_mpk')
@@ -293,7 +299,7 @@ contains
             mean_return = 0.042_dp
 
         case('meanshock_eq_r') ! rf from previous mean shock equilibrium
-            call ms_grids_temp%read_unformatted('ms')
+            call ms_grids_temp%read_unformatted('ms',input_path)
             inverted_mean_return = ms_grids_temp%k(1)
             return
         end select
@@ -316,15 +322,16 @@ contains
     end subroutine save_unformatted
 !-------------------------------------------------------------------------------
 
-    subroutine read_unformatted_ks(grids, coeffs, simvars)
+    subroutine read_unformatted_ks(grids, coeffs, simvars,input_path)
         type(tAggGrids) ,intent(out) :: grids
         type(tCoeffs)   ,intent(out) :: coeffs
         type(tSimvars)  ,allocatable ,intent(out) :: simvars(:)
+        character(*)    ,intent(in)  :: input_path
 
-        call grids%read_unformatted('ge')
-        call coeffs%read_unformatted
+        call grids%read_unformatted('ge',input_path)
+        call coeffs%read_unformatted(input_path)
 
-        call read_unformatted(simvars)
+        call read_unformatted(simvars,input_path)
     end subroutine read_unformatted_ks
 !-------------------------------------------------------------------------------
 

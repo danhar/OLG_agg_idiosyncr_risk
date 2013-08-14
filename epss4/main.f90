@@ -24,17 +24,19 @@ program EPSS
     print*, ' '
    	print*, 'Starting program ', projectname
     print*, ' '
-    sys_error = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
 
     do
         call SetDefaultValues
         call get_calibration_name(calib_name, exit_main_loop)
         if (exit_main_loop) exit
+
+        ! copy the input to new in case we start directly with partial equilibrium (which means that new is not computed)
+        sys_error = system('cp -r model_input/last_results/'//cal_id(calib_name)//'/tau* model_input/last_results/'//cal_id(calib_name)//'/new/')
         calib_name_base = calib_name
 
 	    print*, '- main: Reading calibration file '// calib_name
 	    call ReadCalibration(trim(adjustl(calib_name)))
-	    call SetRemainingParams
+	    call SetRemainingParams(calib_name)
 
 	    if (n_end_params > 0) then
 	        call params_set_thisrun
@@ -81,7 +83,6 @@ program EPSS
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
                     write(runchar,'(a4)') ',GE1'
-                    sys_error = system('cp model_input/last_results/*.unformatted model_input/last_results/previous/')
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     call params_set('surv_rates', .false.)
                     write(runchar,'(a7)') ',noSURV'
