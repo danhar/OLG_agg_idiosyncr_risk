@@ -1,30 +1,48 @@
+This file describes things that will, should, or could be implemented in the code. They have to do with programming, not economics. 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (0) What this branch does 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-072-meanshock_rev: revisit mean shock equilibrium. Specifically, check whether results change if I use stat_dist_z instead of we, wz. 
-                    Maybe use policy%mean like in insurance_effect_mod 
+073-read_previous: As default action, read unformatted input from the subfolder with the same name as this calibration. If that subfolder does not exist, read as before from
+                    model_input/last_results. Can be turned off with logical, so that subfolder is not searched. Should use shell for that.
+                    Also, want a subfolder for each calibration with tau002 and tau000, and previous, where both these subfolders are copied in.
+                    Issue warning if a subfolder is not found.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - save results so that Matlab can always read (see errors in shell_output.txt)
- 
+- correct calc of cross-sectional variance of consumption and portfolio return (graphs)
+- calculate Medians and report them in equilibrium_long? In particular for portfolio return
+- record and report stats for gross wages (important when def benefits) (in simulations and save_results)
+
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
         but do I actually need that or is it specified in logs?
 
 - implement check if stockmarket also clears
-
-- splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
-
-- the prog should look for initial guesses in the subfolder in last_results which corresponds to the calibration name. If not found use the 
-    initial guesses in last_results and issue warning.
-    
 - set_apmax conditions on bequests_to_newborn, which is default .true. even if we do not have survival risk. Should check and correct or impove.
+- reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.  
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- correct calc of cross-sectional variance of consumption and portfolio return (graphs)
-- calculate Medians and report them in equilibrium_long? In particular for portfolio return
-- reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.
+- write t_scrap into simvars, especially the unformatted, because when the old simvars are read to initialize, and the stats are calculated, 
+    then it can happen that the 'new' t_scrap (i.e. in the new calib-file) is larger than the 'old' nt. Concretely, run_model:137 'K%name ='K' ; call K%calc_stats(simvars_old)' can fail.
+- splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
+- use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
+    -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
+        Allocating tPolicies with extent 1 in that dimension introduces a lot of cumbersome notation with brackets like (:,:,1,:,:,:) .
+        Instead, could have an extended derived type extra with less dimensions - but what happens to all the type-bound procedures?
+        See my comment in policyfunctions:interpolate, and the correspondence on CLF
+    -- could put the errors only in the 'normal' type and call later from there (and not have them in the smaller types)    
+    -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
+
+- correct eigenvalue calc of stationary distribution (in module markov_station_distr, see also params_mod:CheckParams), check codes/Fortran/Bewley_by_Karibzhanov/source/toolbox   
+- maybe remove apmax_factor from the calibration files, and put it as a parameter when creating the apmax for ms. It's not needed later (for GE)
+- clean up files: merge rootfinders into one module rootfinder and tools (like linesearch, fdjac); merge the 3 markov*.f90 files and the twostate_exact.f90;
+    merge tools like fun_kronprod.f90 and numrec_utils into utils. Clean up all the usage of these, e.g. of markov* in params_mod   
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ (C) Further ideas
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - rewrite the calibration_mod, so that it reads in the name of the associated param. This would greatly increase usability, because I only need
     to change the calibration files by adding or removing or changing params. However, also need an identifier for the associated target in the calibration file.
     Even better: put the end params at the beginning of each calibration file, and next to it the target. read them in like normal parameters, but then write the param name
@@ -32,9 +50,6 @@
     No need for n_end_params in calibration file.
 - give grids in run_model_mod SAVE, so that agg grid can be updated once in the beginning and not later?
 - make params_mod readable by Matlab and read it in
-- write t_scrap into simvars, especially the unformatted, because when the old simvars are read to initialize, and the stats are calculated, 
-    then it can happen that the 'new' t_scrap (i.e. in the new calib-file) is larger than the 'old' nt. Concretely, run_model:137 'K%name ='K' ; call K%calc_stats(simvars_old)' can fail.
-- clean up initialize_coeffs, remove agg_grid_o
 - have an option to skip the mean shock equilibrium (use opt_initial_ms_guess for this)
 - move value into policies
 - make interpolateXgrid a (type-bound?) function
@@ -48,27 +63,31 @@
     think it's difficult, because need to correct indeces everywhere in the program.
 - Instead of having tPolicies with allocatable components, make tPolicies a tuple (of scalars) and then define arrays of tPolicies. Should work much better, also for 
 adding, interpolating, calling routines, having less dimensions. But have to think it through, not clear how interpolation and other type-bound procedures could be called.
-- use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
-    -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
-        Allocating tPolicies with extent 1 in that dimension introduces a lot of cumbersome notation with brackets like (:,:,1,:,:,:) .
-        Instead, could have an extended derived type extra with less dimensions - but what happens to all the type-bound procedures?
-        See my comment in policyfunctions:interpolate, and the correspondence on CLF
-    -- could put the errors only in the 'normal' type and call later from there (and not have them in the smaller types)    
-    -- in policyfunctions, remove app_min, instead calc for all ap (using the new type policies), and then address element zc=1 where needed.
 - arithmetic operations on tPolicies? Maybe not needed.
-- pol_zk = Interpolate(pol,dim=3,w) is already started. Should unify with the external interpolation in interplate_xgrid.
-- record and report stats for gross wages (important when def benefits) (in simulations and save_results)
-- correct eigenvalue calc of stationary distribution (in module markov_station_distr, see also params_mod:CheckParams), check codes/Fortran/Bewley_by_Karibzhanov/source/toolbox   
-- remove a lot of the use params_mod, in particular in the specification part of a module (e.g. krusell_smith.f90). Instead, use sourced allocation and the like.
-- remove many allocate(some_array(n)) to use automatic allocation on assignment (compiler option -assume realloc_lhs)
-- maybe remove apmax_factor from the calibration files, and put it as a parameter when creating the apmax for ms. It's not needed later (for GE)
 - maybe allow for fractions in calibration files (e.g. 1/3). For this, in ReadCalib, put '(3(a,:))' (: being a stop rule), then scan for \ and make the 
     division, if \ is found. Hoever, this doesnt allow 1/theta directly. Also, prob need to remove the / in the separator lines.
-- clean up files: merge rootfinders into one module rootfinder and tools (like linesearch, fdjac); merge the 3 markov*.f90 files and the twostate_exact.f90;
-    merge tools like fun_kronprod.f90 and numrec_utils into utils. Clean up all the usage of these, e.g. of markov* in params_mod   
-- check why opt_zbrak=.true. takes so much longer (might just be curse of dimensionality)
-
-Object orientation:
+- Move the Build* folders (i.e. the build configurations) to one folder bin. However, with managed make this doesn't seem allowed, see ->Properties->Fortran Build: Build directory. 
+If I try to change this, I should first try it on a new copy (not even a branch, but a new clone or new repository), just to make sure...
+- Make Distribution Phi a derived type, so that it can carry the grid over which it is defined. See my comments in krusell_smith_mod.f90. 
+    Could delete xgrid_ms in run_model_mod and make local in SolveMeanshock. Could make interpolate_xgrid:InterpolateXgrid_Phi a type-bound procedure
+- replace Intel's system(string) subroutine, which is a non-portable extension, with the F2008 execute_command_line(string),
+    which is already supported by Gfortran. It is not yet supported by the Intel Fortran compiler. Don't forget to remove the use ifport
+    See CLF post: http://comp.lang.fortran.narkive.com/Iua1GCiT/system-vs-execute-command-line   
+- errors_mod: detailed_euler_errs not used at the moment!
+- errors_mod: either initialize err%cons and err%asset with xp in first dimension, or save to file with explicit format. At the moment the
+    files written to disk are difficult to read. Also, setting detailed_euler_errs=.true. should write to file, not to stdout, because it's too much for stdout.
+- move "if (errs%not_converged) call errs%write2file(fvals, output_path)" 
+  from meanshock_wrapper and main:internal_subroutine_krusellsmith())
+  to save_results_mod. For this need to put fvals into err, make allocatable.
+  This helps to make the procedures pure, and also more logical: all saving to file is done in save_results_mod
+  See whether can clean up krusell_smith:get_krusellsmith and meanshock_equilib:ms_equilib_get; they are a bit messy because of
+  the errs%not_converged (This should not be a prob once errs is passed as an object in the rootfinder... alternatively could overload the assignment operator) 
+- in fun_eulerasset I do Taylor approx IFF xp<x(1,j+1). Should also do for upper bound? And also for consumption-Euler?!
+- create derived types for  loms (has types coeffs and grids), prices (wages etc)?
+- use simulate_economy also in mean_shock_mod? Not so easy, because want to save mean shock results in the first 'period' of simvars. 
+    Maybe this becomes easier if the derived types are defined on scalar tuples.
+- change depreciation to have its own dimension? affects probabilities, and ups_grid, ups_sigma
+- maybe mod_demographics.f90?
 - put the formatted write into the types. see save_results_mod.f90
 - Call aggregate_grids_class just grids? And use aggregate_grids_class also for apgrid??
 - lifecycles_mod with calculation of lifecycles, consistent both with mean shock and simulations
@@ -79,75 +98,11 @@ Object orientation:
     Then I can have an allocatable type params in main, see how many runs we have (depends on experiment / number of calibs), then allocate and have a params
     for each, which I then pass by argument to start_solution, which has a scalar type params as input.
 - Type results, which contains all the results we are interested in, can print them in formatted and unformatted way. This is helpful for e.g. the no AR economy to read in directly the values.
-- Merge coefficients_class into laws_of_motion. Maybe class laws_of_motion which has a component coefficients_class.
+- Merge coefficients_class into laws_of_motion. Maybe class laws_of_motion which has a component coefficients_class. 
+ - Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (C) To do later/ ideas
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- Move the Build* folders (i.e. the build configurations) to one folder bin. However, with managed make this doesn't seem allowed, see ->Properties->Fortran Build: Build directory. 
-If I try to change this, I should first try it on a new copy (not even a branch, but a new clone or new repository), just to make sure...
-
-- If any(apmin_exog <0) and (kappa_in_01), then it can happen that agents use the stock for borrowing.
-    In particular, this can happen if (read_apmin).
-    Similarly, if apmin_exog<0 and (collateral_constraint) then policyfunctions:consumption:446 sets 
-    cons_out = cmin/100.0 which is only true for apmin_exog = 0.
-    Overall, the case  apmin_exog<0 is a bit buggy.
-
-- Make Distribution Phi a derived type, so that it can carry the grid over which it is defined. See my comments in krusell_smith_mod.f90. 
-    Could delete xgrid_ms in run_model_mod and make local in SolveMeanshock. Could make interpolate_xgrid:InterpolateXgrid_Phi a type-bound procedure
-
-- allow for subfolders in model_input/ep_calib (and other calbration directories). For this, maybe want to keep the subdirectory as part of the calib_name.
-    In that case, need to check that the mkdir command creates all necessary parent directories. Also need to ensure that cal_id keeps the subdir (search for the
-    first /).
-
-- maybe: put start_solution(.,ms) and start_solution(.,ge) in main, then distinguish the two cases in start_solution_mod with if statements,
-    because tehre is some redundancy. In a similar spirit, I could move the pseudo-simulation step
-    from meanshock_wrapper to meanshock_equilib to keep it analogous to krusell_smith.f90. Actually, regarding the last sentence, I would prefer to
-    just call the simulate_economy from meanshock_wrapper, because then the statistics are more comparable to the ge case. 
-     
-- at the very beginning of (the new) main, read the unformatted simvars from the subdirectory with the corresponding calib_id, if it exists,
-    else read from model_input/last_results. Subsequent runs will use the previously calculated output, and subsequent calibs can be specified to use
-    their own or the last results.
-
-- replace Intel's system(string) subroutine, which is a non-portable extension, with the F2008 execute_command_line(string),
-    which is already supported by Gfortran. It is not yet supported by the Intel Fortran compiler. Don't forget to remove the use ifport
-
-- errors_mod: detailed_euler_errs not used at the moment!
-
-- errors_mod: either initialize err%cons and err%asset with xp in first dimensioon, or save to file with explicit format. At the moment the
-files written to disk are quite unusable. Also, setting detailed_euler_errs=.true. should write to file, not to stdout, because it's too much for stdout.
-- move "if (errs%not_converged) call errs%write2file(fvals, output_path)" 
-  from meanshock_wrapper and main:internal_subroutine_krusellsmith())
-  to save_results_mod. For this need to put fvals into err, make allocatable.
-  This helps to make the procedures pure, and alos more logical: all saving to file is done in save_results_mod
-  See whether can clean up krusell_smith:get_krusellsmith and meanshock_equilib:ms_equilib_get; they are a bit messy because of
-  the errs%not_converged (This should not be a prob once errs is passed as an object in the rootfinder... alternatively could overload the assignment operator) 
-
-- put mod_errors into sub_policyfunctions, and treat like print_errors(simvars) in sub_simulate_ge??
-Not so sure, coz need type errors also in sub_saveresults
-maybe do as a submodule, coz sub_policyfunctions becomes too large
-anyway, the printing of errors should come right after call s_policyfunctions
-and should treat err_cons and err_asset the same as err_kp and err_mup.
-also should make err_mup(nz), allocate accordingly.
-Remove the optional on errors (everywhere!)
-
-- in fun_eulerasset I do Taylor approx IFF xp<x(1,j+1). Should also do for upper bound? And also for consumption-Euler?!
-- create derived types for  loms (has types coeffs and grids), prices (wages etc)?
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (D) Only maybe
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- use simulate_economy also in mean_shock_mod? Not so easy, because want to save mean shock results in the first 'period' of simvars. 
-    Maybe this becomes easier if the derived types are defined on scalar tuples.
-
-- change depreciation to have its own dimension? affects probabilities, and ups_grid, ups_sigma
-
-- maybe mod_demographics.f90?
- 
-- Copyleft: http://www.gnu.org/copyleft/gpl-howto.html
-
------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (E) Done! (started only in Nov. 2012) reverse chronological order
+ (D) Done! (started only in Nov. 2012) reverse chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - remove cmin from calibration files. Instead in params_mod, have cmin= min(1e-10, tol_asset_eul), and put a warning if tol_asset_eul<1e-12.
 
@@ -215,10 +170,14 @@ For example, simvars should read and write output unformatted also, see  subrout
 - update agg_grid in krusell_smith so that doesn't hit borders
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (E2) Done! (started in June 2013) chronological order
+ (E) Done! (started in June 2013) chronological order
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - put tolerance in simulation into the calibration files : instead of this, I set tol_simulation_marketclearing = tol_asset_eul*10_dp
 
 071-return_cons: since the new idea of averaging the policies in the risk dimension did not work, I will keep the old calculation, where households re-optimize,
                 and then make an adjustment with aggregate consumption. For this, mean aggregate consumption needs to be returned to main.f90. Then omega (the ratio
                 of mean aggregate consumption) is computed and multiplied with CEV. 
+
+072-meanshock_rev: revisit mean shock equilibrium. Specifically, check whether results change if I use stat_dist_z instead of we, wz. 
+                    Maybe use policy%mean like in insurance_effect_mod 
+                
