@@ -18,7 +18,7 @@ calib_ss/baseline.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.
-
+Only put the filename, not the whole path (because of regex).
 --------------------------------------------------------------------------------------------------------------
 1. Social Security project (folder calib_ss):
 --------------------------------------------------------------------------------------------------------------
