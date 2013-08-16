@@ -1,18 +1,23 @@
-Module partial_sorting
-Integer, Parameter :: kdp = selected_real_kind(15)
-public :: valnth, indnth
-private :: kdp
-private :: R_valnth, I_valnth, D_valnth
-interface valnth
-  module procedure d_valnth, r_valnth, i_valnth
-end interface valnth
-interface indnth
-  module procedure d_indnth, r_indnth, i_indnth
-end interface indnth
+module partial_sorting
+! generalizes concept of Median
+    implicit none
+
+    integer, parameter :: kdp = selected_real_kind(15)
+    public :: valnth, indnth
+    private :: kdp
+    private :: R_valnth, I_valnth, D_valnth
+
+    interface valnth
+      module procedure d_valnth, r_valnth, i_valnth
+    end interface valnth
+
+    interface indnth
+      module procedure d_indnth, r_indnth, i_indnth
+    end interface indnth
 
 contains
 
-pure Function D_valnth (XDONT, NORD) Result (valnth)
+pure function D_valnth (XDONT, NORD) result (valnth)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -27,98 +32,98 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! __________________________________________________________
-      Real (Kind=kdp), Dimension (:), Intent (In) :: XDONT
-      Real (Kind=kdp) :: valnth
-      Integer, Intent (In) :: NORD
+      real (kind=kdp), dimension (:), intent (in) :: XDONT
+      real (kind=kdp) :: valnth
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Real (Kind=kdp), Dimension (SIZE(XDONT)) :: XLOWT, XHIGT
-      Real (Kind=kdp) :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
+      real (kind=kdp), dimension (SIZE(XDONT)) :: XLOWT, XHIGT
+      real (kind=kdp) :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
 !
-      Integer :: NDON, JHIG, JLOW, IHIG
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer :: NDON, JHIG, JLOW, IHIG
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = MAX (MIN (NORD, NDON), 1)
 !
 !    First loop is used to fill-in XLOWT, XHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) VALNTH = XDONT (1)
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) VALNTH = XDONT (1)
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          XLOWT (1) = XDONT(2)
          XHIGT (1) = XDONT(1)
-      Else
+      else
          XLOWT (1) = XDONT(1)
          XHIGT (1) = XDONT(2)
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) VALNTH = XLOWT (1)
-         If (INTH == 2) VALNTH = XHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) VALNTH = XLOWT (1)
+         if (INTH == 2) VALNTH = XHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XHIGT(1)) Then
+      if (XDONT(3) < XHIGT(1)) then
          XHIGT (2) = XHIGT (1)
-         If (XDONT(3) < XLOWT(1)) Then
+         if (XDONT(3) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(3)
-         Else
+         else
             XHIGT (1) = XDONT(3)
-         End If
-      Else
+         end if
+      else
          XHIGT (2) = XDONT(3)
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) Then
+      if (NDON < 4) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
-      If (XDONT(NDON) < XHIGT(1)) Then
+      if (XDONT(NDON) < XHIGT(1)) then
          XHIGT (3) = XHIGT (2)
          XHIGT (2) = XHIGT (1)
-         If (XDONT(NDON) < XLOWT(1)) Then
+         if (XDONT(NDON) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(NDON)
-         Else
+         else
             XHIGT (1) = XDONT(NDON)
-         End If
-      Else
+         end if
+      else
          XHIGT (3) = XDONT(NDON)
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) Then
+      if (NDON < 5) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * (XHIGT(3)-XLOWT(1))
-      If (XPIV >= XHIGT(1)) Then
+      if (XPIV >= XHIGT(1)) then
          XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * &
                            (XHIGT(2)-XLOWT(1))
-         If (XPIV >= XHIGT(1)) &
+         if (XPIV >= XHIGT(1)) &
              XPIV = XLOWT(1) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                (XHIGT(1)-XLOWT(1))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -129,102 +134,102 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !  than enough values in XLOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XHIGT(1)
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XHIGT(ICRS) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XHIGT(ICRS) < XMIN) then
                       XMIN = XHIGT(ICRS)
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 XLOWT (JLOW) = XHIGT (IHIG)
                 XHIGT (IHIG) = XHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 XMAX = XLOWT (JLOW)
                 JLOW = JLOW - 1
-                Do ICRS = 1, JLOW
-                   If (XLOWT(ICRS) > XMAX) Then
+                do ICRS = 1, JLOW
+                   if (XLOWT(ICRS) > XMAX) then
                       XWRK = XMAX
                       XMAX = XLOWT(ICRS)
                       XLOWT (ICRS) = XWRK
-                   End If
-                End Do
-             End If
-         End If
+                   end if
+                end do
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -233,14 +238,14 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -249,49 +254,49 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XHIGT(1) <= XHIGT(2)) Then
+            case (2)
+               if (XHIGT(1) <= XHIGT(2)) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (3)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (3) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   XLOWT (ICRS) = XHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -304,20 +309,20 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (IFIN)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (IFIN) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                XWRK1 = XHIGT (1)
                JLOW = JLOW + 1
@@ -331,89 +336,89 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XHIGT(1)
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XHIGT(ICRS) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XHIGT(ICRS) < XMIN) then
                   XMIN = XHIGT(ICRS)
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             VALNTH = XHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             XHIGT (1) = XLOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                XWRK = XLOWT (ICRS)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XHIGT(IDCR)) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XHIGT(IDCR)) then
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                XHIGT (IDCR+1) = XWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XHIGT(INTH)
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XLOWT (ICRS) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XLOWT (ICRS) < XWRK1) then
                   XWRK = XLOWT (ICRS)
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XHIGT(IDCR)) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XHIGT(IDCR)) exit
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  End Do
+                  end do
                   XHIGT (IDCR+1) = XLOWT (ICRS)
                   XWRK1 = XHIGT(INTH)
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             VALNTH = XHIGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -423,22 +428,22 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XLOWT(IMIL) < XLOWT(1)) Then
+            if (XLOWT(IMIL) < XLOWT(1)) then
                XWRK = XLOWT (1)
                XLOWT (1) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-            End If
-            If (XLOWT(IMIL) > XLOWT(IFIN)) Then
+            end if
+            if (XLOWT(IMIL) > XLOWT(IFIN)) then
                XWRK = XLOWT (IFIN)
                XLOWT (IFIN) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-               If (XLOWT(IMIL) < XLOWT(1)) Then
+               if (XLOWT(IMIL) < XLOWT(1)) then
                   XWRK = XLOWT (1)
                   XLOWT (1) = XLOWT (IMIL)
                   XLOWT (IMIL) = XWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XLOWT(1) + REAL(INTH)/REAL(JLOW+INTH) * &
                               (XLOWT(IFIN)-XLOWT(1))
@@ -449,65 +454,65 @@ pure Function D_valnth (XDONT, NORD) Result (valnth)
             JHIG = 0
             JLOW = 0
 !
-            If (XLOWT(IFIN) > XPIV) Then
+            if (XLOWT(IFIN) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XLOWT(ICRS) > XPIV) Then
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XLOWT(ICRS) <= XPIV) Then
+                     if (XLOWT(ICRS) <= XPIV) then
                         JLOW = JLOW + 1
                         XLOWT (JLOW) = XLOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XLOWT(ICRS) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XLOWT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XLOWT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
       VALNTH = MAXVAL (XLOWT (1:INTH))
-      Return
+      return
 !
 !
-End Function D_valnth
+end function D_valnth
 
-pure Function R_valnth (XDONT, NORD) Result (valnth)
+pure function R_valnth (XDONT, NORD) result (valnth)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -522,98 +527,98 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! _________________________________________________________
-      Real, Dimension (:), Intent (In) :: XDONT
-      Real :: valnth
-      Integer, Intent (In) :: NORD
+      real, dimension (:), intent (in) :: XDONT
+      real :: valnth
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Real, Dimension (SIZE(XDONT)) :: XLOWT, XHIGT
-      Real :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
+      real, dimension (SIZE(XDONT)) :: XLOWT, XHIGT
+      real :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
 !
-      Integer :: NDON, JHIG, JLOW, IHIG
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer :: NDON, JHIG, JLOW, IHIG
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = MAX (MIN (NORD, NDON), 1)
 !
 !    First loop is used to fill-in XLOWT, XHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) VALNTH = XDONT (1)
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) VALNTH = XDONT (1)
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          XLOWT (1) = XDONT(2)
          XHIGT (1) = XDONT(1)
-      Else
+      else
          XLOWT (1) = XDONT(1)
          XHIGT (1) = XDONT(2)
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) VALNTH = XLOWT (1)
-         If (INTH == 2) VALNTH = XHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) VALNTH = XLOWT (1)
+         if (INTH == 2) VALNTH = XHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XHIGT(1)) Then
+      if (XDONT(3) < XHIGT(1)) then
          XHIGT (2) = XHIGT (1)
-         If (XDONT(3) < XLOWT(1)) Then
+         if (XDONT(3) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(3)
-         Else
+         else
             XHIGT (1) = XDONT(3)
-         End If
-      Else
+         end if
+      else
          XHIGT (2) = XDONT(3)
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) Then
+      if (NDON < 4) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
-      If (XDONT(NDON) < XHIGT(1)) Then
+      if (XDONT(NDON) < XHIGT(1)) then
          XHIGT (3) = XHIGT (2)
          XHIGT (2) = XHIGT (1)
-         If (XDONT(NDON) < XLOWT(1)) Then
+         if (XDONT(NDON) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(NDON)
-         Else
+         else
             XHIGT (1) = XDONT(NDON)
-         End If
-      Else
+         end if
+      else
          XHIGT (3) = XDONT(NDON)
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) Then
+      if (NDON < 5) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * (XHIGT(3)-XLOWT(1))
-      If (XPIV >= XHIGT(1)) Then
+      if (XPIV >= XHIGT(1)) then
          XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * &
                            (XHIGT(2)-XLOWT(1))
-         If (XPIV >= XHIGT(1)) &
+         if (XPIV >= XHIGT(1)) &
              XPIV = XLOWT(1) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                (XHIGT(1)-XLOWT(1))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -624,102 +629,102 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !  than enough values in XLOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XHIGT(1)
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XHIGT(ICRS) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XHIGT(ICRS) < XMIN) then
                       XMIN = XHIGT(ICRS)
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 XLOWT (JLOW) = XHIGT (IHIG)
                 XHIGT (IHIG) = XHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 XMAX = XLOWT (JLOW)
                 JLOW = JLOW - 1
-                Do ICRS = 1, JLOW
-                   If (XLOWT(ICRS) > XMAX) Then
+                do ICRS = 1, JLOW
+                   if (XLOWT(ICRS) > XMAX) then
                       XWRK = XMAX
                       XMAX = XLOWT(ICRS)
                       XLOWT (ICRS) = XWRK
-                   End If
-                End Do
-             End If
-         End If
+                   end if
+                end do
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -728,14 +733,14 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -744,49 +749,49 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XHIGT(1) <= XHIGT(2)) Then
+            case (2)
+               if (XHIGT(1) <= XHIGT(2)) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (3)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (3) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   XLOWT (ICRS) = XHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -799,20 +804,20 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (IFIN)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (IFIN) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                XWRK1 = XHIGT (1)
                JLOW = JLOW + 1
@@ -826,89 +831,89 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XHIGT(1)
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XHIGT(ICRS) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XHIGT(ICRS) < XMIN) then
                   XMIN = XHIGT(ICRS)
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             VALNTH = XHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             XHIGT (1) = XLOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                XWRK = XLOWT (ICRS)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XHIGT(IDCR)) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XHIGT(IDCR)) then
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                XHIGT (IDCR+1) = XWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XHIGT(INTH)
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XLOWT (ICRS) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XLOWT (ICRS) < XWRK1) then
                   XWRK = XLOWT (ICRS)
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XHIGT(IDCR)) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XHIGT(IDCR)) exit
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  End Do
+                  end do
                   XHIGT (IDCR+1) = XLOWT (ICRS)
                   XWRK1 = XHIGT(INTH)
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             VALNTH = XHIGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -918,22 +923,22 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XLOWT(IMIL) < XLOWT(1)) Then
+            if (XLOWT(IMIL) < XLOWT(1)) then
                XWRK = XLOWT (1)
                XLOWT (1) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-            End If
-            If (XLOWT(IMIL) > XLOWT(IFIN)) Then
+            end if
+            if (XLOWT(IMIL) > XLOWT(IFIN)) then
                XWRK = XLOWT (IFIN)
                XLOWT (IFIN) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-               If (XLOWT(IMIL) < XLOWT(1)) Then
+               if (XLOWT(IMIL) < XLOWT(1)) then
                   XWRK = XLOWT (1)
                   XLOWT (1) = XLOWT (IMIL)
                   XLOWT (IMIL) = XWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XLOWT(1) + REAL(INTH)/REAL(JLOW+INTH) * &
                               (XLOWT(IFIN)-XLOWT(1))
@@ -944,64 +949,64 @@ pure Function R_valnth (XDONT, NORD) Result (valnth)
             JHIG = 0
             JLOW = 0
 !
-            If (XLOWT(IFIN) > XPIV) Then
+            if (XLOWT(IFIN) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XLOWT(ICRS) > XPIV) Then
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XLOWT(ICRS) <= XPIV) Then
+                     if (XLOWT(ICRS) <= XPIV) then
                         JLOW = JLOW + 1
                         XLOWT (JLOW) = XLOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XLOWT(ICRS) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XLOWT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XLOWT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
       VALNTH = MAXVAL (XLOWT (1:INTH))
-      Return
+      return
 !
 !
-End Function R_valnth
-pure Function I_valnth (XDONT, NORD) Result (valnth)
+end function R_valnth
+pure function I_valnth (XDONT, NORD) result (valnth)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -1016,98 +1021,98 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! __________________________________________________________
-      Integer, Dimension (:), Intent (In) :: XDONT
-      Integer :: valnth
-      Integer, Intent (In) :: NORD
+      integer, dimension (:), intent (in) :: XDONT
+      integer :: valnth
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Integer, Dimension (SIZE(XDONT)) :: XLOWT, XHIGT
-      Integer :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
+      integer, dimension (SIZE(XDONT)) :: XLOWT, XHIGT
+      integer :: XPIV, XPIV0, XWRK, XWRK1, XWRK2, XWRK3, XMIN, XMAX
 !
-      Integer :: NDON, JHIG, JLOW, IHIG
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer :: NDON, JHIG, JLOW, IHIG
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = MAX (MIN (NORD, NDON), 1)
 !
 !    First loop is used to fill-in XLOWT, XHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) VALNTH = XDONT (1)
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) VALNTH = XDONT (1)
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          XLOWT (1) = XDONT(2)
          XHIGT (1) = XDONT(1)
-      Else
+      else
          XLOWT (1) = XDONT(1)
          XHIGT (1) = XDONT(2)
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) VALNTH = XLOWT (1)
-         If (INTH == 2) VALNTH = XHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) VALNTH = XLOWT (1)
+         if (INTH == 2) VALNTH = XHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XHIGT(1)) Then
+      if (XDONT(3) < XHIGT(1)) then
          XHIGT (2) = XHIGT (1)
-         If (XDONT(3) < XLOWT(1)) Then
+         if (XDONT(3) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(3)
-         Else
+         else
             XHIGT (1) = XDONT(3)
-         End If
-      Else
+         end if
+      else
          XHIGT (2) = XDONT(3)
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) Then
+      if (NDON < 4) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
-      If (XDONT(NDON) < XHIGT(1)) Then
+      if (XDONT(NDON) < XHIGT(1)) then
          XHIGT (3) = XHIGT (2)
          XHIGT (2) = XHIGT (1)
-         If (XDONT(NDON) < XLOWT(1)) Then
+         if (XDONT(NDON) < XLOWT(1)) then
             XHIGT (1) = XLOWT (1)
             XLOWT (1) = XDONT(NDON)
-         Else
+         else
             XHIGT (1) = XDONT(NDON)
-         End If
-      Else
+         end if
+      else
          XHIGT (3) = XDONT(NDON)
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) Then
+      if (NDON < 5) then
+         if (INTH == 1) then
              VALNTH = XLOWT (1)
-         Else
+         else
              VALNTH = XHIGT (INTH - 1)
-         End If
-         Return
-      End If
+         end if
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * (XHIGT(3)-XLOWT(1))
-      If (XPIV >= XHIGT(1)) Then
+      if (XPIV >= XHIGT(1)) then
          XPIV = XLOWT(1) + REAL(2*INTH)/REAL(NDON+INTH) * &
                            (XHIGT(2)-XLOWT(1))
-         If (XPIV >= XHIGT(1)) &
+         if (XPIV >= XHIGT(1)) &
              XPIV = XLOWT(1) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                (XHIGT(1)-XLOWT(1))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -1118,102 +1123,102 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !  than enough values in XLOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                XHIGT (JHIG) = XDONT(ICRS)
-            Else
+            else
                JLOW = JLOW + 1
                XLOWT (JLOW) = XDONT(ICRS)
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XDONT(ICRS)
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XHIGT(1)
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XHIGT(ICRS) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XHIGT(ICRS) < XMIN) then
                       XMIN = XHIGT(ICRS)
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 XLOWT (JLOW) = XHIGT (IHIG)
                 XHIGT (IHIG) = XHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 XMAX = XLOWT (JLOW)
                 JLOW = JLOW - 1
-                Do ICRS = 1, JLOW
-                   If (XLOWT(ICRS) > XMAX) Then
+                do ICRS = 1, JLOW
+                   if (XLOWT(ICRS) > XMAX) then
                       XWRK = XMAX
                       XMAX = XLOWT(ICRS)
                       XLOWT (ICRS) = XWRK
-                   End If
-                End Do
-             End If
-         End If
+                   end if
+                end do
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -1222,14 +1227,14 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -1238,49 +1243,49 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XHIGT(1) <= XHIGT(2)) Then
+            case (2)
+               if (XHIGT(1) <= XHIGT(2)) then
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (2)
                   JLOW = JLOW + 1
                   XLOWT (JLOW) = XHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (3)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (3) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   XLOWT (ICRS) = XHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -1293,20 +1298,20 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
                XWRK1 = XHIGT (1)
                XWRK2 = XHIGT (2)
                XWRK3 = XHIGT (IFIN)
-               If (XWRK2 < XWRK1) Then
+               if (XWRK2 < XWRK1) then
                   XHIGT (1) = XWRK2
                   XHIGT (2) = XWRK1
                   XWRK2 = XWRK1
-               End If
-               If (XWRK2 > XWRK3) Then
+               end if
+               if (XWRK2 > XWRK3) then
                   XHIGT (IFIN) = XWRK2
                   XHIGT (2) = XWRK3
                   XWRK2 = XWRK3
-                  If (XWRK2 < XHIGT(1)) Then
+                  if (XWRK2 < XHIGT(1)) then
                      XHIGT (2) = XHIGT (1)
                      XHIGT (1) = XWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                XWRK1 = XHIGT (1)
                JLOW = JLOW + 1
@@ -1320,89 +1325,89 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XHIGT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XHIGT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XHIGT(1)
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XHIGT(ICRS) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XHIGT(ICRS) < XMIN) then
                   XMIN = XHIGT(ICRS)
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             VALNTH = XHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             XHIGT (1) = XLOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                XWRK = XLOWT (ICRS)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XHIGT(IDCR)) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XHIGT(IDCR)) then
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                XHIGT (IDCR+1) = XWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XHIGT(INTH)
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XLOWT (ICRS) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XLOWT (ICRS) < XWRK1) then
                   XWRK = XLOWT (ICRS)
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XHIGT(IDCR)) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XHIGT(IDCR)) exit
                      XHIGT (IDCR+1) = XHIGT (IDCR)
-                  End Do
+                  end do
                   XHIGT (IDCR+1) = XLOWT (ICRS)
                   XWRK1 = XHIGT(INTH)
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             VALNTH = XHIGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -1412,22 +1417,22 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XLOWT(IMIL) < XLOWT(1)) Then
+            if (XLOWT(IMIL) < XLOWT(1)) then
                XWRK = XLOWT (1)
                XLOWT (1) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-            End If
-            If (XLOWT(IMIL) > XLOWT(IFIN)) Then
+            end if
+            if (XLOWT(IMIL) > XLOWT(IFIN)) then
                XWRK = XLOWT (IFIN)
                XLOWT (IFIN) = XLOWT (IMIL)
                XLOWT (IMIL) = XWRK
-               If (XLOWT(IMIL) < XLOWT(1)) Then
+               if (XLOWT(IMIL) < XLOWT(1)) then
                   XWRK = XLOWT (1)
                   XLOWT (1) = XLOWT (IMIL)
                   XLOWT (IMIL) = XWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XLOWT(1) + REAL(INTH)/REAL(JLOW+INTH) * &
                               (XLOWT(IFIN)-XLOWT(1))
@@ -1438,63 +1443,63 @@ pure Function I_valnth (XDONT, NORD) Result (valnth)
             JHIG = 0
             JLOW = 0
 !
-            If (XLOWT(IFIN) > XPIV) Then
+            if (XLOWT(IFIN) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XLOWT(ICRS) > XPIV) Then
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XLOWT(ICRS) <= XPIV) Then
+                     if (XLOWT(ICRS) <= XPIV) then
                         JLOW = JLOW + 1
                         XLOWT (JLOW) = XLOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XLOWT(ICRS) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XLOWT(ICRS) > XPIV) then
                      JHIG = JHIG + 1
                      XHIGT (JHIG) = XLOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XLOWT(ICRS) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XLOWT(ICRS) <= XPIV) then
                      JLOW = JLOW + 1
                      XLOWT (JLOW) = XLOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
       VALNTH = MAXVAL (XLOWT (1:INTH))
-      Return
+      return
 !
 !
-End Function I_valnth
+end function I_valnth
 
 !-------------------------------------------------------------------------------
 !*******************************************************************************
@@ -1502,7 +1507,7 @@ End Function I_valnth
 !-------------------------------------------------------------------------------
 
 
-pure Function D_indnth (XDONT, NORD) Result (INDNTH)
+pure function D_indnth (XDONT, NORD) result (INDNTH)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -1517,97 +1522,97 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! __________________________________________________________
-      Real (kind=kdp), Dimension (:), Intent (In) :: XDONT
-      Integer :: INDNTH
-      Integer, Intent (In) :: NORD
+      real (kind=kdp), dimension (:), intent (in) :: XDONT
+      integer :: INDNTH
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Real (kind=kdp) :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
+      real (kind=kdp) :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
 !
-      Integer, Dimension (NORD) :: IRNGT
-      Integer, Dimension (SIZE(XDONT)) :: ILOWT, IHIGT
-      Integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer, dimension (NORD) :: IRNGT
+      integer, dimension (SIZE(XDONT)) :: ILOWT, IHIGT
+      integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = NORD
 !
 !    First loop is used to fill-in ILOWT, IHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) INDNTH = 1
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) INDNTH = 1
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          ILOWT (1) = 2
          IHIGT (1) = 1
-      Else
+      else
          ILOWT (1) = 1
          IHIGT (1) = 2
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XDONT(IHIGT(1))) Then
+      if (XDONT(3) < XDONT(IHIGT(1))) then
          IHIGT (2) = IHIGT (1)
-         If (XDONT(3) < XDONT(ILOWT(1))) Then
+         if (XDONT(3) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = 3
-         Else
+         else
             IHIGT (1) = 3
-         End If
-      Else
+         end if
+      else
          IHIGT (2) = 3
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         Return
-      End If
+      if (NDON < 4) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         return
+      end if
 !
-      If (XDONT(NDON) < XDONT(IHIGT(1))) Then
+      if (XDONT(NDON) < XDONT(IHIGT(1))) then
          IHIGT (3) = IHIGT (2)
          IHIGT (2) = IHIGT (1)
-         If (XDONT(NDON) < XDONT(ILOWT(1))) Then
+         if (XDONT(NDON) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = NDON
-         Else
+         else
             IHIGT (1) = NDON
-         End If
-      Else
+         end if
+      else
          IHIGT (3) = NDON
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         If (INTH == 4) INDNTH = IHIGT (3)
-         Return
-      End If
+      if (NDON < 5) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         if (INTH == 4) INDNTH = IHIGT (3)
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                    (XDONT(IHIGT(3))-XDONT(ILOWT(1)))
-      If (XPIV >= XDONT(IHIGT(1))) Then
+      if (XPIV >= XDONT(IHIGT(1))) then
          XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                       (XDONT(IHIGT(2))-XDONT(ILOWT(1)))
-         If (XPIV >= XDONT(IHIGT(1))) &
+         if (XPIV >= XDONT(IHIGT(1))) &
              XPIV = XDONT (ILOWT(1)) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                           (XDONT(IHIGT(1))-XDONT(ILOWT(1)))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -1618,104 +1623,104 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !  than enough values in ILOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XDONT (IHIGT(1))
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XDONT(IHIGT(ICRS)) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XDONT(IHIGT(ICRS)) < XMIN) then
                       XMIN = XDONT (IHIGT(ICRS))
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 ILOWT (JLOW) = IHIGT (IHIG)
                 IHIGT (IHIG) = IHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 ILOW = ILOWT (1)
                 XMAX = XDONT (ILOW)
-                Do ICRS = 2, JLOW
-                   If (XDONT(ILOWT(ICRS)) > XMAX) Then
+                do ICRS = 2, JLOW
+                   if (XDONT(ILOWT(ICRS)) > XMAX) then
                       IWRK = ILOWT (ICRS)
                       XMAX = XDONT (IWRK)
                       ILOWT (ICRS) = ILOW
                       ILOW = IWRK
-                   End If
-                End Do
+                   end if
+                end do
                 JLOW = JLOW - 1
-             End If
-         End If
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -1724,14 +1729,14 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -1740,49 +1745,49 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) Then
+            case (2)
+               if (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (3)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (3) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   ILOWT (ICRS) = IHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -1795,20 +1800,20 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (IFIN)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (IFIN) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                IWRK1 = IHIGT (1)
                JLOW = JLOW + 1
@@ -1822,90 +1827,90 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = IHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XDONT (IHIGT(1))
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XDONT(IHIGT(ICRS)) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XDONT(IHIGT(ICRS)) < XMIN) then
                   XMIN = XDONT (IHIGT(ICRS))
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             INDNTH = IHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             IRNGT (1) = ILOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                IWRK = ILOWT (ICRS)
                XWRK = XDONT (IWRK)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XDONT(IRNGT(IDCR))) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XDONT(IRNGT(IDCR))) then
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                IRNGT (IDCR+1) = IWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XDONT (IRNGT(INTH))
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XDONT(ILOWT (ICRS)) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XDONT(ILOWT (ICRS)) < XWRK1) then
                   XWRK = XDONT (ILOWT (ICRS))
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XDONT(IRNGT(IDCR))) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XDONT(IRNGT(IDCR))) exit
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  End Do
+                  end do
                   IRNGT (IDCR+1) = ILOWT (ICRS)
                   XWRK1 = XDONT (IRNGT(INTH))
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             INDNTH = IRNGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -1915,22 +1920,22 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+            if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                IWRK = ILOWT (1)
                ILOWT (1) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-            End If
-            If (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) Then
+            end if
+            if (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) then
                IWRK = ILOWT (IFIN)
                ILOWT (IFIN) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-               If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+               if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                   IWRK = ILOWT (1)
                   ILOWT (1) = ILOWT (IMIL)
                   ILOWT (IMIL) = IWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XDONT (ILOWT(1)) + REAL(INTH)/REAL(JLOW+INTH) * &
                                       (XDONT(ILOWT(IFIN))-XDONT(ILOWT(1)))
@@ -1941,76 +1946,76 @@ pure Function D_indnth (XDONT, NORD) Result (INDNTH)
             JHIG = 0
             JLOW = 0
 !
-            If (XDONT(ILOWT(IFIN)) > XPIV) Then
+            if (XDONT(ILOWT(IFIN)) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+                     if (XDONT(ILOWT(ICRS)) <= XPIV) then
                         JLOW = JLOW + 1
                         ILOWT (JLOW) = ILOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
 
       IWRK1 = ILOWT (1)
       XWRK1 =  XDONT (IWRK1)
-      Do ICRS = 1+1, INTH
+      do ICRS = 1+1, INTH
          IWRK = ILOWT (ICRS)
          XWRK = XDONT (IWRK)
-         If (XWRK > XWRK1) Then
+         if (XWRK > XWRK1) then
             XWRK1 = XWRK
             IWRK1 = IWRK
-         End If
-      End Do
+         end if
+      end do
       INDNTH = IWRK1
-      Return
+      return
 !
 !
-End Function D_indnth
+end function D_indnth
 
-pure Function R_indnth (XDONT, NORD) Result (INDNTH)
+pure function R_indnth (XDONT, NORD) result (INDNTH)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -2025,97 +2030,97 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! _________________________________________________________
-      Real, Dimension (:), Intent (In) :: XDONT
-      Integer :: INDNTH
-      Integer, Intent (In) :: NORD
+      real, dimension (:), intent (in) :: XDONT
+      integer :: INDNTH
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Real :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
+      real :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
 !
-      Integer, Dimension (NORD) :: IRNGT
-      Integer, Dimension (SIZE(XDONT)) :: ILOWT, IHIGT
-      Integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer, dimension (NORD) :: IRNGT
+      integer, dimension (SIZE(XDONT)) :: ILOWT, IHIGT
+      integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = NORD
 !
 !    First loop is used to fill-in ILOWT, IHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) INDNTH = 1
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) INDNTH = 1
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          ILOWT (1) = 2
          IHIGT (1) = 1
-      Else
+      else
          ILOWT (1) = 1
          IHIGT (1) = 2
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XDONT(IHIGT(1))) Then
+      if (XDONT(3) < XDONT(IHIGT(1))) then
          IHIGT (2) = IHIGT (1)
-         If (XDONT(3) < XDONT(ILOWT(1))) Then
+         if (XDONT(3) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = 3
-         Else
+         else
             IHIGT (1) = 3
-         End If
-      Else
+         end if
+      else
          IHIGT (2) = 3
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         Return
-      End If
+      if (NDON < 4) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         return
+      end if
 !
-      If (XDONT(NDON) < XDONT(IHIGT(1))) Then
+      if (XDONT(NDON) < XDONT(IHIGT(1))) then
          IHIGT (3) = IHIGT (2)
          IHIGT (2) = IHIGT (1)
-         If (XDONT(NDON) < XDONT(ILOWT(1))) Then
+         if (XDONT(NDON) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = NDON
-         Else
+         else
             IHIGT (1) = NDON
-         End If
-      Else
+         end if
+      else
          IHIGT (3) = NDON
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         If (INTH == 4) INDNTH = IHIGT (3)
-         Return
-      End If
+      if (NDON < 5) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         if (INTH == 4) INDNTH = IHIGT (3)
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                    (XDONT(IHIGT(3))-XDONT(ILOWT(1)))
-      If (XPIV >= XDONT(IHIGT(1))) Then
+      if (XPIV >= XDONT(IHIGT(1))) then
          XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                       (XDONT(IHIGT(2))-XDONT(ILOWT(1)))
-         If (XPIV >= XDONT(IHIGT(1))) &
+         if (XPIV >= XDONT(IHIGT(1))) &
              XPIV = XDONT (ILOWT(1)) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                           (XDONT(IHIGT(1))-XDONT(ILOWT(1)))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -2126,104 +2131,104 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !  than enough values in ILOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XDONT (IHIGT(1))
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XDONT(IHIGT(ICRS)) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XDONT(IHIGT(ICRS)) < XMIN) then
                       XMIN = XDONT (IHIGT(ICRS))
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 ILOWT (JLOW) = IHIGT (IHIG)
                 IHIGT (IHIG) = IHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 ILOW = ILOWT (1)
                 XMAX = XDONT (ILOW)
-                Do ICRS = 2, JLOW
-                   If (XDONT(ILOWT(ICRS)) > XMAX) Then
+                do ICRS = 2, JLOW
+                   if (XDONT(ILOWT(ICRS)) > XMAX) then
                       IWRK = ILOWT (ICRS)
                       XMAX = XDONT (IWRK)
                       ILOWT (ICRS) = ILOW
                       ILOW = IWRK
-                   End If
-                End Do
+                   end if
+                end do
                 JLOW = JLOW - 1
-             End If
-         End If
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -2232,14 +2237,14 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -2248,49 +2253,49 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) Then
+            case (2)
+               if (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (3)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (3) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   ILOWT (ICRS) = IHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -2303,20 +2308,20 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (IFIN)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (IFIN) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                IWRK1 = IHIGT (1)
                JLOW = JLOW + 1
@@ -2330,90 +2335,90 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = IHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XDONT (IHIGT(1))
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XDONT(IHIGT(ICRS)) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XDONT(IHIGT(ICRS)) < XMIN) then
                   XMIN = XDONT (IHIGT(ICRS))
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             INDNTH = IHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             IRNGT (1) = ILOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                IWRK = ILOWT (ICRS)
                XWRK = XDONT (IWRK)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XDONT(IRNGT(IDCR))) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XDONT(IRNGT(IDCR))) then
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                IRNGT (IDCR+1) = IWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XDONT (IRNGT(INTH))
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XDONT(ILOWT (ICRS)) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XDONT(ILOWT (ICRS)) < XWRK1) then
                   XWRK = XDONT (ILOWT (ICRS))
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XDONT(IRNGT(IDCR))) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XDONT(IRNGT(IDCR))) exit
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  End Do
+                  end do
                   IRNGT (IDCR+1) = ILOWT (ICRS)
                   XWRK1 = XDONT (IRNGT(INTH))
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             INDNTH = IRNGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -2423,22 +2428,22 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+            if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                IWRK = ILOWT (1)
                ILOWT (1) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-            End If
-            If (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) Then
+            end if
+            if (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) then
                IWRK = ILOWT (IFIN)
                ILOWT (IFIN) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-               If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+               if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                   IWRK = ILOWT (1)
                   ILOWT (1) = ILOWT (IMIL)
                   ILOWT (IMIL) = IWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XDONT (ILOWT(1)) + REAL(INTH)/REAL(JLOW+INTH) * &
                                       (XDONT(ILOWT(IFIN))-XDONT(ILOWT(1)))
@@ -2449,75 +2454,75 @@ pure Function R_indnth (XDONT, NORD) Result (INDNTH)
             JHIG = 0
             JLOW = 0
 !
-            If (XDONT(ILOWT(IFIN)) > XPIV) Then
+            if (XDONT(ILOWT(IFIN)) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+                     if (XDONT(ILOWT(ICRS)) <= XPIV) then
                         JLOW = JLOW + 1
                         ILOWT (JLOW) = ILOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
 
       IWRK1 = ILOWT (1)
       XWRK1 =  XDONT (IWRK1)
-      Do ICRS = 1+1, INTH
+      do ICRS = 1+1, INTH
          IWRK = ILOWT (ICRS)
          XWRK = XDONT (IWRK)
-         If (XWRK > XWRK1) Then
+         if (XWRK > XWRK1) then
             XWRK1 = XWRK
             IWRK1 = IWRK
-         End If
-      End Do
+         end if
+      end do
       INDNTH = IWRK1
-      Return
+      return
 !
 !
-End Function R_indnth
-pure Function I_indnth (XDONT, NORD) Result (INDNTH)
+end function R_indnth
+pure function I_indnth (XDONT, NORD) result (INDNTH)
 !  Return NORDth value of XDONT, i.e fractile of order NORD/SIZE(XDONT).
 ! __________________________________________________________
 !  This routine uses a pivoting strategy such as the one of
@@ -2532,97 +2537,97 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !  Michel Olagnon - Aug. 2000
 ! __________________________________________________________
 ! __________________________________________________________
-      Integer, Dimension (:), Intent (In)  :: XDONT
-      Integer :: INDNTH
-      Integer, Intent (In) :: NORD
+      integer, dimension (:), intent (in)  :: XDONT
+      integer :: INDNTH
+      integer, intent (in) :: NORD
 ! __________________________________________________________
-      Integer :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
+      integer :: XPIV, XPIV0, XWRK, XWRK1, XMIN, XMAX
 !
-      Integer, Dimension (NORD) :: IRNGT
-      Integer, Dimension (SIZE(XDONT)) :: ILOWT, IHIGT
-      Integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
-      Integer :: IMIL, IFIN, ICRS, IDCR, ILOW
-      Integer :: JLM2, JLM1, JHM2, JHM1, INTH
+      integer, dimension (NORD) :: IRNGT
+      integer, dimension (SIZE(XDONT)) :: ILOWT, IHIGT
+      integer :: NDON, JHIG, JLOW, IHIG, IWRK, IWRK1, IWRK2, IWRK3
+      integer :: IMIL, IFIN, ICRS, IDCR, ILOW
+      integer :: JLM2, JLM1, JHM2, JHM1, INTH
 !
       NDON = SIZE (XDONT)
       INTH = NORD
 !
 !    First loop is used to fill-in ILOWT, IHIGT at the same time
 !
-      If (NDON < 2) Then
-         If (INTH == 1) INDNTH = 1
-         Return
-      End If
+      if (NDON < 2) then
+         if (INTH == 1) INDNTH = 1
+         return
+      end if
 !
 !  One chooses a pivot, best estimate possible to put fractile near
 !  mid-point of the set of low values.
 !
-      If (XDONT(2) < XDONT(1)) Then
+      if (XDONT(2) < XDONT(1)) then
          ILOWT (1) = 2
          IHIGT (1) = 1
-      Else
+      else
          ILOWT (1) = 1
          IHIGT (1) = 2
-      End If
+      end if
 !
-      If (NDON < 3) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         Return
-      End If
+      if (NDON < 3) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         return
+      end if
 !
-      If (XDONT(3) < XDONT(IHIGT(1))) Then
+      if (XDONT(3) < XDONT(IHIGT(1))) then
          IHIGT (2) = IHIGT (1)
-         If (XDONT(3) < XDONT(ILOWT(1))) Then
+         if (XDONT(3) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = 3
-         Else
+         else
             IHIGT (1) = 3
-         End If
-      Else
+         end if
+      else
          IHIGT (2) = 3
-      End If
+      end if
 !
-      If (NDON < 4) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         Return
-      End If
+      if (NDON < 4) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         return
+      end if
 !
-      If (XDONT(NDON) < XDONT(IHIGT(1))) Then
+      if (XDONT(NDON) < XDONT(IHIGT(1))) then
          IHIGT (3) = IHIGT (2)
          IHIGT (2) = IHIGT (1)
-         If (XDONT(NDON) < XDONT(ILOWT(1))) Then
+         if (XDONT(NDON) < XDONT(ILOWT(1))) then
             IHIGT (1) = ILOWT (1)
             ILOWT (1) = NDON
-         Else
+         else
             IHIGT (1) = NDON
-         End If
-      Else
+         end if
+      else
          IHIGT (3) = NDON
-      End If
+      end if
 !
-      If (NDON < 5) Then
-         If (INTH == 1) INDNTH = ILOWT (1)
-         If (INTH == 2) INDNTH = IHIGT (1)
-         If (INTH == 3) INDNTH = IHIGT (2)
-         If (INTH == 4) INDNTH = IHIGT (3)
-         Return
-      End If
+      if (NDON < 5) then
+         if (INTH == 1) INDNTH = ILOWT (1)
+         if (INTH == 2) INDNTH = IHIGT (1)
+         if (INTH == 3) INDNTH = IHIGT (2)
+         if (INTH == 4) INDNTH = IHIGT (3)
+         return
+      end if
 !
 
       JLOW = 1
       JHIG = 3
       XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                    (XDONT(IHIGT(3))-XDONT(ILOWT(1)))
-      If (XPIV >= XDONT(IHIGT(1))) Then
+      if (XPIV >= XDONT(IHIGT(1))) then
          XPIV = XDONT (ILOWT(1)) + REAL(2*INTH)/REAL(NDON+INTH) * &
                                       (XDONT(IHIGT(2))-XDONT(ILOWT(1)))
-         If (XPIV >= XDONT(IHIGT(1))) &
+         if (XPIV >= XDONT(IHIGT(1))) &
              XPIV = XDONT (ILOWT(1)) + REAL (2*INTH) / REAL (NDON+INTH) * &
                                           (XDONT(IHIGT(1))-XDONT(ILOWT(1)))
-      End If
+      end if
       XPIV0 = XPIV
 !
 !  One puts values > pivot in the end and those <= pivot
@@ -2633,104 +2638,104 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !  than enough values in ILOWT.
 !
 !
-      If (XDONT(NDON) > XPIV) Then
+      if (XDONT(NDON) > XPIV) then
          ICRS = 3
-         Do
+         do
             ICRS = ICRS + 1
-            If (XDONT(ICRS) > XPIV) Then
-               If (ICRS >= NDON) Exit
+            if (XDONT(ICRS) > XPIV) then
+               if (ICRS >= NDON) exit
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
 !  One restricts further processing because it is no use
 !  to store more high values
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
+               if (XDONT(ICRS) <= XPIV) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               Else If (ICRS >= NDON) Then
-                  Exit
-               End If
-            End Do
-         End If
+               else if (ICRS >= NDON) then
+                  exit
+               end if
+            end do
+         end if
 !
 !
-      Else
+      else
 !
 !  Same as above, but this is not as easy to optimize, so the
 !  DO-loop is kept
 !
-         Do ICRS = 4, NDON - 1
-            If (XDONT(ICRS) > XPIV) Then
+         do ICRS = 4, NDON - 1
+            if (XDONT(ICRS) > XPIV) then
                JHIG = JHIG + 1
                IHIGT (JHIG) = ICRS
-            Else
+            else
                JLOW = JLOW + 1
                ILOWT (JLOW) = ICRS
-               If (JLOW >= INTH) Exit
-            End If
-         End Do
+               if (JLOW >= INTH) exit
+            end if
+         end do
 !
-         If (ICRS < NDON-1) Then
-            Do
+         if (ICRS < NDON-1) then
+            do
                ICRS = ICRS + 1
-               If (XDONT(ICRS) <= XPIV) Then
-                  If (ICRS >= NDON) Exit
+               if (XDONT(ICRS) <= XPIV) then
+                  if (ICRS >= NDON) exit
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = ICRS
-               End If
-            End Do
-         End If
-      End If
+               end if
+            end do
+         end if
+      end if
 !
       JLM2 = 0
       JLM1 = 0
       JHM2 = 0
       JHM1 = 0
-      Do
-         If (JLM2 == JLOW .And. JHM2 == JHIG) Then
+      do
+         if (JLM2 == JLOW .and. JHM2 == JHIG) then
 !
 !   We are oscillating. Perturbate by bringing JLOW closer by one
 !   to INTH
 !
-             If (INTH > JLOW) Then
+             if (INTH > JLOW) then
                 XMIN = XDONT (IHIGT(1))
                 IHIG = 1
-                Do ICRS = 2, JHIG
-                   If (XDONT(IHIGT(ICRS)) < XMIN) Then
+                do ICRS = 2, JHIG
+                   if (XDONT(IHIGT(ICRS)) < XMIN) then
                       XMIN = XDONT (IHIGT(ICRS))
                       IHIG = ICRS
-                   End If
-                End Do
+                   end if
+                end do
 !
                 JLOW = JLOW + 1
                 ILOWT (JLOW) = IHIGT (IHIG)
                 IHIGT (IHIG) = IHIGT (JHIG)
                 JHIG = JHIG - 1
-             Else
+             else
 
                 ILOW = ILOWT (1)
                 XMAX = XDONT (ILOW)
-                Do ICRS = 2, JLOW
-                   If (XDONT(ILOWT(ICRS)) > XMAX) Then
+                do ICRS = 2, JLOW
+                   if (XDONT(ILOWT(ICRS)) > XMAX) then
                       IWRK = ILOWT (ICRS)
                       XMAX = XDONT (IWRK)
                       ILOWT (ICRS) = ILOW
                       ILOW = IWRK
-                   End If
-                End Do
+                   end if
+                end do
                 JLOW = JLOW - 1
-             End If
-         End If
+             end if
+         end if
          JLM2 = JLM1
          JLM1 = JLOW
          JHM2 = JHM1
@@ -2739,14 +2744,14 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !   We try to bring the number of values in the low values set
 !   closer to INTH.
 !
-         Select Case (INTH-JLOW)
-         Case (2:)
+         select case (INTH-JLOW)
+         case (2:)
 !
 !   Not enough values in low part, at least 2 are missing
 !
             INTH = INTH - JLOW
             JLOW = 0
-            Select Case (JHIG)
+            select case (JHIG)
 !!!!!           CASE DEFAULT
 !!!!!              write (unit=*,fmt=*) "Assertion failed"
 !!!!!              STOP
@@ -2755,49 +2760,49 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !   the high values set that it is bad performance to choose a pivot
 !   and apply the general algorithm.
 !
-            Case (2)
-               If (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) Then
+            case (2)
+               if (XDONT(IHIGT(1)) <= XDONT(IHIGT(2))) then
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
-               Else
+               else
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (2)
                   JLOW = JLOW + 1
                   ILOWT (JLOW) = IHIGT (1)
-               End If
-               Exit
+               end if
+               exit
 !
-            Case (3)
+            case (3)
 !
 !
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (3)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (3) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
                JHIG = 0
-               Do ICRS = JLOW + 1, INTH
+               do ICRS = JLOW + 1, INTH
                   JHIG = JHIG + 1
                   ILOWT (ICRS) = IHIGT (JHIG)
-               End Do
+               end do
                JLOW = INTH
-               Exit
+               exit
 !
-            Case (4:)
+            case (4:)
 !
 !
                XPIV0 = XPIV
@@ -2810,20 +2815,20 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
                IWRK1 = IHIGT (1)
                IWRK2 = IHIGT (2)
                IWRK3 = IHIGT (IFIN)
-               If (XDONT(IWRK2) < XDONT(IWRK1)) Then
+               if (XDONT(IWRK2) < XDONT(IWRK1)) then
                   IHIGT (1) = IWRK2
                   IHIGT (2) = IWRK1
                   IWRK2 = IWRK1
-               End If
-               If (XDONT(IWRK2) > XDONT(IWRK3)) Then
+               end if
+               if (XDONT(IWRK2) > XDONT(IWRK3)) then
                   IHIGT (IFIN) = IWRK2
                   IHIGT (2) = IWRK3
                   IWRK2 = IWRK3
-                  If (XDONT(IWRK2) < XDONT(IHIGT(1))) Then
+                  if (XDONT(IWRK2) < XDONT(IHIGT(1))) then
                      IHIGT (2) = IHIGT (1)
                      IHIGT (1) = IWRK2
-                  End If
-               End If
+                  end if
+               end if
 !
                IWRK1 = IHIGT (1)
                JLOW = JLOW + 1
@@ -2837,90 +2842,90 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !  low values in the end.
 !
                JHIG = 0
-               Do ICRS = 2, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = 2, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  Else
+                     if (JLOW >= INTH) exit
+                  else
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = IHIGT (ICRS)
-                  End If
-               End Do
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(IHIGT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(IHIGT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = IHIGT (ICRS)
-                  End If
-               End Do
-            End Select
+                  end if
+               end do
+            end select
 !
 !
-         Case (1)
+         case (1)
 !
 !  Only 1 value is missing in low part
 !
             XMIN = XDONT (IHIGT(1))
             IHIG = 1
-            Do ICRS = 2, JHIG
-               If (XDONT(IHIGT(ICRS)) < XMIN) Then
+            do ICRS = 2, JHIG
+               if (XDONT(IHIGT(ICRS)) < XMIN) then
                   XMIN = XDONT (IHIGT(ICRS))
                   IHIG = ICRS
-               End If
-            End Do
+               end if
+            end do
 !
             INDNTH = IHIGT (IHIG)
-            Return
+            return
 !
 !
-         Case (0)
+         case (0)
 !
 !  Low part is exactly what we want
 !
-            Exit
+            exit
 !
 !
-         Case (-5:-1)
+         case (-5:-1)
 !
 !  Only few values too many in low part
 !
             IRNGT (1) = ILOWT (1)
             ILOW = 1 + INTH - JLOW
-            Do ICRS = 2, INTH
+            do ICRS = 2, INTH
                IWRK = ILOWT (ICRS)
                XWRK = XDONT (IWRK)
-               Do IDCR = ICRS - 1, MAX (1, ILOW), - 1
-                  If (XWRK < XDONT(IRNGT(IDCR))) Then
+               do IDCR = ICRS - 1, MAX (1, ILOW), - 1
+                  if (XWRK < XDONT(IRNGT(IDCR))) then
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  Else
-                     Exit
-                  End If
-               End Do
+                  else
+                     exit
+                  end if
+               end do
                IRNGT (IDCR+1) = IWRK
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             XWRK1 = XDONT (IRNGT(INTH))
             ILOW = 2*INTH - JLOW
-            Do ICRS = INTH + 1, JLOW
-               If (XDONT(ILOWT (ICRS)) < XWRK1) Then
+            do ICRS = INTH + 1, JLOW
+               if (XDONT(ILOWT (ICRS)) < XWRK1) then
                   XWRK = XDONT (ILOWT (ICRS))
-                  Do IDCR = INTH - 1, MAX (1, ILOW), - 1
-                     If (XWRK >= XDONT(IRNGT(IDCR))) Exit
+                  do IDCR = INTH - 1, MAX (1, ILOW), - 1
+                     if (XWRK >= XDONT(IRNGT(IDCR))) exit
                      IRNGT (IDCR+1) = IRNGT (IDCR)
-                  End Do
+                  end do
                   IRNGT (IDCR+1) = ILOWT (ICRS)
                   XWRK1 = XDONT (IRNGT(INTH))
-               End If
+               end if
                ILOW = ILOW + 1
-            End Do
+            end do
 !
             INDNTH = IRNGT(INTH)
-            Return
+            return
 !
 !
-         Case (:-6)
+         case (:-6)
 !
 ! last case: too many values in low part
 !
@@ -2930,22 +2935,22 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
 !
 !  One chooses a pivot from 1st, last, and middle values
 !
-            If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+            if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                IWRK = ILOWT (1)
                ILOWT (1) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-            End If
-            If (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) Then
+            end if
+            if (XDONT(ILOWT(IMIL)) > XDONT(ILOWT(IFIN))) then
                IWRK = ILOWT (IFIN)
                ILOWT (IFIN) = ILOWT (IMIL)
                ILOWT (IMIL) = IWRK
-               If (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) Then
+               if (XDONT(ILOWT(IMIL)) < XDONT(ILOWT(1))) then
                   IWRK = ILOWT (1)
                   ILOWT (1) = ILOWT (IMIL)
                   ILOWT (IMIL) = IWRK
-               End If
-            End If
-            If (IFIN <= 3) Exit
+               end if
+            end if
+            if (IFIN <= 3) exit
 !
             XPIV = XDONT (ILOWT(1)) + REAL(INTH)/REAL(JLOW+INTH) * &
                                       (XDONT(ILOWT(IFIN))-XDONT(ILOWT(1)))
@@ -2956,73 +2961,73 @@ pure Function I_indnth (XDONT, NORD) Result (INDNTH)
             JHIG = 0
             JLOW = 0
 !
-            If (XDONT(ILOWT(IFIN)) > XPIV) Then
+            if (XDONT(ILOWT(IFIN)) > XPIV) then
                ICRS = 0
-               Do
+               do
                   ICRS = ICRS + 1
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                     If (ICRS >= IFIN) Exit
-                  Else
+                     if (ICRS >= IFIN) exit
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               If (ICRS < IFIN) Then
-                  Do
+               if (ICRS < IFIN) then
+                  do
                      ICRS = ICRS + 1
-                     If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+                     if (XDONT(ILOWT(ICRS)) <= XPIV) then
                         JLOW = JLOW + 1
                         ILOWT (JLOW) = ILOWT (ICRS)
-                     Else
-                        If (ICRS >= IFIN) Exit
-                     End If
-                  End Do
-               End If
-            Else
-               Do ICRS = 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) > XPIV) Then
+                     else
+                        if (ICRS >= IFIN) exit
+                     end if
+                  end do
+               end if
+            else
+               do ICRS = 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) > XPIV) then
                      JHIG = JHIG + 1
                      IHIGT (JHIG) = ILOWT (ICRS)
-                  Else
+                  else
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                     If (JLOW >= INTH) Exit
-                  End If
-               End Do
+                     if (JLOW >= INTH) exit
+                  end if
+               end do
 !
-               Do ICRS = ICRS + 1, IFIN
-                  If (XDONT(ILOWT(ICRS)) <= XPIV) Then
+               do ICRS = ICRS + 1, IFIN
+                  if (XDONT(ILOWT(ICRS)) <= XPIV) then
                      JLOW = JLOW + 1
                      ILOWT (JLOW) = ILOWT (ICRS)
-                  End If
-               End Do
-            End If
+                  end if
+               end do
+            end if
 !
-         End Select
+         end select
 !
-      End Do
+      end do
 !
 !  Now, we only need to find maximum of the 1:INTH set
 !
 
       IWRK1 = ILOWT (1)
       XWRK1 =  XDONT (IWRK1)
-      Do ICRS = 1+1, INTH
+      do ICRS = 1+1, INTH
          IWRK = ILOWT (ICRS)
          XWRK = XDONT (IWRK)
-         If (XWRK > XWRK1) Then
+         if (XWRK > XWRK1) then
             XWRK1 = XWRK
             IWRK1 = IWRK
-         End If
-      End Do
+         end if
+      end do
       INDNTH = IWRK1
-      Return
+      return
 !
 !
-End Function I_indnth
+end function I_indnth
 
 end module partial_sorting

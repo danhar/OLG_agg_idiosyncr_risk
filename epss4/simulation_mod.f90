@@ -12,7 +12,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_zbrent
     use fun_aggregate_diff
-    use partial_sorting     ! function valnth
+    use partial_sorting     ! function valnth for Median
 
     type(tPolicies)  ,intent(in)    :: policies
     real(dp)         ,intent(in)    :: value(:,:,:,:,:,:)

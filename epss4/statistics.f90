@@ -1,5 +1,5 @@
 module statistics
-    ! This module is a bit of an overkill...
+    ! This module is written in a fully object-oriented way.
     use kinds ,only: dp
 
     implicit none
@@ -8,7 +8,7 @@ module statistics
 
     type tStats
         private
-        real(dp) :: avg, std, auto, absmin, absmax, cv, & ! these include all realizations with an error
+        real(dp) :: avg, median, std, auto, absmin, absmax, cv, & ! these include all realizations with an error
                     avg_exerr, min_exerr, max_exerr       ! these exclude all realizations with an error
         real(dp), allocatable :: series(:)                ! contains the whole series (over all parallel runs), excluding the t_scrap
         integer  :: namelength=10, digits2display_short=2, digits2display_long=8
@@ -19,6 +19,7 @@ module statistics
         procedure :: set_number => set_number_stat
         procedure :: avg_exerr_ ! should make this without final subscript, and the variables with
         procedure :: avg_
+        procedure :: median_
         procedure :: max_exerr_
         procedure :: max_
         procedure :: min_
@@ -78,6 +79,7 @@ contains
     pure subroutine calculate_statistics(this, simvars)
         use params_mod    ,only: t_scrap, stat_dist_z
         use simvars_class ,only: tSimvars
+        use partial_sorting     ! function valnth for Median
         class(tStats)          ,intent(inout) :: this
         type(tSimvars)         ,intent(in)  :: simvars(:)
         real(dp) ,allocatable :: seriest(:), seriesp(:)
@@ -101,6 +103,7 @@ contains
         ! might be different for arithmetic average or weighted average with stat_dist_z
             seriesp  = simvars(1)%get(this%name,1,1) ! This is only temporary
             this%avg = seriesp(1)
+            this%median = seriesp(1)
             this%std = sqrt(sum(stat_dist_z*(this%series - this%avg)**2))
             this%absmax = abs(this%avg)
             this%absmin = abs(this%avg)
@@ -109,6 +112,7 @@ contains
             this%max_exerr = this%absmin
         else
             this%avg = sum(this%series)/n
+            this%median = valnth(this%series,n/2)
             this%std = sqrt(sum((this%series - this%avg)**2)/real(n-1,dp)) ! should I rather divide by n?
             this%absmax = maxval(abs(this%series))
             this%absmin = minval(abs(this%series))
@@ -184,7 +188,7 @@ contains
             case ('short')
                 write(unit,fmt1) ' '//name,this%avg,this%std,this%cv,this%auto
             case ('long')
-                write(unit,fmt1) ' '//name,this%avg,this%std,this%cv,this%auto,this%absmax,this%absmin
+                write(unit,fmt1) ' '//name,this%avg,this%median,this%std,this%cv,this%auto,this%absmax,this%absmin
             case ('short_max')
                 write(unit,fmt1) ' '//name,this%absmax,this%max_exerr,this%avg,this%avg_exerr
             case ('long_max')
@@ -199,6 +203,7 @@ contains
         class(tStats) ,intent(out) :: this
         real(dp)      ,intent(in) :: number
         this%avg       = number
+        this%median    = number
         this%std       = number
         this%auto      = number
         this%absmin    = number
@@ -220,6 +225,12 @@ contains
         real(dp) :: result
             result = this%avg
     end function avg_
+
+    pure function median_(this) result(result)
+        class(tStats) ,intent(in)    :: this
+        real(dp) :: result
+            result = this%median
+    end function median_
 
     pure function max_exerr_(this) result(result)
         class(tStats) ,intent(in)    :: this
@@ -275,12 +286,13 @@ contains
         integer, intent(in) :: nd, nl
         character(:), allocatable :: fp
         character(2) :: nd_char, nd2_char, nl_char
+        integer, parameter :: n_stats = 6 ! actually number of displayed statistics minus one
 
         write(nd_char,'(i2)') nd
         write(nd2_char,'(i2)') nd+7
         write(nl_char,'(i2)') nl+1
         fp ='es'//trim(adjustl(nd2_char))//'.'//trim(adjustl(nd_char))
-        writing_format = '(a'//trim(nl_char)//','//fp//',5(3x,'//fp//'))'
+        writing_format = '(a'//trim(nl_char)//','//fp//',<n_stats>(3x,'//fp//'))'
     end function writing_format
 
 

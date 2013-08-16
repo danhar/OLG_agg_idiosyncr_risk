@@ -117,6 +117,7 @@ contains
     character(len=*) ,intent(in) :: prec
     character(:), allocatable :: fmt1
     integer :: nl, show_digits
+    integer ,parameter :: n_stats = 6 ! actually number of displayed statistics minus one
 
     nl = K%get_namelength()
     show_digits = K%get_digits2display(prec)
@@ -131,11 +132,11 @@ contains
     write(21,*) repeat('-',63)
 
     if (prec=='long') then
-    write(21,123) repeat(' ',nl+2),' Average', 'Std.Dev.', 'Coef.Var', 'Autocorr', 'Abs.Max.', 'Abs.Min.'
+    write(21,123) repeat(' ',nl+2),' Average','  Median', 'Std.Dev.', 'Coef.Var', 'Autocorr', 'Abs.Max.', 'Abs.Min.'
     else
     write(21,123) repeat(' ',nl+2),' Average', 'Std.Dev.', 'Coef.Var', 'Autocorr'
     endif
-123 format(a<nl+2>,a<show_digits+6>,5(<show_digits+2>x,a8))
+123 format(a<nl+2>,a<show_digits+6>,<n_stats>(<show_digits+2>x,a8))
     fmt1 = K%writing_format(show_digits,nl) ! To guarantee compatibility when call K%write(21,'K',prec)
 
     call K%write(21,'K',prec)   ! in units of efficient labor, so that stationary
