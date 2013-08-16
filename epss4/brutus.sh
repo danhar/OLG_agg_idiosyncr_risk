@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='073-base_ep_precise'
+thisrun='073-base_neta4'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

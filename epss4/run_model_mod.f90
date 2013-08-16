@@ -14,7 +14,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     use simvars_class     ,only: read_unformatted, write_unformatted
     use alternative_insurance_calc_mod ,only: calc_insurance_effect
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition,& ! logicals and characters
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, & ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
@@ -154,7 +154,12 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         if (estimate_from_simvars) then
             print*, '- run_model: using previous simvars to initialize'
             write(tau_char,'(f4.2)') tau
-            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
+            if (good_initial_guess_for_both_tau) then
+                input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
+            else ! this is the default, because we calibrate to tau0.02 and want that guess also for 0.00 (bc new calibration)
+                input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.02'
+            endif
+
             call read_unformatted(simvars_old,input_path)
             K%name ='K' ; call K%calc_stats(simvars_old)
             mu%name='mu'; call mu%calc_stats(simvars_old)

@@ -17,7 +17,8 @@ module params_mod
                           lom_k_version, lom_mu_version
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
-                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc
+                          save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc, &
+                          good_initial_guess_for_both_tau
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -96,8 +97,9 @@ subroutine SetDefaultValues()
     run_n_times=1; run_counter_start=1; n_end_params=0; lom_k_version=2; lom_mu_version=2
     ! Logicals
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
-    bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.;
+    bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
+    good_initial_guess_for_both_tau = .false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -317,7 +319,11 @@ subroutine SetRemainingParams(calib_name)
     select case (opt_initial_ms_guess)
     case (0) ! use previous ms equilibrium values saved in ./input/last_results/
         write(tau_char,'(f4.2)') tau ! At the moment, this procedure is called before tau is changed, so that here we only get the initial tau.
-        input_path = 'model_input/last_results/'//cal_id(calib_name)//'/tau'//tau_char
+        if (good_initial_guess_for_both_tau) then
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
+        else ! this is the default, because we calibrate to tau0.02 and want that guess also for 0.00 (bc new calibration)
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.02'
+        endif
         call ms_guess%read_unformatted('ms',input_path)
     case (1) ! use parameter-sensitive hard-coded guesses
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)
