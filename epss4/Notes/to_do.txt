@@ -3,6 +3,11 @@ This file describes things that will, should, or could be implemented in the cod
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- Gini coefficients (need to calc in each simulation step?). The code for Gini coeffs and Lorenz curves is in statistics.f90:lorenz_calc.
+- Calc medians of lifecycle statistics during simulation. In particular, median portfolio return.
+- Euler errors
+- Instead of portfolio return (graphs) (and consumption?), calc 90th- 10th percentile or the like.
+                         
 - record and report stats for gross wages (important when def benefits) (in simulations and save_results)
 
 - implement a check on lowest income shock gridpoint whether it is negative - discussion with Christian Zimmermann at Zilibotti's
@@ -10,8 +15,6 @@ This file describes things that will, should, or could be implemented in the cod
 - implement check if stockmarket also clears
 - set_apmax conditions on bequests_to_newborn, which is default .true. even if we do not have survival risk. Should check and correct or impove.
 - reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.  
-- Euler errors
-- Gini coefficients (need to calc in each simulation step?). The code for Gini coeffs and Lorenz curves is in statistics.f90:lorenz_calc.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

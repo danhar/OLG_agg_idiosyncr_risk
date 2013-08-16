@@ -285,14 +285,15 @@ contains
         class(tStats) ,intent(in) :: this
         integer, intent(in) :: nd, nl
         character(:), allocatable :: fp
-        character(2) :: nd_char, nd2_char, nl_char
+        character(2) :: nd_char, nd2_char, nl_char, ns_char
         integer, parameter :: n_stats = 6 ! actually number of displayed statistics minus one
 
         write(nd_char,'(i2)') nd
         write(nd2_char,'(i2)') nd+7
         write(nl_char,'(i2)') nl+1
+        write(ns_char,'(i2)') n_stats
         fp ='es'//trim(adjustl(nd2_char))//'.'//trim(adjustl(nd_char))
-        writing_format = '(a'//trim(nl_char)//','//fp//',<n_stats>(3x,'//fp//'))'
+        writing_format = '(a'//trim(nl_char)//','//fp//','//trim(adjustl(ns_char))//'(3x,'//fp//'))'
     end function writing_format
 
 

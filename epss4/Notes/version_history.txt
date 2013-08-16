@@ -4,9 +4,7 @@ most recent and also the current. Within each section, style and chronoligal ord
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-074-minor_improvements: save results so that Matlab can always read (see errors in shell_output.txt). correct calc of cross-sectional variance of consumption and portfolio return (graphs).
-                        calculate Medians and report them in equilibrium_long? In particular for portfolio return   
-
+074-minor_improvements: save results so that Matlab can always read (see errors in shell_output.txt). calculate Medians and report them in equilibrium_long. 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
