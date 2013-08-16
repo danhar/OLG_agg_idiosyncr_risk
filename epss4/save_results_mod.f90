@@ -253,83 +253,81 @@ contains
     ! The following will write all nx in one line, then change zc, then jc, ...
     integer :: nx, i2
 
+! The following seems the best format, because it will not produce ****, which can't be read by Matlab
+302 format(<nj> (es13.6,1x))
+
     nx = size(pol%apgrid,1)
-201 format(<nx> (f10.5,1x))
 !    open(20, file=path//'/cons.txt', status = 'replace')
-!    write(20,201) cons
+!    write(20,302) cons
 !    close(20)
 
     open(40, file=path//'/apgrid.txt',  status = 'replace')
-    write(40,201) pol%apgrid
+    write(40,302) pol%apgrid
     close(40)
 
     open(50, file=path//'/xgrid.txt',   status = 'replace')
-    write(50,201) pol%xgrid
+    write(50,302) pol%xgrid
     close(50)
 
     open(60, file=path//'/kappa.txt',   status = 'replace')
-    write(60,160) pol%kappa
-160 format(<nx> (f0.6,x))
+    write(60,302) pol%kappa
     close(60)
 
     open(40, file=path//'/apgrid_mean.txt',  status = 'replace')
-    write(40,201) apgrid_mean
+    write(40,302) apgrid_mean
     close(40)
 
     open(50, file=path//'/xgrid_mean.txt',   status = 'replace')
-    write(50,201) xgrid_mean
+    write(50,302) xgrid_mean
     close(50)
 
 !    open(50, file=path//'/cons_mean.txt',   status = 'replace')
-!    write(50,201) cons_mean
+!    write(50,302) cons_mean
 !    close(50)
 
     open(60, file=path//'/kappa_mean.txt',   status = 'replace')
-    write(60,160) kappa_mean
+    write(60,302) kappa_mean
     close(60)
 
     open(60, file=path//'/stocks_mean.txt',   status = 'replace')
-    write(60,201) stocks_mean
+    write(60,302) stocks_mean
     close(60)
 
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
-    write(21,220) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
-220 format(<size(Phi,1)> (es13.6,1x))
+    write(21,302) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
     close(21)
 
     open(unit=21, file=path//'/Phi.txt', status = 'replace')
-    write(21,220) Phi
+    write(21,302) Phi
     close(21)
 
     open(unit=21, file=path//'/ap_lc.txt', status = 'replace')
-    write(21,301) lc%ap
-301 format(<nj> (f10.6,1x))
+    write(21,302) lc%ap
     close(21)
 
     open(unit=21, file=path//'/kappa_lc.txt', status = 'replace')
-    write(21,360) lc%kappa
-360 format(<nj> (f0.6,x))
+    write(21,302) lc%kappa
     close(21)
+!360 format(<nj> (f0.6,x))
 
     open(unit=21, file=path//'/cons_lc.txt', status = 'replace')
-    write(21,301) lc%cons
+    write(21,302) lc%cons
     close(21)
 
     open(unit=21, file=path//'/stock_lc.txt', status = 'replace')
-    write(21,301) lc%stock
+    write(21,302) lc%stock
     close(21)
 
     open(unit=21, file=path//'/consvar_lc.txt', status = 'replace')
-    write(21,301) lc%cons_var
+    write(21,302) lc%cons_var
     close(21)
 
     open(unit=21, file=path//'/return_lc.txt', status = 'replace')
-    write(21,301) lc%return
+    write(21,302) lc%return
     close(21)
 
     open(unit=21, file=path//'/return_var_lc.txt', status = 'replace')
     write(21,302) lc%return_var
-302 format(<nj> (es9.2,1x))
     close(21)
 
     open(unit=21, file=path//'/pop_frac.txt', status = 'replace')
@@ -338,9 +336,9 @@ contains
 
     open(unit=21, file=path//'/agg_grids.txt', status = 'replace')
     write(21,*) ' grid%k    =  '
-    write(21,201) grids%k
+    write(21,302) grids%k
     write(21,*) ' grid%mu   =  '
-    write(21,201) grids%mu
+    write(21,302) grids%mu
     close(21)
 
     call err%write2file(path)
