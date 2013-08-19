@@ -255,7 +255,9 @@ contains
     integer :: nx, i2
 
 ! The following seems the best format, because it will not produce ****, which can't be read by Matlab
+301 format(<nx> (es13.6,1x))
 302 format(<nj> (es13.6,1x))
+!360 format(<nj> (f0.6,x))
 
     nx = size(pol%apgrid,1)
 !    open(20, file=path//'/cons.txt', status = 'replace')
@@ -263,43 +265,43 @@ contains
 !    close(20)
 
     open(40, file=path//'/apgrid.txt',  status = 'replace')
-    write(40,302) pol%apgrid
+    write(40,301) pol%apgrid
     close(40)
 
     open(50, file=path//'/xgrid.txt',   status = 'replace')
-    write(50,302) pol%xgrid
+    write(50,301) pol%xgrid
     close(50)
 
     open(60, file=path//'/kappa.txt',   status = 'replace')
-    write(60,302) pol%kappa
+    write(60,301) pol%kappa
     close(60)
 
     open(40, file=path//'/apgrid_mean.txt',  status = 'replace')
-    write(40,302) apgrid_mean
+    write(40,301) apgrid_mean
     close(40)
 
     open(50, file=path//'/xgrid_mean.txt',   status = 'replace')
-    write(50,302) xgrid_mean
+    write(50,301) xgrid_mean
     close(50)
 
 !    open(50, file=path//'/cons_mean.txt',   status = 'replace')
-!    write(50,302) cons_mean
+!    write(50,301) cons_mean
 !    close(50)
 
     open(60, file=path//'/kappa_mean.txt',   status = 'replace')
-    write(60,302) kappa_mean
+    write(60,301) kappa_mean
     close(60)
 
     open(60, file=path//'/stocks_mean.txt',   status = 'replace')
-    write(60,302) stocks_mean
+    write(60,301) stocks_mean
     close(60)
 
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
-    write(21,302) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
+    write(21,301) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
     close(21)
 
     open(unit=21, file=path//'/Phi.txt', status = 'replace')
-    write(21,302) Phi
+    write(21,301) Phi
     close(21)
 
     open(unit=21, file=path//'/ap_lc.txt', status = 'replace')
@@ -309,7 +311,6 @@ contains
     open(unit=21, file=path//'/kappa_lc.txt', status = 'replace')
     write(21,302) lc%kappa
     close(21)
-!360 format(<nj> (f0.6,x))
 
     open(unit=21, file=path//'/cons_lc.txt', status = 'replace')
     write(21,302) lc%cons
@@ -336,10 +337,10 @@ contains
     close(21)
 
     open(unit=21, file=path//'/agg_grids.txt', status = 'replace')
-    write(21,*) ' grid%k    =  '
-    write(21,302) grids%k
-    write(21,*) ' grid%mu   =  '
-    write(21,302) grids%mu
+    write(21,*) ' grids%k   =  '
+    write(21,'(<size(grids%k)>(es13.6,1x))') grids%k
+    write(21,*) ' grids%mu  =  '
+    write(21,'(<size(grids%mu)>(es13.6,1x))') grids%mu
     close(21)
 
     call err%write2file(path)
