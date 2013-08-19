@@ -8,3 +8,4 @@
 0.030   del_std     Std. consumption growth (NIPA)
 0.50	pi1_delta	Corr.(TFP, returns) (NIPA, Shiller)
 0.333   theta       Sharpe ratio (Shiller)
+2.65    beta        Capital output ratio (NIPA)
