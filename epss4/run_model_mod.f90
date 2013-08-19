@@ -229,11 +229,11 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     endif
 
     if (.not. calibrating) then
-        print*,' **** Completed solution of calibration ', calib_name, ' **** '
+        print*,'****Completed solution of calibration ', calib_name, '****'
         print*, ' '
         print*, ' '
     else
-        print*,' *** Model solution successful during calibration of ', calib_name
+        print*,'***Model solution successful during calibration of ', calib_name
     endif
 
     ! Solution of mean shock OLG model during transition ?

@@ -1,5 +1,5 @@
 This version history is a collection of 3 different versioning approaches during the project. Section (B) is the oldest history, then (C), then (D) the 
-most recent and also the current. Within each section, style and chronoligal ordering differs. Essentially, only (A) and (D) are of interest now.
+most recent and also the current. Within each section, style and chronological ordering differs. Essentially, only (A) and (D) are of interest now.
   
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 

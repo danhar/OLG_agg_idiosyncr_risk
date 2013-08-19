@@ -1196,7 +1196,7 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,'(a9,a,",",a13,a)') ' Project ', projectname, ' calibration ', calib_name
     write(21,*) '-------------------------- Prefs and Tech --------------------------'
     write(21,211) ' theta        = ', theta
-211 format(a16, f0.4)
+211 format(a16, f0.6)
     write(21,211) ' psi          = ', psi
     write(21,211) ' gamma        = ', gamm
     write(21,211) ' beta         = ', beta
@@ -1220,17 +1220,17 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,*) '----------------------- Stochastic processes -----------------------'
     write(21,212) ' pi_zeta(1,1) = ', pi1_zeta
     write(21,212) ' pi_delta(1,1)= ', pi1_delta
-212 format(a16, f0.4)
+212 format(a16, f0.6)
     write(21,*)
     write(21,215) ' pi_z         = ', transpose(pi_z)
-215 format(a16,<nz>(f0.4,x),/,<nz-1>(t17,<nz>(f0.4,x),/))
-    write(21,'(a16,<nz>(f0.4,x))') ' stat_dist_z  = ', stat_dist_z
+215 format(a16,<nz>(f0.6,x),/,<nz-1>(t17,<nz>(f0.6,x),/))
+    write(21,'(a16,<nz>(f0.6,x))') ' stat_dist_z  = ', stat_dist_z
     write(21,*)
     write(21,209) ' pi_eta       = ', transpose(pi_eta)
-209 format(a16,<n_eta>(f0.4,x),/,<n_eta-1>(t17,<n_eta>(f0.4,x),/))
+209 format(a16,<n_eta>(f0.6,x),/,<n_eta-1>(t17,<n_eta>(f0.6,x),/))
     write(21,214) ' etagri       = ', transpose(etagrid)
-214 format(a16,<nz>(f0.4,x),/,<n_eta-1>(t17,<nz>(f0.4,x),/))
-    write(21,'(a16,<n_eta>(f0.4,x))') ' stat_dist_eta= ', stat_dist_eta
+214 format(a16,<nz>(f0.6,x),/,<n_eta-1>(t17,<nz>(f0.6,x),/))
+    write(21,'(a16,<n_eta>(f0.6,x))') ' stat_dist_eta= ', stat_dist_eta
     write(21,*)
     write(21,*) '------------------------------ Grids -------------------------------'
     write(21,218) ' nap          = ', nap
@@ -1245,8 +1245,8 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,218) ' nx_factor    = ', nx_factor
     write(21,217) ' cover_k      = ', cover_k
     write(21,217) ' cover_mu     = ', cover_mu
-    write(21,'(a16, 4(f0.6,x))') ' k,mu min,max = ', k_min, k_max, mu_min, mu_max
-217 format(a16, 2(f0.6,x))
+    write(21,'(a16, 4(f0.4,x))') ' k,mu min,max = ', k_min, k_max, mu_min, mu_max
+217 format(a16, 2(f0.4,x))
     write(21,218) ' No. threads  = ', OMP_get_max_threads()
     write(21,*)
     write(21,*) '----------------------------- Options ------------------------------'
