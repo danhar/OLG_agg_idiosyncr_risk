@@ -40,7 +40,7 @@ ccv             .true.   Turn on/off countercyclical variance of idiosyncratic i
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     5       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'sharpe_ratio'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
@@ -53,15 +53,15 @@ kappa_in_01              .false.     portfolio share kappa must be in [0,1]. I.e
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
 nap             20       exogenous grid for savings (ap= 'a prime')
-n_eta           2        grid for idiosyncratic stochastic state eta
+n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
-nt              3000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
@@ -82,7 +82,7 @@ factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           4.00        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           18.00       max
+k_max           21.00       max
 mu_min          0.01        min for expected equity premium
 mu_max          0.05        max
 apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
@@ -91,10 +91,10 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
-tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
-tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_ks       0.4         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
+tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
+maxstp_ks       0.6         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/

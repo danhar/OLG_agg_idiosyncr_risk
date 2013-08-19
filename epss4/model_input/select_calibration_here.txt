@@ -1,18 +1,14 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
-calib_ss/baseline.txt
+!calib_ss/baseline.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep.txt
 !calib_ss/ies15.txt
 !calib_ss/ies15_sharpe.txt
 !calib_ss/ies15_ep.txt
-!calib_ss/noIR_sharpe.txt
+!calib_ss/noIR_ep.txt
 !calib_ss/noAR.txt
-!calib_ss/norisk.txt
-!calib_ss/base_bc.txt
-!calib_ss/noIR_ep_bc.txt
-!calib_ss/noAR_bc.txt
-!calib_ss/norisk_bc.txt
+calib_ss/norisk.txt
 !calib_ss/tau12.txt
 !calib_ss/survival_risk.txt
 
@@ -23,6 +19,12 @@ Only put the filename, not the whole path (because of regex).
 1. Social Security project (folder calib_ss):
 --------------------------------------------------------------------------------------------------------------
 /old:
+/borrowing_constraint/
+! base_bc.txt
+! noIR_ep_bc.txt
+! noAR_bc.txt
+! norisk_bc.txt
+
 
 --------------------------------------------------------------------------------------------------------------
 2. Equity premium project (folder calib_ep):

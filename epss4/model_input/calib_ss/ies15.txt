@@ -53,20 +53,21 @@ kappa_in_01              .false.     portfolio share kappa must be in [0,1]. I.e
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
 nap             20       exogenous grid for savings (ap= 'a prime')
-n_eta           2        grid for idiosyncratic stochastic state eta
+n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
-n_coeffs        3        coefficients in law of motion, for every state z
-nt              3000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
 !----------------------------------------------------------------------------------------------------------------------------/
+lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
+lom_mu_version          2           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
 pooled_regression       .false.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
@@ -74,7 +75,6 @@ opt_initial_ms_guess    0           select which guesses for mean shock r and mu
 exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations), which is finer than the one used in household solutions (by nx_factor below). Should always be used.
 save_all_iterations     .false.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
-opt_zbren               .true.      true: use Brent's method (IMSL or NR, need outcomment), false: use Mueller's method (IMSL zreal)
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
 
 factor_k        1.66        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
@@ -91,10 +91,10 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-7        policyfunctions: stopping value for kappa in asset_allocation
-tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
-tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_ks       0.4         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
+tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
+maxstp_ks       0.6         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.04         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/
