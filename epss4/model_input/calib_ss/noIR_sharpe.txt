@@ -59,8 +59,8 @@ n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
-nt              4000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nt              15000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         2500      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
 nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
