@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-075-noIR_sharpe: this calibration is not yet implemented (need to calibrate beta) 
+076-correct_mean_shock: in mean shock, return the policies and values and most importantly Phi that are not interpolated with nx_factor (which in meanshock differs from the on in params_mod). 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -614,3 +614,4 @@ For example, simvars should read and write output unformatted also, see  subrout
                     Also, want a subfolder for each calibration with tau002 and tau000, and previous, where both these subfolders are copied in.
                     Issue warning if a subfolder is not found.
 074-minor_improvements: save results so that Matlab can always read (see errors in shell_output.txt). calculate Medians and report them in equilibrium_long.
+075-noIR_sharpe: this calibration is not yet implemented (need to calibrate beta)
