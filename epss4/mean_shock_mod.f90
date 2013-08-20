@@ -33,7 +33,6 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
 	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
 	real(dp) ,dimension(:,:,:), allocatable :: value_ms ! mean shock
 	logical ,parameter :: normalize_xvars_to_unity = .true.
-	integer ,parameter :: nx_factor = 20    ! use higher nx_factor than in Krusell smith
 
     coeffs          = Initialize()
 	mean_zeta	    = dot_product(stat_dist_z, zeta)
@@ -105,7 +104,7 @@ contains
     ! Solve for the MSE, i.e. where k'=k and mu'=mu given that all realizations are at the mean_z.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
     ! Update: if I update the bequests_ms this is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
-        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio !, nx_factor
+        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
@@ -121,7 +120,7 @@ contains
         real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: value, v_fine
         real(dp) ,dimension(:,:,:) ,allocatable :: Phi ! mean shock projections and distribution
         real(dp)                          :: netwage_ms, pens_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
-        integer                           :: i
+        integer                           :: i, nx_factor_ms
 
         call grid%allocate(size(grids%k), size(grids%mu))
 
@@ -137,7 +136,8 @@ contains
 
         call olg_backwards_recursion(policies,coeffs, grid, value, errs)
 
-        call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
+        nx_factor_ms = nx_factor * 20 ! use higher nx_factor than in KS, though it didn't help much
+        call InterpolateXgrid(nx_factor_ms, policies, value, fine, v_fine)
 
         policies_ms = fine%mean(3,stat_dist_z)
 
@@ -168,7 +168,7 @@ contains
     ! Solve for the MSE one time given the MSE value for k and mu in order to get the (other) equilibrium objects.
     ! The procedure is would be pure pure but for the OMP directives in olg_backwards_solution (but it does read access host variables).
     ! Update: the update of bequests_ms is also non-pure. A more correct (but superfluous) way would be to find the fixed-point in (bequests,Phi).
-        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio !, nx_factor
+        use params_mod             ,only: L_N_ratio, n, g, stat_dist_z, de_ratio, nx_factor
         use error_class            ,only: tErrors
         use household_solution_mod ,only: olg_backwards_recursion
         use distribution           ,only: TransitionPhi
@@ -183,11 +183,12 @@ contains
         type(tPolicies)       :: policies, pol_ms
         real(dp) ,allocatable :: value(:,:,:,:,:,:)
         real(dp)              :: netwage_ms, pens_ms, r_ms, rf_ms
-        integer               :: i
+        integer               :: i, nx_factor_ms
 
         call olg_backwards_recursion(policies,coeffs, grids, value, errs)
 
-        call InterpolateXgrid(nx_factor, policies, value, fine, v_fine)
+        nx_factor_ms = nx_factor * 20 ! use higher nx_factor than in KS, though it didn't help much
+        call InterpolateXgrid(nx_factor_ms, policies, value, fine, v_fine)
 
         policies_ms = fine%mean(3,stat_dist_z)
         call policies_ms%calc_kappa()

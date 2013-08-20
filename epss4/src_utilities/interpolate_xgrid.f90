@@ -61,13 +61,19 @@ contains
 
         real(dp) ,intent(inout) :: Phi(:,:,:)
         real(dp) ,intent(in)    :: xgrid_old(:,:,:), xgrid_new(:,:,:)
+        real(dp) ,allocatable   :: Phi_new(:,:,:)
         integer                 :: jc, ec
+
+        allocate(Phi_new(size(xgrid_new,1), size(Phi,2), size(Phi,3)))
+        Phi_new = 0.0
 
         do jc=1,size(Phi,3)
             do ec=1,size(Phi,2)
-                Phi(:,ec,jc) = f_lininterp(xgrid_old(:,ec,jc), Phi(:,ec,jc), xgrid_new(:,ec,jc))
+                Phi_new(:,ec,jc) = f_lininterp(xgrid_old(:,ec,jc), Phi(:,ec,jc), xgrid_new(:,ec,jc))
             enddo
         enddo
+
+        Phi = Phi_new
     end subroutine InterpolateXgrid_Phi
 
 end module interpolate_xgrid
