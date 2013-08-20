@@ -194,7 +194,7 @@ contains
         allocate(value_ms(size(fine%xgrid,1),size(fine%xgrid,2),size(fine%xgrid,4)))
         value_ms = 0.0
         do i=1,size(fine%xgrid,3)
-            value_ms  = value_ms  + stat_dist_z(i)* v_fine(:,:,i,:,1,1) ! I don't need it right here, but in meanshock_wrapper
+            value_ms  = value_ms  + stat_dist_z(i)* v_fine(:,:,i,:,1,1)
         enddo
 
         ! Prices in mean shock path

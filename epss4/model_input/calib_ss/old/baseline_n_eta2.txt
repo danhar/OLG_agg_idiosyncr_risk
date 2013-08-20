@@ -7,14 +7,14 @@
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.9812   discount factor
+beta            0.9859   discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.1014   mean of depreciation shocks
-del_std         0.0772   std of depreciation shocks
+del_mean        0.1019   mean of depreciation shocks
+del_std         0.0802   std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.8854   first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
@@ -33,8 +33,8 @@ n               0.011    population growth rate
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
 tau             0.02     tax rate. This value is used in the calibration baseline. Alternatives: .12
-tau_experiment  .true.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
-welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
+tau_experiment  .false.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
+welfare_decomposition .false.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
 mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
 ccv             .true.   Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
@@ -82,17 +82,17 @@ factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           15.00       max
-mu_min          0.0005      min for expected equity premium
+k_max           16.00       max
+mu_min          0.0001      min for expected equity premium
 mu_max          0.12        max
-apmax_factor    19.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+apmax_factor    22.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
 tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
-tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
+tol_coeffs      1e-1        stopping value for coeffs (normalized to unity)
 tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_ks       0.8         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
