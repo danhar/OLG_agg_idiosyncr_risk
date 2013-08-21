@@ -1,17 +1,19 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
-!calib_ss/baseline.txt
+calib_ss/baseline.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep.txt
-calib_ss/ies15.txt
+!calib_ss/ies15.txt
 !calib_ss/ies15_sharpe.txt
 !calib_ss/ies15_ep.txt
 !calib_ss/noIR_sharpe.txt
 !calib_ss/noIR_ep.txt
 !calib_ss/noAR.txt
 !calib_ss/norisk.txt
+!calib_ss/base_ep_recal.txt
 !calib_ss/tau12.txt
 !calib_ss/survival_risk.txt
+!calib_ss/testing_cal.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.

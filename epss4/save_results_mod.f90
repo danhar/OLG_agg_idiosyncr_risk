@@ -296,6 +296,7 @@ contains
     write(60,301) stocks_mean
     close(60)
 
+    nx = size(Phi,1)
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
     write(21,301) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
     close(21)

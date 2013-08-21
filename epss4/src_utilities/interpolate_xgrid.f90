@@ -56,10 +56,11 @@ contains
     end subroutine InterpolateXgrid_policies
 
     pure subroutine InterpolateXgrid_Phi(Phi, xgrid_old, xgrid_new)
+        ! Maybe better as a function
         use kinds      ,only: dp
         use fun_lininterp
 
-        real(dp) ,intent(inout) :: Phi(:,:,:)
+        real(dp) ,intent(inout), allocatable :: Phi(:,:,:)
         real(dp) ,intent(in)    :: xgrid_old(:,:,:), xgrid_new(:,:,:)
         real(dp) ,allocatable   :: Phi_new(:,:,:)
         integer                 :: jc, ec

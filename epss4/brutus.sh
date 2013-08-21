@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='074-ies15_neta4c'
+thisrun='074-ies15_sharpe_neta4b'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

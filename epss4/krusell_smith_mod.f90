@@ -29,7 +29,7 @@ contains
         character(len=*),intent(in)    :: projectname, calib_name, output_path
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars(:)
-        real(dp)        ,intent(inout) :: Phi(:,:,:)
+        real(dp),allocatable ,intent(inout) :: Phi(:,:,:)
         real(dp)        ,intent(in)    :: xgrid_ms(:,:,:) ! Could remove if Phi was derived type carrying its own grid.
         logical         ,intent(in)    :: calibrating
         type(tPolicies) ,intent(out)   :: policies
