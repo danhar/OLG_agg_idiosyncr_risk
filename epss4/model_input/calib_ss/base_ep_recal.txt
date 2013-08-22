@@ -5,18 +5,18 @@
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta           5.805541 coefficient of relative risk aversion
+theta           8.394091 coefficient of relative risk aversion
 psi             0.500    elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.9859   discount factor
+beta            0.938979 discount factor
 alpha           0.320    capital share
 g               0.018    growth rate of technology
 de_ratio        0.660    debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        -.008346 mean of depreciation shocks
-del_std         0.113395 std of depreciation shocks
+del_mean        -.008295 mean of depreciation shocks
+del_std         0.111678 std of depreciation shocks
 pi1_zeta        0.9410   first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.826694 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.827413 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -81,10 +81,10 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
-k_min           3.0         Bounds for aggregate grid, if grid is fixed exogenously  
+k_min           1.0         Bounds for aggregate grid, if grid is fixed exogenously  
 k_max           80.00       max
 mu_min          0.01        min for expected equity premium
-mu_max          0.15        max
+mu_max          0.18        max
 apmax_factor    60.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)

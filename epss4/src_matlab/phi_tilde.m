@@ -14,10 +14,6 @@ cd(['../model_output/',dir])
 Phi = dlmread('Phi_tilde.txt');
 xgrid_mean = dlmread('xgrid_mean.txt');
 
-if (size(Phi) ~= size(xgrid_mean))
-    error('Phi not same size as xgrid_mean')
-end
-
 grid_error = (xgrid_mean(:,1)==xgrid_mean(:,2));
 % grid_error can happen because a) numerical Euler equation can become
 % inaccurate at the very small values, and b) the Fortran results are saved
