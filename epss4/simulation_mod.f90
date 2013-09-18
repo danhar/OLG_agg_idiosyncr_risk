@@ -1,11 +1,19 @@
 module simulation_mod
+    use kinds           ,only: dp
+    use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids
+
     implicit none
+    private
+    public simulate
 contains
+!-------------------------------------------------------------------------------
+! Module procedures in order:
+! - pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
+! - pure real(dp) function f_euler_errors()
+!-------------------------------------------------------------------------------
 
 pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
-    use kinds           ,only: dp
-    use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
@@ -237,8 +245,71 @@ contains
         f_excessbonds = bond_supply - sum((apgridtt - stockstt)*Phit)/L_N_ratio    ! analytically, L_N_ratio drops out
 
     end function f_excessbonds
-!-------------------------------------------------------------------------------
 
 end subroutine simulate
+!-------------------------------------------------------------------------------
+
+pure real(dp) dimension(2) function f_euler_errors(rfp, mut,kp,coeffs, grids, policies, value, apgridt)
+    use params_mod ,only: jr, ej, etagrid
+    use household_solution_mod ,only: interp_policies_tomorrow, consumption
+    use laws_of_motion ,only: Forecast_mu
+    use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
+
+    real(dp), intent(in) :: rfp, mut, kp
+    type(tCoeffs)                    ,intent(in)  :: coeffs ! coefficients for laws of motion
+    type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
+    type(tPolicies)                  ,intent(in)  :: policies
+    real(dp)                         ,intent(in)  :: value(:,:,:,:,:,:)
+
+    real(dp) :: app_min
+    real(dp) ,allocatable :: mup(:), rp(:), yp(:,:)
+    real(dp) ,allocatable ,dimension(:,:,:) :: consp, xgridp, vp
+    integer :: zero_mass, zpc, jc, ec, xc, nj, nz
+
+    nz = size(coeffs%mu,2)
+    nj = size(policies%apgrid,4)
+    n_eta = size(etagrid,1)
+    nx = size(policies%apgrid,1)
+
+    allocate(mup(nz), rp(nz), yp(nz,n_eta))
+    allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
+
+    zero_mass = 0
+
+    do zpc = 1,nz
+        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, mut)
+        rp(zpc) = f_stock_return(kp, zeta(zpc), delta(zpc), rfp)
+    enddo
+    where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! because I do this in household_solution_mod:calc_vars_tomorrow
+    where (mup < grids%mu(1))   mup = grids%mu(1)
+
+    do jc=1,nj
+        do zpc = 1,nz
+            if (jc+1>=jr) then
+                yp(:,zpc) = f_pensions(kp, zeta(zpc))
+            else
+                yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
+            endif
+        enddo
+
+        call interp_policies_tomorrow(policies, policies%consumption(), value, kp, mup, grids, jc, consp, xgridp, vp, app_min)
+        do ec=1,n_eta
+            do xc=1,nx
+                if (Phi(xc,ec,jc)=0.0) then
+                    eul_err(xc,ec,jc) = 0.0
+                    zero_mass = zero_mass +1
+                else
+                    call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_opt(xc,ec,zc,jc,kc,muc), evp, err%cons(:,xc,ec,zc,jc,kc,muc))
+                    eul_err(xc,ec,jc) = 1-cons_opt(xc,ec,zc,jc,kc,muc)/cons_t(xc,ec,zc,jc,kc,muc)
+                endif
+            enddo
+        enddo
+    enddo
+
+
+    f_euler_errors(1) = maxval(eul_err)
+    f_euler_errors(2) = sum(eul_err)/(size(euler_err)-zero_mass)
+end function f_euler_errors
+!-------------------------------------------------------------------------------
 
 end module simulation_mod

@@ -5,7 +5,6 @@ This file describes things that will, should, or could be implemented in the cod
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - Gini coefficients (need to calc in each simulation step?). The code for Gini coeffs and Lorenz curves is in statistics.f90:lorenz_calc.
 - Calc medians of lifecycle statistics during simulation. In particular, median portfolio return.
-- Euler errors
 - Instead of portfolio return (graphs) (and consumption?), calc 90th- 10th percentile or the like.
                          
 - record and report stats for gross wages (important when def benefits) (in simulations and save_results)

@@ -5,6 +5,7 @@ module household_solution_mod
     implicit none
     private
     public olg_backwards_recursion
+    public interp_policies_tomorrow, consumption ! these are only needed for calculating the Euler errors in simulation_mod
 
 contains
 !-------------------------------------------------------------------------------
