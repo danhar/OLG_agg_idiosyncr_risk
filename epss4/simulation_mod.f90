@@ -14,7 +14,7 @@ contains
 
 pure subroutine simulate(policies, value, agg_grid, coeffs, calibrating, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
-    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
+    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing, calc_euler_errors
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
@@ -179,7 +179,7 @@ mu:     if (partial_equilibrium) then
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))/(1.0+g)
 
-        if (calibrating) then
+        if (calibrating .or. .not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
             simvars%eul_err_avg(tc)=0.0
         else
@@ -289,7 +289,8 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     nmu = size(grids%mu)
 
     allocate(mup(nz), rp(nz), yp(nz,n_eta))
-    allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz), cons_opt(nx,n_eta,nz), cons_t(nx,n_eta,nz), eul_err(nx,n_eta,nz))
+    allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
+    allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
 
     zero_mass = 0
 
@@ -302,7 +303,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
 
     cons_t=xgridt -apgridt
 
-    do jc=1,nj
+    do jc=1,nj-1
         betatildej = beta*surv(jc)**(1.0/gamm)*(1.0+g)**((1.0-theta)/gamm)
 
         do zpc = 1,nz

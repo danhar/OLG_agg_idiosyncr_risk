@@ -261,6 +261,9 @@ contains
             simvars%B(1)      = simvars%K(1) * de_ratio/(1.0 + de_ratio) - simvars%bonds(1) ! differs from fvals(2)
         endif
         simvars%err_income(1) = f_income_diff(simvars%K(1), mean_zeta, simvars%r(1), simvars%rf(1), mean_delta)
+        ! It would be interesting to calculate the Euler errors, but simulation_mod:f_euler_errors needs zt, which here is zero
+        simvars%eul_err_max(1)=0.0
+        simvars%eul_err_avg(1)=0.0
 
         do i= 1,nz  ! can't I just save z and then call simulate_economy?
             simvars%z(i+1)     = i
@@ -289,6 +292,8 @@ contains
             simvars%err_aggr(i+1)   = f_aggregate_diff(simvars%output(i+1), simvars%invest(i+1), simvars%C(i+1), simvars%bequests(i+1))
 	        simvars%B(i+1)          = simvars%K(i+1) * de_ratio/(1.0 + de_ratio) - simvars%bonds(i+1)
 	        simvars%err_income(i+1) = f_income_diff(simvars%K(i+1), zeta(i), simvars%r(i+1), simvars%rf(i+1), delta(i))
+            simvars%eul_err_max(i+1)= 0.0
+            simvars%eul_err_avg(i+1)= 0.0
         enddo
 
         simvars%K (nz+2) = simvars%K (1) ! K and rf have one more index in the real simulations.

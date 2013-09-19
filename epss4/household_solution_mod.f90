@@ -325,6 +325,10 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
         ! Determine maximum leverage without risk of not paying back (i.e. dropping below xgrid(1,1,jc+1))
         ! only need to look at the worst state tomorrow
         kappa1=((xgridp(1,1,1)-yp(1,1))*(1.0+g)/ap-(1.0+rfp))/(rp(1)-rfp)
+        ! It would be easier and just as justifiable to calculate the kappa1 that implies a return of -100%, i.e. zero assets left, i.e. Rtilde = -1.0
+        ! This kappa1 would be somewhat lower, because in the above calculation, return can be even worse than 100% as long as agent receives some income.
+        ! That is at the moment he has to pay up, there is no limited liability. However, during solution this never happens, but it can happen in simulations.
+
         kappa2=-1.0*sign(1.0,ap)
         !kappa2=((xgrid(1,1,jc+1)-yp(nz))*(1.0+g)/ap-(1.0+rfp(zc)))/(rp(zc,nz)-rfp(zc))
     endif
@@ -480,6 +484,9 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
 
         ! Get cash-at-hand tomorrow for all states
         rtildep= (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
+        ! As mentioned in the subroutine asset_allocation above, one could limit kappa so that rtildep >= 0.0.
+        ! In that case, this should be checked here also, because kappa can take different (very high) values during the simulations (when ap is close to zero).
+
         do epc = 1,n_eta
             xp = yp(epc,zpc)+rtildep*ap
 
@@ -511,6 +518,9 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
     else
         rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
         rhs_fac2=dot_product(pi_z(zc,:),rhs_temp)
+        ! As discussed above, rtilde can become negative. During simulations sometimes so high that rhs_fac2 would be negative when we calc euler err. Then set to zero.
+        if (rhs_fac2 < 0.0) rhs_fac2 = 1.0e-12_dp
+
         cee_rhs=rhs_fac1*rhs_fac2
 
         cons_out=max(cee_rhs**(gamm/(1.0-theta-gamm)), cmin)
