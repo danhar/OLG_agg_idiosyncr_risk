@@ -279,7 +279,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     real(dp) :: betatildej, app_min, evp
     real(dp) ,allocatable :: mup(:), rp(:), yp(:,:)
     real(dp) ,allocatable ,dimension(:,:,:) :: consp, xgridp, vp, cons_opt, cons_t, eul_err
-    integer :: zero_mass, zpc, jc, ec, xc, nj, nz, n_eta, nx, nmu
+    integer :: zpc, jc, ec, xc, nj, nz, n_eta, nx, nmu
     logical(1) ,dimension(size(coeffs%mu,2)) :: error
 
     nz = size(coeffs%mu,2)
@@ -291,8 +291,6 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     allocate(mup(nz), rp(nz), yp(nz,n_eta))
     allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
     allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
-
-    zero_mass = 0
 
     do zpc = 1,nz
         mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, mut)
@@ -318,7 +316,6 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
         do ec=1,n_eta
             do xc=1,nx
                 if (Phi(xc,ec,jc)==0.0) then
-                    zero_mass = zero_mass +1
                     cons_opt(xc,ec,jc)=cons_t(xc,ec,jc)
                 else
                     call consumption(apgridt(xc,ec,jc), kappat(xc,ec,jc), xgridp, consp, vp, rfp,rp, yp, zt, xc, ec, betatildej, cons_opt(xc,ec,jc), evp, error)
@@ -330,7 +327,8 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     eul_err = abs(1.0-cons_opt/cons_t)
 
     f_euler_errors(1) = maxval(eul_err)
-    f_euler_errors(2) = sum(eul_err)/(size(eul_err)-zero_mass)
+    !f_euler_errors(2) = sum(eul_err)/(size(eul_err)-zero_mass)
+    f_euler_errors(2) = sum(Phi*eul_err) ! average
 end function f_euler_errors
 !-------------------------------------------------------------------------------
 
