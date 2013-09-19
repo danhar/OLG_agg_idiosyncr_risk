@@ -158,7 +158,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(pol_newx, val_newx, grids, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(pol_newx, val_newx, grids, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             else
@@ -167,7 +167,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(policies, value, grids, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(policies, value, grids, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             endif

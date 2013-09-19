@@ -9,7 +9,7 @@ module alternative_insurance_calc_mod
     implicit none
 contains
 
-subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, coeffs, calib_name, projectname, welfare)
+subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, coeffs, calibrating, calib_name, projectname, welfare)
     use kinds            ,only: dp
     use classes_mod      ,only: tSimvars, tLifecycle, tPolicies, tAggGrids, tStats, tCoeffs
     use laws_of_motion   ,only: Initialize
@@ -27,6 +27,7 @@ subroutine calc_insurance_effect(policies, value, agg_grid, simvars_in, Phi_in, 
     type(tSimvars)   ,intent(in)  :: simvars_in(:)    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(in)  :: Phi_in(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tCoeffs)    ,intent(in)  :: coeffs
+    logical          ,intent(in)    :: calibrating
     character(len=*) ,intent(in)  :: calib_name, projectname
     real(dp)         ,intent(out) :: welfare(5)
     type(tLifecycle)              :: lifecycles, lifecycles_array(size(simvars_in))         ! lifecycle profiles
@@ -127,7 +128,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(pol_fine, val_newx, agg_grid, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(pol_fine, val_newx, agg_grid, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             else
@@ -136,7 +137,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(pol_minus_risk, val_minus_risk, agg_grid, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(pol_minus_risk, val_minus_risk, agg_grid, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             endif

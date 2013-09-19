@@ -30,7 +30,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
     type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
-                    Phi_1, Phi_nx, err_aggr,B, err_inc, bequest_rate, ex_ret
+                    Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret
     type(tStats_logical) :: err_K, err_mu
     character(:), allocatable :: path
     logical :: calibrating
@@ -86,6 +86,8 @@ contains
         err_aggr%name='err_aggr'; call err_aggr%calc_stats(simvars)
         B%name='B'; call B%calc_stats(simvars)
         err_inc%name='err_inc'; call err_inc%calc_stats(simvars)
+        eul_err_max%name = 'eul_err_max'; call eul_err_max%calc_stats(simvars)
+        eul_err_avg%name = 'eul_err_avg'; call eul_err_avg%calc_stats(simvars)
         bequest_rate%name='bequests,%'; call bequest_rate%calc_stats(simvars)
         cons_grow%name='cons_grow'; call cons_grow%calc_stats(simvars)
         zeta%name='zeta'; call zeta%calc_stats(simvars)
@@ -222,6 +224,10 @@ contains
     call Phi_1%write(21,'Phi_1',prec//'_max')
     call Phi_nx%write(21,'Phi_nx',prec//'_max')
     if (prec=='long' .or. (err_inc%max_exerr_() > 1.0e-7)) call err_inc%write(21,'err_inc',prec//'_max')
+    if (prec=='long' .or. (eul_err_max%max_exerr_() > 1.0e-1) .or. (eul_err_avg%max_exerr_() > 1.0e-2)) then
+        call eul_err_max%write(21,'euler_max',prec//'_max')
+        call eul_err_avg%write(21,'euler_avg',prec//'_max')
+    endif
     call err_aggr%write(21,'err_aggr',prec//'_max')
     call bequest_rate%write(21,'bequests,%',prec//'_max')
 
@@ -376,6 +382,8 @@ contains
         write(21,370) ' B        ', simvars(i)%B
         write(21,373) ' err_inc  ', simvars(i)%err_income
         write(21,373) ' err_aggr ', simvars(i)%err_aggr
+        write(21,373) ' eul_max  ', simvars(i)%eul_err_max
+        write(21,373) ' eul_avg  ', simvars(i)%eul_err_avg
         write(21,373) ' bequests ', simvars(i)%bequests
     373 format(a10,<size(simvars(i)%z)> (es9.2,1x))
         write(21,*)

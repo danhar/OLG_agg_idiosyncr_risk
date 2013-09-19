@@ -9,9 +9,9 @@ module simvars_class
     type tSimvars
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
         real(dp), dimension(:), allocatable ::    &
-                K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, &      ! mu, per capita: k, bonds, consumption
+                K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests ! prices
-        logical,  dimension(:), allocatable :: err_K, err_mu
+        logical, dimension(:), allocatable :: err_K, err_mu
 
     contains
         procedure :: allocate   => allocate_simvars
@@ -48,8 +48,8 @@ contains
     elemental subroutine allocate_simvars(this,t)
         class(tSimvars), intent(out)  :: this
         integer,    intent(in)      :: t
-
-        allocate(this%z(t), this%Phi_1(t), this%Phi_nx(t), this%err_aggr(t), this%err_income(t))
+        call deallocate_simvars(this)
+        allocate(this%z(t), this%Phi_1(t), this%Phi_nx(t), this%err_aggr(t), this%err_income(t), this%eul_err_max(t), this%eul_err_avg(t))
         allocate(this%K(t+1),this%mu(t), this%output(t), this%stock(t), this%bonds(t), this%invest(t), this%C(t), this%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1
         allocate(this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
         allocate(this%B(t), this%err_K(t), this%err_mu(t))
@@ -60,7 +60,34 @@ contains
     end subroutine allocate_simvars
 
     elemental subroutine deallocate_simvars(this)
-        class(tSimvars), intent(out)  :: this
+        class(tSimvars), intent(inout)  :: this
+        ! deallocating in reverse order to allocation for memory purposes
+        if (allocated(this%err_mu)) deallocate(this%err_mu)
+        if (allocated(this%err_K)) deallocate(this%err_K)
+        if (allocated(this%B)) deallocate(this%B)
+        if (allocated(this%bequests)) deallocate(this%bequests)
+        if (allocated(this%tau)) deallocate(this%tau)
+        if (allocated(this%pens)) deallocate(this%pens)
+        if (allocated(this%wage)) deallocate(this%wage)
+        if (allocated(this%r_pf_kappa_med)) deallocate(this%r_pf_kappa_med)
+        if (allocated(this%r_pf_median)) deallocate(this%r_pf_median)
+        if (allocated(this%rf)) deallocate(this%rf)
+        if (allocated(this%r)) deallocate(this%r)
+        if (allocated(this%welf)) deallocate(this%welf)
+        if (allocated(this%C)) deallocate(this%C)
+        if (allocated(this%invest)) deallocate(this%invest)
+        if (allocated(this%bonds)) deallocate(this%bonds)
+        if (allocated(this%stock)) deallocate(this%stock)
+        if (allocated(this%output)) deallocate(this%output)
+        if (allocated(this%mu)) deallocate(this%mu)
+        if (allocated(this%K)) deallocate(this%K)
+        if (allocated(this%eul_err_avg)) deallocate(this%eul_err_avg)
+        if (allocated(this%eul_err_max)) deallocate(this%eul_err_max)
+        if (allocated(this%err_income)) deallocate(this%err_income)
+        if (allocated(this%err_aggr)) deallocate(this%err_aggr)
+        if (allocated(this%Phi_nx)) deallocate(this%Phi_nx)
+        if (allocated(this%Phi_1)) deallocate(this%Phi_1)
+        if (allocated(this%z)) deallocate(this%z)
     end subroutine deallocate_simvars
 
     pure function get_real(this,varname, lb_o, ub_o) result(get)
@@ -110,6 +137,10 @@ contains
         case ('err_inc')
             ! Att: absolute value
             get = abs(this%err_income(lb:ub))
+        case ('eul_err_max')
+            get = abs(this%eul_err_max(lb:ub))
+        case ('eul_err_avg')
+            get = abs(this%eul_err_avg(lb:ub))
         case ('r')
             get = this%r(lb:ub)
         case ('rf')
@@ -390,6 +421,7 @@ contains
             do i=1,size(this)
                read(55) this(i)%z, &    ! integer
                         this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &
+                        ! this(i)%eul_err_max, this(i)%eul_err_avg
                         this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
                         this(i)%err_K, this(i)%err_mu   !logical
             enddo
@@ -421,7 +453,8 @@ contains
         open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
         do i=1,size(this)
             write(55) this(i)%z, &    ! integer
-                      this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &
+                      this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
+                      this(i)%err_aggr, this(i)%err_income, this(i)%eul_err_max, this(i)%eul_err_avg, &
                       this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
                       this(i)%err_K, this(i)%err_mu   !logical
         enddo

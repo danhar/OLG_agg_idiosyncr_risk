@@ -224,7 +224,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
                 simvars = simvars_old
                 coeffs  = coeffs_old
             endif
-            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calib_name, projectname, welfare_ins_o)
+            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calibrating, calib_name, projectname, welfare_ins_o)
         endif
     endif
 

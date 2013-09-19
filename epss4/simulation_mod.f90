@@ -12,7 +12,7 @@ contains
 ! - pure real(dp) function f_euler_errors()
 !-------------------------------------------------------------------------------
 
-pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
+pure subroutine simulate(policies, value, agg_grid, coeffs, calibrating, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
@@ -25,6 +25,8 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     type(tPolicies)  ,intent(in)    :: policies
     real(dp)         ,intent(in)    :: value(:,:,:,:,:,:)
     type(tAggGrids)  ,intent(in)    :: agg_grid
+    type(tCoeffs)    ,intent(in)    :: coeffs
+    logical          ,intent(in)    :: calibrating
     type(tSimvars)   ,intent(inout) :: simvars    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(inout) :: Phi(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tLifecycle) ,intent(out)   :: lc         ! lifecycle profiles
@@ -34,7 +36,7 @@ pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
     real(dp) ,dimension(:,:)     ,allocatable :: val_j1_t ! value of j=1 for given z and K, and mu
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
-    real(dp)  :: Kt, mut, rt, netwaget, penst, w ! variables in period t
+    real(dp)  :: Kt, mut, rt, netwaget, penst, w, eul_err_temp(2) ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
 
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
@@ -177,6 +179,15 @@ mu:     if (partial_equilibrium) then
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))/(1.0+g)
 
+        if (calibrating) then
+            simvars%eul_err_max(tc)=0.0
+            simvars%eul_err_avg(tc)=0.0
+        else
+            eul_err_temp = f_euler_errors(zt, simvars%rf(tc+1), mut,simvars%K(tc+1),coeffs, agg_grid, policies, value, xgridt, apgridt, kappat, Phi)
+            simvars%eul_err_max(tc)=eul_err_temp(1)
+            simvars%eul_err_avg(tc)=eul_err_temp(2)
+        endif
+
         ! Average life cycle profiles and average Phi
         if (tc > t_scrap) then ! 'Throw away' first t_scrap
             ap_lct      = sum(sum(apgridt * Phi,1),1)
@@ -195,6 +206,7 @@ mu:     if (partial_equilibrium) then
             lc%return_var=lc%return_var + return_var_lct/(nt-t_scrap)
             Phi_avg     = Phi_avg + Phi
         endif
+
     enddo
     where (lc%ap .ne. 0.0)
         lc%kappa = lc%stock/lc%ap
@@ -314,7 +326,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
         enddo
     enddo
 
-    eul_err = 1.0-cons_opt/cons_t
+    eul_err = abs(1.0-cons_opt/cons_t)
 
     f_euler_errors(1) = maxval(eul_err)
     f_euler_errors(2) = sum(eul_err)/(size(eul_err)-zero_mass)
