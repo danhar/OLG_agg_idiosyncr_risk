@@ -13,8 +13,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     use krusell_smith_mod ,only: solve_krusellsmith
     use simvars_class     ,only: read_unformatted, write_unformatted
     use alternative_insurance_calc_mod ,only: calc_insurance_effect
-	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, & ! logicals and characters
+	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, params_set, & ! procedures
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, calc_euler_errors, & ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
@@ -32,7 +32,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     real(dp),allocatable :: value(:,:,:,:,:,:), Phi(:,:,:), xgrid_ms(:,:,:) ! value function, distribution, and mean shock xgrid
     real(dp)          :: ms_rf_temp
 	integer           :: start_time, it, i, syserr ! 'it' cointains total iterations of Krusell-Smith loop
-	logical           :: calibrating
+	logical           :: calibrating, pe_temp
 	character(:),allocatable :: dir, output_path, input_path
 	character(4)      :: tau_char
 
@@ -196,9 +196,17 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     endif
 
-    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
-    if (err%not_converged) call err%print2stderr(dir)
+    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, .false.)
     welfare = calc_average_welfare(simvars)
+
+    if (err%not_converged) then
+        call err%print2stderr(dir)
+    elseif (calc_euler_errors .and. .not. calibrating) then
+        pe_temp = partial_equilibrium
+        call params_set('partial_equilibrium', .true.)
+        call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_errors)
+        call params_set('partial_equilibrium', pe_temp)
+    endif
 
     ! Check distribution and save results
     print*, ' '
@@ -224,7 +232,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
                 simvars = simvars_old
                 coeffs  = coeffs_old
             endif
-            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, calibrating, calib_name, projectname, welfare_ins_o)
+            call calc_insurance_effect(policies, value, grids, simvars, Phi, coeffs, .false., calib_name, projectname, welfare_ins_o)
         endif
     endif
 

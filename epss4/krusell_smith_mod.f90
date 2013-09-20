@@ -13,7 +13,7 @@ contains
 ! -- (internal) function krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
 !-------------------------------------------------------------------------------
-    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating)
+    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_err)
     ! Set up environment to use rootfinder for coefficients of loms (KS),
     ! then pass the function krusell_smith as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
@@ -31,7 +31,7 @@ contains
         type(tSimvars)  ,intent(inout) :: simvars(:)
         real(dp),allocatable ,intent(inout) :: Phi(:,:,:)
         real(dp)        ,intent(in)    :: xgrid_ms(:,:,:) ! Could remove if Phi was derived type carrying its own grid.
-        logical         ,intent(in)    :: calibrating
+        logical         ,intent(in)    :: calibrating, calc_euler_err
         type(tPolicies) ,intent(out)   :: policies
         type(tLifecycle),intent(out)   :: lifecycles
         type(tErrors)   ,intent(out)   :: err
@@ -158,7 +158,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(pol_newx, val_newx, grids, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(pol_newx, val_newx, grids, coeffs, calc_euler_err, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             else
@@ -167,7 +167,7 @@ contains
                 Phi_spread = spread(Phi,4,size(simvars))
                 !$OMP  PARALLEL DO IF(size(simvars)>1)
                 do i=1,size(simvars)
-                    call simulate(policies, value, grids, coeffs, calibrating, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
+                    call simulate(policies, value, grids, coeffs, calc_euler_err, simvars(i), Phi_spread(:,:,:,i), lifecycles_array(i))
                 enddo
                 !$OMP END PARALLEL DO
             endif

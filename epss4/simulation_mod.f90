@@ -12,9 +12,9 @@ contains
 ! - pure real(dp) function f_euler_errors()
 !-------------------------------------------------------------------------------
 
-pure subroutine simulate(policies, value, agg_grid, coeffs, calibrating, simvars, Phi, lc)
+pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
-    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing, calc_euler_errors
+    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
@@ -26,7 +26,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calibrating, simvars
     real(dp)         ,intent(in)    :: value(:,:,:,:,:,:)
     type(tAggGrids)  ,intent(in)    :: agg_grid
     type(tCoeffs)    ,intent(in)    :: coeffs
-    logical          ,intent(in)    :: calibrating
+    logical          ,intent(in)    :: calc_euler_errors
     type(tSimvars)   ,intent(inout) :: simvars    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(inout) :: Phi(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tLifecycle) ,intent(out)   :: lc         ! lifecycle profiles
@@ -179,7 +179,7 @@ mu:     if (partial_equilibrium) then
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))/(1.0+g)
 
-        if (calibrating .or. .not. calc_euler_errors) then
+        if (.not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
             simvars%eul_err_avg(tc)=0.0
         else

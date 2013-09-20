@@ -4,7 +4,7 @@ program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
 	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, alt_insurance_calc, surv_rates, debugging,&
-	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp
+	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp, calc_euler_errors
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
@@ -79,6 +79,7 @@ program EPSS
                     write(runchar,'(a4)') ',GE0'
                     ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
                     if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
+                    if (calc_euler_errors)   call params_set('calc_euler_errors', .false.)
                 elseif (rc ==1) then
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
