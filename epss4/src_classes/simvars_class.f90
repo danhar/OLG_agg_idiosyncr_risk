@@ -420,8 +420,8 @@ contains
             ! Could I use standard derived type IO?
             do i=1,size(this)
                read(55) this(i)%z, &    ! integer
-                        this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, this(i)%err_aggr, this(i)%err_income, &
-                        ! this(i)%eul_err_max, this(i)%eul_err_avg
+                        this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
+                        this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                         this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
                         this(i)%err_K, this(i)%err_mu   !logical
             enddo
@@ -454,7 +454,7 @@ contains
         do i=1,size(this)
             write(55) this(i)%z, &    ! integer
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
-                      this(i)%err_aggr, this(i)%err_income, this(i)%eul_err_max, this(i)%eul_err_avg, &
+                      this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                       this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
                       this(i)%err_K, this(i)%err_mu   !logical
         enddo
