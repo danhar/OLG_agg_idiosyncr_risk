@@ -300,7 +300,7 @@ subroutine SetRemainingParams(calib_name)
     nz   = n_zeta*n_delta
     nx   = nap
     cmin=min(1.0e-9_dp, tol_asset_eul/10.0_dp)
-    tol_simulation_marketclearing = tol_asset_eul*10_dp
+    tol_simulation_marketclearing = tol_asset_eul*100_dp
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -1137,7 +1137,7 @@ use omp_lib           ,only: OMP_get_max_threads
 
     if (tol_asset_eul < 1.0e-12) print*, 'Warning: tol_asset_eul < 1.0e-12. Note: cmin=tol_asset_eul/10.0'
     if (cmin < 1.0e-14) print*, 'Warning: cmin = < 1.0e-14'
-    if (tol_asset_eul > 1.0e-4) print*, 'Warning: tol_asset_eul > 1.0e-4. Note: tol_simulation_marketclearing=tol_asset_eul*10.0'
+    if (tol_asset_eul > 1.0e-4) print*, 'Warning: tol_asset_eul > 1.0e-4. Note: tol_simulation_marketclearing=tol_asset_eul*100.0'
 
     if (save_all_iterations) print*, 'WARNING: saving results in every K/S iteration (disk space)!'
 
