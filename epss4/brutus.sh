@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='078-baseline_euler_err3'
+thisrun='079-base_tau12b_lowprec'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

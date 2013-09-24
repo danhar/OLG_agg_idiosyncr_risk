@@ -83,8 +83,8 @@ cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternat
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
 k_max           12.00       max
-mu_min          0.02      min for expected equity premium
-mu_max          0.16        max
+mu_min          0.01      min for expected equity premium
+mu_max          0.07        max
 apmax_factor    20.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
