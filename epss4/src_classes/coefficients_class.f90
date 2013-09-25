@@ -155,7 +155,7 @@ contains
         close(55)
 
         if (io_stat .ne. 0) then
-            print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
+            print*, 'I/O ERROR writing coeffs_size in coefficients_class:write_unformatted'
         endif
 
         open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
@@ -163,7 +163,7 @@ contains
         close(55)
 
         if (io_stat .ne. 0) then
-            print*, 'I/O ERROR in aggregate_grids_class:write_unformatted'
+            print*, 'I/O ERROR writing coeffs_ge in coefficients_class:write_unformatted'
         endif
 
     end subroutine write_unformatted
