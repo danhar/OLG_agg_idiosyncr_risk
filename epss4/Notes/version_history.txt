@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-078-euler_errors: compute Euler equation errors during simulation 
+079-neta4lowprec: compute final results in lower precision, so that they run through on Brutus' 36 hour queue 
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -617,3 +617,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 075-noIR_sharpe: this calibration is not yet implemented (need to calibrate beta)
 076-correct_mean_shock: in mean shock, return the policies and values and most importantly Phi that are not interpolated with nx_factor (which in meanshock differs from the on in params_mod).
 077-recal_calibs: run the new recalibrated versions. Only partially completed, to be continued.
+078-euler_errors: compute Euler equation errors during simulation. Result: they are pretty large, maybe bug?
