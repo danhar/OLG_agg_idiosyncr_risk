@@ -13,7 +13,9 @@ This file describes things that will, should, or could be implemented in the cod
         but do I actually need that or is it specified in logs?
 - implement check if stockmarket also clears
 - set_apmax conditions on bequests_to_newborn, which is default .true. even if we do not have survival risk. Should check and correct or impove.
-- reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.  
+- reading the data from calibration files goes wrong if there is no explanation in 'third column', without error message. Need to change that.
+- if tau is different from 0.02 then can't write unformatted output, because the input path has tau0.02 and tau0.00 hard-coded. Should use tau_low and tau_high instead.
+    See branch 80-tau012, where I implemented a hack for tau012, where it is treated as tau002  
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
