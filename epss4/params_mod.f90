@@ -996,6 +996,11 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
+    if ((tau .ne. 0.00_dp) .and. (tau .ne. 0.02_dp) .and. (tau .ne. 0.04_dp) .and. (tau .ne. 0.12_dp) .and. (tau .ne. 0.14_dp)) then
+        print*, 'ERROR: the larger (after-reform) tau must be 0.02 or 0.14 (see to_do.txt)'
+        call critical_stop
+    endif
+
     if (cover_k > 1.0 .or. cover_k < 0.0) then
         print*, 'ERROR: cover_k not in [0.0 , 1.0]'
         call critical_stop

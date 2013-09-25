@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='079-base_ep_medprec'
+thisrun='080-base_tau_lp3'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
