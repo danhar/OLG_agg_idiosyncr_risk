@@ -20,6 +20,10 @@ This file describes things that will, should, or could be implemented in the cod
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - Euler errors are not saved to or read from simvars.unformatted, see simvars_class. I need to first write unformatted without reading, thus without experiments, for all calibrations.
+- the calibration targets differ from the moments shown in the results (in equilibrium_short/_long.txt), because the former are excluding periods with an error and the latter are including them.
+    That is not wrong, but confusing, because then sometimes the calibration converges but the reported moments differ from the targets (mostly r_f and equity premium). 
+    This can be remedied by increasing aggregate grids until the errors disappear, so it is not bad to have this different reported moment as an indication that grids need to be increased. 
+    I might leave it like this or improve.     
 - write t_scrap into simvars, especially the unformatted, because when the old simvars are read to initialize, and the stats are calculated, 
     then it can happen that the 'new' t_scrap (i.e. in the new calib-file) is larger than the 'old' nt. Concretely, run_model:137 'K%name ='K' ; call K%calc_stats(simvars_old)' can fail.
 - splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
