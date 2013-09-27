@@ -5,7 +5,7 @@
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta           5.550703 coefficient of relative risk aversion
+theta           5.434620 coefficient of relative risk aversion
 psi             0.500    elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
 beta            0.9812   discount factor
 alpha           0.320    capital share
@@ -13,10 +13,10 @@ g               0.018    growth rate of technology
 de_ratio        0.660    debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        -.003494 mean of depreciation shocks
-del_std         0.113940 std of depreciation shocks
+del_mean        -.003177 mean of depreciation shocks
+del_std         0.114193 std of depreciation shocks
 pi1_zeta        0.9410   first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.830329 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.831419 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -52,7 +52,7 @@ kappa_in_01             .false.     portfolio share kappa must be in [0,1]. I.e.
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
-nap             14       exogenous grid for savings (ap= 'a prime')
+nap             20       exogenous grid for savings (ap= 'a prime')
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
@@ -61,7 +61,7 @@ nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
 nt              4000     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters

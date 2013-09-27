@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-080-tau012: this didn't work anymore because 073-read_previous introduced an error. The unformatted input folders are hard-coded to 0.00 and 0.02, but not always.
+080-tau012: tau=0.12 didn't work anymore because 073-read_previous introduced an error. The unformatted input folders are hard-coded to 0.00 and 0.02, but not always.
             It would be best to rename everything to tau_high and tau_low, but I will just implement a hack that treats tau012 as tau002 in the input path.  
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
