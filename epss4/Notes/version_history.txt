@@ -4,8 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-080-tau012: tau=0.12 didn't work anymore because 073-read_previous introduced an error. The unformatted input folders are hard-coded to 0.00 and 0.02, but not always.
-            It would be best to rename everything to tau_high and tau_low, but I will just implement a hack that treats tau012 as tau002 in the input path.  
+081-eul_err: correct calc of Euler equation errors: do not interpolate kappa, instead (implicitly) use optimal one.  
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -620,3 +619,5 @@ For example, simvars should read and write output unformatted also, see  subrout
 077-recal_calibs: run the new recalibrated versions. Only partially completed, to be continued.
 078-euler_errors: compute Euler equation errors during simulation. Result: they are pretty large, maybe bug?
 079-neta4lowprec: compute final results in lower precision, so that they run through on Brutus' 36 hour queue
+080-tau012: tau=0.12 didn't work anymore because 073-read_previous introduced an error. The unformatted input folders are hard-coded to 0.00 and 0.02, but not always.
+            It would be best to rename everything to tau_high and tau_low, but I will just implement a hack that treats tau012 as tau002 in the input path.  
