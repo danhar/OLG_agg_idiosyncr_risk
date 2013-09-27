@@ -508,7 +508,7 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
         ! Now different factors of consumption euler equation
         evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
         rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
-                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)*rtildep)
+                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm))
     enddo
 
     evp=dot_product(pi_z(zc,:),evpz)    ! Expected V'
@@ -517,9 +517,7 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
         cons_out = cmin/100.0
     else
         rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
-        rhs_fac2=dot_product(pi_z(zc,:),rhs_temp)
-        ! As discussed above, rtilde can become negative. During simulations sometimes so high that rhs_fac2 would be negative when we calc euler err. Then set to zero.
-        if (rhs_fac2 < 0.0) rhs_fac2 = 1.0e-12_dp
+        rhs_fac2=rfp*dot_product(pi_z(zc,:),rhs_temp)
 
         cee_rhs=rhs_fac1*rhs_fac2
 
