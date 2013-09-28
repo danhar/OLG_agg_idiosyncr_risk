@@ -517,7 +517,7 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
         cons_out = cmin/100.0
     else
         rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
-        rhs_fac2=rfp*dot_product(pi_z(zc,:),rhs_temp)
+        rhs_fac2=rfp/(1.0+g)*dot_product(pi_z(zc,:),rhs_temp)
 
         cee_rhs=rhs_fac1*rhs_fac2
 
