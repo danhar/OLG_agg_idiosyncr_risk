@@ -219,10 +219,12 @@ contains
         use params_mod   ,only: L_N_ratio, n, g, pi_z, de_ratio
         use fun_aggregate_diff
         use distribution ,only: CheckPhi
+        use simulation_mod, only: f_euler_errors
         use partial_sorting     ! function valnth
 
         type(tSimvars) ,intent(out) :: simvars
         real(dp) ,allocatable       :: r_pf(:,:,:)
+        real(dp) ,dimension(2)      :: eul_err_temp
         integer                     :: i, nz
 
         associate(xgrid_ms  => policies_ms%xgrid (:,:,1,:,1,1), &
@@ -261,9 +263,10 @@ contains
             simvars%B(1)      = simvars%K(1) * de_ratio/(1.0 + de_ratio) - simvars%bonds(1) ! differs from fvals(2)
         endif
         simvars%err_income(1) = f_income_diff(simvars%K(1), mean_zeta, simvars%r(1), simvars%rf(1), mean_delta)
-        ! It would be interesting to calculate the Euler errors, but simulation_mod:f_euler_errors needs zt, which here is zero
-        simvars%eul_err_max(1)=0.0
-        simvars%eul_err_avg(1)=0.0
+        ! the euler errors work only for the no AR economy, because then the zt does not matter. for MS we would need a zt for mean shock
+        eul_err_temp = f_euler_errors(1, simvars%rf(1), simvars%mu(1),simvars%K(1),coeffs, grids, policies_ms, value, xgrid_ms, apgrid_ms, kappa_ms, Phi)
+        simvars%eul_err_max(1)=eul_err_temp(1)
+        simvars%eul_err_avg(1)=eul_err_temp(2)
 
         do i= 1,nz  ! can't I just save z and then call simulate_economy?
             simvars%z(i+1)     = i

@@ -4,7 +4,7 @@ module simulation_mod
 
     implicit none
     private
-    public simulate
+    public simulate, f_euler_errors
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
