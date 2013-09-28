@@ -508,77 +508,6 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
         ! Now different factors of consumption euler equation
         evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
         rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
-                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)*rtildep)
-    enddo
-
-    evp=dot_product(pi_z(zc,:),evpz)    ! Expected V'
-
-    if (collateral_constraint .and. xc ==1) then
-        cons_out = cmin/100.0
-    else
-        rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
-        rhs_fac2=dot_product(pi_z(zc,:),rhs_temp)
-        ! As discussed above, rtilde can become negative. During simulations sometimes so high that rhs_fac2 would be negative when we calc euler err. Then set to zero.
-        if (rhs_fac2 < 0.0) rhs_fac2 = 1.0e-12_dp
-
-        cee_rhs=rhs_fac1*rhs_fac2
-
-        cons_out=max(cee_rhs**(gamm/(1.0-theta-gamm)), cmin)
-    endif
-
-end subroutine consumption
-!-------------------------------------------------------------------------------
-
-pure subroutine consumption_rf(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
-! Only for calculating Euler error
-    use fun_lininterp
-    use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
-
-    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)
-    integer                    ,intent(in)  :: zc, xc, ec
-    real(dp)                   ,intent(out) :: cons_out, evp  ! cons(xc,ec,zc,jc), evp
-    logical(1) ,dimension(nz)  ,intent(out) :: error
-    real(dp)   ,dimension(n_eta)            :: cons_interp, vp_interp ! interpolated values of cons, vp
-    real(dp)   ,dimension(nz)               :: evpz, rhs_temp ! temporary: cee_*: consumption euler eq.
-    real(dp)                                :: rtildep, xp    ! rtilde and cash-at-hand tomorrow
-    real(dp)                                :: cee_rhs, rhs_fac1, rhs_fac2 ! temporary: rhs of cee, factors 1 and 2
-    integer                                 :: zpc, epc       ! counters for shocks tomorrow
-
-    error = .false.
-
-    do zpc=1,nz
-        if (pi_z(zc,zpc) == 0.0) then
-            evpz(zpc)     = 0.0
-            rhs_temp(zpc) = 0.0
-            cycle
-        endif
-
-        ! Get cash-at-hand tomorrow for all states
-        rtildep= (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
-        ! As mentioned in the subroutine asset_allocation above, one could limit kappa so that rtildep >= 0.0.
-        ! In that case, this should be checked here also, because kappa can take different (very high) values during the simulations (when ap is close to zero).
-
-        do epc = 1,n_eta
-            xp = yp(epc,zpc)+rtildep*ap
-
-            ! Interpolate consumption and value function
-            cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc),consp(:,epc,zpc),xp)
-            vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            if (cons_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                cons_interp(epc) = cmin
-                xp               = cmin + ap
-                vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            endif
-            if (vp_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                vp_interp(epc)   = cmin
-            endif
-
-        enddo
-        ! Now different factors of consumption euler equation
-        evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
-        rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
                             (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm))
     enddo
 
@@ -588,85 +517,14 @@ pure subroutine consumption_rf(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc,
         cons_out = cmin/100.0
     else
         rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
-        rhs_fac2=(1.0+rfp)/(1+g)*dot_product(pi_z(zc,:),rhs_temp)
+        rhs_fac2=(1.0+rfp)/(1.0+g)*dot_product(pi_z(zc,:),rhs_temp)
 
         cee_rhs=rhs_fac1*rhs_fac2
 
         cons_out=max(cee_rhs**(gamm/(1.0-theta-gamm)), cmin)
     endif
 
-end subroutine consumption_rf
-!-------------------------------------------------------------------------------
-
-pure subroutine consumption_r(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
-! Only for calculating Euler error
-    use fun_lininterp
-    use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
-
-    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)
-    integer                    ,intent(in)  :: zc, xc, ec
-    real(dp)                   ,intent(out) :: cons_out, evp  ! cons(xc,ec,zc,jc), evp
-    logical(1) ,dimension(nz)  ,intent(out) :: error
-    real(dp)   ,dimension(n_eta)            :: cons_interp, vp_interp ! interpolated values of cons, vp
-    real(dp)   ,dimension(nz)               :: evpz, rhs_temp ! temporary: cee_*: consumption euler eq.
-    real(dp)                                :: rtildep, xp    ! rtilde and cash-at-hand tomorrow
-    real(dp)                                :: cee_rhs, rhs_fac1, rhs_fac2 ! temporary: rhs of cee, factors 1 and 2
-    integer                                 :: zpc, epc       ! counters for shocks tomorrow
-
-    error = .false.
-
-    do zpc=1,nz
-        if (pi_z(zc,zpc) == 0.0) then
-            evpz(zpc)     = 0.0
-            rhs_temp(zpc) = 0.0
-            cycle
-        endif
-
-        ! Get cash-at-hand tomorrow for all states
-        rtildep= (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
-        ! As mentioned in the subroutine asset_allocation above, one could limit kappa so that rtildep >= 0.0.
-        ! In that case, this should be checked here also, because kappa can take different (very high) values during the simulations (when ap is close to zero).
-
-        do epc = 1,n_eta
-            xp = yp(epc,zpc)+rtildep*ap
-
-            ! Interpolate consumption and value function
-            cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc),consp(:,epc,zpc),xp)
-            vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            if (cons_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                cons_interp(epc) = cmin
-                xp               = cmin + ap
-                vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            endif
-            if (vp_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                vp_interp(epc)   = cmin
-            endif
-
-        enddo
-        ! Now different factors of consumption euler equation
-        evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
-        rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
-                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)*(1.0+rp(zpc))/(1+g))
-    enddo
-
-    evp=dot_product(pi_z(zc,:),evpz)    ! Expected V'
-
-    if (collateral_constraint .and. xc ==1) then
-        cons_out = cmin/100.0
-    else
-        rhs_fac1=betatildej*evp**((1.0-gamm)/gamm)
-        rhs_fac2=dot_product(pi_z(zc,:),rhs_temp)
-        ! As discussed above, rtilde can become negative. During simulations sometimes so high that rhs_fac2 would be negative when we calc euler err. Then set to zero.
-        if (rhs_fac2 < 0.0) rhs_fac2 = 1.0e-12_dp
-
-        cee_rhs=rhs_fac1*rhs_fac2
-
-        cons_out=max(cee_rhs**(gamm/(1.0-theta-gamm)), cmin)
-    endif
-
-end subroutine consumption_r
+end subroutine consumption
 !-------------------------------------------------------------------------------
 
 end module household_solution_mod
