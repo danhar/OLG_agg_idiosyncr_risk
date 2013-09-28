@@ -204,6 +204,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (err%not_converged) then
         call err%print2stderr(dir)
     elseif (calc_euler_errors .and. .not. calibrating) then
+        print*, 'Calculating Euler equation errors. This might take very long.'
         pe_temp = partial_equilibrium
         call params_set('partial_equilibrium', .true.)
         call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_errors)
