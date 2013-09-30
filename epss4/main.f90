@@ -136,7 +136,7 @@ program EPSS
     	        agg_cons_ratio(rc) = agg_cons(rc,1)/agg_cons(rc,2)
 	        endif
 	    enddo
-	    agg_cons_ratio(0) = agg_cons(1,1)/agg_cons(0,1)
+	    if (tau_experiment) agg_cons_ratio(0) = agg_cons(1,1)/agg_cons(0,1)
 	    if (welfare_decomposition) then
 	        if (alt_insurance_calc) then
 	            call write2file(welfare,cev,agg_cons_ratio,'welfare',cev_ins)
