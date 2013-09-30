@@ -183,9 +183,15 @@ mu:     if (partial_equilibrium) then
             simvars%eul_err_max(tc)=0.0
             simvars%eul_err_avg(tc)=0.0
         else
-            eul_err_temp = f_euler_errors(zt, simvars%rf(tc+1), mut,simvars%K(tc+1),coeffs, agg_grid, policies, value, xgridt, apgridt, kappat, Phi)
-            simvars%eul_err_max(tc)=eul_err_temp(1)
-            simvars%eul_err_avg(tc)=eul_err_temp(2)
+            if (tc <= t_scrap) then
+            ! do not calculate Euler equation errors, because that is very costly and will be thrown away
+                simvars%eul_err_max(tc)=0.0
+                simvars%eul_err_avg(tc)=0.0
+            else
+                eul_err_temp = f_euler_errors(zt, simvars%rf(tc+1), mut,simvars%K(tc+1),coeffs, agg_grid, policies, value, xgridt, apgridt, kappat, Phi)
+                simvars%eul_err_max(tc)=eul_err_temp(1)
+                simvars%eul_err_avg(tc)=eul_err_temp(2)
+            endif
         endif
 
         ! Average life cycle profiles and average Phi
@@ -262,7 +268,7 @@ end subroutine simulate
 !-------------------------------------------------------------------------------
 
 pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
-    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid
+    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, cmin
     use household_solution_mod ,only: interp_policies_tomorrow, consumption
     use laws_of_motion ,only: Forecast_mu
     use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
@@ -319,6 +325,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
                     cons_opt(xc,ec,jc)=cons_t(xc,ec,jc)
                 else
                     call consumption(apgridt(xc,ec,jc), kappat(xc,ec,jc), xgridp, consp, vp, rfp,rp, yp, zt, xc, ec, betatildej, cons_opt(xc,ec,jc), evp, error)
+                    if ((cons_opt(xc,ec,jc) < cmin*10.0_dp) .or. any(error)) cons_opt(xc,ec,jc) = cons_t(xc,ec,jc)
                 endif
             enddo
         enddo
