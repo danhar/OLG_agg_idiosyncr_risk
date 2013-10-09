@@ -330,6 +330,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
             enddo
         enddo
     enddo
+    cons_opt(:,:,nj)=cons_t(:,:,nj)
 
     eul_err = abs(1.0-cons_opt/cons_t)
 
