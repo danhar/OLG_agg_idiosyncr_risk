@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='082-ies15sh_eerr_corr'
+thisrun='082-basetau12_lp7n2e7d'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
