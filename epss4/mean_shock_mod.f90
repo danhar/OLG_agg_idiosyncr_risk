@@ -220,7 +220,7 @@ contains
         use fun_aggregate_diff
         use distribution ,only: CheckPhi
         use simulation_mod, only: f_euler_errors
-        use partial_sorting     ! function valnth
+        use sorting_partial_mod     ! function valnth
 
         type(tSimvars) ,intent(out) :: simvars
         real(dp) ,allocatable       :: r_pf(:,:,:)

@@ -187,7 +187,7 @@ contains
         use income
         use fun_aggregate_diff
         use distribution ,only: CheckPhi
-        use partial_sorting     ! function valnth
+        use sorting_partial_mod     ! function valnth
 
         type(tSimvars) ,intent(out) :: simvars
         real(dp) ,dimension(:,:,:) ,allocatable       :: r_pf, stocks_ms, apgrid_ms, xgrid_ms, kappa_ms, value_ms

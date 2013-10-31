@@ -20,7 +20,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_zbrent
     use fun_aggregate_diff
-    use partial_sorting     ! function valnth for Median
+    use sorting_partial_mod ,only : valnth     ! for Median
 
     type(tPolicies)  ,intent(in)    :: policies
     real(dp)         ,intent(in)    :: value(:,:,:,:,:,:)
