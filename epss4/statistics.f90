@@ -79,7 +79,7 @@ contains
     pure subroutine calculate_statistics(this, simvars)
         use params_mod    ,only: t_scrap, stat_dist_z
         use simvars_class ,only: tSimvars
-        use partial_sorting     ! function valnth for Median
+        use sorting_partial_mod     ! function valnth for Median
         class(tStats)          ,intent(inout) :: this
         type(tSimvars)         ,intent(in)  :: simvars(:)
         real(dp) ,allocatable :: seriest(:), seriesp(:)
@@ -328,9 +328,9 @@ contains
 
 	subroutine lorenz_calc(f,x,fx,gini,error)
 	! Compute Lorenz curve and Gini coefficient by sorting vector x and using density f
-	! Note: to link dlasrt2 add mkl_scalapack_core.lib to project's additional dependencies
-
-!	use mkl_scalapack ,only: dlasrt2
+	! An alternative to rank and sort is dlasrt2 from Scalapack, which does both in one go.
+        use sorting_full_mod ,only : sort
+        use ranking_full_mod ,only : rank
 	    implicit none
 	    real(dp), dimension(:), intent(in)    :: f
 	    real(dp), dimension(:), intent(inout) :: x
@@ -348,8 +348,10 @@ contains
 	       return
         endif
 
-	    key=[(i,i=1,n)]
-!	    call dlasrt2('I',n,x,key,error)
+!	    key=[(i,i=1,n)]
+!	    call dlasrt2('I',n,x,key,error) ! this would be from Scalapack
+        call rank(x,key)
+        call sort(x)
 	    fx=f(key)
 	    x=x*fx
 	    gini=x(1)*fx(1)
