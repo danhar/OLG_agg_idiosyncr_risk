@@ -62,6 +62,8 @@ contains
 ! - pure integer function get_digits2display(this, format)
 ! - pure integer function get_format(this, format)
 ! - pure real(dp)function Correlation(series1,stats1,series2,stats2)
+! - pure subroutine lorenz_calc(f,x,fx,gini,error)
+! - subroutine lorenz_err(error)
 !-------------------------------------------------------------------------------
 
     pure function constructor(varname) result (new_stats)
@@ -326,7 +328,7 @@ contains
         cov = sum((var1%series - var1%avg)*(var2%series - var2%avg))/real((size(var1%series)-1),dp)
     end function cov
 
-	subroutine lorenz_calc(f,x,fx,gini,error)
+	pure subroutine lorenz_calc(f,x,fx,gini,error)
 	! Compute Lorenz curve and Gini coefficient by sorting vector x and using density f
 	! An alternative to rank and sort is dlasrt2 from Scalapack, which does both in one go.
         use sorting_full_mod ,only : sort

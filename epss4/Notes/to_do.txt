@@ -3,7 +3,6 @@ This file describes things that will, should, or could be implemented in the cod
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-- Gini coefficients (need to calc in each simulation step?). The code for Gini coeffs and Lorenz curves is in statistics.f90:lorenz_calc.
 - Calc medians of lifecycle statistics during simulation. In particular, median portfolio return.
 - Instead of portfolio return (graphs) (and consumption?), calc 90th- 10th percentile or the like.
                          

@@ -30,7 +30,8 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
     type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
-                    Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret
+                    Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret, &
+                    gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
     type(tStats_logical) :: err_K, err_mu
     character(:), allocatable :: path
     logical :: calibrating
@@ -83,6 +84,14 @@ contains
         welfare%name='welfare'; call welfare%calc_stats(simvars)
         Phi_1%name='Phi_1'; call Phi_1%calc_stats(simvars)
         Phi_nx%name='Phi_nx'; call Phi_nx%calc_stats(simvars)
+        gini_income%name='gini_income'; call gini_income%calc_stats(simvars)
+        gini_assets%name='gini_assets'; call gini_assets%calc_stats(simvars)
+        gini_stocks%name='gini_stocks'; call gini_stocks%calc_stats(simvars)
+        gini_consumption%name='gini_consumption'; call gini_consumption%calc_stats(simvars)
+        cv_income%name='cv_income'; call cv_income%calc_stats(simvars)
+        cv_assets%name='cv_assets'; call cv_assets%calc_stats(simvars)
+        cv_stocks%name='cv_stocks'; call cv_stocks%calc_stats(simvars)
+        cv_consumption%name='cv_consumption'; call cv_consumption%calc_stats(simvars)
         err_aggr%name='err_aggr'; call err_aggr%calc_stats(simvars)
         B%name='B'; call B%calc_stats(simvars)
         err_inc%name='err_inc'; call err_inc%calc_stats(simvars)
@@ -193,6 +202,13 @@ contains
         write(21,fmt1)' cons      ', cov(cons     ,r), cov(cons     ,netwage), cov(cons     ,zeta), cov(cons     ,output), cov(cons     ,invest), cov(cons     ,ex_ret)
         write(21,fmt1)' cons_grow ', cov(cons_grow,r), cov(cons_grow,netwage), cov(cons_grow,zeta), cov(cons_grow,output), cov(cons_grow,invest), cov(cons_grow,ex_ret)
         write(21,fmt1)' delta     ', cov(delta    ,r), cov(delta    ,netwage), cov(delta    ,zeta), cov(delta    ,output), cov(delta    ,invest), cov(delta    ,ex_ret)
+
+        write(21,*)
+        write(21,*) 'Gini and Coefficient of Variation'
+        write(21,*) repeat('-',63)
+        write(21,123)'            ',     ' savings    ',         'stocks  ',         'income  ',          'cons    '
+        write(21,fmt1)' Gini      ', gini_assets%avg_(), gini_stocks%avg_(), gini_income%avg_(), gini_consumption%avg_()
+        write(21,fmt1)' Coef Var. ',   cv_assets%avg_(),   cv_stocks%avg_(),   cv_income%avg_(),   cv_consumption%avg_()
     endif
 
     write(21,*)

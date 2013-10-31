@@ -11,7 +11,7 @@ module simvars_class
         real(dp), dimension(:), allocatable ::    &
                 K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
-                gini_income, gini_assets, gini_consumption, cv_income, cv_assets, cv_consumption ! inequality measures
+                gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
         logical, dimension(:), allocatable :: err_K, err_mu
 
     contains
@@ -53,7 +53,7 @@ contains
         allocate(this%z(t), this%Phi_1(t), this%Phi_nx(t), this%err_aggr(t), this%err_income(t), this%eul_err_max(t), this%eul_err_avg(t))
         allocate(this%K(t+1),this%mu(t), this%output(t), this%stock(t), this%bonds(t), this%invest(t), this%C(t), this%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1
         allocate(this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
-        allocate(this%gini_income(t), this%gini_assets(t), this%gini_consumption(t),this%cv_income(t), this%cv_assets(t), this%cv_consumption(t))
+        allocate(this%gini_income(t), this%gini_assets(t), this%gini_stocks(t), this%gini_consumption(t),this%cv_income(t), this%cv_assets(t), this%cv_stocks(t), this%cv_consumption(t))
         allocate(this%B(t), this%err_K(t), this%err_mu(t))
 
         this%err_K = .false.
@@ -69,9 +69,11 @@ contains
         if (allocated(this%B)) deallocate(this%B)
         if (allocated(this%gini_income)) deallocate(this%gini_income)
         if (allocated(this%gini_assets)) deallocate(this%gini_assets)
+        if (allocated(this%gini_stocks)) deallocate(this%gini_stocks)
         if (allocated(this%gini_consumption)) deallocate(this%gini_consumption)
         if (allocated(this%cv_income)) deallocate(this%cv_income)
         if (allocated(this%cv_assets)) deallocate(this%cv_assets)
+        if (allocated(this%cv_stocks)) deallocate(this%cv_stocks)
         if (allocated(this%cv_consumption)) deallocate(this%cv_consumption)
         if (allocated(this%bequests)) deallocate(this%bequests)
         if (allocated(this%tau)) deallocate(this%tau)
@@ -172,12 +174,16 @@ contains
             get = this%gini_income(lb:ub)
         case ('gini_assets')
             get = this%gini_assets(lb:ub)
+        case ('gini_stocks')
+            get = this%gini_stocks(lb:ub)
         case ('gini_consumption')
             get = this%gini_consumption(lb:ub)
         case ('cv_income')
             get = this%cv_income(lb:ub)
         case ('cv_assets')
             get = this%cv_assets(lb:ub)
+        case ('cv_stocks')
+            get = this%cv_stocks(lb:ub)
         case ('cv_consumption')
             get = this%cv_consumption(lb:ub)
         case ('ex_ret')
@@ -443,7 +449,7 @@ contains
                         this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                         this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                         this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                        this(i)%gini_income, this(i)%gini_assets, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_consumption, &
+                        this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption, &
                         this(i)%err_K, this(i)%err_mu   !logical
             enddo
             close(55)
@@ -477,7 +483,7 @@ contains
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                       this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                       this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                      this(i)%gini_income, this(i)%gini_assets, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_consumption, &
+                      this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption, &
                       this(i)%err_K, this(i)%err_mu   !logical
         enddo
         close(55)

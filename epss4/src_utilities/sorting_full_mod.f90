@@ -1,11 +1,12 @@
 module sorting_full_mod
 ! see http://www.fortran-2000.com/rank/ , Subroutine REFSOR (XVALT)
 ! sorts an array
+    use kinds ,only : kdp => dp
 
     implicit none
-    integer, parameter :: kdp = selected_real_kind(15)
+    private
+
     public  :: sort
-    private :: kdp
     private :: R_refsor, I_refsor, D_refsor
     private :: R_inssor, I_inssor, D_inssor
     private :: R_subsor, I_subsor, D_subsor
