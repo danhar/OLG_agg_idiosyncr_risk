@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-082-eul_err: still too high Euler errors. also using new x1 Carbon laptop.  
+083-gini_coeffs: calc lorenz curve and gini coefficients. Try to use the code I have and use scalapack?  
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -622,3 +622,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 080-tau012: tau=0.12 didn't work anymore because 073-read_previous introduced an error. The unformatted input folders are hard-coded to 0.00 and 0.02, but not always.
             It would be best to rename everything to tau_high and tau_low, but I will just implement a hack that treats tau012 as tau002 in the input path.  
 081-eul_err: correct calc of Euler equation errors: do not interpolate kappa, instead (implicitly) use optimal one.
+082-eul_err: still too high Euler errors. also using new x1 Carbon laptop.

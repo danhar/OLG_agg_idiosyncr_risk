@@ -296,11 +296,11 @@
 								</option>
 								<option id="intel.fortran.link.option.l.1825573350" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l" valueType="libs">
 									<listOptionValue builtIn="false" value="mkl_intel_lp64"/>
+									<listOptionValue builtIn="false" value="mkl_core"/>
 									<listOptionValue builtIn="false" value="mkl_intel_thread"/>
-									<listOptionValue builtIn="false" value="iomp5"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="m"/>
-									<listOptionValue builtIn="false" value="mkl_core"/>
+									<listOptionValue builtIn="false" value="iomp5"/>
 								</option>
 								<option id="intel.fortran.link.cmdline.addlopts.359523301" name="Additional Options" superClass="intel.fortran.link.cmdline.addlopts" value="$(MKLROOT)/lib/intel64/libmkl_lapack95_lp64.a" valueType="string"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.linker.input.1943673495" superClass="photran.managedbuild.tool.intel.fortran.linker.input">

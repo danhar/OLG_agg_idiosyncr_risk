@@ -1,5 +1,6 @@
-module partial_sorting
+module sorting_partial_mod
 ! generalizes concept of Median
+! see http://www.fortran-2000.com/rank/
     implicit none
 
     integer, parameter :: kdp = selected_real_kind(15)
@@ -3030,4 +3031,4 @@ pure function I_indnth (XDONT, NORD) result (INDNTH)
 !
 end function I_indnth
 
-end module partial_sorting
+end module sorting_partial_mod
