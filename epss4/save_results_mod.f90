@@ -206,7 +206,7 @@ contains
         write(21,*)
         write(21,*) 'Gini and Coefficient of Variation'
         write(21,*) repeat('-',63)
-        write(21,123)'            ',     ' savings    ',         'stocks  ',         'income  ',          'cons    '
+        write(21,123)'            ',         ' savings',         '  stocks',         '  income',          '    cons'
         write(21,fmt1)' Gini      ', gini_assets%avg_(), gini_stocks%avg_(), gini_income%avg_(), gini_consumption%avg_()
         write(21,fmt1)' Coef Var. ',   cv_assets%avg_(),   cv_stocks%avg_(),   cv_income%avg_(),   cv_consumption%avg_()
     endif

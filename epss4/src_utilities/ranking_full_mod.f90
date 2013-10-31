@@ -1,10 +1,10 @@
 module ranking_full_mod
 ! ranks an array
 ! see http://www.fortran-2000.com/rank/ , Subroutine MRGRNK (XVALT, IMULT)
+    use kinds ,only : kdp => dp
     implicit none
-    integer, parameter :: kdp = selected_real_kind(15)
+
     public  :: rank
-    private :: kdp
     private :: R_mrgrnk, I_mrgrnk, D_mrgrnk
 
     interface rank

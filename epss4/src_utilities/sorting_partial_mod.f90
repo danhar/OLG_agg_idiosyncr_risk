@@ -1,11 +1,10 @@
 module sorting_partial_mod
 ! generalizes concept of Median
 ! see http://www.fortran-2000.com/rank/
+    use kinds ,only : kdp => dp
     implicit none
 
-    integer, parameter :: kdp = selected_real_kind(15)
     public :: valnth, indnth
-    private :: kdp
     private :: R_valnth, I_valnth, D_valnth
 
     interface valnth
