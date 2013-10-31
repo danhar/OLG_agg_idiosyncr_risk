@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='082-theta1_lp'
+thisrun='082-theta1d'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

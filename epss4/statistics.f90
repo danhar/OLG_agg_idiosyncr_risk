@@ -330,7 +330,7 @@ contains
 	! Compute Lorenz curve and Gini coefficient by sorting vector x and using density f
 	! Note: to link dlasrt2 add mkl_scalapack_core.lib to project's additional dependencies
 
-!	use mkl_scalapack
+!	use mkl_scalapack ,only: dlasrt2
 	    implicit none
 	    real(dp), dimension(:), intent(in)    :: f
 	    real(dp), dimension(:), intent(inout) :: x
@@ -356,10 +356,10 @@ contains
 	    do i=2,n
 	        x(i)=x(i)+x(i-1)
 	        gini=gini+(x(i)+x(i-1))*fx(i)
-	        fx(i)=fx(i)+fx(i-1)
+	        fx(i)=fx(i)+fx(i-1) ! this is the cumulative distribution, i.e. the y-axis of the Lorenz-cuve
 	    end do
 	    gini=1-gini/x(n)
-	    x=x/x(n)
+	    x=x/x(n) ! x-axis of Lorenz curve
 	end subroutine lorenz_calc
 
     subroutine lorenz_err(error)
