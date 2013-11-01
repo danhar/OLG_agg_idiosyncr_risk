@@ -279,7 +279,7 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
     real(dp)                   ,intent(in)    :: penst, netwaget
     integer                    ,intent(in)    :: tc
     real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
-    real(dp) ,dimension(:,:,:) ,allocatable    :: const
+    real(dp) ,dimension(:,:,:) ,allocatable   :: const, assets_t
     real(dp) ,dimension(size(Phi,2),size(Phi,3)) :: income_dist
     real(dp)                                  :: mean, std
     integer                                   :: error, jc
@@ -313,10 +313,12 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
             endif
         enddo
 
+        assets_t = xgridt - spread(income_dist, 1, size(xgridt,1))
+
         lorenz_x = pack(income_dist, .true.)
         lorenz_y = lorenz_x
         call lorenz_calc(pack(sum(Phi,1), .true.), lorenz_x, lorenz_y, simvars%gini_income(tc), error)
-        lorenz_x = pack(apgridt, .true.)
+        lorenz_x = pack(assets_t, .true.)
         lorenz_y = lorenz_x
         call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_assets(tc), error)
         lorenz_x = pack(stockst, .true.)
@@ -329,9 +331,9 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
         std  = sqrt(sum(sum(Phi,1)*(income_dist - mean)**2))
         simvars%cv_income(tc)        = std/mean
 
-        mean = sum(Phi*apgridt)
+        mean = sum(Phi*assets_t)
         if (mean == 0.0) mean = 1.0
-        std  = sqrt(sum(Phi*(apgridt - mean)**2))
+        std  = sqrt(sum(Phi*(assets_t - mean)**2))
         simvars%cv_assets(tc)        = std/mean
 
         mean = sum(Phi*stockst)
