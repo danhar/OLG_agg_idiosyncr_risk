@@ -432,9 +432,17 @@ contains
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
         character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
+        logical :: ginis
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
-        read(55) array_size, nt
+        if (io_stat == 0) read(55,iostat=io_stat) array_size, nt
+        if (io_stat == 0) then
+            read(55,iostat=io_stat) ginis
+            if (io_stat .ne. 0) then
+                ginis = .false.
+                io_stat = 0
+            endif
+        endif
         close(55)
 
         if (io_stat == 0) then
@@ -449,8 +457,8 @@ contains
                         this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                         this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                         this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                        this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption, &
                         this(i)%err_K, this(i)%err_mu   !logical
+               if (ginis) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
             enddo
             close(55)
         endif
@@ -470,7 +478,7 @@ contains
         integer :: i, io_stat
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
-        write(55) size(this), size(this(1)%z)
+        write(55) size(this), size(this(1)%z), .true. ! true for ginis added later
         close(55)
 
         if (io_stat .ne. 0) then
@@ -483,8 +491,8 @@ contains
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                       this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                       this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                      this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption, &
                       this(i)%err_K, this(i)%err_mu   !logical
+            write(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption  ! inequality measures added later
         enddo
         close(55)
 
