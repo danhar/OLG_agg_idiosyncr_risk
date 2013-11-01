@@ -437,11 +437,12 @@ contains
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
         if (io_stat == 0) read(55,iostat=io_stat) array_size, nt
         if (io_stat == 0) then
-            read(55,iostat=io_stat) ginis
+            read(55,iostat=io_stat) ginis ! somehow this doesn't work in debug mode
             if (io_stat .ne. 0) then
                 ginis = .false.
                 io_stat = 0
             endif
+            if (.not. ginis) ginis = .false. ! This is a trick that seems to work in debug.
         endif
         close(55)
 
@@ -458,7 +459,7 @@ contains
                         this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                         this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
                         this(i)%err_K, this(i)%err_mu   !logical
-               if (ginis) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
+               if (.false.) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
             enddo
             close(55)
         endif
