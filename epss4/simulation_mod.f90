@@ -4,11 +4,12 @@ module simulation_mod
 
     implicit none
     private
-    public simulate, f_euler_errors
+    public simulate, calc_inequality_measures, f_euler_errors
 contains
 !-------------------------------------------------------------------------------
 ! Module procedures in order:
 ! - pure subroutine simulate(policies, value, agg_grid, simvars, Phi, lc)
+! - pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagridt, penst, netwaget, tc)
 ! - pure real(dp) function f_euler_errors()
 !-------------------------------------------------------------------------------
 
@@ -194,7 +195,7 @@ mu:     if (partial_equilibrium) then
             endif
         endif
 
-        call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, tc)
+        call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, tc)
 
         ! Average life cycle profiles and average Phi
         if (tc > t_scrap) then ! 'Throw away' first t_scrap
@@ -229,7 +230,6 @@ contains
 !-------------------------------------------------------------------------------
 ! Internal procedures in order:
 ! - pure real(dp) function f_excessbonds(mut)
-! - pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, tc)
 !-------------------------------------------------------------------------------
 
     pure real(dp) function f_excessbonds(mut)
@@ -267,76 +267,79 @@ contains
 
     end function f_excessbonds
 
-    pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, tc)
-        use statistics  ,only: lorenz_calc
-        use params_mod  ,only: jr, ej
-        type(tSimvars)            ,intent(inout) :: simvars
-        real(dp) ,dimension(:,:,:) ,intent(in)    :: xgridt, apgridt, stockst, Phi
-        integer                    ,intent(in)    :: tc
-        real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
-        real(dp) ,dimension(:,:,:) ,allocatable    :: const
-        real(dp) ,dimension(size(Phi,2),size(Phi,3)) :: income_dist
-        real(dp)                                  :: mean, std
-        integer                                   :: error, jc
-
-        if (tc <= t_scrap) then
-        ! do not calculate Ginis errors, because that is very costly and will be thrown away
-            simvars%gini_income(tc)      = 0.0
-            simvars%gini_assets(tc)      = 0.0
-            simvars%gini_stocks(tc)      = 0.0
-            simvars%gini_consumption(tc) = 0.0
-            simvars%cv_income(tc)        = 0.0
-            simvars%cv_assets(tc)        = 0.0
-            simvars%cv_stocks(tc)        = 0.0
-            simvars%cv_consumption(tc)   = 0.0
-        else
-
-            const = xgridt -apgridt
-
-            do jc=1,size(income_dist,2)
-                if (jc>=jr) then
-                    income_dist(:,jc) = penst
-                else
-                    income_dist(:,jc) = netwaget*ej(jc)*etagrid(:,zt)
-                endif
-            enddo
-
-            lorenz_x = pack(income_dist, .true.)
-            lorenz_y = lorenz_x
-            call lorenz_calc(pack(sum(Phi,1), .true.), lorenz_x, lorenz_y, simvars%gini_income(tc), error)
-            lorenz_x = pack(apgridt, .true.)
-            lorenz_y = lorenz_x
-            call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_assets(tc), error)
-            lorenz_x = pack(stockst, .true.)
-            call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_stocks(tc), error)
-            lorenz_x = pack(const, .true.)
-            call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_consumption(tc), error)
-
-            mean = sum(sum(Phi,1)*income_dist)
-            if (mean == 0.0) mean = 1.0
-            std  = sqrt(sum(sum(Phi,1)*(income_dist - mean)**2))
-            simvars%cv_income(tc)        = std/mean
-
-            mean = sum(Phi*apgridt)
-            if (mean == 0.0) mean = 1.0
-            std  = sqrt(sum(Phi*(apgridt - mean)**2))
-            simvars%cv_assets(tc)        = std/mean
-
-            mean = sum(Phi*stockst)
-            if (mean == 0.0) mean = 1.0
-            std  = sqrt(sum(Phi*(stockst - mean)**2))
-            simvars%cv_stocks(tc)        = std/mean
-
-            mean = sum(Phi*const)
-            if (mean == 0.0) mean = 1.0
-            std  = sqrt(sum(Phi*(const - mean)**2))
-            simvars%cv_consumption(tc)        = std/mean
-
-        endif
-
-    end subroutine calc_inequality_measures
-
 end subroutine simulate
+!-------------------------------------------------------------------------------
+
+pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagridt, penst, netwaget, tc)
+    use statistics  ,only: lorenz_calc
+    use params_mod  ,only: t_scrap, jr, ej
+    type(tSimvars)             ,intent(inout) :: simvars
+    real(dp) ,dimension(:,:,:) ,intent(in)    :: xgridt, apgridt, stockst, Phi
+    real(dp) ,dimension(:)     ,intent(in)    :: etagridt
+    real(dp)                   ,intent(in)    :: penst, netwaget
+    integer                    ,intent(in)    :: tc
+    real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
+    real(dp) ,dimension(:,:,:) ,allocatable    :: const
+    real(dp) ,dimension(size(Phi,2),size(Phi,3)) :: income_dist
+    real(dp)                                  :: mean, std
+    integer                                   :: error, jc
+
+    if (tc <= t_scrap) then
+    ! do not calculate Ginis errors, because that is very costly and will be thrown away
+        simvars%gini_income(tc)      = 0.0
+        simvars%gini_assets(tc)      = 0.0
+        simvars%gini_stocks(tc)      = 0.0
+        simvars%gini_consumption(tc) = 0.0
+        simvars%cv_income(tc)        = 0.0
+        simvars%cv_assets(tc)        = 0.0
+        simvars%cv_stocks(tc)        = 0.0
+        simvars%cv_consumption(tc)   = 0.0
+    else
+
+        const = xgridt -apgridt
+
+        do jc=1,size(income_dist,2)
+            if (jc>=jr) then
+                income_dist(:,jc) = penst
+            else
+                income_dist(:,jc) = netwaget*ej(jc)*etagridt
+            endif
+        enddo
+
+        lorenz_x = pack(income_dist, .true.)
+        lorenz_y = lorenz_x
+        call lorenz_calc(pack(sum(Phi,1), .true.), lorenz_x, lorenz_y, simvars%gini_income(tc), error)
+        lorenz_x = pack(apgridt, .true.)
+        lorenz_y = lorenz_x
+        call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_assets(tc), error)
+        lorenz_x = pack(stockst, .true.)
+        call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_stocks(tc), error)
+        lorenz_x = pack(const, .true.)
+        call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_consumption(tc), error)
+
+        mean = sum(sum(Phi,1)*income_dist)
+        if (mean == 0.0) mean = 1.0
+        std  = sqrt(sum(sum(Phi,1)*(income_dist - mean)**2))
+        simvars%cv_income(tc)        = std/mean
+
+        mean = sum(Phi*apgridt)
+        if (mean == 0.0) mean = 1.0
+        std  = sqrt(sum(Phi*(apgridt - mean)**2))
+        simvars%cv_assets(tc)        = std/mean
+
+        mean = sum(Phi*stockst)
+        if (mean == 0.0) mean = 1.0
+        std  = sqrt(sum(Phi*(stockst - mean)**2))
+        simvars%cv_stocks(tc)        = std/mean
+
+        mean = sum(Phi*const)
+        if (mean == 0.0) mean = 1.0
+        std  = sqrt(sum(Phi*(const - mean)**2))
+        simvars%cv_consumption(tc)        = std/mean
+
+    endif
+
+end subroutine calc_inequality_measures
 !-------------------------------------------------------------------------------
 
 pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)

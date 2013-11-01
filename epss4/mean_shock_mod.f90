@@ -219,7 +219,7 @@ contains
         use params_mod   ,only: L_N_ratio, n, g, pi_z, de_ratio
         use fun_aggregate_diff
         use distribution ,only: CheckPhi
-        use simulation_mod, only: f_euler_errors
+        use simulation_mod, only: calc_inequality_measures, f_euler_errors
         use sorting_partial_mod     ! function valnth
 
         type(tSimvars) ,intent(out) :: simvars
@@ -268,6 +268,8 @@ contains
         simvars%eul_err_max(1)=eul_err_temp(1)
         simvars%eul_err_avg(1)=eul_err_temp(2)
 
+        call calc_inequality_measures(simvars, xgrid_ms, apgrid_ms, stocks_ms, Phi, m_etagrid, simvars%pens(1), simvars%wage(1), 1)
+
         do i= 1,nz  ! can't I just save z and then call simulate_economy?
             simvars%z(i+1)     = i
             simvars%K(i+1)     = sum(policies%apgrid(:,:,i,:,1,1)*Phi)/(L_N_ratio*(1.0+n)*(1.0+g))
@@ -297,6 +299,7 @@ contains
 	        simvars%err_income(i+1) = f_income_diff(simvars%K(i+1), zeta(i), simvars%r(i+1), simvars%rf(i+1), delta(i))
             simvars%eul_err_max(i+1)= 0.0
             simvars%eul_err_avg(i+1)= 0.0
+            call calc_inequality_measures(simvars,policies%xgrid(:,:,i,:,1,1), policies%apgrid(:,:,i,:,1,1), policies%stocks(:,:,i,:,1,1), Phi, etagrid(:,i), simvars%pens(i+1), simvars%wage(i+1), i+1)
         enddo
 
         simvars%K (nz+2) = simvars%K (1) ! K and rf have one more index in the real simulations.
