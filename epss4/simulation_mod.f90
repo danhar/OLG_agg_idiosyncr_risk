@@ -283,8 +283,15 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
     real(dp) ,dimension(size(Phi,2),size(Phi,3)) :: income_dist
     real(dp)                                  :: mean, std
     integer                                   :: error, jc
+    logical                                   :: ms_equilibrium
 
-    if (tc <= t_scrap) then
+    if (size(simvars%rf) < t_scrap) then
+        ms_equilibrium = .true.
+    else
+        ms_equilibrium = .false.
+    endif
+
+    if (tc <= t_scrap .and. .not. ms_equilibrium) then
     ! do not calculate Ginis errors, because that is very costly and will be thrown away
         simvars%gini_income(tc)      = 0.0
         simvars%gini_assets(tc)      = 0.0
