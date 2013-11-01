@@ -1,0 +1,13 @@
+eclipse.preferences.version=1
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/CPATH/delimiter=\:
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/CPATH/operation=replace
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/CPATH/value=/usr/local/intel/composer_xe_2013_sp1.0.080/mkl/include
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/C_INCLUDE_PATH/delimiter=\:
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/C_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/append=true
+environment/buildEnvironmentInclude/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/appendContributed=true
+environment/buildEnvironmentLibrary/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/LIBRARY_PATH/delimiter=\:
+environment/buildEnvironmentLibrary/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/LIBRARY_PATH/operation=replace
+environment/buildEnvironmentLibrary/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/LIBRARY_PATH/value=/usr/local/intel/composer_xe_2013_sp1.0.080/compiler/lib/intel64\:/usr/local/intel/composer_xe_2013_sp1.0.080/compiler/lib/intel64\:/usr/local/intel/composer_xe_2013_sp1.0.080/mkl/lib/intel64
+environment/buildEnvironmentLibrary/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/append=true
+environment/buildEnvironmentLibrary/photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157/appendContributed=true
