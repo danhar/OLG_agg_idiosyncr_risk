@@ -434,15 +434,20 @@ contains
         integer :: array_size, nt, i, io_stat
         logical :: ginis
 
-        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
-        if (io_stat == 0) read(55,iostat=io_stat) array_size, nt
+        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read',status='old')
         if (io_stat == 0) then
-            read(55,iostat=io_stat) ginis ! somehow this doesn't work in debug mode
-            if (io_stat .ne. 0) then
+            read(55,iostat=io_stat) array_size, nt
+        else
+            ! most likely, error occurs because no file exists (status='old'). One could set here default values, but at the moment the program will be stopped below.
+        endif
+
+        if (io_stat == 0) then
+            read(55,iostat=io_stat) ginis
+            if (io_stat .ne. 0) then ! This would work if simvars_sizes.unformatted did not contain old, erroneous values
                 ginis = .false.
                 io_stat = 0
             endif
-            if (.not. ginis) ginis = .false. ! This is a trick that seems to work in debug.
+            if (ginis .ne. 0 .or. ginis .ne. 1) ginis = .false. ! Have to do this because simvars_sizes.unformatted contained old, erroneous values
         endif
         close(55)
 
@@ -451,16 +456,21 @@ contains
             allocate(this(array_size))
             call this%allocate(nt)
 
-            open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+            open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read',status='old')
             ! Could I use standard derived type IO?
-            do i=1,size(this)
-               read(55) this(i)%z, &    ! integer
-                        this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
-                        this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
-                        this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                        this(i)%err_K, this(i)%err_mu   !logical
-               if (.false.) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
-            enddo
+            if (io_stat == 0) then
+                do i=1,size(this)
+                   read(55) this(i)%z, &    ! integer
+                            this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
+                            this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
+                            this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
+                            this(i)%err_K, this(i)%err_mu   !logical
+                   if (ginis) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
+                enddo
+            else
+                ! most likely, error occurs because no file exists (status='old'). One could set here default values, but at the moment the program will be stopped below.
+            endif
+
             close(55)
         endif
 
@@ -477,16 +487,21 @@ contains
         class(tSimvars) ,intent(in) :: this(:)
         character(*)    ,intent(in) :: input_path
         integer :: i, io_stat
+        logical :: ginis, euler_errors ! indicator whether variables that have been added later are present
 
-        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
-        write(55) size(this), size(this(1)%z), .true. ! true for ginis added later
+        ginis = .true.
+        euler_errors = .false. ! needs implementing in read
+
+        open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
+        write(55) size(this), size(this(1)%z)
+        write(55) ginis
         close(55)
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
         endif
 
-        open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
+        open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
         do i=1,size(this)
             write(55) this(i)%z, &    ! integer
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
