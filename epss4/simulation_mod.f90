@@ -307,7 +307,7 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
 
         do jc=1,size(income_dist,2)
             if (jc>=jr) then
-                income_dist(:,jc) = penst
+                income_dist(:,jc) = 0.0 !penst
             else
                 income_dist(:,jc) = netwaget*ej(jc)*etagridt
             endif
