@@ -406,11 +406,11 @@ contains
         write(21,373) ' gini_inc ', simvars(i)%gini_income
         write(21,373) ' gi_asset ', simvars(i)%gini_assets
         write(21,373) ' gi_stock ', simvars(i)%gini_stocks
-        write(21,373) ' gi_cons  ', simvars(i)%gi_cons
-        write(21,373) ' cv_inc   ', simvars(i)%cv_inc
-        write(21,373) ' cv_asset ', simvars(i)%cv_asset
-        write(21,373) ' cv_stock ', simvars(i)%cv_stock
-        write(21,373) ' cv_cons  ', simvars(i)%cv_cons
+        write(21,373) ' gi_cons  ', simvars(i)%gini_consumption
+        write(21,373) ' cv_inc   ', simvars(i)%cv_income
+        write(21,373) ' cv_asset ', simvars(i)%cv_assets
+        write(21,373) ' cv_stock ', simvars(i)%cv_stocks
+        write(21,373) ' cv_cons  ', simvars(i)%cv_consumption
     373 format(a10,<size(simvars(i)%z)> (es9.2,1x))
         write(21,*)
     enddo
