@@ -20,26 +20,28 @@ end
 cd(['../model_output/',dir])
 
 all_generations_unit_mass = 1;
+ap_lc  = dlmread('ap_lc.txt')
+nj = length(ap_lc);
 
 if (all_generations_unit_mass)   
     pop_frac = dlmread('pop_frac.txt');
+    pop_frac_rescale=pop_frac*double(nj);
     disp('Plotting lifecycles conditional on surviving to max age!');
 else
-   pop_frac = 1.0;
+   pop_frac_rescale = 1.0;
    disp('Plotting expected lifecycle at birth (i.e. including survival rates, i.e. population shrinks)');
 end
-ap_lc  = dlmread('ap_lc.txt')./pop_frac*pop_frac(1);
+ap_lc  = dlmread('ap_lc.txt')./pop_frac_rescale;
 kappa_lc   = dlmread('kappa_lc.txt');
-stock_lc   = dlmread('stock_lc.txt')./pop_frac*pop_frac(1);
-cons_lc    = dlmread('cons_lc.txt')./pop_frac*pop_frac(1);
-consvar_lc = dlmread('consvar_lc.txt')./pop_frac*pop_frac(1);
-return_lc  = dlmread('return_lc.txt')./pop_frac*pop_frac(1);
-returnvar_lc=dlmread('return_var_lc.txt')./pop_frac*pop_frac(1);
+stock_lc   = dlmread('stock_lc.txt')./pop_frac_rescale;
+cons_lc    = dlmread('cons_lc.txt')./pop_frac_rescale;
+consvar_lc = dlmread('consvar_lc.txt')./pop_frac_rescale;
+return_lc  = dlmread('return_lc.txt')./pop_frac_rescale;
+returnvar_lc=dlmread('return_var_lc.txt')./pop_frac_rescale;
 bond_lc    = ap_lc - stock_lc;
 % cd('../../../src_matlab/')
 
 j0 = 21;
-nj = length(ap_lc);
 
 scrsz = get(0,'ScreenSize');
 offset = -35;
