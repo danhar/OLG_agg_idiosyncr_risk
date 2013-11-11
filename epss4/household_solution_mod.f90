@@ -278,7 +278,7 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     ! This subroutine will pass the asset euler equation as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
-    use params_mod ,only: tol_asset_eul, opt_zbrak, kappa_in_01, scale_AR, de_ratio, g
+    use params_mod ,only: tol_asset_eul, opt_zbrak, kappa_in_01, nonnegative_stock, scale_AR, de_ratio, g
     use fun_zbrent     ! NR: Brent method
     use sub_zbrac      ! NR: outwards bracketing
     use sub_zbrak      ! NR: inwards bracketing
@@ -312,6 +312,11 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     endif
 
     if (kappa_in_01) then   ! since ap <0.0 is possible (if .not. collateral_constraint) this is not the same as no_short_selling
+        if (nonnegative_stock .and. ap <=0.0) then
+            kappa_out = 0.0
+            return
+        endif
+
         kappa1 = 0.0
         kappa2 = 1.0
         if (asseteuler_f(kappa1) <= 0.0) then
@@ -384,6 +389,8 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
         kappa_out= kappa_test(kappa_result(1))
         error=.true.
     endif
+
+    if (nonnegative_stock .and. (ap * kappa_out < 0.0)) kappa_out = 0.0
 
 contains
 !---------------------------------------------------------------------------

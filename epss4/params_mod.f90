@@ -15,7 +15,7 @@ module params_mod
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
                           nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params, &
                           lom_k_version, lom_mu_version
-    logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
+    logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01, nonnegative_stock,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc, &
                           good_initial_guess_for_both_tau, calc_euler_errors
@@ -96,7 +96,7 @@ subroutine SetDefaultValues()
     nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=0; lom_k_version=2; lom_mu_version=2
     ! Logicals
-    ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
+    ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.; nonnegative_stock=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
     good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.
@@ -204,6 +204,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) collateral_constraint
             case ('kappa_in_01')
                 read (parval,*) kappa_in_01
+            case ('nonnegative_stock')
+                read (parval,*) nonnegative_stock
             case ('nap')
                 read (parval,*) nap
             case ('n_eta')
@@ -1263,6 +1265,7 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,'(a20,l1)') ' def_contrib     =  ', def_contrib
     write(21,'(a20,l1)') ' collat_constr   =  ', collateral_constraint
     write(21,'(a20,l1)') ' kappa_in_01     =  ', kappa_in_01
+    write(21,'(a20,l1)') ' nonneg_stock    =  ', nonnegative_stock
     write(21,'(a20,l1)') ' exogenous_xgrid =  ', exogenous_xgrid
     write(21,'(a19,i2)') ' lom_k_version   = ' , lom_k_version
     write(21,'(a19,i2)') ' lom_mu_version  = ' , lom_mu_version
