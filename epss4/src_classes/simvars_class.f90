@@ -447,7 +447,7 @@ contains
                 ginis = .false.
                 io_stat = 0
             endif
-            if (ginis .ne. 0 .or. ginis .ne. 1) ginis = .false. ! Have to do this because simvars_sizes.unformatted contained old, erroneous values
+            if ((ginis .ne. 0 .or. ginis .ne. 1) .and. ginis .ne. .true.) ginis = .false. ! Have to do this because simvars_sizes.unformatted contained old, erroneous values
         endif
         close(55)
 
