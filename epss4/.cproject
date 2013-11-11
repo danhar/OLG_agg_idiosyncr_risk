@@ -35,16 +35,13 @@
 								</outputEntries>
 							</builder>
 							<tool id="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2015405717" name="GCC C Compiler" superClass="photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base">
-								<option id="gnu.c.compiler.option.include.paths.1067647188" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
-								</option>
+								<option id="gnu.c.compiler.option.include.paths.1067647188" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.93924483" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base.1079276910" name="Intel(R) Intel(R) 64 Fortran Compiler" superClass="photran.managedbuild.tool.intel.fortran.compiler.x86_64.base">
 								<option id="intel.linux.fortran.compiler.preprocessor.includedirectories.609910793" name="Additional Include Directories (-I)" superClass="intel.linux.fortran.compiler.preprocessor.includedirectories" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
+									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
 								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1127285709" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -standard-semantics" valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1009820391" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.none" valueType="enumerated"/>
