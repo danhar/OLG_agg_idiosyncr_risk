@@ -378,7 +378,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     nx = size(policies%apgrid,1)
     nmu = size(grids%mu)
 
-    allocate(mup(nz), rp(nz), yp(nz,n_eta))
+    allocate(mup(nz), rp(nz), yp(n_eta,nz))
     allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
     allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
 
