@@ -4,7 +4,7 @@ close all;
 
 if (isempty(gplot_all))    
     visibility = 'on ';
-    dir = 'FD1_KK/msge';  % 'ge'
+    dir = 'testing_cal/mspe';  % 'ge'
 else
     visibility = 'off';
     dir = getenv('EPSSDIR');
