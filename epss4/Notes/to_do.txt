@@ -42,7 +42,8 @@ This file describes things that will, should, or could be implemented in the cod
 - maybe remove apmax_factor from the calibration files, and put it as a parameter when creating the apmax for ms. It's not needed later (for GE)
 - clean up files: merge rootfinders into one module rootfinder and tools (like linesearch, fdjac); merge the 3 markov*.f90 files and the twostate_exact.f90;
     merge tools like fun_kronprod.f90 and numrec_utils into utils. Clean up all the usage of these, e.g. of markov* in params_mod   
-
+- If there is no risk, the mean shock code is used with zero risk. However, the distribution will still spread out a bit, because households will be set to 2 adjacient points in the 1st period,
+    and in following periods will slowly spread out. This is not important for the application, it only shows up in the variance of lifecycle profiles in economies without risk.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (C) Further ideas
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------

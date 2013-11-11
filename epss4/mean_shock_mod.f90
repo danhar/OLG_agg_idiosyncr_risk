@@ -216,7 +216,7 @@ contains
     ! - agents live in a world where z(i) always realizes, use LOMs of mean shock (i.e. kp =k, mup = mu)
     ! - Phi remains constant at Phi_ms
 
-        use params_mod   ,only: L_N_ratio, n, g, pi_z, de_ratio
+        use params_mod   ,only: L_N_ratio, n, g, pi_z, de_ratio, calc_euler_errors
         use fun_aggregate_diff
         use distribution ,only: CheckPhi
         use simulation_mod, only: calc_inequality_measures, f_euler_errors
@@ -264,9 +264,14 @@ contains
         endif
         simvars%err_income(1) = f_income_diff(simvars%K(1), mean_zeta, simvars%r(1), simvars%rf(1), mean_delta)
         ! the euler errors work only for the no AR economy, because then the zt does not matter. for MS we would need a zt for mean shock
-        eul_err_temp = f_euler_errors(1, simvars%rf(1), simvars%mu(1),simvars%K(1),coeffs, grids, policies_ms, value, xgrid_ms, apgrid_ms, kappa_ms, Phi)
-        simvars%eul_err_max(1)=eul_err_temp(1)
-        simvars%eul_err_avg(1)=eul_err_temp(2)
+        if (.not. calc_euler_errors) then
+            simvars%eul_err_max(1)=0.0
+            simvars%eul_err_avg(1)=0.0
+        else
+            eul_err_temp = f_euler_errors(1, simvars%rf(1), simvars%mu(1),simvars%K(1),coeffs, grids, policies_ms, value, xgrid_ms, apgrid_ms, kappa_ms, Phi)
+            simvars%eul_err_max(1)=eul_err_temp(1)
+            simvars%eul_err_avg(1)=eul_err_temp(2)
+        endif
 
         call calc_inequality_measures(simvars, xgrid_ms, apgrid_ms, stocks_ms, Phi, m_etagrid, simvars%pens(1), simvars%wage(1), 1)
 
