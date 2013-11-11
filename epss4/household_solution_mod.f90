@@ -351,11 +351,16 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
                 deallocate(kappal,kappau)
             endif
         endif
-        if (.not. bracket_found .and. .not. kappa_in_01) then
-            ! Look 'outwards', i.e. extend the bounds
-            kappa_brack1 = -20.0_dp
-            kappa_brack2 = 20.0_dp
-            call s_zbrac(asseteuler_f,kappa_brack1,kappa_brack2,bracket_found)
+        if (.not. bracket_found) then
+            if (kappa_in_01) then
+                kappa_brack1    = kappa2/3.0
+                kappa_brack2    = kappa2*2.0/3.0
+            else
+                ! Look 'outwards', i.e. extend the bounds
+                kappa_brack1 = -20.0_dp
+                kappa_brack2 = 20.0_dp
+                call s_zbrac(asseteuler_f,kappa_brack1,kappa_brack2,bracket_found)
+            endif
         endif
     endif
 
