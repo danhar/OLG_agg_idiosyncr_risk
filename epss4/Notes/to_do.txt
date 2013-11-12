@@ -19,6 +19,8 @@ This file describes things that will, should, or could be implemented in the cod
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) To do
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- allow for borrowing only in bond while forbidding leverage in stock. This should help getting the portfolio shares more like in the data while still allowing agents to offset some of the tax.
+     See 084-kappa_in_01, which didn't work for a reason I didn't understand.
 - Euler errors are not saved to or read from simvars.unformatted, see simvars_class. I need to first write unformatted without reading, thus without experiments, for all calibrations.
 - i) the calibration targets differ from the moments shown in the results (in equilibrium_short/_long.txt), because the former are excluding periods with an error and the latter are including them.
     That is not wrong, but confusing, because then sometimes the calibration converges but the reported moments differ from the targets (mostly r_f and equity premium). 
