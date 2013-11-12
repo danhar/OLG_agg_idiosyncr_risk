@@ -4,7 +4,8 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-084-kappa_in_01: if (kappa_in_01) then strange results. Add option no_neg_stock.  
+084-kappa_in_01: if (kappa_in_01) then strange results. Add option no_neg_stock.
+Doesnt work, dont know why. Discontinuing.  
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order

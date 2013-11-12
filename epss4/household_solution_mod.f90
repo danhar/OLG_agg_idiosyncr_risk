@@ -392,6 +392,12 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
 
     if (nonnegative_stock .and. (ap * kappa_out < 0.0)) kappa_out = 0.0
 
+    if (kappa_out < 0.0) then
+        kappa_out = 0.0
+    elseif (kappa_out > 1.0) then
+        kappa_out = 1.0
+    endif
+
 contains
 !---------------------------------------------------------------------------
 ! Euler equation
