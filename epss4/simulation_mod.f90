@@ -207,7 +207,8 @@ mu:     if (partial_equilibrium) then
             lc%cons     = lc%cons  + cons_lct  /(nt-t_scrap)
             lc%stock    = lc%stock + stocks_lct/(nt-t_scrap)
             do jc=1,nj
-                cons_var_lct(jc)   = sum(((xgridt(:,:,jc)-apgridt(:,:,jc)) - cons_lct(jc))**2 * Phi(:,:,jc))
+                !cons_var_lct(jc)   = sum(((xgridt(:,:,jc)-apgridt(:,:,jc)) - cons_lct(jc))**2 * Phi(:,:,jc))
+                cons_var_lct(jc)   = sum((xgridt(:,:,jc)-apgridt(:,:,jc))**2 * Phi(:,:,jc)) - cons_lct(jc)**2 ! equivalent to the previous line
                 return_var_lct(jc)= sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * Phi(:,:,jc))
             enddo
             lc%cons_var = lc%cons_var   + cons_var_lct  /(nt-t_scrap)
