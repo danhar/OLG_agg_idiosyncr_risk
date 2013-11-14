@@ -23,7 +23,7 @@ if (any(grid_error))
 end
 
 [nj nx] = size(Phi);
-nx_interp = 4*nx;
+nx_interp = min([nx*4, 100]); % min so that it doesn't become too large, which is a problem when printing graph on cluster
 Phi_cutoff=0.00001;
 
 scrsz = get(0,'ScreenSize');
@@ -70,15 +70,15 @@ system(['epstopdf graphs/Phi_j.eps']);
 % (a) first and foremost, want to throw out very small values to get a nice graph
 % (b) as mentioned above, we do not have the grid that exactly corresponds to Phi, bc Phi is average over simulations
 %     However, xgrid_mean should be a very good approximation, so (b) is not the reason for interpolating here
-Phi_interp=zeros(nj,nx_interp);
+Phi_interp=zeros(nj-1,nx_interp); % nj-1, because all dlmread variables are read in with one line too much...
 xmax=max(max(xgrid_mean(Phi>Phi_cutoff)));
 xmin=min(min(xgrid_mean(Phi>Phi_cutoff)));
 xgrid=(xmin:((xmax-xmin)/(nx_interp-1)):xmax)';
-for j=1:nj
+for j=1:size(Phi_interp,1)
     Phi_interp(j,:)=interp1(xgrid_mean(j,:),Phi(j,:), xgrid,'linear',0);
 end
 figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
-surf((1:nj),xgrid,Phi_interp');
+surf((1:size(Phi_interp,1)),xgrid,Phi_interp');
 set(gca,'FontSize',fontsize);
 title(['\Phi_{',dir,'}(x,j), for \Phi>',num2str(Phi_cutoff)]);
 view([-25 60]);

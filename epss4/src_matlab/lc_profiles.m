@@ -20,7 +20,7 @@ end
 cd(['../model_output/',dir])
 
 all_generations_unit_mass = 1;
-ap_lc  = dlmread('ap_lc.txt')
+ap_lc  = dlmread('ap_lc.txt');
 nj = length(ap_lc);
 
 if (all_generations_unit_mass)   
