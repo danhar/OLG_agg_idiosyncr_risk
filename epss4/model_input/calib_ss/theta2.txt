@@ -13,10 +13,10 @@ g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.156790 mean of depreciation shocks
-del_std         0.087762 std of depreciation shocks
+del_mean        0.159504 mean of depreciation shocks
+del_std         0.090871 std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.8854   first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.908754 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -86,7 +86,7 @@ k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenou
 k_max           9.00       max
 mu_min          0.0005      min for expected equity premium
 mu_max          0.05        max
-apmax_factor    14.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+apmax_factor    11.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
