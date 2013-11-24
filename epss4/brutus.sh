@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='085-base_sharpe_fine'
+thisrun='086-ies_ep_7d'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug #    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

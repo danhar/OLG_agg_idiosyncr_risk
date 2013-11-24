@@ -59,9 +59,9 @@ n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
 nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
-nt              3500     simulation periods, like in Gomes/Michaelides(2007)
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
@@ -91,8 +91,8 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-8        policyfunctions: stopping value for kappa in asset_allocation
-tol_coeffs      1e-6        stopping value for coeffs (normalized to unity)
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
 tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_ks       0.9         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.08         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
