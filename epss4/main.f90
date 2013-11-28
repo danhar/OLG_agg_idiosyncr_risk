@@ -9,9 +9,10 @@ program EPSS
 	use run_model_mod
 
     implicit none
-	real(dp)                  :: secs
+	real(dp)                  :: secs, elapsed_time
 	real(dp)     ,allocatable :: welfare(:,:), agg_cons(:,:), cev(:), agg_cons_ratio(:), cev_ins(:,:), welfare_ins(:,:,:), risk_scale(:)
-	integer                   :: sys_error, rc, i, start_time, end_time, count_rate
+	integer                   :: sys_error, rc, i
+	integer(8)                :: start_time, end_time, count_rate, count_max ! to avoid maximum time, but relies on intel extension
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
 	character(len=7)          :: runchar
@@ -155,8 +156,13 @@ program EPSS
         endif
     enddo
 
-    call system_clock(end_time,count_rate)
-    secs= real(end_time - start_time,dp)/real(count_rate,dp)
+    call system_clock(end_time,count_rate,count_max) ! since the arguments are of kind integer(8), this relies on the intel fortran extension
+    if (end_time < start_time) then
+        elapsed_time = real(abs(end_time),dp) + real(count_max,dp) - real(start_time,dp)
+    else
+        elapsed_time= real(end_time - start_time,dp)
+    endif
+    secs= elapsed_time/real(count_rate,dp)
     print*, '*********** ..... Program ', projectname, ' completed ..... ***********'
 	print '(a10, f0.2, a9, f0.2, a6)', 'CPU time: ', secs,' secs (= ', secs/60,' mins)'
 
