@@ -163,6 +163,7 @@ end subroutine calc_vars_tomorrow
 
 pure subroutine interp_policies_tomorrow(p,cons,value,kp, mup, grid, jc, consp, xgridp, vp, app_min)
 ! Make a projection of tomorrow's policies on k prime and mu prime
+! using bilinear interpolation (see Judd 1999, p. 240f, and Press et al (1992) p. 116f)
     use fun_locate
 
     type(tPolicies) ,intent(in) :: p

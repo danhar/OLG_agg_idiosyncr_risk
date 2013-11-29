@@ -33,6 +33,7 @@ This file describes things that will, should, or could be implemented in the cod
     then it can happen that the 'new' t_scrap (i.e. in the new calib-file) is larger than the 'old' nt. Concretely, run_model:137 'K%name ='K' ; call K%calc_stats(simvars_old)' can fail.
 - in save_results_mod:save_results, some of the formatted .txt files have an additional empty line at the bottom, eg. in     write(60,301) stocks_mean. This creates an additional row when read in in Matlab with dlmread. 
     Tried to remedy by putting access='stream', form='formatted', or (,:) in the edit descriptor, but didn't help.
+- use simplicial interpolation (on scattered data), see Judd, p. 242. Or interpolate on a fixed xgrid in the solution.
 - splines for value function and consumption in Euler equations / household solution? Maybe also to interpolate stocks and bonds?
 - use the type tPolicies everywhere instead of redefining xgrid etc (Distribution, fun_excessbonds, save_results_mod, policyfunctions).
     -- started, but is not so easy: the newly defined xgrid etc have less dimensions. 
