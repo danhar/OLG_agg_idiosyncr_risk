@@ -450,6 +450,7 @@ contains
             if ((ginis .ne. 0 .or. ginis .ne. 1) .and. ginis .ne. .true.) ginis = .false. ! Have to do this because simvars_sizes.unformatted contained old, erroneous values
         endif
         close(55)
+!        ginis = .true.
 
         if (io_stat == 0) then
 
