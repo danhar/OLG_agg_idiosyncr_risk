@@ -22,6 +22,8 @@ cd ..
 
 if [[ "$BUILD" == *Debug* ]]; then
     gdb --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/epss4 >>shell_output.txt 2>&1
+    # module load valgrind # use either gdb or valgrind
+    # valgrind --error-limit=no  ./$BUILD/epss4 >>shell_output.txt 2>&1 # not tested
 else
     ./$BUILD/epss4 >>shell_output.txt 2>&1
 fi
