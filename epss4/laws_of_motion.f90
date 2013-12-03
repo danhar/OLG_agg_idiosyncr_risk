@@ -34,7 +34,7 @@ pure real(dp) function Forecast_k(coeffs, k_in, mu)
     else
         k = k_in
     endif
-! Taking logs of mu didn't seemed counterproductive in tests
+! Taking logs of mu seemed counterproductive in tests
 
     select case (lom_k_version)
     case(1)
@@ -72,7 +72,7 @@ pure real(dp) function Forecast_mu(coeffs, kp_in, mu)
     else
         kp = kp_in
     endif
-! Taking logs of mu didn't seemed counterproductive in tests
+! Taking logs of mu seemed counterproductive in tests
 
     if (coeffs(1) == 0.0 .and. coeffs(2) == 1.0) then
         Forecast_mu = mu ! Handles mean shock case and STY calibration
