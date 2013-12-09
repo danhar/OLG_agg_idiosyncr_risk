@@ -868,8 +868,8 @@ use omp_lib           ,only: OMP_get_max_threads
     if (nx_factor < 1) then
         print*, 'ERROR: nx_factor < 1'
         call critical_stop
-    elseif (nx_factor > 100) then
-        print*, 'WARNING: nx_factor > 100 : might run out of mem/ take long time'
+    elseif (nx_factor > 8) then
+        print*, 'WARNING: nx_factor > 8 : might run out of memory during simulation when computing simvars%r_pf_median(tc).'
     endif
 
     if (jr>=nj) then

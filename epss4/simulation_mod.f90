@@ -175,10 +175,14 @@ mu:     if (partial_equilibrium) then
             simvars%rf(tc+1) = f_riskfree_rate(simvars%K(tc+1),mut,pi_z(zt,:))
         endif
         r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))/(1.0+g)
-        simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
 
+        ! The following two medians for portfolio holdings may stop program execution for nx_factor > 8 due to memory limits.
+        ! If so, outcomment and set to zero.
+        simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
+        ! simvars%r_pf_median(tc) = 0.0
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))/(1.0+g)
+        ! simvars%r_pf_kappa_med(tc)= 0.0
 
         if (.not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
