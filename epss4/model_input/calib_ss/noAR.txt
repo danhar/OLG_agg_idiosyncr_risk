@@ -1,13 +1,13 @@
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
-! Like pc3.txt with new options
+! Economy with only idiosyncratic risk (no aggregate risk). Recalibrate all. Names noAR and ge_IR both denote this calibration. 
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.966764 discount factor
+beta            0.967261 discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
@@ -53,7 +53,7 @@ calc_euler_errors        .true.     calculates relative Euler equation errors al
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
-nap             20       exogenous grid for savings (ap= 'a prime')
+nap             40       exogenous grid for savings (ap= 'a prime')
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
@@ -62,7 +62,7 @@ nk              16       grid for aggregate capital (per capita) k
 nmu             10       grid for ex-ante expected equity premium (mu)
 nt              4000     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nx_factor       10        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
