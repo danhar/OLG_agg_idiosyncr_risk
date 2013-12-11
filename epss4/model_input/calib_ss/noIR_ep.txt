@@ -1,22 +1,22 @@
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
-! match equity premium
+! Economy with only aggregate risk (no idiosyncratic risk). Match equity premium, recalibrate all. Names noIR and ge_AR both denote this calibration.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta          15.117831 coefficient of relative risk aversion
+theta          14.650339 coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.993609 discount factor
+beta            0.993824 discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.076404 mean of depreciation shocks
-del_std         0.110656 std of depreciation shocks
+del_mean        0.076634 mean of depreciation shocks
+del_std         0.110703 std of depreciation shocks
 pi1_zeta        0.8960   first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.832667 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.833333 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
