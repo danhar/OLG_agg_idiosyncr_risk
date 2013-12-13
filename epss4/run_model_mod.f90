@@ -89,8 +89,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (.not. calibrating) call CheckPhi(Phi,output_path) ! writes errors to file
     if (.not. partial_equilibrium  .and. .not. err%not_converged) then
         write(tau_char,'(f4.2)') tau
-        if (tau == 0.14_dp) write(tau_char,'(f4.2)') 0.02
-        if (tau == 0.12_dp) write(tau_char,'(f4.2)') 0.00
+        if (abs(tau - 0.14_dp) < real(1.0e-5,dp)) write(tau_char,'(f4.2)') 0.02
+        if (abs(tau - 0.12_dp) < real(1.0e-5,dp)) write(tau_char,'(f4.2)') 0.00
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%write_unformatted('ms',input_path)
     endif
@@ -218,8 +218,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (.not. calibrating) call CheckPhi(Phi,output_path)
     if (.not. partial_equilibrium .and. .not. err%not_converged) then
         write(tau_char,'(f4.2)') tau
-        if (tau == 0.14_dp) write(tau_char,'(f4.2)') 0.02
-        if (tau == 0.12_dp) write(tau_char,'(f4.2)') 0.00
+        if (abs(tau - 0.14_dp) < real(1.0e-5,dp)) write(tau_char,'(f4.2)') 0.02
+        if (abs(tau - 0.12_dp) < real(1.0e-5,dp)) write(tau_char,'(f4.2)') 0.00
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call save_unformatted(grids, coeffs, simvars,input_path)
     endif
