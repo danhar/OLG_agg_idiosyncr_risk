@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='086-base_ep_recal3_7d'
+thisrun='086-tau12_recal_corr'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
