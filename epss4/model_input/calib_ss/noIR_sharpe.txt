@@ -1,6 +1,6 @@
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
-! No idiosyncratic risk, recalibrate all. Code name ge_AR_sharpe
+! Economy with only aggregate risk (no idiosyncratic risk). Match Sharpe ratio, recalibrate all. Names noIR and ge_AR both denote this calibration.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
