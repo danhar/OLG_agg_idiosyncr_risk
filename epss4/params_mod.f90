@@ -852,10 +852,6 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
-    if (n_eta /= 2) then
-        print*, 'WARNING: n_eta /= 2'
-    endif
-
     if (nt<=t_scrap) then
         print*, 'ERROR: nt<=t_scrap'
         call critical_stop
