@@ -432,7 +432,7 @@ contains
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
         character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
-        logical :: ginis
+        logical :: ginis ! This indicator doesn't work properly, see description in subroutine write_unformatted_array below.
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read',status='old')
         if (io_stat == 0) then
@@ -441,16 +441,18 @@ contains
             ! most likely, error occurs because no file exists (status='old'). One could set here default values, but at the moment the program will be stopped below.
         endif
 
+        ! The following lines do not work, because ginis will be read as an integer (that is the internal Fortran representation of an integer).
+        ! That is why in the end I set ginis = .true., because all the final results are with ginis.
+        ! This block of code is kept in here for future reference, when I might implement ginis as a character or integer.
         if (io_stat == 0) then
             read(55,iostat=io_stat) ginis
             if (io_stat .ne. 0) then ! This would work if simvars_sizes.unformatted did not contain old, erroneous values
                 ginis = .false.
                 io_stat = 0
             endif
-            if ((ginis .ne. 0 .or. ginis .ne. 1) .and. ginis .ne. .true.) ginis = .false. ! Have to do this because simvars_sizes.unformatted contained old, erroneous values
         endif
         close(55)
-!        ginis = .true.
+        ginis = .true.
 
         if (io_stat == 0) then
 
@@ -458,7 +460,6 @@ contains
             call this%allocate(nt)
 
             open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read',status='old')
-            ! Could I use standard derived type IO?
             if (io_stat == 0) then
                 do i=1,size(this)
                    read(55) this(i)%z, &    ! integer
@@ -488,10 +489,12 @@ contains
         class(tSimvars) ,intent(in) :: this(:)
         character(*)    ,intent(in) :: input_path
         integer :: i, io_stat
-        logical :: ginis, euler_errors ! indicator whether variables that have been added later are present
+        logical :: ginis
 
+        ! logical ginis meant as indicator whether variables that have been added later are present.
+        ! However, doesn't work because Intel Fortran Compiler stores logicals as integer values.
+        ! Probably should use character instead, like T for true, or integer 1 for true.
         ginis = .true.
-        euler_errors = .false. ! needs implementing in read
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
         write(55) size(this), size(this(1)%z)
