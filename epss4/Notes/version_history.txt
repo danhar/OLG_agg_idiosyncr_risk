@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-086-recalc_all: recalc results with same precision as baseline. Also get ginis and graphs for all. Trying -ipo on Brutus.  
+087-final: version used for computing final results in December 2013. Contains the updated calibration files.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -626,3 +626,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 083(b)-gini_coeffs: calc lorenz curve and gini coefficients. Use the existing code but without scalapack.
 084-kappa_in_01: tried to implement borrowing only in bond and no leverage in stock, but didn't work. DISCONTINUED.
 085-check_lc_var: implement alternative computation for the lifecycle variances, to check whether they are computed correctly.
+086-recalc_all: recalc results with same precision as baseline. Also get ginis and graphs for all. Trying -ipo on Brutus.
