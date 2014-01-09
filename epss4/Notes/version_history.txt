@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-087-final: version used for computing final results in December 2013. Contains the updated calibration files.
+088-gc_age: calculate CEV over age (during simulations). Maybe also over cash-on-hand, or better assets.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -627,3 +627,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 084-kappa_in_01: tried to implement borrowing only in bond and no leverage in stock, but didn't work. DISCONTINUED.
 085-check_lc_var: implement alternative computation for the lifecycle variances, to check whether they are computed correctly.
 086-recalc_all: recalc results with same precision as baseline. Also get ginis and graphs for all. Trying -ipo on Brutus.
+087-final: version used for computing final results in December 2013. Contains the updated calibration files.
