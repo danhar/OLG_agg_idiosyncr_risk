@@ -320,11 +320,19 @@ contains
 
     nx = size(Phi,1)
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
-    write(21,301) sum(Phi,2) ! This is rough approximation, since different xgrids for each eta.
+    write(21,301) sum(Phi,2) ! This is a linear approximation, which corresponds to the xgrid below
     close(21)
 
     open(unit=21, file=path//'/Phi.txt', status = 'replace')
     write(21,301) Phi
+    close(21)
+
+    open(unit=21, file=path//'/exp_val_tilde.txt', status = 'replace')
+    write(21,301) sum(lc%exp_value,2)
+    close(21)
+
+    open(unit=21, file=path//'/xgrid_tilde.txt', status = 'replace')
+    write(21,301) sum(lc%xgrid,2)/size(lc%xgrid,2)
     close(21)
 
     open(unit=21, file=path//'/ap_lc.txt', status = 'replace')
@@ -353,6 +361,14 @@ contains
 
     open(unit=21, file=path//'/return_var_lc.txt', status = 'replace')
     write(21,302) lc%return_var
+    close(21)
+
+    open(unit=21, file=path//'/log_cons_lc.txt', status = 'replace')
+    write(21,302) lc%log_cons
+    close(21)
+
+    open(unit=21, file=path//'/var_log_cons_lc.txt', status = 'replace')
+    write(21,302) lc%var_log_cons
     close(21)
 
     open(unit=21, file=path//'/pop_frac.txt', status = 'replace')

@@ -31,21 +31,19 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     type(tSimvars)   ,intent(inout) :: simvars    ! (zt, kt, mut, bt,...), first element contains starting values
     real(dp)         ,intent(inout) :: Phi(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tLifecycle) ,intent(out)   :: lc         ! lifecycle profiles
-    real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, kappa_zk, xgrid_zk, stocks_zk ! policies for given z and K
-    real(dp) ,dimension(:,:,:)   ,allocatable :: apgridt, kappat, xgridt, stockst         ! policies for given z, K, and mu
-    real(dp) ,dimension(:,:,:)   ,allocatable :: Phi_avg, r_pf, val_j1_zk ! portfolio return
-    real(dp) ,dimension(:,:)     ,allocatable :: val_j1_t ! value of j=1 for given z and K, and mu
-    real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct
+    real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, kappa_zk, xgrid_zk, stocks_zk, value_zk    ! policies for given z and K
+    real(dp) ,dimension(:,:,:)   ,allocatable :: apgridt, kappat, xgridt, stockst, valuet, exp_value_t ! policies for given z, K, and mu
+    real(dp) ,dimension(:,:,:)   ,allocatable :: Phi_avg, r_pf ! portfolio return
+    real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct, log_cons_lct, var_log_cons_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
     real(dp)  :: Kt, mut, rt, netwaget, penst, w, eul_err_temp(2) ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
 
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
     nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)
-    allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu))
-    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), stockst(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
-    allocate(val_j1_zk(nx,n_eta,nmu), val_j1_t(nx,n_eta))
-    allocate(ap_lct(nj), stocks_lct(nj), cons_lct(nj), cons_var_lct(nj), return_lct(nj), return_var_lct(nj))
+    allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu), value_zk(nx,n_eta,nj,nmu))
+    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), stockst(nx,n_eta,nj), valuet(nx,n_eta,nj), exp_value_t(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
+    allocate(ap_lct(nj), stocks_lct(nj), cons_lct(nj), cons_var_lct(nj), return_lct(nj), return_var_lct(nj), log_cons_lct(nj), var_log_cons_lct(nj))
     allocate(Knew(nt+1))
 
     Phi_avg         = 0.0
@@ -74,7 +72,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
         xgrid_zk (:,:,:,:)= (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
         apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
         stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
-        val_j1_zk(:,:,:)  = (1-w)*value(:,:,zt,1,i,:) +w*value(:,:,zt,1,i+1,:)
+        value_zk (:,:,:,:)= (1-w)*value          (:,:,zt,:,i,:) +w*value          (:,:,zt,:,i+1,:)
         where (apgrid_zk .ne. 0.0)
             kappa_zk = stocks_zk/apgrid_zk
         elsewhere
@@ -128,7 +126,7 @@ mu:     if (partial_equilibrium) then
 
 	        apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
 	        stockst  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
-	        val_j1_t = (1-w)*val_j1_zk(:,:,i)   + w*val_j1_zk(:,:,i+1)
+	        valuet   = (1-w)*value_zk (:,:,:,i) + w*value_zk (:,:,:,i+1)
 	        where (apgridt .ne. 0.0)
 	            kappat = stockst/ apgridt
 	        elsewhere ! includes apgrid(:,nj) =0
@@ -137,9 +135,10 @@ mu:     if (partial_equilibrium) then
         else
             apgridt  = apgrid_zk(:,:,:,1)
             stockst  = stocks_zk(:,:,:,1)
-            val_j1_t = val_j1_zk(:,:,1)
+            valuet   = value_zk (:,:,:,1)
             kappat   = kappa_zk (:,:,:,1)
         endif
+        exp_value_t = valuet*Phi(:,:,:)
 
         call CheckPhi(Phi, simvars%Phi_1(tc), simvars%Phi_nx(tc)) ! Do here because Phi now was transitioned for all cases
 
@@ -163,7 +162,7 @@ mu:     if (partial_equilibrium) then
         simvars%wage(tc)  = netwaget
         simvars%pens(tc)  = penst
         simvars%tau (tc)  = f_tau(Kt, zeta(zt))
-        simvars%welf(tc)  = sum(val_j1_t*Phi(:,:,1))
+        simvars%welf(tc)  = sum(exp_value_t(:,:,1))
         simvars%err_aggr(tc)   = f_aggregate_diff(simvars%output(tc),  simvars%invest(tc), simvars%C(tc),simvars%bequests(tc))
         simvars%B(tc)          = f_excessbonds(mut)
         simvars%err_income(tc) = f_income_diff(simvars%K(tc), zeta(zt), simvars%r(tc), simvars%rf(tc), delta(zt))
@@ -206,19 +205,25 @@ mu:     if (partial_equilibrium) then
             ap_lct      = sum(sum(apgridt * Phi,1),1)
             stocks_lct  = sum(sum(stockst * Phi,1),1)
             cons_lct    = sum(sum((xgridt-apgridt) * Phi,1),1)
+            log_cons_lct= sum(sum(log(xgridt-apgridt) * Phi,1),1)
             return_lct  = sum(sum(Phi*r_pf,1),1)
             lc%ap       = lc%ap    + ap_lct    /(nt-t_scrap)
             lc%cons     = lc%cons  + cons_lct  /(nt-t_scrap)
             lc%stock    = lc%stock + stocks_lct/(nt-t_scrap)
             do jc=1,nj
                 !cons_var_lct(jc)   = sum(((xgridt(:,:,jc)-apgridt(:,:,jc)) - cons_lct(jc))**2 * Phi(:,:,jc))
-                cons_var_lct(jc)   = sum((xgridt(:,:,jc)-apgridt(:,:,jc))**2 * Phi(:,:,jc)) - cons_lct(jc)**2 ! equivalent to the previous line
-                return_var_lct(jc)= sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * Phi(:,:,jc))
+                cons_var_lct(jc)     = sum((xgridt(:,:,jc)-apgridt(:,:,jc))**2 * Phi(:,:,jc)) - cons_lct(jc)**2 ! equivalent to the previous line
+                var_log_cons_lct(jc) = sum(log(xgridt(:,:,jc)-apgridt(:,:,jc))**2 * Phi(:,:,jc)) - log_cons_lct(jc)**2
+                return_var_lct(jc)   = sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * Phi(:,:,jc))
             enddo
-            lc%cons_var = lc%cons_var   + cons_var_lct  /(nt-t_scrap)
-            lc%return   = lc%return     + return_lct    /(nt-t_scrap)
-            lc%return_var=lc%return_var + return_var_lct/(nt-t_scrap)
-            Phi_avg     = Phi_avg + Phi
+            lc%cons_var     = lc%cons_var     + cons_var_lct    /(nt-t_scrap)
+            lc%return       = lc%return       + return_lct      /(nt-t_scrap)
+            lc%return_var   = lc%return_var   + return_var_lct  /(nt-t_scrap)
+            lc%log_cons     = lc%log_cons     + log_cons_lct    /(nt-t_scrap)
+            lc%var_log_cons = lc%var_log_cons + var_log_cons_lct/(nt-t_scrap)
+            lc%exp_value    = lc%exp_value    + exp_value_t     /(nt-t_scrap)
+            lc%xgrid        = lc%xgrid        + xgridt          /(nt-t_scrap)
+            Phi_avg         = Phi_avg + Phi
         endif
 
     enddo

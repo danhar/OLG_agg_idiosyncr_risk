@@ -31,13 +31,15 @@ else
    pop_frac_rescale = 1.0;
    disp('Plotting expected lifecycle at birth (i.e. including survival rates, i.e. population shrinks)');
 end
-ap_lc  = dlmread('ap_lc.txt')./pop_frac_rescale;
-kappa_lc   = dlmread('kappa_lc.txt');
-stock_lc   = dlmread('stock_lc.txt')./pop_frac_rescale;
-cons_lc    = dlmread('cons_lc.txt')./pop_frac_rescale;
-consvar_lc = dlmread('consvar_lc.txt')./pop_frac_rescale;
-return_lc  = dlmread('return_lc.txt')./pop_frac_rescale;
-returnvar_lc=dlmread('return_var_lc.txt')./pop_frac_rescale;
+ap_lc           = dlmread('ap_lc.txt')          ./pop_frac_rescale;
+kappa_lc        = dlmread('kappa_lc.txt');
+stock_lc        = dlmread('stock_lc.txt')       ./pop_frac_rescale;
+cons_lc         = dlmread('cons_lc.txt')        ./pop_frac_rescale;
+consvar_lc      = dlmread('consvar_lc.txt')     ./pop_frac_rescale;
+return_lc       = dlmread('return_lc.txt')      ./pop_frac_rescale;
+returnvar_lc    = dlmread('return_var_lc.txt')  ./pop_frac_rescale;
+log_cons_lc     = dlmread('log_cons_lc.txt')    ./pop_frac_rescale;
+var_log_cons_lc = dlmread('var_log_cons_lc.txt')./pop_frac_rescale;
 bond_lc    = ap_lc - stock_lc;
 % cd('../../../src_matlab/')
 
@@ -132,15 +134,6 @@ set(gca,'FontSize',fontsize);
 title('Consumption');
 
 subplot(2,2,2)
-plot(agegrid,return_lc,'LineWidth',linewidth);
-if (min(return_lc) < max(return_lc))
-    axis([agegrid(1) agegrid(end) min(return_lc) max(return_lc)])
-end
-%xlabel('age','FontSize',fontsize); ylabel('avg portf return','FontSize',fontsize);
-set(gca,'FontSize',fontsize);
-title('Portfolio return');
-
-subplot(2,2,3)
 plot(agegrid,consvar_lc,'LineWidth',linewidth);
 if (min(consvar_lc) < max(consvar_lc))
     axis([agegrid(1) agegrid(end) min(consvar_lc) max(consvar_lc)])
@@ -149,7 +142,39 @@ xlabel('age','FontSize',fontsize); %ylabel('var(cons)','FontSize',fontsize);
 set(gca,'FontSize',fontsize);
 title('Cross-sectional variance of consumption');
 
+subplot(2,2,3)
+plot(agegrid,log_cons_lc,'LineWidth',linewidth);
+if (min(log_cons_lc) < max(log_cons_lc))
+    axis([agegrid(1) agegrid(end) min(log_cons_lc) max(log_cons_lc)])
+end
+%xlabel('age','FontSize',fontsize); ylabel('cons','FontSize',fontsize);
+set(gca,'FontSize',fontsize);
+title('Log Consumption');
+
 subplot(2,2,4)
+plot(agegrid,var_log_cons_lc,'LineWidth',linewidth);
+if (min(var_log_cons_lc) < max(var_log_cons_lc))
+    axis([agegrid(1) agegrid(end) min(var_log_cons_lc) max(var_log_cons_lc)])
+end
+xlabel('age','FontSize',fontsize); %ylabel('var(cons)','FontSize',fontsize);
+set(gca,'FontSize',fontsize);
+title('Cross-sectional variance of log consumption');
+
+print('-depsc', ['graphs/lifecycles2']);
+system(['epstopdf graphs/lifecycles2.eps']);
+
+figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+
+subplot(2,2,1)
+plot(agegrid,return_lc,'LineWidth',linewidth);
+if (min(return_lc) < max(return_lc))
+    axis([agegrid(1) agegrid(end) min(return_lc) max(return_lc)])
+end
+%xlabel('age','FontSize',fontsize); ylabel('avg portf return','FontSize',fontsize);
+set(gca,'FontSize',fontsize);
+title('Portfolio return');
+
+subplot(2,2,2)
 plot(agegrid,returnvar_lc,'LineWidth',linewidth);
 if (min(returnvar_lc) < max(returnvar_lc))
     axis([agegrid(1) agegrid(end) min(returnvar_lc) max(returnvar_lc)])
@@ -158,8 +183,8 @@ xlabel('age','FontSize',fontsize); %ylabel('var(portf return)','FontSize',fontsi
 set(gca,'FontSize',fontsize);
 title('Variance of portfolio return');
 
-print('-depsc', ['graphs/lifecycles2']);
-system(['epstopdf graphs/lifecycles2.eps']);
+print('-depsc', ['graphs/lifecycles3']);
+system(['epstopdf graphs/lifecycles3.eps']);
 
 if (~isempty(strfind(pwd,'insurance'))) 
     cd('..')

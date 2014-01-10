@@ -4,7 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branch 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-088-gc_age: calculate CEV over age (during simulations). Maybe also over cash-on-hand, or better assets.
+088-gc_age: calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
