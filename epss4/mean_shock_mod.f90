@@ -328,12 +328,15 @@ contains
 
         lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
         lifecycles%cons    = sum(sum((xgrid_ms-apgrid_ms) * Phi,1),1)
+        lifecycles%log_cons= sum(sum(log(xgrid_ms-apgrid_ms) * Phi,1),1)
         lifecycles%stock   = sum(sum(stocks_ms * Phi,1),1)
         lifecycles%return  = sum(sum(Phi*sign(1.0,apgrid_ms)*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
         do jc=1,size(apgrid_ms,3)
-            lifecycles%cons_var(jc)  = sum((((xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%cons(jc)))**2 * Phi(:,:,jc))
-            lifecycles%return_var(jc)= sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * Phi(:,:,jc))
+            lifecycles%cons_var(jc)     = sum((((xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%cons(jc)))**2 * Phi(:,:,jc))
+            lifecycles%var_log_cons(jc) = sum(((log(xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%log_cons(jc)))**2 * Phi(:,:,jc))
+            lifecycles%return_var(jc)   = sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * Phi(:,:,jc))
         enddo
+        lifecycles%exp_value = value_ms * Phi
 
         where (lifecycles%ap .ne. 0.0)
             lifecycles%kappa = lifecycles%stock/lifecycles%ap
