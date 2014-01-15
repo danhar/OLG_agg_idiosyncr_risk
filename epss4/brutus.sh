@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 
-thisrun='088-gc_age'
-BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
+thisrun='088-gc_age_corr_debug_7d'
+BUILD=Build_Parallel_Debug #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 projectname="${MYDIR##*/}"
