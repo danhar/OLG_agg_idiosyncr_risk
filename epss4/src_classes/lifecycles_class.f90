@@ -23,7 +23,7 @@ module lifecycles_class
 contains
     elemental subroutine allocate_lifecycle(this, nj_o, nx_o)
         use params_mod, only: n_eta, nj_param => nj, nx_param => nx, nx_factor
-        class(tLifecycle) ,intent(out) :: this
+        class(tLifecycle) ,intent(inout) :: this
         integer ,intent(in) ,optional  :: nj_o, nx_o
         integer :: nj, nx
 
@@ -38,6 +38,8 @@ contains
         else
             nx = nx_param* nx_factor ! multiplying with nx_factor is specific to the use in simulation_mod
         endif
+
+        call this%deallocate()
 
         allocate(this%ap(nj), this%kappa(nj), this%cons(nj), this%stock(nj), this%cons_var(nj), this%return(nj), this%return_var(nj), this%log_cons(nj), this%var_log_cons(nj))
         allocate(this%exp_value(nx,n_eta,nj), this%xgrid(nx,n_eta,nj))
@@ -59,7 +61,7 @@ contains
     end subroutine deallocate_lifecycle
 
     elemental subroutine set_number_lifecycle(this, number)
-        class(tLifecycle) ,intent(out) :: this
+        class(tLifecycle) ,intent(inout) :: this
         real(dp)          ,intent(in) :: number
         if (.not. allocated(this%ap)) call this%allocate
         this%ap           = number
@@ -83,18 +85,7 @@ contains
         integer :: i
 
         call average%allocate(size(lc(1)%ap), size(lc(1)%exp_value,1))
-
-        average%ap           = 0.0
-        average%kappa        = 0.0
-        average%cons         = 0.0
-        average%stock        = 0.0
-        average%cons_var     = 0.0
-        average%return       = 0.0
-        average%return_var   = 0.0
-        average%log_cons     = 0.0
-        average%var_log_cons = 0.0
-        average%exp_value    = 0.0
-        average%xgrid        = 0.0
+        call average%set_number(0.0_dp)
 
         do i=1,size(lc)
             average%ap           = average%ap           + lc(i)%ap          /size(lc)

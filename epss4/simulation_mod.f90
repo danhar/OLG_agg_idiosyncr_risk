@@ -47,6 +47,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     allocate(Knew(nt+1))
 
     Phi_avg         = 0.0
+    call lc%allocate(nj,nx)
     call lc%set_number(0.0_dp)
     simvars%err_K   = .false.
     simvars%err_mu  = .false.
