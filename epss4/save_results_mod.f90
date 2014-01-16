@@ -279,6 +279,7 @@ contains
 ! The following seems the best format, because it will not produce ****, which can't be read by Matlab
 301 format(<nx> (es13.6,1x))
 302 format(<nj> (es13.6,1x))
+303 format(<nx> (es14.6e3,1x))
 !360 format(<nj> (f0.6,x))
 
     nx = size(pol%apgrid,1)
@@ -320,15 +321,15 @@ contains
 
     nx = size(Phi,1)
     open(unit=21, file=path//'/Phi_tilde.txt', status = 'replace')
-    write(21,301) sum(Phi,2) ! This is a linear approximation, which corresponds to the xgrid below
+    write(21,303) sum(Phi,2) ! This is a linear approximation, which corresponds to the xgrid below
     close(21)
 
     open(unit=21, file=path//'/Phi.txt', status = 'replace')
-    write(21,301) Phi
+    write(21,303) Phi
     close(21)
 
     open(unit=21, file=path//'/exp_val_tilde.txt', status = 'replace')
-    write(21,301) sum(lc%exp_value,2)
+    write(21,303) sum(lc%exp_value,2)
     close(21)
 
     open(unit=21, file=path//'/xgrid_tilde.txt', status = 'replace')
