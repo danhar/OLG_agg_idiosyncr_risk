@@ -8,7 +8,7 @@ module krusell_smith_mod
 
 contains
 !-------------------------------------------------------------------------------
-! Module procedures in order: bla
+! Module procedures in order:
 ! - subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, policies, value, lifecycles, err, calibrating)
 ! -- (internal) function krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
