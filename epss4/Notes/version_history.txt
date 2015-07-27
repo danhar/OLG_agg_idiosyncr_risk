@@ -2,9 +2,10 @@ This version history is a collection of 3 different versioning approaches during
 most recent and also the current. Within each section, style and chronological ordering differs. Essentially, only (A) and (D) are of interest now.
   
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
- (A) Current branch 
+ (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-088-gc_age: calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age.
+090-assetpricing: restart equity premium analysis
+088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. UNFINISHED?
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order

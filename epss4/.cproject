@@ -77,8 +77,8 @@
 							</tool>
 							<tool id="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base.630968356" name="GCC Assembler" superClass="photran.managedbuild.tool.intel.gnu.assembler.x86_64.base">
 								<option id="gnu.both.asm.option.include.paths.1398772400" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include/intel64/lp64"/>
-									<listOptionValue builtIn="false" value="/usr/local/intel/composer_xe_2013.0.079/mkl/include"/>
+									<listOptionValue builtIn="false" value="/opt/intel/composerxe/mkl/include/intel64/lp64"/>
+									<listOptionValue builtIn="false" value="/opt/intel/composer_xe_2015.1.133/mkl/include"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.912902345" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
@@ -343,6 +343,9 @@
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.1647259652;cdt.managedbuild.tool.gnu.c.compiler.input.2059878800">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1759305339.1011539157.;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2131414387;cdt.managedbuild.tool.gnu.c.compiler.input.574683826">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381;photran.managedbuild.toolchain.intel.fortran.x86_64.base.1763601381.1623462470;photran.managedbuild.tool.intel.gnu.c.compiler.x86_64.base.2015405717;cdt.managedbuild.tool.gnu.c.compiler.input.93924483">
