@@ -1,7 +1,7 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 
 !calib_ss/baseline.txt
-calib_ss/base_sharpe.txt
+!calib_ss/base_sharpe.txt
 !calib_ss/base_ep2.txt
 !calib_ss/ies15.txt
 !calib_ss/ies15_sharpe.txt
@@ -11,7 +11,7 @@ calib_ss/base_sharpe.txt
 !calib_ss/noAR.txt
 !calib_ss/norisk.txt
 !calib_ss/base_sharpe_recal.txt
-!calib_ss/base_ep_recal.txt
+calib_ss/base_ep_recal.txt
 !calib_ss/ies15_sharpe_recal.txt
 !calib_ss/ies15_ep_recal.txt
 !calib_ss/base_tau12.txt
@@ -40,6 +40,10 @@ Only put the filename, not the whole path (because of regex).
 --------------------------------------------------------------------------------------------------------------
 2. Equity premium project (folder calib_ep):
 --------------------------------------------------------------------------------------------------------------
+! STY_cor_const.txt
+
+/old
+/old/2012/: version of thesis, outdated calib files and *.unformatted in /model_input/last_results/.old
 
 
 
