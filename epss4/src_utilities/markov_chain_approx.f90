@@ -141,7 +141,7 @@ contains
 
 subroutine ergodic(p,s)
 ! Purpose: Compute ergodic distribution s of Markov transition matrix p
-    use mkl95_lapack, only: geev
+    use lapack95, only: geev
     implicit none
     real(dp), dimension(:,:), intent(in) :: p
     real(dp), dimension(:), intent(out) :: s

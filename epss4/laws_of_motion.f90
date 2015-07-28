@@ -107,7 +107,7 @@ end function Forecast_mu
 pure subroutine Regression(simvars,coeffs)
     use params_mod   ,only: t_scrap
     use classes_mod  ,only: tSimvars
-    use MKL95_LAPACK ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
+    use lapack95 ,only: gels, gelsy ! Intel MKL/ LAPACK dgels. Explanation at the bottom.
 
     type(tSimvars)           ,intent(in)   :: simvars(:)
     type(tCoeffs)            ,intent(inout):: coeffs   ! inout coz some coeffs might not be updated
