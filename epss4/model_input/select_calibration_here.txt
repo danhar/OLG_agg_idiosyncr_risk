@@ -1,8 +1,8 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 ! This version is for the equity premium project.
 
-calib_ep/GM1.txt
-
+!calib_ep/GM1.txt
+calib_ss/base_ep_recal.txt
 
 !!! Do not change this line. Put all calibration files above this line. !!!
 In the following, the available calibration files are listed, together with a short description.
