@@ -562,7 +562,7 @@ contains
     subroutine set_demographics()
     ! Sets productivity profile, survival rates, and calculates pop ratios
         integer, parameter :: iounit=124
-        logical, parameter :: adjust_nj = .true. ! if true, then set nj to life expectancy if surv_rates = .false., else leave nj as it is
+        logical, parameter :: adjust_nj = .false. ! if true, then set nj to life expectancy if surv_rates = .false., else leave nj as it is
         logical, save      :: already_adjusted_nj = .false.
         real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
         real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
