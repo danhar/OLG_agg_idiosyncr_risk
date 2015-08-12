@@ -1,13 +1,13 @@
 ! Calibration file Equity Premium Project. Change values but not format.
 ! Short description of this specific calibration:
-! GM: Gomes, Michaelides RFS 2008, but without survival risk
+! GM: Gomes, Michaelides RFS 2008, but without survival risk, natural borrowing limit (NNB) and idiosyncratic risk (IR)
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           8.0     coefficient of relative risk aversion
 psi             0.50   elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.90    discount factor
+beta            0.91    discount factor
 alpha           0.36    capital share
 g               0.00    growth rate of technology
 de_ratio        0.66    debt-equity-ratio. Alternatives: 0.66
@@ -24,10 +24,10 @@ nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Demographics    
 !----------------------------------------------------------------------------------------------------------------------------/
-nj              80      maximum model age (max biological age: econ_life_start -1 + nj)
-jr              45      model retirement age (biological retirement age: econ_life_start -1 + jr)
-econ_life_start 21      biological age at j=1
-n               0.011   population growth rate
+nj              64      maximum model age (max biological age: econ_life_start -1 + nj)
+jr              44      model retirement age (biological retirement age: econ_life_start -1 + jr)
+econ_life_start 22      biological age at j=1
+n               0.01    population growth rate
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Model options and experiments
@@ -46,19 +46,19 @@ twosided_experiment .false. If true (and run_n_times>1), the risk experiments ar
 surv_rates      .false.  false = no survival rates
 def_contrib     .true.  true=tau exogenous, false=benefits exogenous (not yet fully implemented)
 partial_equilibrium     .false.     If true, no GE computed, GE values read from file
-collateral_constraint   .true.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
-kappa_in_01             .true.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
+collateral_constraint   .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
+kappa_in_01             .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
 nap             20      exogenous grid for savings (ap= 'a prime')
-n_eta           4       grid for idiosyncratic stochastic state eta
+n_eta           5       grid for idiosyncratic stochastic state eta
 n_zeta          2       aggregate productivity shocks
 n_delta         2       depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
-nk              12       grid for aggregate capital (per capita) k
-nmu             10       grid for ex-ante expected equity premium (mu)
+nk              24       grid for aggregate capital (per capita) k
+nmu             12       grid for ex-ante expected equity premium (mu)
 nt              4000     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
 nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
@@ -77,7 +77,7 @@ save_all_iterations     .false.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
 
-factor_k        1.10        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
+factor_k        1.12        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
 factor_mu       1.00        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.70        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.40        same. Alteratives .3, .4
@@ -91,10 +91,10 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-10       policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
-tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
-tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_ks       0.7         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
+tol_asset_eul   1e-8       policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
+tol_coeffs      1e-4        stopping value for coeffs (normalized to unity)
+tol_calib       1e-3        stopping value for sum(abs(endog_moments - data_moments))
+maxstp_ks       1.0         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.2         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/
