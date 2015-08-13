@@ -82,17 +82,17 @@ factor_mu       1.00        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.70        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.40        same. Alteratives .3, .4
 k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           15.00       max
+k_max           20.00       max
 mu_min          0.0005      min for expected equity premium
 mu_max          0.12        max
-apmax_factor    20.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+apmax_factor    40.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-9       policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
-tol_coeffs      1e-5        stopping value for coeffs (normalized to unity)
+tol_asset_eul   1e-10       policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
+tol_coeffs      1e-6        stopping value for coeffs (normalized to unity)
 tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_ks       0.9         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.2         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
