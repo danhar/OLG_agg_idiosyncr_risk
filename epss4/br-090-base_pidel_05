@@ -12,33 +12,25 @@
 
 thisrun="${PWD##*/}"
 
-lshosts -w $HOSTNAME >shell_output.txt 2>&1
-echo " "  >>shell_output.txt 2>&1
+lshosts -w $HOSTNAME >bsub_output.txt 2>&1
+echo " "  >>bsub_output.txt 2>&1
 
 cd $BUILD
-make clean
-make all >>../shell_output.txt 2>&1
+make clean >>../bsub_output.txt 2>&1
+make all >>../bsub_output.txt 2>&1
 cd ..
 
 if [[ "$BUILD" == *Debug* ]]; then
-    gdb --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/epss4 >>shell_output.txt 2>&1
+    gdb --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/epss4 >./model_output/shell_output.txt 2>&1
     # module load valgrind # use either gdb or valgrind
     # valgrind --error-limit=no  ./$BUILD/epss4 >>shell_output.txt 2>&1 # not tested
 else
-    ./$BUILD/epss4 >>shell_output.txt 2>&1
+    ./$BUILD/epss4 >./model_output/shell_output.txt 2>&1
 fi
 
-mv shell_output.txt ./model_output/shell_output.txt
+# mv bsub_output.txt ./model_output/bsub_output.txt
 tar -cjf results.tar.bz2 model_output model_input
 
-scp results.tar.bz2 isildur@82.130.121.40:~/Tempdh/Brutus/$thisrun
-ssh isildur@82.130.121.40 "cd ~/Tempdh/Brutus/$thisrun; tar -xjf results.tar.bz2; rm results.tar.bz2"
-
-
-############################### Notes ################################
-# Get the name (without .txt) of the current calibration_file used
-# calib_id = "${EPSSDIR%%/*}" 
-# Run multiple times with different calibration files as input
-# ./$BUILD/ calib_ep/STY-IR03.txt >>shell_output.txt 2>&1
-# ./$BUILD/ calib_ep/STY2noir.txt >>shell_output.txt 2>&1
-####################### End of Job File ##############################
+scp results.tar.bz2 $USERNAME@$MY_IP:$path_to_results/$thisrun
+ssh $USERNAME@$MY_IP "cd $path_to_results/$thisrun; tar -xjf results.tar.bz2; rm results.tar.bz2"
+scp bsub_output.txt $USERNAME@$MY_IP:$path_to_results/$thisrun
