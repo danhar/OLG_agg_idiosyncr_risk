@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='090-GM_NNB_IR3'
+thisrun='090-base_nocal_repl2'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
 NTHREADS=24  # number of OpenMP threads 
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
@@ -11,7 +11,8 @@ projectname="${MYDIR##*/}"
 MY_IP="$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')"
 USERNAME="$(whoami)"
 
-path_to_results=~/work/Research/Eqprem_idiorisk/test_results/Euler
+#path_to_results=~/work/Research/Eqprem_idiorisk/test_results/Euler
+path_to_results=~/work/Research/EPSocSec/test_results/Euler
 mkdir --parents $path_to_results/$thisrun
 cd $MYDIR
 
