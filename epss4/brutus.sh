@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='090-base_pidel_05'
+thisrun='090-base_Alex_income'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
 NTHREADS=16  # number of OpenMP threads 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"

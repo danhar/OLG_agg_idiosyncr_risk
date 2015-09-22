@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-thisrun='090-base_neta2b'
+thisrun='090-base_zbc_recal'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
 NTHREADS=24  # number of OpenMP threads 
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
