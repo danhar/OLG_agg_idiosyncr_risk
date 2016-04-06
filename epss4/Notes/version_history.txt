@@ -4,6 +4,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+091-ss_newresults: for submission to RED (in particular var log cons for tau=.12)
 090-assetpricing: restart equity premium analysis
 088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. UNFINISHED?
 
