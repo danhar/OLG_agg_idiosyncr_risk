@@ -19,27 +19,18 @@ end
 
 cd(['../model_output/',dir])
 
-all_generations_unit_mass = 1;
 ap_lc  = dlmread('ap_lc.txt');
 nj = length(ap_lc);
 
-if (all_generations_unit_mass)   
-    pop_frac = dlmread('pop_frac.txt');
-    pop_frac_rescale=pop_frac*double(nj);
-    disp('Plotting lifecycles conditional on surviving to max age!');
-else
-   pop_frac_rescale = 1.0;
-   disp('Plotting expected lifecycle at birth (i.e. including survival rates, i.e. population shrinks)');
-end
-ap_lc           = dlmread('ap_lc.txt')          ./pop_frac_rescale;
+ap_lc           = dlmread('ap_lc.txt')          ;
 kappa_lc        = dlmread('kappa_lc.txt');
-stock_lc        = dlmread('stock_lc.txt')       ./pop_frac_rescale;
-cons_lc         = dlmread('cons_lc.txt')        ./pop_frac_rescale;
-consvar_lc      = dlmread('consvar_lc.txt')     ./pop_frac_rescale;
-return_lc       = dlmread('return_lc.txt')      ./pop_frac_rescale;
-returnvar_lc    = dlmread('return_var_lc.txt')  ./pop_frac_rescale;
-log_cons_lc     = dlmread('log_cons_lc.txt')    ./pop_frac_rescale;
-var_log_cons_lc = dlmread('var_log_cons_lc.txt')./pop_frac_rescale;
+stock_lc        = dlmread('stock_lc.txt')       ;
+cons_lc         = dlmread('cons_lc.txt')        ;
+consvar_lc      = dlmread('consvar_lc.txt')     ;
+return_lc       = dlmread('return_lc.txt')      ;
+returnvar_lc    = dlmread('return_var_lc.txt')  ;
+log_cons_lc     = dlmread('log_cons_lc.txt')    ;
+var_log_cons_lc = dlmread('var_log_cons_lc.txt');
 bond_lc    = ap_lc - stock_lc;
 % cd('../../../src_matlab/')
 
@@ -105,11 +96,7 @@ set(gca,'FontSize',fontsize);
 title('Total savings');
 
 
-if (all_generations_unit_mass == 1)
-    note='Profiles are conditional on surviving to max age';
-else
-    note='Expected profiles at birth, incl survival risk';    
-end
+note='Profiles are conditional on surviving to max age';
 stringmatrix=char(...
 '{\bf            Lifecycle profiles over age}',...
 '  ',...

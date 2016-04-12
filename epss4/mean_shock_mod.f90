@@ -315,9 +315,10 @@ contains
 
     pure subroutine ms_lc_profiles(lifecycles)
     ! Calculates the policies in the mean shock and then the corresponding life-cycle profiles
-        use params_mod   ,only        :  g
+        use params_mod   ,only        :  g, pop_frac
         type(tLifecycle) ,intent(out) :: lifecycles
-        integer                       :: jc
+        integer                       :: jc, nx, n_eta, nj
+        real(dp) ,dimension(:,:,:) ,allocatable :: cons_ms, weight
 
         associate(xgrid_ms  => policies_ms%xgrid (:,:,1,:,1,1), &
                   apgrid_ms => policies_ms%apgrid(:,:,1,:,1,1), &
@@ -325,18 +326,28 @@ contains
                   kappa_ms  => policies_ms%kappa (:,:,1,:,1,1)  )
 
         call lifecycles%allocate(size(apgrid_ms,3))
+        ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove the following allocation block.
+        nx = size(xgrid_ms,1); n_eta = size(xgrid_ms,2); nj = size(xgrid_ms,3);
+        allocate(cons_ms(nx,n_eta,nj), weight(nx,n_eta,nj))
 
-        lifecycles%ap      = sum(sum(apgrid_ms * Phi,1),1)
-        lifecycles%cons    = sum(sum((xgrid_ms-apgrid_ms) * Phi,1),1)
-        lifecycles%log_cons= sum(sum(log(xgrid_ms-apgrid_ms) * Phi,1),1)
-        lifecycles%stock   = sum(sum(stocks_ms * Phi,1),1)
-        lifecycles%return  = sum(sum(Phi*sign(1.0,apgrid_ms)*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
-        do jc=1,size(apgrid_ms,3)
-            lifecycles%cons_var(jc)     = sum((((xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%cons(jc)))**2 * Phi(:,:,jc))
-            lifecycles%var_log_cons(jc) = sum(((log(xgrid_ms(:,:,jc)-apgrid_ms(:,:,jc)) - lifecycles%log_cons(jc)))**2 * Phi(:,:,jc))
-            lifecycles%return_var(jc)   = sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * Phi(:,:,jc))
+
+        do jc=1,nj
+            weight(:,:,jc) = Phi(:,:,jc)/pop_frac(jc)
         enddo
-        lifecycles%exp_value = value_ms * Phi
+
+        cons_ms = xgrid_ms-apgrid_ms
+        lifecycles%ap      = sum(sum(apgrid_ms * weight,1),1)
+        lifecycles%cons    = sum(sum(cons_ms * weight,1),1)
+        lifecycles%log_cons= sum(sum(log(cons_ms) * weight,1),1)
+        lifecycles%stock   = sum(sum(stocks_ms * weight,1),1)
+        lifecycles%return  = sum(sum(weight*sign(1.0,apgrid_ms)*(1.0 + simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g),1),1)
+        do jc=1,size(apgrid_ms,3)
+            lifecycles%cons_var(jc)     = sum(((cons_ms(:,:,jc) - lifecycles%cons(jc)))**2 * weight(:,:,jc))
+            lifecycles%var_log_cons(jc) = sum(((log(cons_ms(:,:,jc)) - lifecycles%log_cons(jc)))**2 * weight(:,:,jc))
+            lifecycles%return_var(jc)   = sum((apgrid_ms(:,:,jc)*(1.0 + simvars%rf(1) + kappa_ms(:,:,jc)*simvars%mu(1))/(1.0+g) - lifecycles%return(jc))**2 * weight(:,:,jc))
+        enddo
+        lifecycles%exp_value = value_ms * Phi ! recall that this is not a lifecycle profile.
+        lifecycles%xgrid     = xgrid_ms ! recall that this is not a lifecycle profile.
 
         where (lifecycles%ap .ne. 0.0)
             lifecycles%kappa = lifecycles%stock/lifecycles%ap

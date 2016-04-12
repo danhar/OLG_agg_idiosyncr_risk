@@ -32,7 +32,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     real(dp)         ,intent(inout) :: Phi(:,:,:) ! distribution. Returns: average Phi if (exogenous_xgrid), else Phi in nt
     type(tLifecycle) ,intent(out)   :: lc         ! lifecycle profiles
     real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, kappa_zk, xgrid_zk, stocks_zk, value_zk    ! policies for given z and K
-    real(dp) ,dimension(:,:,:)   ,allocatable :: apgridt, kappat, xgridt, stockst, valuet, const, exp_value_t ! policies for given z, K, and mu
+    real(dp) ,dimension(:,:,:)   ,allocatable :: apgridt, kappat, xgridt, stockst, valuet, const, exp_value_t, weight ! policies for given z, K, and mu
     real(dp) ,dimension(:,:,:)   ,allocatable :: Phi_avg, r_pf ! portfolio return
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct, log_cons_lct, var_log_cons_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
@@ -42,7 +42,8 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
     nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)
     allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu), value_zk(nx,n_eta,nj,nmu))
-    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), const(nx,n_eta,nj), stockst(nx,n_eta,nj), valuet(nx,n_eta,nj), exp_value_t(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
+    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), const(nx,n_eta,nj), stockst(nx,n_eta,nj), valuet(nx,n_eta,nj))
+    allocate(exp_value_t(nx,n_eta,nj), weight(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
     allocate(ap_lct(nj), stocks_lct(nj), cons_lct(nj), cons_var_lct(nj), return_lct(nj), return_var_lct(nj), log_cons_lct(nj), var_log_cons_lct(nj))
     allocate(Knew(nt+1))
 
@@ -204,20 +205,25 @@ mu:     if (partial_equilibrium) then
 
         ! Average life cycle profiles and average Phi
         if (tc > t_scrap) then ! 'Throw away' first t_scrap
-            ap_lct      = sum(sum(apgridt * Phi,1),1)
-            stocks_lct  = sum(sum(stockst * Phi,1),1)
-            cons_lct    = sum(sum(const * Phi,1),1)
-            log_cons_lct= sum(sum(log(const) * Phi,1),1)
-            return_lct  = sum(sum(Phi*r_pf,1),1)
-            lc%ap       = lc%ap    + ap_lct    /(nt-t_scrap)
-            lc%cons     = lc%cons  + cons_lct  /(nt-t_scrap)
-            lc%stock    = lc%stock + stocks_lct/(nt-t_scrap)
             do jc=1,nj
-                !cons_var_lct(jc)   = sum(((xgridt(:,:,jc)-apgridt(:,:,jc)) - cons_lct(jc))**2 * Phi(:,:,jc))
-                cons_var_lct(jc)     = sum(const(:,:,jc)**2 * Phi(:,:,jc)) - cons_lct(jc)**2 ! equivalent to the previous line
-                var_log_cons_lct(jc) = sum(log(const(:,:,jc))**2 * Phi(:,:,jc)) - log_cons_lct(jc)**2
-                return_var_lct(jc)   = sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * Phi(:,:,jc))
+                weight(:,:,jc) = Phi(:,:,jc)/pop_frac(jc)
             enddo
+
+            ap_lct      = sum(sum(apgridt    * weight,1),1)
+            stocks_lct  = sum(sum(stockst    * weight,1),1)
+            cons_lct    = sum(sum(const      * weight,1),1)
+            log_cons_lct= sum(sum(log(const) * weight,1),1)
+            return_lct  = sum(sum(r_pf       * weight,1),1)
+            do jc=1,nj
+                cons_var_lct(jc)     = sum((const(:,:,jc) - cons_lct(jc))**2 * weight(:,:,jc))
+                ! According to Wikipedia article "Algorithms for calculating variance" this alternative is more unstable:
+                !cons_var_lct(jc)    = sum(const(:,:,jc)**2 * weight(:,:,jc)) - cons_lct(jc)**2
+                var_log_cons_lct(jc) = sum((log(const(:,:,jc)) - log_cons_lct(jc))**2 * weight(:,:,jc))
+                return_var_lct(jc)   = sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * weight(:,:,jc))
+            enddo
+            lc%ap           = lc%ap           + ap_lct          /(nt-t_scrap)
+            lc%cons         = lc%cons         + cons_lct        /(nt-t_scrap)
+            lc%stock        = lc%stock        + stocks_lct      /(nt-t_scrap)
             lc%cons_var     = lc%cons_var     + cons_var_lct    /(nt-t_scrap)
             lc%return       = lc%return       + return_lct      /(nt-t_scrap)
             lc%return_var   = lc%return_var   + return_var_lct  /(nt-t_scrap)
