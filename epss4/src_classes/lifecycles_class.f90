@@ -8,7 +8,7 @@ module lifecycles_class
 
     type tLifecycle
         real(dp), dimension(:),     allocatable :: ap, kappa, cons, stock, cons_var, return, return_var, log_cons, var_log_cons
-        real(dp), dimension(:,:,:), allocatable :: exp_value, xgrid
+        real(dp), dimension(:,:,:), allocatable :: exp_value, xgrid ! these are not really life-cycle profiles
     contains
         procedure :: allocate => allocate_lifecycle
         procedure :: deallocate => deallocate_lifecycle

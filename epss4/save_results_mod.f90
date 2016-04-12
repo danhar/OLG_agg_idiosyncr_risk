@@ -217,13 +217,11 @@ contains
     call coeffs%write(21, show_digits)
 
     write(21,*)
-    write(21,*) 'Lifecycle statistics   (Cond. = conditional on survival)' ! in per capita units
+    write(21,*) 'Lifecycle statistics   (conditional on survival)' ! in per capita units
     write(21,*) repeat('-',63)
-    write(21,123) repeat(' ',nl+2),' Average', 'Std.Dev.', 'Cond.Avg', 'Cond.Std'
-    write(21,fmt1) ' R_portf   ', sum(lc%return)/nj, sum(lc%return_var)/nj,  & !!! Attn: the second is Rpvar_avg!!!
-                    sum(lc%return/pop_frac*pop_frac(1))/nj, sum(lc%return_var/pop_frac*pop_frac(1))/nj
-    write(21,fmt1) ' Cons      ', sum(lc%cons)/nj, sum(lc%cons_var)/nj,  & !!! Attn: the second is Rpvar_avg!!!
-                    sum(lc%cons/pop_frac*pop_frac(1))/nj, sum(lc%cons_var/pop_frac*pop_frac(1))/nj
+    write(21,123) repeat(' ',nl+2),' Average', 'Std.Dev.'
+    write(21,fmt1) ' r_portf   ', sum(lc%return), sum(lc%return_var) !!! Attn: the second is Rpvar_avg!!!
+    write(21,fmt1) ' cons      ', sum(lc%cons), sum(lc%cons_var)     !!! Attn: the second is cons_avg!!!
     if (prec=='long') then
         write(21,*) 'Report more lifecycle statistics in equil_long'
     endif
