@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module income
 ! contains functions for net wages, net returns, and pensions
     use kinds

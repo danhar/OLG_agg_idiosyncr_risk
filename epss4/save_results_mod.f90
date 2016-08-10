@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module save_results_mod
     implicit none
 contains

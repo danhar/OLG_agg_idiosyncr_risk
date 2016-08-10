@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module kinds
 ! Type kind parameters
     implicit none

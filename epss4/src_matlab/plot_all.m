@@ -1,3 +1,5 @@
+% Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+
 clear all;
 close all;
 global gplot_all

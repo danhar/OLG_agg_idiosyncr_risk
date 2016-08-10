@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module krusell_smith_mod
     use kinds
     use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs

@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module classes_mod
 ! contains the different classes, which are just derived types with methods
     use aggregate_grids_class

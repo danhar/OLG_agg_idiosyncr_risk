@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module simulation_mod
     use kinds           ,only: dp
     use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids, tCoeffs

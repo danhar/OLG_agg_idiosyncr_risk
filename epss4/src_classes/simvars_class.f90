@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module simvars_class
     ! This derived type collects the aggregate variables over the simulations.
     use kinds      ,only: dp

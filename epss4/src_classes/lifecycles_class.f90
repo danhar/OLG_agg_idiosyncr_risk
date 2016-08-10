@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module lifecycles_class
     ! This derived type collects the various lifecycle profiles.
     use kinds      ,only: dp

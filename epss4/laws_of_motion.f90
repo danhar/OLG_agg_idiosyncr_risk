@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module laws_of_motion
     use kinds      ,only: dp
     use classes_mod,only: tCoeffs

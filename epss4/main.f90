@@ -1,5 +1,5 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 ! main.f90 of program Equity Premium Social Security
-! Copyleft 2012 Daniel Harenberg
 program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library

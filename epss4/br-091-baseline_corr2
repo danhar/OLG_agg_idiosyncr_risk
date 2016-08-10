@@ -1,3 +1,4 @@
+# Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 #!/bin/bash
 
 # #BSUB-q pub.7d                    # Job queue 1h, 8h, 36h, 7d

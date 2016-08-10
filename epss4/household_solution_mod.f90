@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module household_solution_mod
     use kinds
     use classes_mod ,only: tAggGrids, tPolicies, tErrors, tCoeffs

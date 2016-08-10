@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module params_mod
 ! Contains all economic and numerical parameters.
 ! All 'variables' in this module have either parameter or protected attribute.

@@ -1,3 +1,4 @@
+! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 module calibration_mod
 ! calibration of 'endogenous parameters'
     use kinds
