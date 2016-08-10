@@ -1,4 +1,4 @@
- /*************************************************************************
+/*************************************************************************
 Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 
 This copyright applies to all files of the epss project, hosted on
@@ -9,4 +9,4 @@ https://github.com/danhar/epss:
 
 Excluded from this license are some files in the folder src_utilities. 
 In that folder, the licenses are as indicated in each file.
- /*************************************************************************
+/*************************************************************************
