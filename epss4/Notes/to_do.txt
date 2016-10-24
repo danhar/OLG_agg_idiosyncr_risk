@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 
 This file describes things that will, should, or could be implemented in the code. They have to do with programming, not economics.
 
