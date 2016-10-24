@@ -5,7 +5,7 @@
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
 ! This version is for the social security project.
 
-calib_ss/baseline.txt
+!calib_ss/baseline.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep2.txt
 !calib_ss/ies15.txt
@@ -27,7 +27,7 @@ calib_ss/baseline.txt
 !calib_ss/ies15_sharpe_eerr.txt
 !calib_ss/survival_risk.txt
 !calib_ss/base_zbc.txt
-!calib_ss/testing_cal.txt
+calib_ss/testing_cal.txt
 
 
 

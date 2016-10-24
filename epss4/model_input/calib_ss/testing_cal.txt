@@ -1,3 +1,7 @@
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
 ! Like baseline.txt, but quick computation, little accuracy for testing
