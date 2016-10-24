@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module simulation_mod
     use kinds           ,only: dp
     use classes_mod     ,only: tSimvars, tLifecycle, tPolicies, tAggGrids, tCoeffs

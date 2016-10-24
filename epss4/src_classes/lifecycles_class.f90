@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module lifecycles_class
     ! This derived type collects the various lifecycle profiles.
     use kinds      ,only: dp

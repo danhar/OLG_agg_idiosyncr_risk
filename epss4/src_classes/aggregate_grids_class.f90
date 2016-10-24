@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module aggregate_grids_class
     use kinds,  only : dp
     implicit none

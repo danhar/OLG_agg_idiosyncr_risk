@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module calibration_mod
 ! calibration of 'endogenous parameters'
     use kinds

@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module distribution
     use kinds
     use params_mod, only: n, jr, g, pi_eta, ej, pop_frac, surv, stat_dist_eta, bequests_to_newborn, L_N_ratio

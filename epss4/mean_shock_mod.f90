@@ -1,4 +1,7 @@
-! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+!*******************************************************************************
+! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
 module mean_shock_mod
 ! This module conains all procedures to solve for the 'mean shock equilibrium' (MSE).
 ! The MSE is a degenerate stochastic steady state which we compute to get initial estimates
