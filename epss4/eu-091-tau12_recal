@@ -1,5 +1,8 @@
-# Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 #!/bin/bash
+#
+#*******************************************************************************
+# Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+#*******************************************************************************
 
 # #BSUB-q pub.7d                    # Job queue 4h, 24h, 120h
 #BSUB-W 24:00                         # Time limit in minutes (or HH:MM)

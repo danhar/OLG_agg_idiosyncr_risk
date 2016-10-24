@@ -1,6 +1,8 @@
-# Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
 #!/bin/bash
 #
+#*******************************************************************************
+# Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+#*******************************************************************************
 
 thisrun='091-tau12_recal'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
