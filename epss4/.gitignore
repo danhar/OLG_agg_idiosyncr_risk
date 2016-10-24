@@ -4,3 +4,6 @@ bin
 /model_output
 model_input/last_results
 src_matlab/cl_output.txt
+/eu-094-old_ifort
+/euler.sh
+/run_from_commandline.sh
