@@ -1,4 +1,6 @@
-% Copyright (C) 2016 Daniel Harenberg - All Rights Reserved
+%*******************************************************************************
+% Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+%*******************************************************************************
 
 clear;
 %close all;
