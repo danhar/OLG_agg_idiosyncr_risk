@@ -27,7 +27,8 @@
 !calib_ss/ies15_sharpe_eerr.txt
 !calib_ss/survival_risk.txt
 !calib_ss/base_zbc.txt
-calib_ss/testing_cal.txt
+!calib_ss/testing_cal.txt
+calib_ss/testing_new.txt
 
 
 
