@@ -6,4 +6,4 @@ model_input/last_results
 src_matlab/cl_output.txt
 # /eu-*
 # /euler.sh
-/run_from_commandline.sh
+# /run_from_commandline.sh

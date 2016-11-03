@@ -21,7 +21,7 @@ echo " "  >>bsub_output.txt 2>&1
 
 cd $BUILD
 make clean >>../bsub_output.txt 2>&1
-make -j $OMP_NUM_THREADS all >>../bsub_output.txt 2>&1
+make -j$OMP_NUM_THREADS all >>../bsub_output.txt 2>&1
 cd ..
 
 if [[ "$BUILD" == *Debug* ]]; then
