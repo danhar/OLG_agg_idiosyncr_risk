@@ -10,8 +10,9 @@ ulimit -s unlimited              # stacksize
 ulimit -v unlimited              # virtual memory
 
 
-if [[ "$HOSTNAME" == imladris ]]; then
-	. /opt/intel/composerxe/bin/compilervars.sh intel64
+if [[ "$HOSTNAME" == imladris ]]; then	
+	. /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+	. /opt/imsl/imsl/fnl700/lnxin120e64/bin/fnlsetup.sh
 else
 	. /usr/local/intel/composerxe/bin/compilervars.sh intel64
 fi
@@ -48,7 +49,7 @@ echo " "  >>bsub_output.txt 2>&1
 
 cd $BUILD
 make clean >>../bsub_output.txt 2>&1
-make all >>../bsub_output.txt 2>&1
+make -j2 all >>../bsub_output.txt 2>&1
 cd ..
 
 if [[ "$BUILD" == *Debug* ]]; then
