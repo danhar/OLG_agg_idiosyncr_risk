@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+#*******************************************************************************
+# Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+#*******************************************************************************
+
+# #BSUB-q pub.7d                    # Job queue 4h, 24h, 120h
+#BSUB-W 4:00                         # Time limit in minutes (or HH:MM)
+#BSUB-n 24            # number of processors / threads
+# #BSUB-R "rusage[mem=4096]"          # Memory in MB per processor
+# #BSUB-M 64000000                     # Memory requirements in Kbytes, not sure this works on Brutus
+# #BSUB-R "select[model==XeonE5_2680v3]"   # Euler II nodes
+#BSUB-oo bsub_output.txt           # Redirect output to file
+# #BSUB-B                             # Send email when begins
+# #BSUB-N                             # Send email when ends
+
+export thisrun="${PWD##*/}"
+
+lshosts -w $HOSTNAME >bsub_output.txt 2>&1
+echo " "  >>bsub_output.txt 2>&1
+
+cd $BUILD
+make clean >>../bsub_output.txt 2>&1
+make -j $OMP_NUM_THREADS all >>../bsub_output.txt 2>&1
+cd ..
+
+if [[ "$BUILD" == *Debug* ]]; then
+    gdb --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/epss4 >./model_output/shell_output.txt 2>&1
+    # module load valgrind # use either gdb or valgrind
+    # valgrind --error-limit=no  ./$BUILD/epss4 >>shell_output.txt 2>&1 # not tested
+else
+    ./$BUILD/epss4 >./model_output/shell_output.txt 2>&1
+fi
+
+# mv bsub_output.txt ./model_output/bsub_output.txt
+tar -cjf results.tar.bz2 model_output model_input
+
+scp results.tar.bz2 $USERNAME@$MY_IP:$path_to_results/$thisrun
+ssh $USERNAME@$MY_IP "cd $path_to_results/$thisrun; tar -xjf results.tar.bz2; rm results.tar.bz2"
+scp bsub_output.txt $USERNAME@$MY_IP:$path_to_results/$thisrun
