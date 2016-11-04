@@ -280,13 +280,13 @@
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
-								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -qopenmp -assume realloc_lhs -no-prec-div -xHost -ipo -qopt-report=2 -qopt-report-phase=vec " valueType="string"/>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -qopenmp -assume realloc_lhs -no-prec-div -xHost -ipo -qopt-report=5 -qopt-report-phase=vec " valueType="string"/>
 								<option id="intel.linux.fortran.compiler.general.optimization.1962840659" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speed" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.fp.fpmodel.2002131156" name="Floating Point Model" superClass="intel.linux.fortran.compiler.fp.fpmodel" value="fpmodel.fast.2" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.193590100" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.none" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.lang.openmp.1642357473" name="Process OpenMP Directives" superClass="intel.linux.fortran.compiler.lang.openmp" value="intel.lang.mpdisable" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.diags.vectorizer.x86.1388358906_64" name="Vectorizer Report" superClass="intel.linux.fortran.compiler.diags.vectorizer.x86_64" value="diags.vectorizer.none.x86_64" valueType="enumerated"/>
-								<option id="intel.linux.fortran.compiler.general.debug.652232757" name="Include Debug Information (-g)" superClass="intel.linux.fortran.compiler.general.debug" value="false" valueType="boolean"/>
+								<option id="intel.linux.fortran.compiler.general.debug.652232757" name="Include Debug Information (-g)" superClass="intel.linux.fortran.compiler.general.debug" value="true" valueType="boolean"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.328605419" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.1044479925" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">
