@@ -17,7 +17,7 @@ contains
 ! - pure real(dp) function f_euler_errors()
 !-------------------------------------------------------------------------------
 
-pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, simvars, Phi, lc)
+subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
@@ -373,7 +373,7 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
 end subroutine calc_inequality_measures
 !-------------------------------------------------------------------------------
 
-pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
+function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
     use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, cmin
     use household_solution_mod ,only: interp_policies_tomorrow, consumption
     use laws_of_motion ,only: Forecast_mu

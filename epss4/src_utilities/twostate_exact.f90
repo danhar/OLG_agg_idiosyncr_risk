@@ -3,7 +3,7 @@ module twostate_exact
     implicit none
 contains
 
-pure subroutine calibridiorisk2(rho,sigma,transition,states,stat_dist, converged)
+subroutine calibridiorisk2(rho,sigma,transition,states,stat_dist, converged)
 ! Calculate an 'exact 2-state-approximation' to an AR(1)-process of the form
 ! y(t) = rho y(t-1)+ e(t),   e(t)~N(sigma,1)
 ! See Harenberg_JMpaper.pdf, App. B3 for the formulae below

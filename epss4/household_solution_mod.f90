@@ -279,7 +279,8 @@ CC: if (collateral_constraint) then
 end function f_apgrid_j
 !-------------------------------------------------------------------------------
 
-pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
+subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_etap, xc, jc, kappa_out, error)
+! doesn't vectorize: !$omp declare simd(asset_allocation) uniform(xgridp, consp, vp, yp, rfp, rp, pi_zp, pi_etap, jc) linear(xc) notinbranch
     ! This subroutine will pass the asset euler equation as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
     ! in the Intel Fortran Compiler >= 11.0 and in gfortran >= 4.5
@@ -389,47 +390,45 @@ contains
 !---------------------------------------------------------------------------
 ! Euler equation
 !---------------------------------------------------------------------------
-    pure function asseteuler_f(kappa)
+    function asseteuler_f(kappa)
     use params_mod         ,only: theta, gamm, g, cmin
     use fun_lininterp
 
     real(dp)                  :: asseteuler_f
     real(dp) ,intent(in)      :: kappa
-    real(dp) ,dimension(:) ,allocatable :: aeez      ! asset euler equation for each z
-    real(dp) ,dimension(1)    :: cons_interp, vp_interp, xp, aeetemp
+    real(dp) ,dimension(:) ,allocatable ::cons_interp, vp_interp, xp, aeetemp, aeez      ! asset euler equation for each z
     real(dp) :: rtildep     ! rtilde prime, aprime
     integer                   :: zpc, epc, nz, n_eta
 
     nz = size(pi_zp)
     n_eta = size(pi_etap)
     allocate(aeez(nz))
+    allocate(cons_interp(n_eta), vp_interp(n_eta), xp(n_eta), aeetemp(n_eta))
     aeez = 0.0
     do zpc=1,nz
         rtildep     = (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
+        xp          = yp(:,zpc)+rtildep*ap
+        !$OMP SIMD
         do epc=1,n_eta
-            xp          = yp(epc,zpc)+rtildep*ap
-            cons_interp = f_lininterp(xgridp(:,epc,zpc), consp(:,epc,zpc), xp)
-            vp_interp   = f_lininterp(xgridp(:,epc,zpc), vp(:,epc,zpc), xp)
-
-
-            if (cons_interp(1) <=cmin) then
-                cons_interp = cmin
-                xp               = cmin + ap
-                vp_interp   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            endif
-            if (vp_interp(1) <=cmin) then
-                vp_interp(1)   = cmin
-            endif
-            aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
+            cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc), consp(:,epc,zpc), xp, epc)
+            vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc), vp(:,epc,zpc), xp, epc)
+!
+!            if (cons_interp(epc) <=cmin) then
+!                cons_interp(epc) = cmin
+!                vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),cmin + ap)
+!            endif
+!            if (vp_interp(epc) <=cmin) then
+!                vp_interp(epc)   = cmin
+!            endif
+            aeetemp(epc) = vp_interp(epc)**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp(epc)**((1.0-theta-gamm)/gamm)
 !
 !           if (xp(1) < xgridp(1,epc,zpc)) then
 !               aeetemp = taylor_expansion(cons_interp, vp_interp,epc,zpc)  ! only works for theta\=1
 !           else
 !               aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
 !           endif
-
-            aeez(zpc) = aeez(zpc) + pi_etap(epc)*aeetemp(1)
         enddo
+        aeez(zpc) = dot_product(pi_etap, aeetemp)
     enddo
 
     asseteuler_f    = dot_product(pi_zp,aeez*(rp-rfp))
@@ -464,7 +463,8 @@ contains
 end subroutine asset_allocation
 !-------------------------------------------------------------------------------
 
-pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
+subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
+! vectorizes, but may be inefficient: !$omp declare simd(consumption)
     use fun_lininterp
     use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
 
@@ -492,6 +492,7 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
         ! As mentioned in the subroutine asset_allocation above, one could limit kappa so that rtildep >= 0.0.
         ! In that case, this should be checked here also, because kappa can take different (very high) values during the simulations (when ap is close to zero).
 
+        ! !$OMP SIMD
         do epc = 1,n_eta
             xp = yp(epc,zpc)+rtildep*ap
 

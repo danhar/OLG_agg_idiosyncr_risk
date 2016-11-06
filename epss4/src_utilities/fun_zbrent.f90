@@ -10,7 +10,7 @@ contains
 ! - real(dp) function f_zbrent_array(func,x1,x2,tol_o) result(zbrent)
 !---------------------------------------------------------------------------
 
-pure real(dp) function f_zbrent(func,x1,x2,tol_o) result(zbrent)
+real(dp) function f_zbrent(func,x1,x2,tol_o) result(zbrent)
 ! Uses Brent's method to find the root of func that is bracketed by [x1,x2]
 ! Adapted from Press et al. (2002), Numerical Recipes in F90 (NR), p. 1188
 ! Attention: call only if x1, x2 are known to bracket a root, because there is
@@ -19,7 +19,7 @@ pure real(dp) function f_zbrent(func,x1,x2,tol_o) result(zbrent)
 	real(dp), intent(in) :: x1,x2
 	real(dp), intent(in), optional :: tol_o
 	interface
-		pure function func(x)
+		function func(x)
 		use kinds
 		implicit none
 		real(dp), intent(in) :: x

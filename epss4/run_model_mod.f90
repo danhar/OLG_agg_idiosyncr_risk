@@ -281,10 +281,10 @@ contains
         call system_clock(end_time,count_rate)
         secs= real(end_time-start_time,dp)/real(count_rate,dp) ! excludes time for saving and plotting results
 
-        call save_results(Phi, simvars, coeffs, grids,lifecycles,&
-                             policies, secs, it, projectname, calib_name, dir, err, cal_iter_o)
+        !call save_results(Phi, simvars, coeffs, grids,lifecycles,&
+        !                     policies, secs, it, projectname, calib_name, dir, err, cal_iter_o)
 
-        if (.not. calibrating) call plot_results(output_path, 'plot_all')
+        !if (.not. calibrating) call plot_results(output_path, 'plot_all')
 
     end subroutine save_and_plot_results
 

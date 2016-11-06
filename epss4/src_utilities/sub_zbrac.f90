@@ -10,7 +10,7 @@ contains
 ! - subroutine s_zbrac_array(func,x1,x2,success)
 !---------------------------------------------------------------------------
 
-pure subroutine s_zbrac(func,x1,x2,success)
+subroutine s_zbrac(func,x1,x2,success)
 ! Attempts to bracket a root of func by expanding [x1,x2] by FACTOR=1.6
 ! Adapted from Press et al. (2002), Numerical Recipes in F90 (NR), p. 1183
 ! Attention: made pure, but no error return!
@@ -18,7 +18,7 @@ pure subroutine s_zbrac(func,x1,x2,success)
 	real(dp), intent(inout) :: x1,x2
 	logical, intent(out) :: success
 	interface
-        pure function func(x)
+        function func(x)
 		use kinds
 		implicit none
 		real(dp), intent(in) :: x

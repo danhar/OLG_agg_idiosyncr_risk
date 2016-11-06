@@ -12,7 +12,7 @@ module interpolate_xgrid
     end interface InterpolateXgrid
 
 contains
-    pure subroutine InterpolateXgrid_policies(nx_factor,policies, value, polx, valx)
+    subroutine InterpolateXgrid_policies(nx_factor,policies, value, polx, valx)
         use kinds      ,only: dp
         use policies_class
         use makegrid_mod
@@ -55,7 +55,7 @@ contains
 
     end subroutine InterpolateXgrid_policies
 
-    pure subroutine InterpolateXgrid_Phi(Phi, xgrid_old, xgrid_new)
+    subroutine InterpolateXgrid_Phi(Phi, xgrid_old, xgrid_new)
         ! Maybe better as a function
         use kinds      ,only: dp
         use fun_lininterp

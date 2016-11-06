@@ -2,7 +2,7 @@ module sub_zbrak
     implicit none
 contains
 
-pure subroutine s_zbrak(func,x1,x2,n,xb1,xb2)
+subroutine s_zbrak(func,x1,x2,n,xb1,xb2)
 ! Searches for root of fun by subdividing (x2-x1) into n equi-spaced segments, and returns nb pairs xb1(1:nb), xb2(1,nb)
 ! Adapted from Press et al. (2002), Numerical Recipes in F90 (NR), p. 1184
 ! Attention: made pure, but no error return!
@@ -12,7 +12,7 @@ pure subroutine s_zbrak(func,x1,x2,n,xb1,xb2)
 	real(dp), intent(in) :: x1,x2
 	real(dp), dimension(:), allocatable, intent(out) :: xb1,xb2
 	interface
-		pure function func(x)
+		function func(x)
 		use kinds
 		implicit none
 		real(dp), intent(in) :: x

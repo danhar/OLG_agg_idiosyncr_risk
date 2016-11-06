@@ -213,7 +213,7 @@ contains
 
     end subroutine get_equilibrium_values
 
-    pure subroutine simulate_ms(simvars)
+    subroutine simulate_ms(simvars)
     ! Variable simvars is used to get a very rough approximation of standard deviations.
     ! At index 1, store mean shock values of aggregates.
     ! At index i+1, store aggregates for z=i, calculated by assuming:

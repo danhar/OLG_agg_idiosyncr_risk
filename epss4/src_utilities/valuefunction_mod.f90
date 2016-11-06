@@ -17,7 +17,7 @@ contains
 ! - pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
 !-------------------------------------------------------------------------------
 
-pure function value(p, coeffs, grids)
+function value(p, coeffs, grids)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
@@ -198,7 +198,7 @@ pure subroutine interp_policies_tomorrow(p,cons,value,kp, mup, grid, jc, consp, 
 end subroutine interp_policies_tomorrow
 !-------------------------------------------------------------------------------
 
-pure function evp(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej)
+function evp(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej)
     use fun_lininterp
     use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
 
