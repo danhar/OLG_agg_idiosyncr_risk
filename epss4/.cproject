@@ -280,8 +280,8 @@
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include/intel64/lp64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MKLROOT}/include&quot;"/>
 								</option>
-								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -qopenmp -assume realloc_lhs -no-prec-div -xHost -ipo -qopt-report=2 -qopt-report-phase=vec " valueType="string"/>
-								<option id="intel.linux.fortran.compiler.general.optimization.1962840659" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speed" valueType="enumerated"/>
+								<option id="intel.linux.fortran.compiler.cmdline.addlopts.1229961754" name="Additional Options" superClass="intel.linux.fortran.compiler.cmdline.addlopts" value="-c -qopenmp -assume realloc_lhs -no-prec-div -xHost -ipo" valueType="string"/>
+								<option id="intel.linux.fortran.compiler.general.optimization.1962840659" name="Optimization Level" superClass="intel.linux.fortran.compiler.general.optimization" value="general.opt.speedHLO" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.fp.fpmodel.2002131156" name="Floating Point Model" superClass="intel.linux.fortran.compiler.fp.fpmodel" value="fpmodel.fast.2" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.runtime.rterrorchk.193590100" name="Runtime Error Checking" superClass="intel.linux.fortran.compiler.runtime.rterrorchk" value="intel.runtime.rterrorchk.none" valueType="enumerated"/>
 								<option id="intel.linux.fortran.compiler.lang.openmp.1642357473" name="Process OpenMP Directives" superClass="intel.linux.fortran.compiler.lang.openmp" value="intel.lang.mpdisable" valueType="enumerated"/>
@@ -364,8 +364,8 @@
 								<inputType id="photran.managedbuild.tool.intel.fortran.compiler.input.623528467" superClass="photran.managedbuild.tool.intel.fortran.compiler.input"/>
 							</tool>
 							<tool commandLinePattern="${COMMAND} ${OUTPUT_PREFIX} ${OUTPUT_FLAG} ${OUTPUT} ${INPUTS} ${FLAGS}" id="photran.managedbuild.tool.intel.fortran.linker.x86_64.base.280684862" name="Intel(R) Fortran Linker" superClass="photran.managedbuild.tool.intel.fortran.linker.x86_64.base">
-								<option id="intel.fortran.link.option.libpath.1015960289" name="Search Directory for Libraries (-L)" superClass="intel.fortran.link.option.libpath" valueType="stringList"/>
-								<option id="intel.fortran.link.option.l.657246286" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l" valueType="libs"/>
+								<option id="intel.fortran.link.option.libpath.1015960289" name="Search Directory for Libraries (-L)" superClass="intel.fortran.link.option.libpath"/>
+								<option id="intel.fortran.link.option.l.657246286" name="Additional Libraries (-l)" superClass="intel.fortran.link.option.l"/>
 								<option id="intel.fortran.link.cmdline.addlopts.2055263301" name="Additional Options" superClass="intel.fortran.link.cmdline.addlopts" value="-qopenmp -L${MKLROOT}/lib/intel64 -lmkl_blas95_lp64 -lmkl_lapack95_lp64 -lmkl_intel_lp64 -lmkl_core -lmkl_intel_thread -lpthread -lm -ldl" valueType="string"/>
 								<inputType id="photran.managedbuild.tool.intel.fortran.linker.input.700832203" superClass="photran.managedbuild.tool.intel.fortran.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
