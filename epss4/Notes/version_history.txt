@@ -634,3 +634,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 085-check_lc_var: implement alternative computation for the lifecycle variances, to check whether they are computed correctly.
 086-recalc_all: recalc results with same precision as baseline. Also get ginis and graphs for all. Trying -ipo on Brutus.
 087-final: version used for computing final results in December 2013. Contains the updated calibration files.
+095-SIMD: try to implement SIMD vectorization. DIDN'T WORK, DISCONTINUED!
