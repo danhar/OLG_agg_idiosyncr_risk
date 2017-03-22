@@ -10,7 +10,7 @@ ulimit -s unlimited              # stacksize
 ulimit -v unlimited              # virtual memory
 
 
-if [[ "$HOSTNAME" == imladris ]]; then	
+if [[ "$HOSTNAME" == imladris ]]; then
 	. /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
 	. /opt/imsl/imsl/fnl700/lnxin120e64/bin/fnlsetup.sh
 else
@@ -39,7 +39,7 @@ rm $BUILD/*.o $BUILD/*.mod $BUILD/src_utilities/*.o $BUILD/src_utilities/*.mod $
 
 cp -r --parents *.f90 $BUILD src_* model_input/*.* model_input/calib* model_input/data model_input/last_results/last_results.tar.bz2 $path_to_results/$thisrun
 rm model_input/last_results/last_results.tar.bz2
-cd $path_to_results/$thisrun/model_input/last_results 
+cd $path_to_results/$thisrun/model_input/last_results
 tar -xjf last_results.tar.bz2
 rm last_results.tar.bz2
 cd ../..
