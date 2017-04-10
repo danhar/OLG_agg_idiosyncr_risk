@@ -9,7 +9,7 @@
 #BSUB-n 24            # number of processors / threads
 # #BSUB-R "rusage[mem=4096]"          # Memory in MB per processor
 # #BSUB-M 64000000                     # Memory requirements in Kbytes, not sure this works on Brutus
-#BSUB-R "select[model==XeonE5_2680v3]"   # Euler II nodes
+# #BSUB-R "select[model==XeonE5_2680v3]"   # Euler II nodes
 #BSUB-oo bsub_output.txt           # Redirect BSUB output to file
 #BSUB-B                             # Send email when begins
 #BSUB-N                             # Send email when ends
