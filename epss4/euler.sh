@@ -4,7 +4,7 @@
 # Copyright (c) 2016 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='095-test2_nk12_O3_qomp_int17_simd_ipo_noplot'
+thisrun='095-test2_nk12_O3_qomp_int17_deb_ipo_noplot'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
