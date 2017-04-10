@@ -4,18 +4,21 @@
 # Copyright (c) 2016 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='094-new_ifort_testnew4'
-BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim    
-NTHREADS=24  # number of OpenMP threads 
+thisrun='094-testnew_int17'
+BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
+NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
 
 MYDIR="$( cd "$( dirname "$0" )" && pwd )"
 # projectname="${MYDIR##*/}" # current directory, but careful with symlinks
-MY_IP="$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')"
+# The following is robust but may take very long, so one has to wait for the rest to be executed.
+# MY_IP="$(wget -q -O - checkip.dyndns.org|sed -e 's/.*Current IP Address: //' -e 's/<.*$//')"
+# The alernative following one is very fast but needs VPN connection (also within ETH) and only works on GNU Linux!
+MY_IP=$(hostname -I | cut -f2 -d' ')
 USERNAME="$(whoami)"
 
 #path_to_results=~/work/Research/Eqprem_idiorisk/test_results/Euler
-path_to_results=~/work/Research/EPSocSec/test_results/Euler
+path_to_results="/home/$USERNAME/work/Research/EPSocSec/test_results/Euler"
 mkdir --parents $path_to_results/$thisrun
 cd $MYDIR
 
