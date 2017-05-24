@@ -42,7 +42,10 @@ program EPSS
 	    call ReadCalibration(trim(adjustl(calib_name)))
 	    call SetRemainingParams(calib_name)
 
+        ! First, calibrate the economy to targets (if applicable).
 	    if (n_end_params > 0) then
+	        print*, ' '
+	        print*, '- main: Starting calibration routine'
 	        call params_set_thisrun
             call CheckParams
             write(runchar,'(a4)') ',cal'
@@ -51,6 +54,7 @@ program EPSS
 	        call calibrate(projectname, calib_name)
         endif
 
+        ! Second, set up experiments and run them.
         if (twosided_experiment .and. run_n_times>1) call params_set('run_counter_start', -1*run_n_times+2)
         if (allocated(welfare)) deallocate(welfare)
         allocate(welfare(run_counter_start:run_n_times,2))
@@ -83,7 +87,6 @@ program EPSS
                     write(runchar,'(a4)') ',GE0'
                     ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
                     if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
-                    if (calc_euler_errors)   call params_set('calc_euler_errors', .false.)
                 elseif (rc ==1) then
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.)
@@ -91,6 +94,8 @@ program EPSS
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     call params_set('surv_rates', .false.)
                     write(runchar,'(a7)') ',noSURV'
+                    ! The current and following are partial equilibrium, so we don't calc Euler errors.
+                    if (calc_euler_errors)   call params_set('calc_euler_errors', .false.)
                 elseif (rc ==3) then
                     call params_set('ccv', .false.)
                     write(runchar,'(a6)') ',noCCV'

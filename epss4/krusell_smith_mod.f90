@@ -4,7 +4,7 @@
 
 module krusell_smith_mod
     use kinds
-    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs
+    use classes_mod ,only: tSimvars, tLifecycle,tErrors, tAggGrids, tPolicies, tCoeffs, t_timer
 
     implicit none
     private
@@ -143,13 +143,21 @@ contains
             type(tCoeffs)   :: coeffs_old, coeff_dif
             type(tLifecycle) :: lifecycles_array(size(simvars))
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
+            type(t_timer):: timer
+            logical ,parameter:: debugging_this = .false., timing = .true.
 
             call coeffs%maketype(coeffvec)
             it = it+1
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
+            if (timing) call timer%start()
             call olg_backwards_recursion(policies,coeffs, grids, value, err)
             call err%print2stderr
+            if (timing) then
+                call timer%stop()
+                print *, "Solution time = ", timer%elapsedTime()," sec"
+                call timer%start()
+            endif
 
             print *,'- krusell_smith: simulating'
             if (exogenous_xgrid) then
@@ -179,6 +187,12 @@ contains
             Phi = sum(Phi_spread,4)/size(Phi_spread,4)
             call print_error(simvars)
 
+            if (timing) then
+                call timer%stop()
+                print *, "Simulation time = ", timer%elapsedTime()," sec"
+                call timer%start()
+            endif
+
             ! Here, one could make a (dampened) update of grids using the mean from simvars, but this turns out to be too complex for rootfinder
 
             coeffs_old    = coeffs
@@ -188,6 +202,11 @@ contains
             coeff_dif%mu = (coeffs%mu - coeffs_old%mu) !/(coeffs_old%mu+1.0)
 
             distance = coeff_dif%makevector()
+
+            if (timing) then
+                call timer%stop()
+                print *, "Regression time = ", timer%elapsedTime()," sec"
+            endif
 
             if (save_all_iterations) then
                 print *,'- krusell_smith: WARNING: saving intermediate results (disk space)'

@@ -71,10 +71,12 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
 !$OMP PARALLEL IF(nk>1) DEFAULT(NONE) &
-!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax) &
-!$OMP PRIVATE(jc,muc,kc,zc,betatildej,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
+!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax, betatildej) &
+!$OMP PRIVATE(jc,muc,kc,zc,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 jloop:do jc= nj-1,1,-1
+!$OMP SINGLE
         betatildej = beta*surv(jc)**(1.0/gamm)*(1.0+g)**((1.0-theta)/gamm)
+!$OMP END SINGLE
 !$OMP DO COLLAPSE(2) SCHEDULE(STATIC)
 kloop:  do kc=1,nk          ! Small performance notice: the outermost loop does not correspond to the rightmost state, because I interchanged loops for k and mu, so that OpenMP can work on k.
 muloop:     do muc=1,nmu
