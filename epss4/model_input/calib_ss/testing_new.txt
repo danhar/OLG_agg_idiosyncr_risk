@@ -57,13 +57,13 @@ calc_euler_errors        .false.     calculates relative Euler equation errors a
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
-nap             20       exogenous grid for savings (ap= 'a prime')
+nap             10       exogenous grid for savings (ap= 'a prime')
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
-nk              12       grid for aggregate capital (per capita) k
-nmu             8       grid for ex-ante expected equity premium (mu)
+nk              8       grid for aggregate capital (per capita) k
+nmu             3       grid for ex-ante expected equity premium (mu)
 nt              40     simulation periods, like in Gomes/Michaelides(2007)
 t_scrap         10      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
 nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points

@@ -8,6 +8,7 @@ This file describes things that will, should, or could be implemented in the cod
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+- finish computatios of CEV distribution over age and cash-at-hand. Need only load and divide the expected values, which are already computed and saved.
 - make estimation of LOMs more stable: regularize data and use Hermite polynomials, see Judd,Mailar,Mailar 2011, section 4.5.1.
 - gini: wage before or after tax? need to check and implement
 - Calc medians of lifecycle statistics during simulation. In particular, median portfolio return.
