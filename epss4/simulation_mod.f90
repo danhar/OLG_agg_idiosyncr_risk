@@ -43,13 +43,8 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     real(dp)  :: Kt, mut, rt, netwaget, penst, w, eul_err_temp(2) ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
 
-    ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block
     nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(value,1); n_eta=size(value,2); nj=size(value,4); nt=size(simvars%z)
-    allocate(apgrid_zk(nx,n_eta,nj,nmu), kappa_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu), value_zk(nx,n_eta,nj,nmu))
-    allocate(apgridt(nx,n_eta,nj), kappat(nx,n_eta,nj), xgridt(nx,n_eta,nj), const(nx,n_eta,nj), stockst(nx,n_eta,nj), valuet(nx,n_eta,nj))
-    allocate(exp_value_t(nx,n_eta,nj), weight(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), r_pf(nx,n_eta,nj))
-    allocate(ap_lct(nj), stocks_lct(nj), cons_lct(nj), cons_var_lct(nj), return_lct(nj), return_var_lct(nj), log_cons_lct(nj), var_log_cons_lct(nj))
-    allocate(Knew(nt+1))
+    allocate(weight(nx,n_eta,nj), Phi_avg(nx,n_eta,nj), cons_var_lct(nj), return_var_lct(nj), var_log_cons_lct(nj), Knew(nt+1))
 
     Phi_avg         = 0.0
     call lc%allocate(nj,nx)
@@ -68,17 +63,20 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
         penst    = f_pensions(Kt, zeta(zt))
         rt       = f_stock_return(Kt, zeta(zt), delta(zt), simvars%rf(tc))
 
-        simvars%bequests(tc) = f_bequests(simvars%rf(tc), rt, stockst, apgridt, Phi)
+        if (tc == 1) then
+            simvars%bequests(tc) = 0.0
+        else
+            simvars%bequests(tc) = f_bequests(simvars%rf(tc), rt, stockst, apgridt, Phi)
+        endif
 
         ! Projection of policies on Kt
         i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
         w        = (Kt - agg_grid%K(i)) / (agg_grid%K(i+1) - agg_grid%K(i))
         ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
-        !! Once the Intel Fortran bug on reallocation is fixed, I can simply write xgrid_zk= ...
-        xgrid_zk (:,:,:,:)= (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
-        apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
-        stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
-        value_zk (:,:,:,:)= (1-w)*value          (:,:,zt,:,i,:) +w*value          (:,:,zt,:,i+1,:)
+        xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
+        apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
+        value_zk = (1-w)*value          (:,:,zt,:,i,:) +w*value          (:,:,zt,:,i+1,:)
         where (apgrid_zk .ne. 0.0)
             kappa_zk = stocks_zk/apgrid_zk
         elsewhere
@@ -145,7 +143,7 @@ mu:     if (partial_equilibrium) then
             kappat   = kappa_zk (:,:,:,1)
         endif
         const        = xgridt - apgridt
-        exp_value_t  = valuet*Phi(:,:,:)
+        exp_value_t  = valuet*Phi
 
         call CheckPhi(Phi, simvars%Phi_1(tc), simvars%Phi_nx(tc)) ! Do here because Phi now was transitioned for all cases
 
@@ -444,6 +442,79 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     !f_euler_errors(2) = sum(eul_err)/(size(eul_err)-zero_mass)
     f_euler_errors(2) = sum(Phi*eul_err) ! average
 end function f_euler_errors
+!-------------------------------------------------------------------------------
+
+pure function f_dyn_eff_a(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
+    ! Checking the Demange 2002 criterion for dynamic efficiency. Specifically, here we check
+    ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006.
+
+    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, cmin
+    use household_solution_mod ,only: interp_policies_tomorrow, consumption
+    use laws_of_motion ,only: Forecast_mu
+    use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
+
+    logical :: f_dyn_eff_a
+    integer                          ,intent(in) :: zt
+    real(dp)                         ,intent(in) :: rfp, mut, kp
+    type(tCoeffs)                    ,intent(in) :: coeffs ! coefficients for laws of motion
+    type(tAggGrids)                  ,intent(in) :: grids  ! grids for aggregate states k and mu
+    type(tPolicies)                  ,intent(in) :: policies
+    real(dp) ,dimension(:,:,:,:,:,:) ,intent(in) :: value
+    real(dp) ,dimension(:,:,:)       ,intent(in) :: xgridt, apgridt, kappat, Phi
+
+    real(dp) :: betatildej, app_min, evp
+    real(dp) ,allocatable :: mup(:), rp(:), yp(:,:)
+    real(dp) ,allocatable ,dimension(:,:,:) :: consp, xgridp, vp, cons_opt, cons_t, eul_err
+    integer :: zpc, jc, ec, xc, nj, nz, n_eta, nx, nmu
+    logical(1) ,dimension(size(coeffs%mu,2)) :: error
+
+    nz = size(coeffs%mu,2)
+    nj = size(policies%apgrid,4)
+    n_eta = size(etagrid,1)
+    nx = size(policies%apgrid,1)
+    nmu = size(grids%mu)
+
+    allocate(mup(nz), rp(nz), yp(n_eta,nz))
+    allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
+    allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
+
+    do zpc = 1,nz
+        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, mut)
+        rp(zpc) = f_stock_return(kp, zeta(zpc), delta(zpc), rfp)
+    enddo
+    where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! because I do this in household_solution_mod:calc_vars_tomorrow
+    where (mup < grids%mu(1))   mup = grids%mu(1)
+
+    cons_t=xgridt -apgridt
+
+    do jc=1,nj-1
+        betatildej = beta*surv(jc)**(1.0/gamm)*(1.0+g)**((1.0-theta)/gamm)
+
+        do zpc = 1,nz
+            if (jc+1>=jr) then
+                yp(:,zpc) = f_pensions(kp, zeta(zpc))
+            else
+                yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
+            endif
+        enddo
+
+        call interp_policies_tomorrow(policies, policies%consumption(), value, kp, mup, grids, jc, consp, xgridp, vp, app_min)
+        do ec=1,n_eta
+            do xc=1,nx
+                if (Phi(xc,ec,jc)==0.0) then
+                    cons_opt(xc,ec,jc)=cons_t(xc,ec,jc)
+                else
+                    call consumption(apgridt(xc,ec,jc), kappat(xc,ec,jc), xgridp, consp, vp, rfp,rp, yp, zt, xc, ec, betatildej, cons_opt(xc,ec,jc), evp, error)
+                    if ((cons_opt(xc,ec,jc) < cmin*10.0_dp) .or. any(error)) cons_opt(xc,ec,jc) = cons_t(xc,ec,jc)
+                endif
+            enddo
+        enddo
+    enddo
+    cons_opt(:,:,nj)=cons_t(:,:,nj)
+
+    eul_err = abs(1.0-cons_opt/cons_t)
+
+end function f_dyn_eff_a
 !-------------------------------------------------------------------------------
 
 end module simulation_mod
