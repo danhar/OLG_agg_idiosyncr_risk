@@ -8,9 +8,10 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-091-ss_newresults: for submission to RED (in particular var log cons for tau=.12)
-090-assetpricing: restart equity premium analysis
-088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. UNFINISHED?
+096-dyn_eff: implement dyn eff criterion of Demange (cf KK).
+088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. 
+               UNFINISHED: So far, expected value for age and cah over simulation is computed and saved (from this I can compute value over age by simply summing). But to 
+               get to CEV, I still need to compute the difference to an experiment (and maybe plot).
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (B) Version history (August 2011 - October 2012) reverse chronological order
@@ -634,4 +635,10 @@ For example, simvars should read and write output unformatted also, see  subrout
 085-check_lc_var: implement alternative computation for the lifecycle variances, to check whether they are computed correctly.
 086-recalc_all: recalc results with same precision as baseline. Also get ginis and graphs for all. Trying -ipo on Brutus.
 087-final: version used for computing final results in December 2013. Contains the updated calibration files.
+088-gc_age(2): calculate CEV over age. UNFINISHED, SEE ABOVE
+090-assetpricing: restart equity premium analysis
+091-ss_newresults: for submission to IER (in particular var log cons for tau=.12)
+092 and 093: remove GPL, add (c)
+094-ifort: new compiler
 095-SIMD: try to implement SIMD vectorization. DIDN'T WORK, DISCONTINUED!
+095-start_resubmit
