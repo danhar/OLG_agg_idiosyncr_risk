@@ -4,7 +4,7 @@
 # Copyright (c) 2016 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='095-base_nk18_nmu8'
+thisrun='095-base_omp24_time_base'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M

@@ -144,7 +144,7 @@ contains
             type(tLifecycle) :: lifecycles_array(size(simvars))
             real(dp), allocatable :: val_newx(:,:,:,:,:,:), xgrid_mean_old(:,:,:), Phi_spread(:,:,:,:)
             type(t_timer):: timer
-            logical ,parameter:: debugging_this = .false., timing = .true.
+            logical ,parameter:: debugging_this = .false., timing = .false.
 
             call coeffs%maketype(coeffvec)
             it = it+1
