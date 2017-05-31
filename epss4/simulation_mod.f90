@@ -450,77 +450,148 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
 end function f_euler_errors
 !-------------------------------------------------------------------------------
 
-pure function f_dyn_eff_a(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
+pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, Phi)
     ! Checking the Demange 2002 criterion for dynamic efficiency. Specifically, here we check
-    ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006.
+    ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006. See my note in /home/elessar/work/Research/EPSocSec/notes/170515-Dynamic_efficiency.
 
-    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, cmin
-    use household_solution_mod ,only: interp_policies_tomorrow, consumption
-    use laws_of_motion ,only: Forecast_mu
-    use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
+    use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,exogenous_xgrid, zeta, delta, tol_mut=> tol_simulation_marketclearing
+    use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate
+    use fun_locate      ,only: f_locate
+    use distribution    ,only: TransitionPhi, CheckPhi
+    use fun_aggregate_diff
+    use fun_zbrent
 
-    logical :: f_dyn_eff_a
-    integer                          ,intent(in) :: zt
-    real(dp)                         ,intent(in) :: rfp, mut, kp
-    type(tCoeffs)                    ,intent(in) :: coeffs ! coefficients for laws of motion
-    type(tAggGrids)                  ,intent(in) :: grids  ! grids for aggregate states k and mu
-    type(tPolicies)                  ,intent(in) :: policies
-    real(dp) ,dimension(:,:,:,:,:,:) ,intent(in) :: value
-    real(dp) ,dimension(:,:,:)       ,intent(in) :: xgridt, apgridt, kappat, Phi
+    real(dp)         ,intent(in)    :: rf_t, Kt ! these are actually t+1, but for notational purposes just t.
+    real(dp) ,dimension(:,:,:) ,intent(in) :: apgridt, stockst, Phi ! policies for given z, K, and mu
+    type(tPolicies)  ,intent(in)    :: policies
+    type(tAggGrids)  ,intent(in)    :: agg_grid
+    real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, xgrid_zk, stocks_zk    ! policies for given z and K
+    real(dp) ,dimension(:,:,:)   ,allocatable :: apgrid_new, xgridt, Phi_new
+    real(dp)  :: Knew, rf_new, mut, rt, bequestst, netwaget, penst, w ! variables in period t
+    integer   :: i, zt, nmu, nx, n_eta, nj, nk, nz
+    logical   :: r_low, r_high
 
-    real(dp) :: betatildej, app_min, evp
-    real(dp) ,allocatable :: mup(:), rp(:), yp(:,:)
-    real(dp) ,allocatable ,dimension(:,:,:) :: consp, xgridp, vp, cons_opt, cons_t, eul_err
-    integer :: zpc, jc, ec, xc, nj, nz, n_eta, nx, nmu
-    logical(1) ,dimension(size(coeffs%mu,2)) :: error
+    nmu = size(agg_grid%mu); nk= size(agg_grid%k); nx=size(policies%apgrid,1); n_eta=size(policies%apgrid,2); nj=size(policies%apgrid,4); nz=size(zeta)
+    allocate(apgrid_zk(nx,n_eta,nj,nmu), xgrid_zk(nx,n_eta,nj,nmu), stocks_zk(nx,n_eta,nj,nmu))
+    allocate(xgridt, apgrid_new, Phi_new, source=apgridt)
+    r_low = .false.
+    r_high= .false.
 
-    nz = size(coeffs%mu,2)
-    nj = size(policies%apgrid,4)
-    n_eta = size(etagrid,1)
-    nx = size(policies%apgrid,1)
-    nmu = size(grids%mu)
+    do zt = 1, nz ! for all shocks tomorrow
+        ! Prices
+        netwaget = f_netwage(Kt, zeta(zt))
+        penst    = f_pensions(Kt, zeta(zt))
+        rt       = f_stock_return(Kt, zeta(zt), delta(zt), rf_t)
+        bequestst = f_bequests(rf_t, rt, stockst, apgridt, Phi)
 
-    allocate(mup(nz), rp(nz), yp(n_eta,nz))
-    allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
-    allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
+        ! Projection of policies on Kt
+        i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
+        w        = (Kt - agg_grid%K(i)) / (agg_grid%K(i+1) - agg_grid%K(i))
+        ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
+        xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
+        apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
 
-    do zpc = 1,nz
-        mup(zpc) = Forecast_mu(coeffs%mu(:,zpc), kp, mut)
-        rp(zpc) = f_stock_return(kp, zeta(zpc), delta(zpc), rfp)
-    enddo
-    where (mup > grids%mu(nmu)) mup = grids%mu(nmu) ! because I do this in household_solution_mod:calc_vars_tomorrow
-    where (mup < grids%mu(1))   mup = grids%mu(1)
+ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
+            xgridt   = xgrid_zk(:,:,:,1)
+            ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
+            Phi_new  = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+        endif ex
 
-    cons_t=xgridt -apgridt
-
-    do jc=1,nj-1
-        betatildej = beta*surv(jc)**(1.0/gamm)*(1.0+g)**((1.0-theta)/gamm)
-
-        do zpc = 1,nz
-            if (jc+1>=jr) then
-                yp(:,zpc) = f_pensions(kp, zeta(zpc))
+        ! Find mut that clears bondmarket
+        if (f_excessbonds(agg_grid%mu(1)) * f_excessbonds(agg_grid%mu(nmu)) < 0.0 ) then
+            mut  = f_zbrent(f_excessbonds,agg_grid%mu(1),agg_grid%mu(nmu),tol_mut)
+        else
+            ! simvars%err_mu(tc) = .true.
+            if (abs(f_excessbonds(agg_grid%mu(1))) < abs(f_excessbonds(agg_grid%mu(nmu)))) then
+                mut = agg_grid%mu(1)
             else
-                yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
+                mut = agg_grid%mu(nmu)
             endif
-        enddo
+        endif
 
-        call interp_policies_tomorrow(policies, policies%consumption(), value, kp, mup, grids, jc, consp, xgridp, vp, app_min)
-        do ec=1,n_eta
-            do xc=1,nx
-                if (Phi(xc,ec,jc)==0.0) then
-                    cons_opt(xc,ec,jc)=cons_t(xc,ec,jc)
-                else
-                    call consumption(apgridt(xc,ec,jc), kappat(xc,ec,jc), xgridp, consp, vp, rfp,rp, yp, zt, xc, ec, betatildej, cons_opt(xc,ec,jc), evp, error)
-                    if ((cons_opt(xc,ec,jc) < cmin*10.0_dp) .or. any(error)) cons_opt(xc,ec,jc) = cons_t(xc,ec,jc)
-                endif
-            enddo
-        enddo
+        ! Projection of policies on mut
+        if (nmu > 1) then
+            i        = f_locate(agg_grid%mu, mut)
+            w        = (mut - agg_grid%mu(i)) / (agg_grid%mu(i+1) - agg_grid%mu(i))
+            if (.not. exogenous_xgrid) then
+                xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
+                ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
+                Phi_new = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+            endif
+            apgrid_new  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
+        else
+            apgrid_new  = apgrid_zk(:,:,:,1)
+        endif
+
+        ! call CheckPhi(Phi, simvars%Phi_1(tc), simvars%Phi_nx(tc)) ! Do here because Phi now was transitioned for all cases
+
+        ! Aggregate
+        Knew = sum(apgrid_new*Phi_new) /(L_N_ratio*(1.0+n)*(1.0+g))  ! in units of efficient labor
+        ! Could allow some deviation out of grid - recorded as error in next period. Also in PE to keep comparable!
+!        if (Knew     < agg_grid%K(1 )) then
+!            Knew     = agg_grid%K(1 )
+!        elseif (Knew > agg_grid%K(nk)) then
+!            Knew     = agg_grid%K(nk)
+!        endif
+
+        rf_new = f_riskfree_rate(Knew,mut,pi_z(zt,:))
+
+        if (rf_new > (1.0+n)*(1.0+g)) then
+            if (rt > rf_new) then
+                r_high = .true.
+            else
+                r_low  = .true.
+            endif
+        endif
+
+        if (r_low .and. r_high) exit
     enddo
-    cons_opt(:,:,nj)=cons_t(:,:,nj)
 
-    eul_err = abs(1.0-cons_opt/cons_t)
+dyn_eff_a = r_low .and. r_high
 
-end function f_dyn_eff_a
+contains
+!-------------------------------------------------------------------------------
+! Internal procedures in order:
+! - pure real(dp) function f_excessbonds(mut)
+!-------------------------------------------------------------------------------
+
+    pure real(dp) function f_excessbonds(mut)
+    ! calculates excess bond demand
+        use params_mod    ,only: de_ratio
+    !    use bs3vl_int   ! IMSL Math.pdf, p. 754ff: evaluate a 3d tensor-product spline given B-spline-coeffs
+
+        real(dp) ,intent(in) :: mut       ! expected equity premium
+        real(dp) ,dimension(:,:,:) ,allocatable :: Phit, apgridtt, stockstt, xgridtt    ! temporary distribution, policies for given z, K, AND mu
+        real(dp)                         :: w, bond_supply
+        integer                          :: i
+
+        if (size(agg_grid%mu) >1) then
+            i        = f_locate(agg_grid%mu, mut)
+            w        = (mut - agg_grid%mu(i)) / (agg_grid%mu(i+1) - agg_grid%mu(i))
+
+            if (.not. exogenous_xgrid) then
+                xgridtt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
+                Phit      = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
+            else
+                Phit = Phi
+            endif
+
+            apgridtt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
+            stockstt  = (1-w)*stocks_zk(:,:,:,i) + w*stocks_zk(:,:,:,i+1)
+
+        else
+            Phit = Phi
+            apgridtt  = apgrid_zk(:,:,:,1)
+            stockstt  = stocks_zk(:,:,:,1)
+        endif
+
+        bond_supply   = de_ratio * sum(stockstt*Phit)/L_N_ratio
+        f_excessbonds = bond_supply - sum((apgridtt - stockstt)*Phit)/L_N_ratio    ! analytically, L_N_ratio drops out
+
+    end function f_excessbonds
+
+end function dyn_eff_a
 !-------------------------------------------------------------------------------
 
 end module simulation_mod
