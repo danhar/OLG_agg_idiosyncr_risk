@@ -16,7 +16,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     use kinds
     use classes_mod     ,only: tPolicies, tAggGrids, tErrors, tSimvars, tLifecycle, tCoeffs, tStats, tStats_logical
     use statistics      ,only: cov, corr
-    use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path, cal_id, calc_euler_errors
+    use params_mod      ,only: n_eta, nj,nz, pop_frac, construct_path, cal_id, calc_euler_errors, check_dynamic_efficiency
 
     intent(in):: Phi, simvars, coeffs, grids, lc, pol, err, secs, it, projectname, calib_name, dir, cal_iter_o
     optional:: cal_iter_o
@@ -36,7 +36,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
     type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret, &
                     gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
-    type(tStats_logical) :: err_K, err_mu
+    type(tStats_logical) :: err_K, err_mu, dyn_eff
     character(:), allocatable :: path
     logical :: calibrating
 
@@ -107,6 +107,7 @@ contains
         delta%name='delta'; call delta%calc_stats(simvars)
         err_K%name ='err_K' ; call err_K %calc_stats(simvars)
         err_mu%name='err_mu'; call err_mu%calc_stats(simvars)
+        dyn_eff%name ='dyn_eff' ; call dyn_eff %calc_stats(simvars)
 
        ! The next holds for mean shock only if wm=0.25, which is ususally true
         nmu = size(pol%apgrid,6)
@@ -262,8 +263,9 @@ contains
 
 
     write(21,*)   'Warnings in simulation'
-    write(21,125) ' K     ', err_K%count , '  (',err_K%percent ,'%)   ', &
-                  '    mu ', err_mu%count, '  (',err_mu%percent,'%)   '
+    write(21,125) ' K     ', err_K%count  , '  (',err_K%percent ,  '%)   ', &
+                  '    mu ', err_mu%count , '  (',err_mu%percent,  '%)   '
+    if (check_dynamic_efficiency) write(21,125) 'dyn_ef1', dyn_eff%count, '  (',dyn_eff%percent ,'%)   '
 
     write(21,*)   'Duration measures'
     write(21,'(a7,i6, 14x, a5, es9.2)') ' KS_it ', it, 'secs ', secs
@@ -420,6 +422,9 @@ contains
         if (calc_euler_errors) then
             write(21,373) ' eul_max  ', simvars(i)%eul_err_max
             write(21,373) ' eul_avg  ', simvars(i)%eul_err_avg
+        endif
+        if (check_dynamic_efficiency) then
+            write(21,372) ' dyn_eff  ', simvars(i)%dyn_eff
         endif
         write(21,373) ' bequests ', simvars(i)%bequests
         write(21,373) ' gini_inc ', simvars(i)%gini_income

@@ -19,7 +19,9 @@ contains
 
 pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, simvars, Phi, lc)
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
-    use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, partial_equilibrium, zeta, delta, alpha, tol_mut=> tol_simulation_marketclearing
+    use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, &
+                               partial_equilibrium, zeta, delta, alpha, check_dynamic_efficiency, &
+                               tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
@@ -210,6 +212,12 @@ mu:     if (partial_equilibrium) then
         endif
 
         call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, tc)
+
+        if (check_dynamic_efficiency .and. simvars%rf(tc+1)>(1+n)(1+g)) then
+            simvars%dyn_eff = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
+        else
+            simvars%dyn_eff = .true.
+        endif
 
         ! Average life cycle profiles and average Phi
         if (tc > t_scrap) then ! 'Throw away' first t_scrap

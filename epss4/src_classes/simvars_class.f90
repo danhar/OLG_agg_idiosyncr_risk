@@ -16,7 +16,7 @@ module simvars_class
                 K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
                 gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
-        logical, dimension(:), allocatable :: err_K, err_mu
+        logical, dimension(:), allocatable :: err_K, err_mu, dyn_eff
 
     contains
         procedure :: allocate   => allocate_simvars
@@ -58,10 +58,11 @@ contains
         allocate(this%K(t+1),this%mu(t), this%output(t), this%stock(t), this%bonds(t), this%invest(t), this%C(t), this%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1
         allocate(this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
         allocate(this%gini_income(t), this%gini_assets(t), this%gini_stocks(t), this%gini_consumption(t),this%cv_income(t), this%cv_assets(t), this%cv_stocks(t), this%cv_consumption(t))
-        allocate(this%B(t), this%err_K(t), this%err_mu(t))
+        allocate(this%B(t), this%err_K(t), this%err_mu(t), this%dyn_eff(t))
 
         this%err_K = .false.
         this%err_mu = .false.
+        this%dyn_eff = .true.
 
     end subroutine allocate_simvars
 
@@ -70,6 +71,7 @@ contains
         ! deallocating in reverse order to allocation for memory purposes
         if (allocated(this%err_mu)) deallocate(this%err_mu)
         if (allocated(this%err_K)) deallocate(this%err_K)
+        if (allocated(this%dyn_eff)) deallocate(this%dyn_eff)
         if (allocated(this%B)) deallocate(this%B)
         if (allocated(this%gini_income)) deallocate(this%gini_income)
         if (allocated(this%gini_assets)) deallocate(this%gini_assets)
@@ -233,6 +235,8 @@ contains
             get = this%err_K(lb:ub)
         case ('err_mu')
             get = this%err_mu(lb:ub)
+        case ('dyn_eff')
+            get = this%dyn_eff(lb:ub)
         end select
 
     end function get_logical
@@ -470,7 +474,7 @@ contains
                             this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                             this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                             this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                            this(i)%err_K, this(i)%err_mu   !logical
+                            this(i)%err_K, this(i)%err_mu, this(i)%dyn_eff   !logical
                    if (ginis) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
                 enddo
             else
@@ -515,7 +519,7 @@ contains
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                       this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                       this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                      this(i)%err_K, this(i)%err_mu   !logical
+                      this(i)%err_K, this(i)%err_mu, this(i)%dyn_eff   !logical
             write(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption  ! inequality measures added later
         enddo
         close(55)
