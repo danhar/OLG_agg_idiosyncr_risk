@@ -53,6 +53,7 @@ partial_equilibrium      .false.     If true, no GE computed, GE values read fro
 collateral_constraint    .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
 kappa_in_01              .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
 calc_euler_errors        .false.     calculates relative Euler equation errors along the simulation. Very time-intensive.
+check_dynamic_efficiency .false.     In simulations, check KK Prop. 1, criterion a) and b).
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)

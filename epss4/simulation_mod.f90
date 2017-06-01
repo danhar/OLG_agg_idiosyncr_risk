@@ -213,10 +213,12 @@ mu:     if (partial_equilibrium) then
 
         call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, tc)
 
-        if (check_dynamic_efficiency .and. simvars%rf(tc+1)>(1+n)(1+g)) then
-            simvars%dyn_eff = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
-        else
-            simvars%dyn_eff = .true.
+        if (check_dynamic_efficiency .and. .not. partial_equilibrium) then
+            if (simvars%rf(tc+1)>(1+n)*(1+g)) then
+                simvars%dyn_eff = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
+            else
+                simvars%dyn_eff = .true.
+            endif
         endif
 
         ! Average life cycle profiles and average Phi
@@ -460,7 +462,9 @@ end function f_euler_errors
 
 pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, Phi)
     ! Checking the Demange 2002 criterion for dynamic efficiency. Specifically, here we check
-    ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006. See my note in /home/elessar/work/Research/EPSocSec/notes/170515-Dynamic_efficiency.
+    ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006.
+    ! Not implemented for partial equilibrium (since that is efficient if GE is).
+    ! See my note in /home/elessar/work/Research/EPSocSec/notes/170515-Dynamic_efficiency.
 
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,exogenous_xgrid, zeta, delta, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate
