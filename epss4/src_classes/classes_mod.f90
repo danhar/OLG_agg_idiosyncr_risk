@@ -10,7 +10,7 @@ module classes_mod
     use policies_class
     use simvars_class
     use coefficients_class
-    use statistics           ,only: tStats, tStats_logical
+    use statistics
     use timer_class          ,only: t_timer
 
 end module classes_mod

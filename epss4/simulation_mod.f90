@@ -43,7 +43,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct, log_cons_lct, var_log_cons_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
     real(dp)  :: Kt, mut, rt, netwaget, penst, w, eul_err_temp(2) ! variables in period t
-    integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk
+    integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk, dyn_eff_b_counter
 
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block.
     ! Intel Compiler 2017.0.098 works if I remove the block, but performance degrades substantially.
@@ -59,6 +59,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     call lc%set_number(0.0_dp)
     simvars%err_K   = .false.
     simvars%err_mu  = .false.
+    dyn_eff_b_counter = 0
     Knew(1)   = simvars%K(1)    ! This is only interesting for PE
 
     do tc=1,nt
@@ -214,10 +215,13 @@ mu:     if (partial_equilibrium) then
         call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, tc)
 
         if (check_dynamic_efficiency .and. .not. partial_equilibrium) then
+            dyn_eff_b_counter = dyn_eff_b_counter + 1
+            simvars%dyn_eff_b = dyn_eff_b_counter
             if (simvars%rf(tc+1)>(1+n)*(1+g)) then
-                simvars%dyn_eff = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
+                simvars%dyn_eff_a = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
+                dyn_eff_b_counter = 0
             else
-                simvars%dyn_eff = .true.
+                simvars%dyn_eff_a = .true.
             endif
         endif
 

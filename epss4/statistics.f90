@@ -8,7 +8,7 @@ module statistics
 
     implicit none
     private
-    public tStats, tStats_logical, corr, cov, lorenz_calc, lorenz_err
+    public tStats, tStats_logical, tStats_integer, corr, cov, lorenz_calc, lorenz_err
 
     type tStats
         private
@@ -37,11 +37,20 @@ module statistics
     type tStats_logical
         integer :: count
         real(dp) :: percent
-        logical(dp)  ,allocatable :: series(:)
+        logical  ,allocatable :: series(:)
         character(:) ,allocatable :: name
     contains
         procedure :: calc_stats => calculate_statistics_logical
     end type tStats_logical
+
+    type tStats_integer
+        integer :: absmax
+        real(dp) :: avg
+        integer  ,allocatable :: series(:)
+        character(:) ,allocatable :: name
+    contains
+        procedure :: calc_stats => calculate_statistics_integer
+    end type tStats_integer
 
 ! Compiler bug in Intel Fortran 12.1.2 (but not in 13.0.0)
 !    interface tStats
@@ -82,6 +91,12 @@ contains
         new_stats%name = varname
     end function constructor_logical
 
+    pure function constructor_integer(varname) result (new_stats)
+        character(len=*) ,intent(in)  :: varname
+        type(tStats_integer) :: new_stats
+        new_stats%name = varname
+    end function constructor_integer
+
     pure subroutine calculate_statistics(this, simvars)
         use params_mod    ,only: t_scrap, stat_dist_z
         use simvars_class ,only: tSimvars
@@ -117,7 +132,7 @@ contains
             this%max_exerr = this%absmax
             this%max_exerr = this%absmin
         else
-            this%avg = sum(this%series)/n
+            this%avg = sum(this%series)/real(n,dp)
             this%median = valnth(this%series,n/2)
             this%std = sqrt(sum((this%series - this%avg)**2)/real(n-1,dp)) ! should I rather divide by n?
             this%absmax = maxval(abs(this%series))
@@ -162,6 +177,27 @@ contains
 
     end subroutine calculate_statistics_logical
 
+   pure subroutine calculate_statistics_integer(this, simvars)
+        use params_mod    ,only: t_scrap, stat_dist_z
+        use simvars_class ,only: tSimvars
+        class(tStats_integer) ,intent(inout) :: this
+        type(tSimvars)        ,intent(in)    :: simvars(:)
+        integer :: i, lb, n ! lb = lower bound
+
+        if (size(simvars(1)%get_integer(this%name))<= size(stat_dist_z) +2) then
+            lb = 2 ! mean shock equilibrium
+        else
+            lb = t_scrap+1
+        endif
+
+        n = size(this%series)
+
+        this%series  = [(simvars(i)%get_integer(this%name,lb) ,i=1, size(simvars))]
+
+        this%avg = sum(this%series)/real(n,dp)
+        this%absmax = maxval(abs(this%series))
+
+    end subroutine calculate_statistics_integer
 
     subroutine write_stats(this, unit, name_opt, format)
     ! This is a specific type bound procedure
