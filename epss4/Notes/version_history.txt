@@ -8,7 +8,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-096-dyn_eff: implement dyn eff criterion of Demange (cf KK).
+096-dyn_eff_a: implement dyn eff criterion of Demange (cf KK). First condition a).
 088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. 
                UNFINISHED: So far, expected value for age and cah over simulation is computed and saved (from this I can compute value over age by simply summing). But to 
                get to CEV, I still need to compute the difference to an experiment (and maybe plot).

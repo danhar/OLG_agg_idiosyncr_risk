@@ -4,8 +4,8 @@
 # Copyright (c) 2016 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='096-base_autorealloc_sim_deb'
-BUILD=Build_Parallel_Debug #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
+thisrun='096-expl_alloc_no_colons'
+BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
 
