@@ -472,7 +472,8 @@ contains
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
         character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
-        logical :: ginis ! This indicator doesn't work properly, see description in subroutine write_unformatted_array below.
+        logical :: ginis, & ! This indicator doesn't work properly, see description in subroutine write_unformatted_array below.
+                   dynamic_efficiency
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read',status='old')
         if (io_stat == 0) then
@@ -493,6 +494,7 @@ contains
         endif
         close(55)
         ginis = .true.
+        dynamic_efficiency = .false.
 
         if (io_stat == 0) then
 
@@ -506,8 +508,8 @@ contains
                             this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
                             this(i)%err_aggr, this(i)%err_income, & ! this(i)%eul_err_max, this(i)%eul_err_avg, &
                             this(i)%r, this(i)%rf, this(i)%r_pf_median, this(i)%r_pf_kappa_med, this(i)%wage, this(i)%pens, this(i)%tau, this(i)%welf, this(i)%bequests, &
-                            this(i)%err_K, this(i)%err_mu, this(i)%dyn_eff_a, &   !logical
-                            this(i)%dyn_eff_b ! integer
+                            this(i)%err_K, this(i)%err_mu   !logical
+                   if (dynamic_efficiency) read(55)  this(i)%dyn_eff_a, this(i)%dyn_eff_b
                    if (ginis) read(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption ! inequality measures added later
                 enddo
             else

@@ -190,11 +190,10 @@ contains
             lb = t_scrap+1
         endif
 
+        this%series  = [(simvars(i)%get_integer(this%name,lb) ,i=1, size(simvars))]
         n = size(this%series)
 
-        this%series  = [(simvars(i)%get_integer(this%name,lb) ,i=1, size(simvars))]
-
-        this%avg = sum(this%series)/real(n,dp)
+        this%avg = real(sum(this%series),dp)/real(n,dp)
         this%absmax = maxval(abs(this%series))
 
     end subroutine calculate_statistics_integer

@@ -216,12 +216,12 @@ mu:     if (partial_equilibrium) then
 
         if (check_dynamic_efficiency .and. .not. partial_equilibrium) then
             dyn_eff_b_counter = dyn_eff_b_counter + 1
-            simvars%dyn_eff_b = dyn_eff_b_counter
+            simvars%dyn_eff_b(tc) = dyn_eff_b_counter
             if (simvars%rf(tc+1)>(1+n)*(1+g)) then
-                simvars%dyn_eff_a = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
+                simvars%dyn_eff_a(tc) = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
                 dyn_eff_b_counter = 0
             else
-                simvars%dyn_eff_a = .true.
+                simvars%dyn_eff_a(tc) = .true.
             endif
         endif
 
