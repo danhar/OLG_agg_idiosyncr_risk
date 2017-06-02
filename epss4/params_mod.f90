@@ -95,7 +95,8 @@ subroutine SetDefaultValues()
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; kappamax=1000.0_dp
-    apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp
+    apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp;
+    def_benefits = 0.0
     ! Integers
     nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_zeta=2; n_delta=2; nk=10; nmu=8; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=0; lom_k_version=2; lom_mu_version=2
