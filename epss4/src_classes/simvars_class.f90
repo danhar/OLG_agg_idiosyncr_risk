@@ -494,7 +494,7 @@ contains
         endif
         close(55)
         ginis = .true.
-        dynamic_efficiency = .false.
+        dynamic_efficiency = .true.
 
         if (io_stat == 0) then
 
