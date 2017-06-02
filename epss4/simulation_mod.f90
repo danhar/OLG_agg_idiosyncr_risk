@@ -82,10 +82,11 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
         i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
         w        = (Kt - agg_grid%K(i)) / (agg_grid%K(i+1) - agg_grid%K(i))
         ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
-        xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
-        apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
-        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
-        value_zk = (1-w)*value          (:,:,zt,:,i,:) +w*value          (:,:,zt,:,i+1,:)
+        !! Once the Intel Fortran bug on reallocation is fixed, I can simply write xgrid_zk= ...
+        xgrid_zk (:,:,:,:)= (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
+        apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
+        value_zk (:,:,:,:)= (1-w)*value          (:,:,zt,:,i,:) +w*value          (:,:,zt,:,i+1,:)
         where (apgrid_zk .ne. 0.0)
             kappa_zk = stocks_zk/apgrid_zk
         elsewhere
@@ -152,7 +153,7 @@ mu:     if (partial_equilibrium) then
             kappat   = kappa_zk (:,:,:,1)
         endif
         const        = xgridt - apgridt
-        exp_value_t  = valuet*Phi
+        exp_value_t  = valuet*Phi(:,:,:)
 
         call CheckPhi(Phi, simvars%Phi_1(tc), simvars%Phi_nx(tc)) ! Do here because Phi now was transitioned for all cases
 
@@ -504,9 +505,9 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
         i        = f_locate(agg_grid%K, Kt)   ! In 'default', returns iu-1 if x>xgrid(iu-1)
         w        = (Kt - agg_grid%K(i)) / (agg_grid%K(i+1) - agg_grid%K(i))
         ! If w>1 or w<0 we get linear extrapolation at upper or lower bounds
-        xgrid_zk = (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
-        apgrid_zk= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
-        stocks_zk= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
+        xgrid_zk (:,:,:,:)= (1-w)*policies%xgrid (:,:,zt,:,i,:) +w*policies%xgrid (:,:,zt,:,i+1,:)
+        apgrid_zk(:,:,:,:)= (1-w)*policies%apgrid(:,:,zt,:,i,:) +w*policies%apgrid(:,:,zt,:,i+1,:)
+        stocks_zk(:,:,:,:)= (1-w)*policies%stocks(:,:,zt,:,i,:) +w*policies%stocks(:,:,zt,:,i+1,:)
 
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
