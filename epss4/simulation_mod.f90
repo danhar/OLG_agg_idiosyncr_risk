@@ -218,11 +218,12 @@ mu:     if (partial_equilibrium) then
         if (check_dynamic_efficiency .and. .not. partial_equilibrium) then
             dyn_eff_b_counter = dyn_eff_b_counter + 1
             simvars%dyn_eff_b(tc) = dyn_eff_b_counter
-            if (simvars%rf(tc+1)>(1+n)*(1+g)) then
+            if ((1.0 + simvars%rf(tc+1))>(1+n)*(1+g)) then
+                ! dyn_eff_a defined as violation of condition A.
                 simvars%dyn_eff_a(tc) = dyn_eff_a(simvars%rf(tc+1), simvars%K(tc+1), stockst, apgridt, policies, agg_grid, Phi)
                 dyn_eff_b_counter = 0
             else
-                simvars%dyn_eff_a(tc) = .true.
+                simvars%dyn_eff_a(tc) = .false. ! no violation of condition A.
             endif
         endif
 
@@ -470,6 +471,7 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
     ! condition (a) of Prop. 1 of Kubler and Krueger AER 2006.
     ! Not implemented for partial equilibrium (since that is efficient if GE is).
     ! See my note in /home/elessar/work/Research/EPSocSec/notes/170515-Dynamic_efficiency.
+    ! Important: Output .true. indicates a violation of the condition!
 
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,exogenous_xgrid, zeta, delta, tol_mut=> tol_simulation_marketclearing
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate
@@ -554,7 +556,7 @@ ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
 
         rf_new = f_riskfree_rate(Knew,mut,pi_z(zt,:))
 
-        if (rf_new > (1.0+n)*(1.0+g)) then
+        if ((1.0 + rf_new) > (1.0+n)*(1.0+g)) then
             if (rt > rf_new) then
                 r_high = .true.
             else
@@ -565,7 +567,7 @@ ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
         if (r_low .and. r_high) exit
     enddo
 
-dyn_eff_a = r_low .and. r_high
+dyn_eff_a = .not.(r_low .and. r_high) ! report as a violation
 
 contains
 !-------------------------------------------------------------------------------

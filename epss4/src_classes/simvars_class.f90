@@ -16,7 +16,7 @@ module simvars_class
                 K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
                 r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
                 gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
-        logical , dimension(:), allocatable :: err_K, err_mu, dyn_eff_a
+        logical , dimension(:), allocatable :: err_K, err_mu, dyn_eff_a ! dyn_eff_a=.true. means violation of condition A.
         integer , dimension(:), allocatable :: dyn_eff_b
 
     contains
@@ -64,7 +64,7 @@ contains
 
         this%err_K = .false.
         this%err_mu = .false.
-        this%dyn_eff_a = .true.
+        this%dyn_eff_a = .false. ! Since reported as violations of condition A.
         this%dyn_eff_b = 0
 
     end subroutine allocate_simvars

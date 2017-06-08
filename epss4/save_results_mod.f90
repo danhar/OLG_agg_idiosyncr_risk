@@ -108,8 +108,10 @@ contains
         delta%name='delta'; call delta%calc_stats(simvars)
         err_K%name ='err_K' ; call err_K %calc_stats(simvars)
         err_mu%name='err_mu'; call err_mu%calc_stats(simvars)
-        dyn_eff_a%name ='dyn_eff_a' ; call dyn_eff_a%calc_stats(simvars)
-        dyn_eff_b%name ='dyn_eff_b' ; call dyn_eff_b%calc_stats(simvars)
+        if (check_dynamic_efficiency) then
+            dyn_eff_a%name ='dyn_eff_a' ; call dyn_eff_a%calc_stats(simvars)
+            dyn_eff_b%name ='dyn_eff_b' ; call dyn_eff_b%calc_stats(simvars)
+        endif
 
        ! The next holds for mean shock only if wm=0.25, which is ususally true
         nmu = size(pol%apgrid,6)
@@ -268,8 +270,9 @@ contains
     write(21,125) ' K     ', err_K%count  , '  (',err_K%percent ,  '%)   ', &
                   '    mu ', err_mu%count , '  (',err_mu%percent,  '%)   '
     if (check_dynamic_efficiency) then
-        write(21,125) 'DynEf_A', dyn_eff_a%count , '  (',dyn_eff_a%percent ,'%)   ' ,&
-                      'DynEf_B', dyn_eff_b%absmax, 'mx(',dyn_eff_b%avg     ,' avg)'
+        write(21,*)   'Dynamic efficiency (Cond. A as violations, Cond. B as max)'
+        write(21,125) ' CondA ', dyn_eff_a%count , '  (',dyn_eff_a%percent ,'%)   ' ,&
+                      ' CondB ', dyn_eff_b%absmax, '  (',dyn_eff_b%avg     ,' avg)'
     endif
 
     write(21,*)   'Duration measures'
@@ -429,8 +432,8 @@ contains
             write(21,373) ' eul_avg  ', simvars(i)%eul_err_avg
         endif
         if (check_dynamic_efficiency) then
-            write(21,372) ' dyn_eff_a', simvars(i)%dyn_eff_a
-            write(21,368) ' dyn_eff_b', simvars(i)%dyn_eff_b
+            write(21,372)  ' dyn_eff_a', simvars(i)%dyn_eff_a
+            write(21,368) ' dyn_eff_b ', simvars(i)%dyn_eff_b
         endif
         write(21,373) ' bequests ', simvars(i)%bequests
         write(21,373) ' gini_inc ', simvars(i)%gini_income

@@ -1433,6 +1433,8 @@ subroutine params_set_logical(param_name, new_value)
             surv_rates = new_value
         case ('ccv')
             ccv = new_value
+        case ('check_dynamic_efficiency')
+            check_dynamic_efficiency = new_value
     end select
 end subroutine params_set_logical
 
