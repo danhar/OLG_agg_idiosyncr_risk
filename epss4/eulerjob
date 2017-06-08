@@ -5,7 +5,7 @@
 #*******************************************************************************
 
 # #BSUB-q 24h                    # Job queue 4h, 24h, 120h
-#BSUB-W 24:00                         # Time limit in minutes (or HH:MM)
+#BSUB-W 10:00                         # Time limit in minutes (or HH:MM)
 #BSUB-n 24            # number of processors / threads
 # #BSUB-R "select[nthreads==2]" # force hyperthreading
 #BSUB-R "select[model==XeonE5_2680v3]"   # Euler II nodes
@@ -31,8 +31,8 @@ make -j$OMP_NUM_THREADS all >>make_output.txt 2>&1
 cd ..
 
 if [[ "$BUILD" == *Debug* ]]; then
-    gdb --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/$PROJECT >./model_output/shell_output.txt 2>&1
-    # gdb-ia not available on Euler
+    gdb-ia --batch --eval-command=run --eval-command=bt --nw --args ./$BUILD/$PROJECT >./model_output/shell_output.txt 2>&1
+    # if gdb-ia not available on Euler (because older Intel version), use gdb
     # module load valgrind # use either gdb or valgrind
     # valgrind --error-limit=no  ./$BUILD/$PROJECT >>shell_output.txt 2>&1 # not tested
 else
