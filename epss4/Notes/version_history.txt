@@ -1,5 +1,5 @@
 !*******************************************************************************
-! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 !*******************************************************************************
 
 This version history is a collection of 3 different versioning approaches during the project. Section (B) is the oldest history, then (C), then (D) the 

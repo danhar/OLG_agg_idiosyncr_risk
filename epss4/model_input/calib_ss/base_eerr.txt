@@ -1,5 +1,5 @@
 !*******************************************************************************
-! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 !*******************************************************************************
 
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).

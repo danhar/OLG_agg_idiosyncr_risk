@@ -1,5 +1,5 @@
 !*******************************************************************************
-! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 !*******************************************************************************
 
 module aggregate_grids_class

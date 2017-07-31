@@ -1,5 +1,5 @@
 !*******************************************************************************
-! Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 !*******************************************************************************
 
 ! main.f90 of program Equity Premium Social Security
