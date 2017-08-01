@@ -59,7 +59,7 @@ calc_euler_errors        .false.     calculates relative Euler equation errors a
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
 nap             20       exogenous grid for savings (ap= 'a prime')
-n_trans         4        grid for idiosyncratic transitory income shock
+n_trans         1        grid for idiosyncratic transitory income shock
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks

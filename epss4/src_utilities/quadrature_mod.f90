@@ -71,15 +71,19 @@ real(dp) :: mean
 logical :: lognormal
 character(*),parameter::procedure_name='change_of_standard_normal_variable'
 
-if (present(mean_o)) then
-    mean = mean_o
-else
-    mean = 0.0
-endif
-if (present(lognormal_o)) then
+if (present(lognormal_o)) then ! This check needs to come first.
     lognormal = lognormal_o
 else
     lognormal = .false.
+endif
+if (present(mean_o)) then
+    mean = mean_o
+else
+    if (lognormal) then
+        mean = -(standard_deviation**2.0_dp/2.0_dp)
+    else
+        mean = 0.0
+    endif
 endif
 
 nodes = mean + sqrt(2.0_dp) * standard_deviation *nodes
