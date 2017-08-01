@@ -21,10 +21,10 @@ del_mean        0.100830 mean of depreciation shocks
 del_std         0.076727 std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.884114 first element in transition matrix for delta, pi_delta(1,1)
-rho             0.952    autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_h      0.211    standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_l      0.125    standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
-trans_std       0.0996   standard deviation of idiosyncratic transitory income shocks
+rho             0.9666   autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_h      0.1558   standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_l      0.0977   standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
+trans_std       0.3156   standard deviation of idiosyncratic transitory income shocks
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Demographics    
@@ -59,7 +59,7 @@ calc_euler_errors        .false.     calculates relative Euler equation errors a
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
 nap             20       exogenous grid for savings (ap= 'a prime')
-n_trans         1        grid for idiosyncratic transitory income shock
+n_trans         4        grid for idiosyncratic transitory income shock
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
