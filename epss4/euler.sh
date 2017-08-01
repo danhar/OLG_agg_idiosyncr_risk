@@ -1,10 +1,10 @@
 #!/bin/bash
 #
 #*******************************************************************************
-# Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+# Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='097-dyn_eff9'
+thisrun='098-base_bench'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M

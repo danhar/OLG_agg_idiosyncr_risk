@@ -13,10 +13,10 @@ module params_mod
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
-	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, rho, n, tau, scale_AR, scale_IR, &
+	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
-    integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_zeta, n_delta, nk, nmu,&
+    integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_trans, n_zeta, n_delta, nk, nmu,&
                           nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params, &
                           lom_k_version, lom_mu_version
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
@@ -53,6 +53,8 @@ module params_mod
             etagrid,        &   ! idiosyncratic stochastic state
             pi_z                ! Markov transition matrix for aggregate shocks: pi(z1,z2)=Prob(z2|z1)
     real(dp) ,dimension(:)   ,allocatable ,protected :: &
+            trans_prob,     &   ! probability of transitory income shocks
+            trans_grid,     &   ! grid for transitory income shocks
             zeta,           &   ! aggregate technology shocks
             delta,          &   ! Shock to depreciation - REVERSE ORDER so that zc=1 is lowest return, zc=4 highest
             stat_dist_eta,  &   ! stationary distribution of idiosyncratic state
@@ -159,6 +161,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) nu_sigma_h
             case ('nu_sigma_l')
                 read (parval,*) nu_sigma_l
+            case ('trans_std')
+                read (parval,*) trans_std
             case ('nj')
                 read (parval,*) nj
             case ('jr')
@@ -215,6 +219,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) nap
             case ('n_eta')
                 read (parval,*) n_eta
+            case ('n_trans')
+                read (parval,*) n_trans
             case ('n_zeta')
                 read (parval,*) n_zeta
             case ('n_delta')
@@ -560,7 +566,7 @@ subroutine params_set_thisrun()
     zeta =[zeta_mean-zeta_std_scaled, zeta_mean-zeta_std_scaled, zeta_mean+zeta_std_scaled, zeta_mean+zeta_std_scaled]
     delta=[del_mean + del_std_scaled, del_mean - del_std_scaled, del_mean + del_std_scaled, del_mean - del_std_scaled]
 
-    call set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, nz, ccv)
+    call set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, trans_prob, trans_grid, n_eta, nz, ccv)
 
     call set_apmax(ms_guess%k(1), apmax_factor, scale_IR ,apmax_curv)  ! This must be called after set_demographics()
 
@@ -643,18 +649,21 @@ contains
     end subroutine set_demographics
 !-------------------------------------------------------------------------------------------------
 
-    subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, nz, ccv)
+    subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, trans_prob, trans_grid, n_eta, nz, ccv)
         use markov_chain_approx
         use twostate_exact
+        use quadrature_mod
 
         integer  ,intent(in)  :: n_eta, nz
         logical  ,intent(in)  :: ccv
-        real(dp) ,allocatable ,intent(out) :: etagrid(:,:), pi_eta(:,:), stat_dist_eta(:)
-        real(dp) :: sigma(nz)
+        real(dp) ,allocatable ,intent(out) :: etagrid(:,:), pi_eta(:,:), stat_dist_eta(:), &
+                                              trans_prob(:), trans_grid(:)
+        real(dp) :: sigma(nz), sigma_transitory
         integer  :: zc, ec
         logical  :: converged
 
         allocate(etagrid(n_eta,nz), pi_eta(n_eta,n_eta), stat_dist_eta(n_eta))
+        allocate(trans_prob(n_trans), trans_grid(n_trans))
 
         if (ccv) then
             sigma = [nu_sigma_h,nu_sigma_h,nu_sigma_l,nu_sigma_l]
@@ -663,6 +672,7 @@ contains
         endif
 
         sigma = sigma * (1.0 + scale_IR)
+        sigma_transitory = trans_std * (1.0 + scale_IR)
 
         if (n_eta == 2) then
             call calibridiorisk2(rho,sigma,pi_eta,etagrid,stat_dist_eta, converged)
@@ -679,6 +689,9 @@ contains
                 etagrid(:,zc) = etagrid(:,zc)/dot_product((etagrid(:,zc)),stat_dist_eta(:))
             enddo
         endif
+
+    call quadrature(trans_grid, trans_prob, n_trans, 'gauss_hermite')
+    call change_of_standard_normal_rv(standard_deviation=sigma_transitory, lognormal_o=.true., nodes=trans_grid)
 
     end subroutine set_idiosync_shocks
 end subroutine params_set_thisrun
@@ -969,6 +982,16 @@ use omp_lib           ,only: OMP_get_max_threads
         call critical_stop
     endif
 
+    if (abs(sum(trans_prob) -1.0)>crit) then
+        print*, 'Error: sum(trans_prob) .ne. 1'
+        call critical_stop
+    endif
+
+    if (abs(dot_product(trans_prob, trans_grid)-1.0)>crit) then
+        print*, 'WARNING: dot_product(trans_prob, trans_grid) .ne. 1 : ', matmul(stat_dist_eta,etagrid)
+        call critical_stop
+    endif
+
     if (r_ms_guess > .2_dp) then
         print*, 'ERROR: r_ms_guess > .2'
         call critical_stop
@@ -1219,6 +1242,7 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,211) ' zeta_std     = ', zeta_std
     write(21,211) ' del_mean     = ', del_mean
     write(21,211) ' del_std      = ', del_std
+    write(21,211) ' trans_std    = ', trans_std
     write(21,*)
     write(21,*) '------------------- Soc. Sec. & Demographics -----------------------'
     write(21,211) ' tau          = ', tau
@@ -1244,11 +1268,15 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
 214 format(a16,<nz>(f0.6,x),/,<n_eta-1>(t17,<nz>(f0.6,x),/))
     write(21,'(a16,<n_eta>(f0.6,x))') ' stat_dist_eta= ', stat_dist_eta
     write(21,*)
+    write(21,'(a16,<n_trans>(f0.6,x))') ' trans_prob   = ', trans_prob
+    write(21,'(a16,<n_trans>(f0.6,x))') ' trans_grid   = ', trans_grid
+    write(21,*)
     write(21,*) '------------------------------ Grids -------------------------------'
     write(21,218) ' nap          = ', nap
 218 format(a16, i3)
     write(21,218) ' nx           = ', nx
     write(21,218) ' n_eta        = ', n_eta
+    write(21,218) ' n_trans      = ', n_trans
     write(21,218) ' nz           = ', nz
     write(21,218) ' nk           = ', nk
     write(21,218) ' nmu          = ', nmu

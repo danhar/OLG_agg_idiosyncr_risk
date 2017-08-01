@@ -26,7 +26,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
-    use params_mod      ,only: nj, nx, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
+    use params_mod      ,only: nj, nx, n_trans, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
     use makegrid_mod
 
     type(tPolicies)                  ,intent(out) :: p      ! policies
@@ -36,7 +36,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     type(tErrors)                    ,intent(out) :: err
     real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
     real(dp) ,dimension(nx,n_eta,nz)              :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
-    real(dp) ,dimension(n_eta,nz)                 :: yp      ! income tomorrow, for every idiosyncr & aggr state
+    real(dp) ,dimension(n_trans,n_eta,nz)         :: yp      ! income tomorrow, for every idiosyncr & aggr state
     real(dp) ,dimension(nz)                       :: rp, mup ! risky return AND equity premium for every aggr state tomorrow
     real(dp)   :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
     real(dp)   :: betatildej, evp                            ! modified discount factor, expected value tomorrow
@@ -115,16 +115,16 @@ end subroutine olg_backwards_recursion
 
 pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, err_k, err_mu, err_rfp)
 ! Forecast kp, mup, and get corresonding prices  (might want to move into laws_of_motion)
-    use params_mod     ,only: nz, pi_z, jr, ej, etagrid
+    use params_mod     ,only: nz, pi_z, jr, ej, etagrid, trans_grid
     use laws_of_motion ,only: Forecast_k, Forecast_mu
     use income
 
     type(tCoeffs)   ,intent(in)  :: coeffs ! coefficients for laws of motion
     type(tAggGrids) ,intent(in)  :: grids  ! grids for aggregate states k and mu
     integer         ,intent(in)  :: jc, zc, kc, muc
-    real(dp)        ,intent(out) :: kp, mup(:), rp(:), rfp, yp(:,:)
+    real(dp)        ,intent(out) :: kp, mup(:), rp(:), rfp, yp(:,:,:)
     logical(1)      ,intent(out) :: err_k, err_mu, err_rfp
-    integer :: zpc, nk, nmu
+    integer :: zpc, epc, nk, nmu
     real(dp), parameter :: crit = 1.0e-10
 
     err_k   = .false.
@@ -154,9 +154,11 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp, e
     do zpc= 1,nz
         rp(zpc) = f_stock_return(kp, zeta(zpc), delta(zpc), rfp)
         if (jc+1>=jr) then
-            yp(:,zpc) = f_pensions(kp, zeta(zpc))
+            yp(:,:,zpc) = f_pensions(kp, zeta(zpc))
         else
-            yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
+            do epc=1,size(etagrid,1)
+                yp(:,epc,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(epc,zpc) * trans_grid
+            enddo
         endif
     enddo
     if (rfp < rp(1)*(1.0 + sign(0.0001_dp,rp(1))) .and. grids%mu(muc)>0.0 ) then
@@ -256,7 +258,7 @@ pure function f_apgrid_j(rfp,yp, xgridp, app_min, apmax, jc)
     use makegrid_mod
 
     real(dp) ,dimension(nap) :: f_apgrid_j
-    real(dp) ,intent(in)     :: rfp, yp(:,:), xgridp(:,:,:), app_min, apmax
+    real(dp) ,intent(in)     :: rfp, yp(:,:,:), xgridp(:,:,:), app_min, apmax
     integer  ,intent(in)     :: jc
     real(dp)                 :: rtildemax_debt, apmin, xp_min
 
@@ -269,7 +271,7 @@ CC: if (collateral_constraint) then
         ! need to check whether zpc=1 or zpc=nz gives the smaller apmin (in absolute terms)
         rtildemax_debt  = (1.0+rfp)/(1.0+g)
         xp_min          = min(cmin, cmin + app_min, xgridp(1,1,1))
-        apmin           = (xp_min-yp(1,1))/rtildemax_debt
+        apmin           = (xp_min-yp(1,1,1))/rtildemax_debt
         if (jc < 6) then
             apmin = xp_min*.8_dp
         endif
@@ -291,7 +293,7 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     use sub_zbrak      ! NR: inwards bracketing
 
     real(dp) ,dimension(:,:,:) ,intent(in) :: xgridp, consp, vp
-    real(dp)   ,intent(in)  :: ap, rfp, yp(:,:), rp(:), pi_zp(:), pi_etap(:)        ! apgrid(xc,ec,zc,jc)
+    real(dp)   ,intent(in)  :: ap, rfp, yp(:,:,:), rp(:), pi_zp(:), pi_etap(:)        ! apgrid(xc,ec,zc,jc)
     integer   ,intent(in)   :: xc, jc
     real(dp)   ,intent(out) :: kappa_out ! kappa(xc,ec,zc,jc)
     logical(1) ,intent(out) :: error
@@ -331,7 +333,7 @@ pure subroutine asset_allocation(xgridp, consp, vp, yp, rfp, rp, ap, pi_zp, pi_e
     else
         ! Determine maximum leverage without risk of not paying back (i.e. dropping below xgrid(1,1,jc+1))
         ! only need to look at the worst state tomorrow
-        kappa1=((xgridp(1,1,1)-yp(1,1))*(1.0+g)/ap-(1.0+rfp))/(rp(1)-rfp)
+        kappa1=((xgridp(1,1,1)-yp(1,1,1))*(1.0+g)/ap-(1.0+rfp))/(rp(1)-rfp)
         ! It would be easier and just as justifiable to calculate the kappa1 that implies a return of -100%, i.e. zero assets left, i.e. Rtilde = -1.0
         ! This kappa1 would be somewhat lower, because in the above calculation, return can be even worse than 100% as long as agent receives some income.
         ! That is at the moment he has to pay up, there is no limited liability. However, during solution this never happens, but it can happen in simulations.
@@ -392,7 +394,7 @@ contains
 ! Euler equation
 !---------------------------------------------------------------------------
     pure function asseteuler_f(kappa)
-    use params_mod         ,only: theta, gamm, g, cmin
+    use params_mod         ,only: theta, gamm, g, cmin, trans_prob
     use fun_lininterp
 
     real(dp)                  :: asseteuler_f
@@ -400,37 +402,40 @@ contains
     real(dp) ,dimension(:) ,allocatable :: aeez      ! asset euler equation for each z
     real(dp) ,dimension(1)    :: cons_interp, vp_interp, xp, aeetemp
     real(dp) :: rtildep     ! rtilde prime, aprime
-    integer                   :: zpc, epc, nz, n_eta
+    integer                   :: zpc, epc, tpc, nz, n_eta, n_trans
 
     nz = size(pi_zp)
     n_eta = size(pi_etap)
+    n_trans = size(trans_prob)
     allocate(aeez(nz))
     aeez = 0.0
     do zpc=1,nz
         rtildep     = (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
         do epc=1,n_eta
-            xp          = yp(epc,zpc)+rtildep*ap
-            cons_interp = f_lininterp(xgridp(:,epc,zpc), consp(:,epc,zpc), xp)
-            vp_interp   = f_lininterp(xgridp(:,epc,zpc), vp(:,epc,zpc), xp)
+            do tpc=1,n_trans
+                xp          = yp(tpc,epc,zpc)+rtildep*ap
+                cons_interp = f_lininterp(xgridp(:,epc,zpc), consp(:,epc,zpc), xp)
+                vp_interp   = f_lininterp(xgridp(:,epc,zpc), vp(:,epc,zpc), xp)
 
 
-            if (cons_interp(1) <=cmin) then
-                cons_interp = cmin
-                xp               = cmin + ap
-                vp_interp   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            endif
-            if (vp_interp(1) <=cmin) then
-                vp_interp(1)   = cmin
-            endif
-            aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
-!
-!           if (xp(1) < xgridp(1,epc,zpc)) then
-!               aeetemp = taylor_expansion(cons_interp, vp_interp,epc,zpc)  ! only works for theta\=1
-!           else
-!               aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
-!           endif
+                if (cons_interp(1) <=cmin) then
+                    cons_interp = cmin
+                    xp               = cmin + ap
+                    vp_interp   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
+                endif
+                if (vp_interp(1) <=cmin) then
+                    vp_interp(1)   = cmin
+                endif
+                aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
+    !
+    !           if (xp(1) < xgridp(1,epc,zpc)) then
+    !               aeetemp = taylor_expansion(cons_interp, vp_interp,epc,zpc)  ! only works for theta\=1
+    !           else
+    !               aeetemp = vp_interp**((1.0-theta)*(gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm)
+    !           endif
 
-            aeez(zpc) = aeez(zpc) + pi_etap(epc)*aeetemp(1)
+                aeez(zpc) = aeez(zpc) + pi_etap(epc)*trans_prob(tpc)*aeetemp(1)
+            enddo
         enddo
     enddo
 
@@ -468,9 +473,9 @@ end subroutine asset_allocation
 
 pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
     use fun_lininterp
-    use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, g, cmin, theta, gamm
+    use params_mod, only : collateral_constraint, pi_z, pi_eta, nz, n_eta, n_trans, g, cmin, theta, gamm, trans_prob
 
-    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)
+    real(dp)                   ,intent(in)  :: ap, kappa, rfp, betatildej, rp(:),yp(:,:,:), xgridp(:,:,:),consp(:,:,:), vp(:,:,:)
     integer                    ,intent(in)  :: zc, xc, ec
     real(dp)                   ,intent(out) :: cons_out, evp  ! cons(xc,ec,zc,jc), evp
     logical(1) ,dimension(nz)  ,intent(out) :: error
@@ -478,44 +483,45 @@ pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec
     real(dp)   ,dimension(nz)               :: evpz, rhs_temp ! temporary: cee_*: consumption euler eq.
     real(dp)                                :: rtildep, xp    ! rtilde and cash-at-hand tomorrow
     real(dp)                                :: cee_rhs, rhs_fac1, rhs_fac2 ! temporary: rhs of cee, factors 1 and 2
-    integer                                 :: zpc, epc       ! counters for shocks tomorrow
+    integer                                 :: zpc, epc, tpc  ! counters for shocks tomorrow
 
     error = .false.
 
+    evpz     = 0.0
+    rhs_temp = 0.0
+
     do zpc=1,nz
-        if (pi_z(zc,zpc) == 0.0) then
-            evpz(zpc)     = 0.0
-            rhs_temp(zpc) = 0.0
-            cycle
-        endif
+        if (pi_z(zc,zpc) == 0.0) cycle
 
         ! Get cash-at-hand tomorrow for all states
         rtildep= (1.0+rfp+kappa*(rp(zpc)-rfp))/(1.0+g)
         ! As mentioned in the subroutine asset_allocation above, one could limit kappa so that rtildep >= 0.0.
         ! In that case, this should be checked here also, because kappa can take different (very high) values during the simulations (when ap is close to zero).
 
-        do epc = 1,n_eta
-            xp = yp(epc,zpc)+rtildep*ap
+        do tpc = 1,n_trans
+            do epc = 1,n_eta
+                xp = yp(tpc,epc,zpc)+rtildep*ap
 
-            ! Interpolate consumption and value function
-            cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc),consp(:,epc,zpc),xp)
-            vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            if (cons_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                cons_interp(epc) = cmin
-                xp               = cmin + ap
+                ! Interpolate consumption and value function
+                cons_interp(epc) = f_lininterp(xgridp(:,epc,zpc),consp(:,epc,zpc),xp)
                 vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
-            endif
-            if (vp_interp(epc) <=cmin) then
-                error(zpc)       = .true.
-                vp_interp(epc)   = cmin
-            endif
-
+                if (cons_interp(epc) <=cmin) then
+                    error(zpc)       = .true.
+                    cons_interp(epc) = cmin
+                    xp               = cmin + ap
+                    vp_interp(epc)   = f_lininterp(xgridp(:,epc,zpc),vp(:,epc,zpc),xp)
+                endif
+                if (vp_interp(epc) <=cmin) then
+                    error(zpc)       = .true.
+                    vp_interp(epc)   = cmin
+                endif
+            enddo
+           ! Now different factors of consumption euler equation
+            evpz(zpc)     = evpz(zpc) + trans_prob(tpc)* sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
+            rhs_temp(zpc) = rhs_temp(zpc) + trans_prob(tpc) * sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
+                                                    (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm))
         enddo
-        ! Now different factors of consumption euler equation
-        evpz(zpc)     = sum(pi_eta(ec,:)*vp_interp**(1.0-theta))
-        rhs_temp(zpc) = sum(pi_eta(ec,:)*vp_interp**((1.0-theta)*&
-                            (gamm-1.0)/gamm)*cons_interp**((1.0-theta-gamm)/gamm))
+
     enddo
 
     evp=dot_product(pi_z(zc,:),evpz)    ! Expected V'

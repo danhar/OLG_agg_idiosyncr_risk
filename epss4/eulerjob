@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #*******************************************************************************
-# Copyright (c) 2016 Daniel Harenberg - All rights reserved.
+# Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
 # #BSUB-q 24h                    # Job queue 4h, 24h, 120h

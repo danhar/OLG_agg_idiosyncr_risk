@@ -394,7 +394,7 @@ end subroutine calc_inequality_measures
 !-------------------------------------------------------------------------------
 
 pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgridt, apgridt, kappat, Phi)
-    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, cmin
+    use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, trans_grid, cmin
     use household_solution_mod ,only: interp_policies_tomorrow, consumption
     use laws_of_motion ,only: Forecast_mu
     use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
@@ -409,18 +409,19 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     real(dp) ,dimension(:,:,:)       ,intent(in) :: xgridt, apgridt, kappat, Phi
 
     real(dp) :: betatildej, app_min, evp
-    real(dp) ,allocatable :: mup(:), rp(:), yp(:,:)
+    real(dp) ,allocatable :: mup(:), rp(:), yp(:,:,:)
     real(dp) ,allocatable ,dimension(:,:,:) :: consp, xgridp, vp, cons_opt, cons_t, eul_err
-    integer :: zpc, jc, ec, xc, nj, nz, n_eta, nx, nmu
+    integer :: zpc, jc, ec, xc, nj, nz, n_eta, n_trans, nx, nmu
     logical(1) ,dimension(size(coeffs%mu,2)) :: error
 
     nz = size(coeffs%mu,2)
     nj = size(policies%apgrid,4)
     n_eta = size(etagrid,1)
+    n_trans = size(trans_grid)
     nx = size(policies%apgrid,1)
     nmu = size(grids%mu)
 
-    allocate(mup(nz), rp(nz), yp(n_eta,nz))
+    allocate(mup(nz), rp(nz), yp(n_trans, n_eta,nz))
     allocate(consp(nx,n_eta,nz), xgridp(nx,n_eta,nz), vp(nx,n_eta,nz))
     allocate(cons_opt(nx,n_eta,nj), cons_t(nx,n_eta,nj), eul_err(nx,n_eta,nj))
 
@@ -438,9 +439,11 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
 
         do zpc = 1,nz
             if (jc+1>=jr) then
-                yp(:,zpc) = f_pensions(kp, zeta(zpc))
+                yp(:,:,zpc) = f_pensions(kp, zeta(zpc))
             else
-                yp(:,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(:,zpc)
+                do ec=1,n_eta
+                    yp(:,ec,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(ec,zpc) * trans_grid
+                enddo
             endif
         enddo
 
