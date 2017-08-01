@@ -314,17 +314,16 @@ end subroutine simulate
 
 pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagridt, penst, netwaget, tc)
     use statistics  ,only: lorenz_calc
-    use params_mod  ,only: t_scrap, jr, ej
+    use params_mod  ,only: t_scrap, jr, ej, trans_grid, trans_prob
     type(tSimvars)             ,intent(inout) :: simvars
     real(dp) ,dimension(:,:,:) ,intent(in)    :: xgridt, apgridt, stockst, Phi
     real(dp) ,dimension(:)     ,intent(in)    :: etagridt
     real(dp)                   ,intent(in)    :: penst, netwaget
     integer                    ,intent(in)    :: tc
     real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
-    real(dp) ,dimension(:,:,:) ,allocatable   :: const, assets_t
-    real(dp) ,dimension(size(Phi,2),size(Phi,3)) :: income_dist
+    real(dp) ,dimension(:,:,:) ,allocatable   :: const, assets_t, Phi_trans, income_dist
     real(dp)                                  :: mean, std
-    integer                                   :: error, jc
+    integer                                   :: error, jc, ec, n_trans, n_eta, n_j
     logical                                   :: ms_equilibrium
 
     if (size(simvars%rf) < t_scrap) then
@@ -344,22 +343,32 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
         simvars%cv_stocks(tc)        = 0.0
         simvars%cv_consumption(tc)   = 0.0
     else
-
+        n_trans = size(trans_grid)
+        n_eta = size(Phi,2)
+        n_j   = size(Phi,3)
+        allocate(income_dist(n_trans, n_eta, n_j))
+        income_dist =0.0
+        Phi_trans = income_dist
         const = xgridt -apgridt
 
-        do jc=1,size(income_dist,2)
-            if (jc>=jr) then
-                income_dist(:,jc) = 0.0 !penst
-            else
-                income_dist(:,jc) = netwaget*ej(jc)*etagridt
-            endif
+        do jc=1, n_j
+            do ec=1,n_eta
+                if (jc>=jr) then
+                    income_dist(:,ec,jc) = 0.0 !penst
+                    Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))/real(n_trans,dp)
+                else
+                    income_dist(:,ec,jc) = netwaget*ej(jc)*etagridt(ec)*trans_grid
+                    Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))*trans_prob
+                endif
+            enddo
         enddo
 
-        assets_t = xgridt - spread(income_dist, 1, size(xgridt,1))
+        ! The following is the best I can do, I think:
+        assets_t = xgridt - spread(sum(income_dist,1), 1, size(xgridt,1))
 
         lorenz_x = pack(income_dist, .true.)
         lorenz_y = lorenz_x
-        call lorenz_calc(pack(sum(Phi,1), .true.), lorenz_x, lorenz_y, simvars%gini_income(tc), error)
+        call lorenz_calc(pack(Phi_trans, .true.), lorenz_x, lorenz_y, simvars%gini_income(tc), error)
         lorenz_x = pack(assets_t, .true.)
         lorenz_y = lorenz_x
         call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_assets(tc), error)
@@ -368,9 +377,9 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
         lorenz_x = pack(const, .true.)
         call lorenz_calc(pack(Phi, .true.), lorenz_x, lorenz_y, simvars%gini_consumption(tc), error)
 
-        mean = sum(sum(Phi,1)*income_dist)
+        mean = sum(Phi_trans*income_dist)
         if (mean == 0.0) mean = 1.0
-        std  = sqrt(sum(sum(Phi,1)*(income_dist - mean)**2))
+        std  = sqrt(sum(Phi_trans*(income_dist - mean)**2))
         simvars%cv_income(tc)        = std/mean
 
         mean = sum(Phi*assets_t)
