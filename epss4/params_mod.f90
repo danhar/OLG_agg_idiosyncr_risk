@@ -75,7 +75,7 @@ contains
 ! - subroutine ReadCalibration()
 ! - subroutine SetRemainingParams() contains the following internal subroutines
 !   -- subroutine set_demographics()
-!   -- subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, n_eta, ccv)
+!   -- subroutine set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, trans_prob, trans_grid, n_eta, ccv)
 !   -- subroutine set_benefits
 !   -- pure subroutine set_ms_guess(ms_guess, r_ms_guess, ccv, tau)
 ! - subroutine params_set_thisrun()
