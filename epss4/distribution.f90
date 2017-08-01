@@ -25,6 +25,7 @@ contains
 pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
 ! Calculate the transition of Phi
     use fun_locate
+    use params_mod     ,only: trans_grid, trans_prob ! transitory income shocks
 
     real(dp) ,dimension(:,:,:) ,allocatable ,target     :: Phi                  ! new distribution
     real(dp) ,dimension(:,:,:) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
@@ -32,11 +33,11 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
     real(dp) ,dimension(:,:,:) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
     real(dp) ,dimension(:)     ,intent(in) :: etagrid              ! idiosyncratic income shocks today
     real(dp) ,dimension(:,:,:) ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
-    real(dp) ,dimension(size(etagrid)) :: y ! income
+    real(dp) ,dimension(size(trans_grid),size(etagrid)) :: y ! income
     real(dp) :: wx, x ! weight, cash at hand
-    integer  :: ix, jc, ec, xmc, emc, nj, n_eta, nx   ! xmc,emc: x/eta previous period or generation
+    integer  :: ix, jc, ec, tc, xmc, emc, nj, n_eta, n_trans, nx   ! xmc,emc: x/eta previous period or generation
 
-    nx= size(apgrid,1); n_eta = size(apgrid,2); nj = size(apgrid,3)
+    nx= size(apgrid,1); n_eta = size(apgrid,2); nj = size(apgrid,3); n_trans = size(trans_grid)
     allocate(Phi(nx,n_eta,nj))
 
     if (present(Phitm_o)) then
@@ -48,15 +49,19 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
 
     Phi         = 0.0
     ! Generation jc=1
-    y           = netwage*ej(1)*etagrid
+    do ec = 1,n_eta
+        y(:,ec)     = netwage*ej(1)*etagrid(ec)*trans_grid
+    enddo
     if (bequests_to_newborn) y = y + bequests * L_N_ratio/pop_frac(1) ! transform from per efficient worker to per efficient capita, then distribute to newborn
     do ec = 1,n_eta ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
-	    x           = y(ec)             ! agents born with zero assets
-	    ix          = f_locate(xgrid(:,ec,1),x)
-	    wx          = (x-xgrid(ix,ec,1))/(xgrid(ix+1,ec,1)-xgrid(ix,ec,1))
-	    wx          = max(min(wx,1.0),0.0)
-        Phi(ix  ,ec,1) = Phi(ix  ,ec,1) + stat_dist_eta(ec) * (1.0 - wx) * pop_frac(1)
-        Phi(ix+1,ec,1) = Phi(ix+1,ec,1) + stat_dist_eta(ec) *        wx  * pop_frac(1)
+        do tc = 1,n_trans
+            x           = y(tc,ec)             ! agents born with zero assets
+            ix          = f_locate(xgrid(:,ec,1),x)
+            wx          = (x-xgrid(ix,ec,1))/(xgrid(ix+1,ec,1)-xgrid(ix,ec,1))
+            wx          = max(min(wx,1.0),0.0)
+            Phi(ix  ,ec,1) = Phi(ix  ,ec,1) + stat_dist_eta(ec) * trans_prob(tc) * (1.0 - wx) * pop_frac(1)
+            Phi(ix+1,ec,1) = Phi(ix+1,ec,1) + stat_dist_eta(ec) * trans_prob(tc) *        wx  * pop_frac(1)
+        enddo
     enddo
 
     ! Generations jc=2 to nj
@@ -64,19 +69,23 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
         if (jc>=jr) then
             y=pens
         else
-            y = netwage*ej(jc)*etagrid
+            do ec=1,n_eta
+                y(:,ec) = netwage*ej(jc)*etagrid(ec)*trans_grid
+            enddo
         endif
         do emc= 1,n_eta
             do ec = 1,n_eta
-                do xmc = 1, nx ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
-		            if (Phitm(xmc,emc,jc-1)==0.0) cycle
-		            x           = y(ec)+ (apgrid(xmc,emc,jc-1)*(1.0+rf) +stocks(xmc,emc,jc-1)*(r-rf))/(1.0+g) ! no need to calc rtilde first using kappa
-		            ix          = f_locate(xgrid(:,ec, jc),x)
-		            wx          = (x-xgrid(ix,ec,jc))/(xgrid(ix+1,ec,jc)-xgrid(ix,ec,jc))
-		            wx          = max(min(wx,1.0),0.0)
-	                Phi(ix  ,ec,jc) = Phi(ix  ,ec,jc) + pi_eta(emc, ec) * (1.0 - wx)*Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc) ! Instead of multyplying with pop_frac(jc), better to divede by (1.0 + n), bc *difference* in cohort sizes
-	                Phi(ix+1,ec,jc) = Phi(ix+1,ec,jc) + pi_eta(emc, ec) *        wx *Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc)
-	            enddo
+                do tc=1,n_trans
+                    do xmc = 1, nx ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
+                        if (Phitm(xmc,emc,jc-1)==0.0) cycle
+                        x           = y(tc,ec)+ (apgrid(xmc,emc,jc-1)*(1.0+rf) +stocks(xmc,emc,jc-1)*(r-rf))/(1.0+g) ! no need to calc rtilde first using kappa
+                        ix          = f_locate(xgrid(:,ec, jc),x)
+                        wx          = (x-xgrid(ix,ec,jc))/(xgrid(ix+1,ec,jc)-xgrid(ix,ec,jc))
+                        wx          = max(min(wx,1.0),0.0)
+                        Phi(ix  ,ec,jc) = Phi(ix  ,ec,jc) + pi_eta(emc, ec) * trans_prob(tc) * (1.0 - wx)*Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc) ! Instead of multyplying with pop_frac(jc), better to divede by (1.0 + n), bc *difference* in cohort sizes
+                        Phi(ix+1,ec,jc) = Phi(ix+1,ec,jc) + pi_eta(emc, ec) * trans_prob(tc) *        wx *Phitm(xmc,emc,jc-1)/(1.0 + n) * surv(jc)
+                    enddo
+                enddo
             enddo
         enddo
     enddo
