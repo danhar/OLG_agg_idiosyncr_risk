@@ -11,16 +11,16 @@
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.981480 discount factor
+beta            0.986751 discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.100830 mean of depreciation shocks
-del_std         0.076727 std of depreciation shocks
+del_mean        0.102077 mean of depreciation shocks
+del_std         0.080672 std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.884114 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.886871 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.9666   autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.1558   standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.0977   standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -37,7 +37,7 @@ n               0.011    population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
-tau             0.02     tax rate. This value is used in the calibration baseline. Alternatives: .12
+tau             0.124     tax rate. This value is used in the calibration baseline. Alternatives: .12
 tau_experiment  .true.  true: increase tau + 2%, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
 welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
 mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
