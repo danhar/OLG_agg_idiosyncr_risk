@@ -322,6 +322,7 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
     integer                    ,intent(in)    :: tc
     real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
     real(dp) ,dimension(:,:,:) ,allocatable   :: const, assets_t, Phi_trans, income_dist
+    real(dp) ,dimension(:,:)   ,allocatable   :: income_dist_a ! just for calc assets
     real(dp)                                  :: mean, std
     integer                                   :: error, jc, ec, n_trans, n_eta, n_j
     logical                                   :: ms_equilibrium
@@ -347,24 +348,28 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
         n_eta = size(Phi,2)
         n_j   = size(Phi,3)
         allocate(income_dist(n_trans, n_eta, n_j))
-        income_dist =0.0
-        Phi_trans = income_dist
+        allocate(income_dist_a(n_eta, n_j))
+        income_dist   = 0.0
+        Phi_trans     = income_dist
+        income_dist_a = 0.0
         const = xgridt -apgridt
 
         do jc=1, n_j
             do ec=1,n_eta
                 if (jc>=jr) then
+                    income_dist_a(ec,jc) = 0.0 !penst
                     income_dist(:,ec,jc) = 0.0 !penst
                     Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))/real(n_trans,dp)
                 else
+                    income_dist_a(ec,jc) = netwaget*ej(jc)*etagridt(ec)
                     income_dist(:,ec,jc) = netwaget*ej(jc)*etagridt(ec)*trans_grid
                     Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))*trans_prob
                 endif
             enddo
         enddo
 
-        ! The following is the best I can do, I think:
-        assets_t = xgridt - spread(sum(income_dist,1), 1, size(xgridt,1))
+        ! Only here is income_dist_a used.
+        assets_t = xgridt - spread(income_dist_a, 1, size(xgridt,1))
 
         lorenz_x = pack(income_dist, .true.)
         lorenz_y = lorenz_x
