@@ -20,7 +20,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     use global_constants  ,only: fmt_tau_char
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, params_set, & ! procedures
 	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, calc_euler_errors, & ! logicals and characters
-	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau, tau_GE0
+	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau, tau_increment, tau_GE0, tau_GE1
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
 	character(len=*) ,intent(in) ,optional :: cal_iter_o
@@ -58,8 +58,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (partial_equilibrium) then
         print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
-        write(tau_char,fmt_tau_char) tau - 0.02_dp
-        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/'//tau_char
+        write(tau_char,fmt_tau_char) tau_GE1
+        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%read_unformatted('ms',input_path)
         if (scale_AR == -1.0) then
             print*,'- run_model: setting mu = 0.0, mean return to type '//mean_return_type
@@ -122,8 +122,8 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if(partial_equilibrium) then
         print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
-        write(tau_char,fmt_tau_char) tau - 0.02_dp
-        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/'//tau_char
+        write(tau_char,fmt_tau_char) tau_GE1
+        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call read_unformatted_ks(grids, coeffs, simvars,input_path)
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 85

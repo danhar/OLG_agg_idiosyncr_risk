@@ -7,7 +7,8 @@ program EPSS
 
     use ifport             ,only: system  ! Intel Fortran portability library
 	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, alt_insurance_calc, surv_rates, debugging,&
-	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp, calc_euler_errors
+	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp, calc_euler_errors, &
+	                              tau_increment
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
@@ -18,8 +19,7 @@ program EPSS
 	integer(8)                :: start_time, end_time, count_rate, count_max ! to avoid maximum time, but relies on intel extension
 	logical                   :: exit_main_loop
 	character(:) ,allocatable :: projectname, calib_name, calib_name_base
-	character(len=7)          :: runchar
-    real(dp), parameter       :: tau_increment =0.02_dp
+	character(len=8)          :: runchar
 
     call system_clock(start_time)
 !    sys_error = system('rm -fr model_output/*') ! Deletes existing output files
@@ -85,13 +85,15 @@ program EPSS
                     write(runchar,'(a3,f4.2)') ',AR', risk_scale(rc)
                 elseif (rc ==0) then
                     write(runchar,'(a4)') ',GE0'
+                    call params_set('tau_experiment', .false.)
                     call params_set('check_dynamic_efficiency', .true.)
                     ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
                     if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
                 elseif (rc ==1) then
                     write(runchar,'(a4)') ',GE1'
+                    call params_set('tau_experiment', .true.)
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
-                    call params_set('partial_equilibrium', .false.)
+                    call params_set('partial_equilibrium', .false.) ! redundant since tau_experiment=.false. in previous GE0, but keep for safety.
                     call params_set('check_dynamic_efficiency', .false.)
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     call params_set('surv_rates', .false.)
@@ -133,7 +135,7 @@ program EPSS
     	    if (tau_experiment) then
     	        call params_set('partial_equilibrium', .true.)
     	        call params_set('tau', tau+ tau_increment) ! better make function increase tau and put tau_increment in params
-    	        write(runchar,'(a4,f3.2)') ',tau',tau
+    	        write(runchar,'(a4,f4.3)') ',tau',tau
     	        calib_name = calib_name//runchar
     	        sys_error = system('mkdir model_output/'//cal_id(calib_name))
     	        if (alt_insurance_calc) then

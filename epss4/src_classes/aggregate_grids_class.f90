@@ -54,6 +54,12 @@ contains
         integer :: nk, nmu, io_stat
 
         open(55,file=input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        if (io_stat .ne. 0) then
+            print*, 'aggregate_grids_class:read_unformatted: I/O ERROR reading aggregate grids from unformatted file'
+            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
+            print*, 'If folder for tau doesnt exist, need to create manually.'
+            !stop 'STOP in in aggregate_grids_class:read_unformatted'
+        endif
         read(55) nk, nmu
         close(55)
 
@@ -65,13 +71,6 @@ contains
             close(55)
         endif
 
-        if (io_stat .ne. 0) then
-            print*, 'I/O ERROR reading aggregate grids from unformatted file'
-            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
-            print*, 'If folder for tau doesnt exist, need to create manually.'
-            stop 'STOP in in aggregate_grids_class:read_unformatted'
-        endif
-
     end subroutine read_unformatted
 
     subroutine write_unformatted(this,equilibrium_type,input_path)
@@ -80,24 +79,17 @@ contains
         integer :: io_stat
 
         open(55,file=input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
-        write(55) size(this%k), size(this%mu)
-        close(55)
-
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing aggr_grid_size in aggregate_grids_class:write_unformatted'
             print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
             print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
+        write(55) size(this%k), size(this%mu)
+        close(55)
 
         open(55,file=input_path//'/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
         write(55) this%k, this%mu
         close(55)
-
-        if (io_stat .ne. 0) then
-            print*, 'I/O ERROR writing grids in aggregate_grids_class:write_unformatted'
-            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
-            print*, 'If folder for tau doesnt exist, need to create manually.'
-        endif
 
     end subroutine write_unformatted
 

@@ -3,10 +3,12 @@
 !*******************************************************************************
 
 ! Put name(s) (incl. path) of calibration file(s) here. You can also put comments and blank lines.
-! This version is for the social security project.
+! The names should not contain "GE0", "GE1", "cal".
+! This version is for the social security project. 
 
 calib_ss/baseline.txt
-!calib_ss/baseline2_n3.txt
+!calib_ss/baseline_test.txt
+!calib_ss/test_fast.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep2.txt
 !calib_ss/ies15.txt

@@ -542,15 +542,19 @@ contains
         ginis = .true.
 
         open(55,file=input_path//'/simvars_sizes.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
+        endif
         write(55) size(this), size(this(1)%z)
         write(55) ginis
         close(55)
 
+        open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
-
-        open(55,file=input_path//'/simvars_ge.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write',status='replace')
         do i=1,size(this)
             write(55) this(i)%z, &    ! integer
                       this(i)%K, this(i)%mu, this(i)%output,this(i)%stock,this(i)%bonds, this(i)%B, this(i)%invest, this(i)%C, this(i)%Phi_1, this(i)%Phi_nx, &
@@ -561,12 +565,6 @@ contains
             write(55) this(i)%gini_income, this(i)%gini_assets, this(i)%gini_stocks, this(i)%gini_consumption, this(i)%cv_income, this(i)%cv_assets, this(i)%cv_stocks, this(i)%cv_consumption  ! inequality measures added later
         enddo
         close(55)
-
-        if (io_stat .ne. 0) then
-            print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
-            print*, 'Check path: '//input_path
-            print*, 'If folder for tau doesnt exist, need to create manually.'
-        endif
 
     end subroutine write_unformatted_array
     !-------------------------------------------------------------------------------

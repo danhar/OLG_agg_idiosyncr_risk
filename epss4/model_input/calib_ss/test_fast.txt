@@ -4,7 +4,7 @@
 
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
-! Like pc3.txt with new options
+! Like baseline but faster
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
@@ -29,8 +29,8 @@ trans_std       0.3156   standard deviation of idiosyncratic transitory income s
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Demographics    
 !----------------------------------------------------------------------------------------------------------------------------/
-nj              80       maximum model age (max biological age: econ_life_start -1 + nj)
-jr              45       model retirement age (biological retirement age: econ_life_start -1 + jr)
+nj              10       maximum model age (max biological age: econ_life_start -1 + nj)
+jr              8       model retirement age (biological retirement age: econ_life_start -1 + jr)
 econ_life_start 21       biological age at j=1
 n               0.011    population growth rate
 
@@ -47,7 +47,7 @@ ccv             .true.   Turn on/off countercyclical variance of idiosyncratic i
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+n_end_params     0       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'baseline'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
@@ -60,23 +60,23 @@ calc_euler_errors        .false.     calculates relative Euler equation errors a
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
-nap             20       exogenous grid for savings (ap= 'a prime')
-n_trans         4        grid for idiosyncratic transitory income shock
-n_eta           4        grid for idiosyncratic stochastic state eta
+nap             6       exogenous grid for savings (ap= 'a prime')
+n_trans         1        grid for idiosyncratic transitory income shock
+n_eta           2        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
 n_delta         2        depreciations shocks
 ! Note: Number of aggregate states nz = n_zeta*n_delta 
-nk              18       grid for aggregate capital (per capita) k
-nmu              8       grid for ex-ante expected equity premium (mu)
-nt              4000     simulation periods, like in Gomes/Michaelides(2007)
-t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
-nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+nk              6       grid for aggregate capital (per capita) k
+nmu              3       grid for ex-ante expected equity premium (mu)
+nt              500     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         100      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       1        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
 !----------------------------------------------------------------------------------------------------------------------------/
-lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
-lom_mu_version          2           functional form of law of motion
+lom_k_version           1           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
+lom_mu_version          1           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
 pooled_regression       .false.     one lom for all z
 estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
@@ -85,6 +85,7 @@ exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid 
 save_all_iterations     .false.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
+no_plotting             .true.      dont plot with Matlab
 
 factor_k        1.66        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
@@ -100,9 +101,9 @@ kappamax        1000.0      maximum leverage (both when in debt and in positive 
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
 
 ! Tolerances (stopping criteria)
-tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
-tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
-tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
+tol_asset_eul   1e-4        policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
+tol_coeffs      1e-1        stopping value for coeffs (normalized to unity)
+tol_calib       1e-1        stopping value for sum(abs(endog_moments - data_moments))
 maxstp_ks       0.8         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 

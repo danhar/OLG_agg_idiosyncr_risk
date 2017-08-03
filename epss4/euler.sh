@@ -4,8 +4,8 @@
 # Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='099-input_path_deb'
-BUILD=Build_Parallel_Debug #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
+thisrun='099-output_path_corr'
+BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
 

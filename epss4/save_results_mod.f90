@@ -458,10 +458,13 @@ end subroutine save_results
 subroutine plot_results(path,mfile)
     ! Call Matlab and plot
     use ifport            ,only: system  ! Intel Fortran portability library
+    use params_mod        ,only: no_plotting
     character(len=*), intent(in)   :: path
     character(len=*), intent(in)   :: mfile
     integer                        :: err_matl
     character(:), allocatable      :: epssdir
+
+    if (no_plotting) return
     !print*, ' '
     !print*, 'Starting MATLAB to plot ',mfile,'(',dir,')'
     err_matl = system('mkdir '//path//'/graphs  > /dev/null 2>&1')

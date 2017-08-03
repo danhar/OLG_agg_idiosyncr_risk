@@ -116,7 +116,19 @@ contains
         integer :: ncoeffs_k, ncoeffs_mu,nz , io_stat, io_stat2, lom_k_version_read, lom_mu_version_read
 
         open(55,file=input_path//'/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR opening unformatted file in coefficients_class:read_unformatted.'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
+            !stop 'STOP in in coefficients_class:read_unformatted'
+        endif
         read(55,iostat=io_stat2) ncoeffs_k, ncoeffs_mu, nz, lom_k_version_read, lom_mu_version_read
+        if (io_stat2 .ne. 0) then
+            print*, 'I/O ERROR reading coefficients from unformatted file in coefficients_class:read_unformatted.'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
+            !stop 'STOP in in coefficients_class:read_unformatted'
+        endif
         close(55)
 
         if (io_stat2 == 0) then
@@ -140,13 +152,6 @@ contains
             close(55)
         endif
 
-        if (io_stat .ne. 0 .or. io_stat2 .ne. 0) then
-            print*, 'I/O ERROR reading coefficients from unformatted file'
-            print*, 'Check path: '//input_path
-            print*, 'If folder for tau doesnt exist, need to create manually.'
-            stop 'STOP in in coefficients_class:read_unformatted'
-        endif
-
     end subroutine read_unformatted
 !-------------------------------------------------------------------------------
 
@@ -157,24 +162,22 @@ contains
         integer :: io_stat
 
         open(55,file=input_path//'/coeffs_size.unformatted',form='unformatted',access='stream',iostat=io_stat, action='write')
-        write(55) size(this%k,1), size(this%mu,1), size(this%k,2), lom_k_version, lom_mu_version
-        close(55)
-
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing coeffs_size in coefficients_class:write_unformatted'
             print*, 'Check path: '//input_path
             print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
-
-        open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
-        write(55) this%k, this%mu, this%r_squared
+        write(55) size(this%k,1), size(this%mu,1), size(this%k,2), lom_k_version, lom_mu_version
         close(55)
 
+        open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing coeffs_ge in coefficients_class:write_unformatted'
             print*, 'Check path: '//input_path
             print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
+        write(55) this%k, this%mu, this%r_squared
+        close(55)
 
     end subroutine write_unformatted
 !-------------------------------------------------------------------------------

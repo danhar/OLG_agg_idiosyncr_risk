@@ -13,7 +13,7 @@ module params_mod
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
-	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, tau_calib, scale_AR, scale_IR, &
+	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, tau_calib, tau_increment, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_trans, n_zeta, n_delta, nk, nmu,&
@@ -22,7 +22,7 @@ module params_mod
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc, &
-                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency
+                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency, no_plotting
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ module params_mod
             seed                ! seed to keep the same random variables over multiple calibration runs
     real(dp), protected ::  &
             scale_IR_orig, scale_AR_orig, & ! keep the original calibration values
-            tau_GE0 ! keep the tau of the first (after-calibrating) GE
+            tau_GE0, tau_GE1 ! keep the tau of the first (after-calibrating) GE
 
 interface params_set
     module procedure params_set_real, params_set_integer, params_set_logical
@@ -96,7 +96,7 @@ subroutine SetDefaultValues()
 ! Some variables might be set that are not explicitly mentioned in the calibration file
     ! Reals
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
-    pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; trans_std = 0.0996; rho=0.952_dp; n=0.01_dp; tau=0.0; scale_AR=0.0; scale_IR = 0.0
+    pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; trans_std = 0.0996; rho=0.952_dp; n=0.01_dp; tau=0.0; tau_increment=0.02; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp;
     def_benefits = 0.0
@@ -107,7 +107,7 @@ subroutine SetDefaultValues()
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
-    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.
+    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.; no_plotting=.false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -174,6 +174,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) n
             case ('tau')
                 read (parval,*) tau
+            case ('tau_increment')
+                read (parval,*) tau_increment
             case ('tau_calib')
                 read (parval,*) tau_calib
             case ('tau_experiment')
@@ -254,6 +256,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) detailed_euler_errs
             case ('opt_zbrak')
                 read (parval,*) opt_zbrak
+            case ('no_plotting')
+                read (parval,*) no_plotting
             case ('factor_k')
                 read (parval,*) factor_k
             case ('factor_mu')
@@ -319,6 +323,7 @@ subroutine SetRemainingParams(calib_name)
     cmin=min(1.0e-9_dp, tol_asset_eul/10.0_dp)
     tol_simulation_marketclearing = tol_asset_eul*100_dp
     tau_GE0 = tau
+    tau_GE1 = tau - tau_increment
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -695,7 +700,11 @@ contains
         endif
 
     call quadrature(trans_grid, trans_prob, n_trans, 'gauss_hermite')
-    call change_of_standard_normal_rv(standard_deviation=sigma_transitory, lognormal_o=.true., nodes=trans_grid)
+    if (n_trans==1) then
+        trans_grid = exp(trans_grid)
+    else
+        call change_of_standard_normal_rv(standard_deviation=sigma_transitory, lognormal_o=.true., nodes=trans_grid)
+    endif
 
     end subroutine set_idiosync_shocks
 end subroutine params_set_thisrun
