@@ -13,7 +13,7 @@ module params_mod
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
-	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, scale_AR, scale_IR, &
+	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, tau_calib, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_trans, n_zeta, n_delta, nk, nmu,&
@@ -62,7 +62,8 @@ module params_mod
     integer, dimension(:)    ,allocatable ,protected :: &
             seed                ! seed to keep the same random variables over multiple calibration runs
     real(dp), protected ::  &
-            scale_IR_orig, scale_AR_orig ! keep the original calibration values
+            scale_IR_orig, scale_AR_orig, & ! keep the original calibration values
+            tau_GE0 ! keep the tau of the first (after-calibrating) GE
 
 interface params_set
     module procedure params_set_real, params_set_integer, params_set_logical
@@ -173,6 +174,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) n
             case ('tau')
                 read (parval,*) tau
+            case ('tau_calib')
+                read (parval,*) tau_calib
             case ('tau_experiment')
                 read (parval,*) tau_experiment
             case ('welfare_decomposition')
@@ -304,6 +307,7 @@ end subroutine ReadCalibration
 subroutine SetRemainingParams(calib_name)
 ! This is called from main.f90 right in the beginning
     use markov_station_distr
+    use global_constants, only: fmt_tau_char
     character(*) ,intent(in)  :: calib_name
     character(:) ,allocatable :: input_path
     character(4) :: tau_char
@@ -314,6 +318,7 @@ subroutine SetRemainingParams(calib_name)
     nx   = nap
     cmin=min(1.0e-9_dp, tol_asset_eul/10.0_dp)
     tol_simulation_marketclearing = tol_asset_eul*100_dp
+    tau_GE0 = tau
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -331,14 +336,11 @@ subroutine SetRemainingParams(calib_name)
 
     if (.not. def_contrib) call set_defined_benefits()
 
+    ! move the following block to params_set_thisrun()?
     select case (opt_initial_ms_guess)
     case (0) ! use previous ms equilibrium values saved in ./input/last_results/
-        write(tau_char,'(f4.2)') tau ! At the moment, this procedure is called before tau is changed, so that here we only get the initial tau.
-        if (good_initial_guess_for_both_tau) then
-            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
-        else ! this is the default, because we calibrate to tau0.02 and want that guess also for 0.00 (bc new calibration)
-            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau0.02'
-        endif
+        write(tau_char,fmt_tau_char) tau ! At the moment, this procedure is called before tau is changed, so that here we only get the initial tau.
+        input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_guess%read_unformatted('ms',input_path)
     case (1) ! use parameter-sensitive hard-coded guesses
         call set_ms_guess(ms_guess, r_ms_guess, ccv, scale_IR, tau)

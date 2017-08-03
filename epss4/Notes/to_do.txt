@@ -9,7 +9,8 @@ This file describes things that will, should, or could be implemented in the cod
  (A) Next steps 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 - if tau is different from 0.02 then can't write unformatted output, because the input path has tau0.02 and tau0.00 hard-coded. Should use tau_low and tau_high instead.
-    See branch 80-tau012, where I implemented a hack for tau012, where it is treated as tau002  
+    See branch 80-tau012, where I implemented a hack for tau012, where it is treated as tau002
+- change dynamic efficiency to be computed in GE1      
 - finish computatios of CEV distribution over age and cash-at-hand. Need only load and divide the expected values, which are already computed and saved.
 - make estimation of LOMs more stable: regularize data and use Hermite polynomials, see Judd,Mailar,Mailar 2011, section 4.5.1.
 - gini: wage before or after tax? need to check and implement

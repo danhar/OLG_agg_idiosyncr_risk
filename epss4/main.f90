@@ -225,6 +225,10 @@ stupid:     do ! this stupid do-loop is only here to allow for comments (precede
 		               exit_main_loop = .true.
 		           elseif (index(calib_name,'!')>0 .or. len_trim(calib_name)== 0) then
 		              cycle
+		           elseif (index(cal_id(calib_name),'cal')>0 .or. index(cal_id(calib_name),'GE0')>0 .or. index(cal_id(calib_name),'GE1')>0) then
+		              print*, '- main: ERROR: calibration name must not contain cal, GE0, or GE1!'
+		              print*, '        calib_name: '//calib_name
+		              stop 'STOP'
 	               endif
 		        else
 		           print '(a,i6)', '- main: ERROR reading calibration name in line ', line

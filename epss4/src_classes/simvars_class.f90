@@ -521,7 +521,9 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR reading simvars from unformatted file'
-            print*, 'Try initializing with hard-coded guess (estimate_from_simvars=.false.)'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
+            print*, 'Else, try initializing with hard-coded guess (estimate_from_simvars=.false.)'
             stop 'STOP in in simvars_class:read_unformatted_array'
         endif
 
@@ -562,6 +564,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR in in simvars_class:write_unformatted_array'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
 
     end subroutine write_unformatted_array

@@ -142,6 +142,8 @@ contains
 
         if (io_stat .ne. 0 .or. io_stat2 .ne. 0) then
             print*, 'I/O ERROR reading coefficients from unformatted file'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
             stop 'STOP in in coefficients_class:read_unformatted'
         endif
 
@@ -160,6 +162,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing coeffs_size in coefficients_class:write_unformatted'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
 
         open(55,file=input_path//'/coeffs_ge.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
@@ -168,6 +172,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing coeffs_ge in coefficients_class:write_unformatted'
+            print*, 'Check path: '//input_path
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
 
     end subroutine write_unformatted

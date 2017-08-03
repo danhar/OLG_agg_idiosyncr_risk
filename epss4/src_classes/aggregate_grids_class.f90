@@ -67,6 +67,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR reading aggregate grids from unformatted file'
+            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
+            print*, 'If folder for tau doesnt exist, need to create manually.'
             stop 'STOP in in aggregate_grids_class:read_unformatted'
         endif
 
@@ -83,6 +85,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing aggr_grid_size in aggregate_grids_class:write_unformatted'
+            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
 
         open(55,file=input_path//'/grids_'//equilibrium_type//'.unformatted'  ,form='unformatted',access='stream',iostat=io_stat,action='write')
@@ -91,6 +95,8 @@ contains
 
         if (io_stat .ne. 0) then
             print*, 'I/O ERROR writing grids in aggregate_grids_class:write_unformatted'
+            print*, 'Check path: '//input_path//'/aggr_grid_size_'//equilibrium_type//'.unformatted'
+            print*, 'If folder for tau doesnt exist, need to create manually.'
         endif
 
     end subroutine write_unformatted

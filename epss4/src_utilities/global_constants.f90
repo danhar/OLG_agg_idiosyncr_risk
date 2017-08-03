@@ -23,7 +23,8 @@ module global_constants
                             fmt_char_esE3   = '(a,x,es13.5E3)', &
                             fmt_char_int    = '(a,x,i3)'      , &
                             fmt_char_logi   = '(a,2x,l1)'     , &
-                            fmt_char_char   = '(a,2x,a)'
+                            fmt_char_char   = '(a,2x,a)'      , &
+                            fmt_tau_char    = '(f4.3)'
 
     ! literal constants (pi, etc)
     real(dp) ,parameter :: euler = 0.5772156649015328606065120900824024310422_dp
