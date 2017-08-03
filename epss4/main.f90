@@ -86,7 +86,6 @@ program EPSS
                 elseif (rc ==0) then
                     write(runchar,'(a4)') ',GE0'
                     call params_set('tau_experiment', .false.)
-                    call params_set('check_dynamic_efficiency', .true.)
                     ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
                     if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
                 elseif (rc ==1) then
@@ -94,11 +93,12 @@ program EPSS
                     call params_set('tau_experiment', .true.)
                     call params_set('tau', tau- tau_increment) ! because we always calibrate to the higher tau
                     call params_set('partial_equilibrium', .false.) ! redundant since tau_experiment=.false. in previous GE0, but keep for safety.
-                    call params_set('check_dynamic_efficiency', .false.)
+                    call params_set('check_dynamic_efficiency', .true.)
                 elseif (rc ==2) then ! the following are for the welfare decomposition
                     call params_set('surv_rates', .false.)
                     write(runchar,'(a7)') ',noSURV'
                     ! The current and following are partial equilibrium, so we don't calc Euler errors.
+                    call params_set('check_dynamic_efficiency', .false.)
                     if (calc_euler_errors)   call params_set('calc_euler_errors', .false.)
                 elseif (rc ==3) then
                     call params_set('ccv', .false.)
