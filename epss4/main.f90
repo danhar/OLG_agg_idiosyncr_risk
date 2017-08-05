@@ -8,7 +8,7 @@ program EPSS
     use ifport             ,only: system  ! Intel Fortran portability library
 	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, alt_insurance_calc, surv_rates, debugging,&
 	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp, calc_euler_errors, &
-	                              tau_increment
+	                              tau_increment, tau_calib, tau_GE0
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
@@ -46,12 +46,14 @@ program EPSS
 	    if (n_end_params > 0) then
 	        print*, ' '
 	        print*, '- main: Starting calibration routine'
+            call params_set('tau', tau_calib)
 	        call params_set_thisrun
             call CheckParams
             write(runchar,'(a4)') ',cal'
             calib_name = trim(calib_name)//trim(runchar)
             sys_error = system('mkdir model_output/'//cal_id(calib_name)) ! could create different folder with _cal attached?
 	        call calibrate(projectname, calib_name)
+	        call params_set('tau', tau_GE0)
         endif
 
         ! Second, set up experiments and run them.

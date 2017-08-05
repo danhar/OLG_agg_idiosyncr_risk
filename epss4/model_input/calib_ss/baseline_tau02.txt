@@ -1,0 +1,126 @@
+!*******************************************************************************
+! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
+!*******************************************************************************
+
+! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
+! Short description of this specific calibration:
+! Like pc3.txt with new options
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Preferences and technology
+!----------------------------------------------------------------------------------------------------------------------------/ 
+theta           3.0      coefficient of relative risk aversion
+psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
+beta            0.986751 discount factor
+alpha           0.32     capital share
+g               0.018    growth rate of technology
+de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
+zeta_mean       1.000    mean of productivity shocks
+zeta_std        0.029    standard deviation of productivity shocks
+del_mean        0.102077 mean of depreciation shocks
+del_std         0.080672 std of depreciation shocks
+pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
+pi1_delta       0.886871 first element in transition matrix for delta, pi_delta(1,1)
+rho             0.9666   autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_h      0.1558   standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_l      0.0977   standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
+trans_std       0.3156   standard deviation of idiosyncratic transitory income shocks
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Demographics    
+!----------------------------------------------------------------------------------------------------------------------------/
+nj              80       maximum model age (max biological age: econ_life_start -1 + nj)
+jr              45       model retirement age (biological retirement age: econ_life_start -1 + jr)
+econ_life_start 21       biological age at j=1
+n               0.011    population growth rate
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Model options and experiments
+!----------------------------------------------------------------------------------------------------------------------------/
+tau_calib       0.02     S.S. tax rate for calibrating economy
+tau             0.02     S.S. tax rate for GE0, the baseline economy with S.S.
+tau_increment   0.02     S.S. experiment: decrease tau by this amount.
+tau_experiment  .true.   true: increase tau by tau_increment, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
+welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
+mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
+ccv             .true.   Turn on/off countercyclical variance of idiosyncratic income risk
+scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
+scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
+run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
+n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+calib_targets 'baseline'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y
+twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
+surv_rates      .false.   false = no survival rates
+def_contrib     .true.   true=tau exogenous, false=benefits exogenous (not yet fully implemented)
+partial_equilibrium      .false.     If true, no GE computed, GE values read from file
+collateral_constraint    .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
+kappa_in_01              .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
+calc_euler_errors        .false.     calculates relative Euler equation errors along the simulation. Very time-intensive.
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Grids (number of discrete grid points)
+!----------------------------------------------------------------------------------------------------------------------------/
+nap             20       exogenous grid for savings (ap= 'a prime')
+n_trans         4        grid for idiosyncratic transitory income shock
+n_eta           4        grid for idiosyncratic stochastic state eta
+n_zeta          2        aggregate productivity shocks
+n_delta         2        depreciations shocks
+! Note: Number of aggregate states nz = n_zeta*n_delta 
+nk              18       grid for aggregate capital (per capita) k
+nmu              8       grid for ex-ante expected equity premium (mu)
+nt              4000     simulation periods, like in Gomes/Michaelides(2007)
+t_scrap         1000      In simulations, throw away the first t_scrap. For parallel simulations, 1000 is good, for sequential 500.
+nx_factor       4        In simulations use a finer xgrid, i.e. interpolate the policies with nx*nx_factor points
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Numerical options and parameters
+!----------------------------------------------------------------------------------------------------------------------------/
+lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
+lom_mu_version          2           functional form of law of motion
+loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
+pooled_regression       .false.     one lom for all z
+estimate_from_simvars   .true.      true: estimate initial guess for coeffs from old simvars; false: use parameter-sensitive hard-coded guess for coeffs
+opt_initial_ms_guess    0           select which guesses for mean shock r and mu to use (0,1,2). 0: use previous ms equilibrium values saved in model_input/last_results/grids_ms.unformatted; 1: use parameter-sensitive hard-coded guesses; 2: use user-supplied guess in this calibration file
+exogenous_xgrid         .true.      interpolates policies on an exogenous xgrid (before simulations), which is finer than the one used in household solutions (by nx_factor below). Should always be used.
+save_all_iterations     .false.     during KS iteratins, save all results
+detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
+opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
+
+factor_k        1.66        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
+factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
+cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
+cover_mu        0.80        same. Alteratives .3, .4
+k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           15.00       max
+mu_min          0.0005      min for expected equity premium
+mu_max          0.12        max
+apmax_factor    19.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+
+kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
+apmax_curv      1.0         determines spacing over generations of apmax in apgrid
+
+! Tolerances (stopping criteria)
+tol_asset_eul   1e-10        policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
+tol_coeffs      1e-7        stopping value for coeffs (normalized to unity)
+tol_calib       1e-4        stopping value for sum(abs(endog_moments - data_moments))
+maxstp_ks       0.8         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
+maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Initial guesses
+!----------------------------------------------------------------------------------------------------------------------------/
+r_ms_guess      6.3e-2      OPTIONAL (only used if opt_initial_ms_guess=2) initial guess for risky return in 'mean shock equilibrium'
+mu_ms_guess     4.3e-2      OPTIONAL (only used if opt_initial_ms_guess=2) initial guess for equity premium in 'mean shock equilibrium'
+
+
+!----------------------------------------------------------------------------------------------------------------------------/
+! Notes:
+! (0) It is possible to add blank lines, comment lines, remove variables, change their order, and add variables, without impeding the program.
+! (00) All variables are lower case. Upper case will yield unknown variable.
+! (1) The forward slash indicates end of record. It is is needed whenever there are less then 2 words after the !, 
+!    e.g. after the !--- , because there are no spaces or other separators to separate words.
+! (2) The 'collateral constraint' uses today's prices for both assets (it does not include the risk-free rate)
+! (3) If collateral_constraint == .false and kappa_in_01 == .true. then the agent can borrow for consumption (but not for investing in stock).
+! (4) tau_experiment = .true. increases tau +2% after first run, sets partial_equilibrium=.true., runs again, computes consumption equivalent variation (CEV).
+!     If combined with run_n_times, then each run will perform this experiment (e.g. with different scale_AR). Only first run is GE. 
+!----------------------------------------------------------------------------------------------------------------------------/
