@@ -2,7 +2,7 @@
 Social security project EPSocSec with Alex Ludwig.
 
 *************************************************************************
-Copyright (c) 2016 Daniel Harenberg - All Rights Reserved
+Copyright (c) 2010-2017 Daniel Harenberg - All Rights Reserved
 
 This copyright applies to all files of the epss repository, hosted on
 https://github.com/danhar/epss:
