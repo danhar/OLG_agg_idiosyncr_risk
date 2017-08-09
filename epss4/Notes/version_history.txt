@@ -8,7 +8,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-099-calib_strategy: new calibration strategy where we first calibrate to tau=12% with the after gov income process
+100-calib_strat2: increase RA, maybe also IES.
 088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. 
                UNFINISHED: So far, expected value for age and cah over simulation is computed and saved (from this I can compute value over age by simply summing). But to 
                get to CEV, I still need to compute the difference to an experiment (and maybe plot).
@@ -645,3 +645,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 096-dyn_eff_a: implement dyn eff criterion of Demange (cf KK). First condition a).
 097-dyn_eff_b: implement dyn eff criterion of Demange, specifically KK Prop 1, condition b).
 098-trans_shocks: transitory shocks for new income process
+099-calib_strategy: new calibration strategy where we first calibrate to tau=12% with the after gov income process
