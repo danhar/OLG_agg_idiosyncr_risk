@@ -89,7 +89,7 @@ program EPSS
                     write(runchar,'(a4)') ',GE0'
                     call params_set('tau_experiment', .false.)
                     ! The following is necessary, because in this case we need to calibrate to the smaller tau so as to get consistent results
-                    if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
+                    ! if (scale_AR == -1.0) call params_set('tau', tau+ tau_increment)
                 elseif (rc ==1) then
                     write(runchar,'(a4)') ',GE1'
                     call params_set('tau_experiment', .true.)
