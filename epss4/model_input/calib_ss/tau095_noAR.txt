@@ -4,23 +4,23 @@
 
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
 ! Short description of this specific calibration:
-! Like pc3.txt with new options
+! Economy with only idiosyncratic risk (no aggregate risk). Recalibrate all. Names noAR and ge_IR both denote this calibration. 
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           3.0      coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            1.013736 discount factor
+beta            1.019825 discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.105127 mean of depreciation shocks
-del_std         0.087742 std of depreciation shocks
+del_mean        0.105672 mean of depreciation shocks
+del_std         0.088724 std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.892852 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.893918 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.9666   autocorrelation of idiosyncr shocks, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.1558   standard deviation of idiosyncratic shocks in recession, from STY JPE 2004, table 2, row C (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.0977   standard deviation of idiosyncratic shocks in upswing, from STY JPE 2004, table 2, row C   (for n_eta=2, discrete etagrid hard-coded)
@@ -37,18 +37,18 @@ n               0.011    population growth rate
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Model options and experiments
 !----------------------------------------------------------------------------------------------------------------------------/
-tau_calib       0.095    S.S. tax rate for calibrating economy
+tau_calib       0.075    S.S. tax rate for calibrating economy
 tau             0.095     S.S. tax rate for GE0, the baseline economy with S.S.
 tau_increment   0.02     S.S. experiment: decrease tau by this amount.
 tau_experiment  .true.   true: increase tau by tau_increment, run again, compute CEV. Sets partial_equilibrium = .true. in second run (so as to retain same prices etc). See note (4) at bottom.
 welfare_decomposition .true.    performs the complete analysis. Sets tau_experiment = .true. and run_n_times = 6.
-mean_return_type  'Siegel2002'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
-ccv             .true.   Turn on/off countercyclical variance of idiosyncratic income risk
+mean_return_type  'meanshock_eq_r'      average return in no AR economy, applied only if (welfare_decomposition .or. scale_AR=-1.0). Admissible values: mean_mpk, weighted_aggregate_return, median_portf_return, median_portf_share, Siegel2002
+ccv             .false.   Turn on/off countercyclical variance of idiosyncratic income risk
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
-scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
+scale_AR        -1.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
-calib_targets 'baseline'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y
+n_end_params     2       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+calib_targets 'no_AR'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y, no_AR
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
 def_contrib     .true.   true=tau exogenous, false=benefits exogenous (not yet fully implemented)
