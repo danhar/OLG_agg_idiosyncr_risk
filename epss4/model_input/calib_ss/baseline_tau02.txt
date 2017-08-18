@@ -3,8 +3,7 @@
 !*******************************************************************************
 
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
-! Short description of this specific calibration:
-! Like pc3.txt with new options
+! This calibration is the baseline.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
@@ -21,14 +20,11 @@ del_mean        0.102077 mean of depreciation shocks
 del_std         0.080672 std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.886871 first element in transition matrix for delta, pi_delta(1,1)
-rho_SS          0.9666   autocorrelation of idiosyncr shocks, with Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_h_SS   0.1558   standard deviation of idiosyncratic shocks in recession, with Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_l_SS   0.0977   standard deviation of idiosyncratic shocks in upswing, with Soc. Sec.   (for n_eta=2, discrete etagrid hard-coded)
-trans_std_SS    0.3156   standard deviation of idiosyncratic transitory income shocks, with Soc. Sec.
-rho_noSS        0.9698   autocorrelation of idiosyncr shocks, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_h_noSS 0.1549   standard deviation of idiosyncratic shocks in recession, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
-nu_sigma_l_noSS 0.0920   standard deviation of idiosyncratic shocks in upswing, without Soc. Sec.   (for n_eta=2, discrete etagrid hard-coded)
-trans_std_noSS  0.2918   standard deviation of idiosyncratic transitory income shocks
+rho             0.9698   autocorrelation of idiosyncr shocks, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_h      0.1549   standard deviation of idiosyncratic shocks in recession, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
+nu_sigma_l      0.0920   standard deviation of idiosyncratic shocks in upswing, without Soc. Sec.   (for n_eta=2, discrete etagrid hard-coded)
+trans_std       0.2918   standard deviation of idiosyncratic transitory income shocks
+
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Demographics    
 !----------------------------------------------------------------------------------------------------------------------------/

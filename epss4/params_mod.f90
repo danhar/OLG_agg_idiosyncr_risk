@@ -22,7 +22,7 @@ module params_mod
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
                           save_all_iterations, detailed_euler_errs, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc, &
-                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency, no_plotting
+                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency, no_plotting, two_income_processes
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ subroutine SetDefaultValues()
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.
     save_all_iterations=.false.; detailed_euler_errs=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
-    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.; no_plotting=.false.
+    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.; no_plotting=.false.; two_income_processes = .false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -334,6 +334,9 @@ subroutine SetRemainingParams(calib_name)
     tau_GE0 = tau
     tau_GE1 = tau - tau_increment
 
+    ! note that nu_sigma_h_SS etc are always read in, also if calib file only mentions nu_sigma_h, so that
+    ! we can use it also for the noSS process, if only one process shall be used, which is the standard,
+    ! as two_income_processes = .false.
     nu_sigma_h = nu_sigma_h_SS
     nu_sigma_l = nu_sigma_l_SS
     rho        = rho_SS
@@ -588,10 +591,12 @@ subroutine params_set_thisrun()
     zeta =[zeta_mean-zeta_std_scaled, zeta_mean-zeta_std_scaled, zeta_mean+zeta_std_scaled, zeta_mean+zeta_std_scaled]
     delta=[del_mean + del_std_scaled, del_mean - del_std_scaled, del_mean + del_std_scaled, del_mean - del_std_scaled]
 
-    if (tau == 0.0) then
-        call set_income_params(with_SS=.false.)
-    else
-        call set_income_params(with_SS=.true.)
+    if (two_income_processes) then
+        if (tau == 0.0) then
+            call set_income_params(with_SS=.false.)
+        else
+            call set_income_params(with_SS=.true.)
+        endif
     endif
     call set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, trans_prob, trans_grid, n_eta, nz, ccv)
 
