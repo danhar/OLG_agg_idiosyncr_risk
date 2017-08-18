@@ -13,7 +13,7 @@ module params_mod
 ! The following are set and explained in the calibration file (see select_calibration_here.txt)
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
-	                      pi1_zeta, pi1_delta, nu_sigma_h, nu_sigma_l, trans_std, rho, n, tau, tau_calib, tau_increment, scale_AR, scale_IR, &
+	                      pi1_zeta, pi1_delta, nu_sigma_h_SS, nu_sigma_l_SS, nu_sigma_h_noSS, nu_sigma_l_noSS, trans_std_SS, trans_std_noSS, rho_SS, rho_noSS, n, tau, tau_calib, tau_increment, scale_AR, scale_IR, &
 	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_trans, n_zeta, n_delta, nk, nmu,&
@@ -63,7 +63,8 @@ module params_mod
             seed                ! seed to keep the same random variables over multiple calibration runs
     real(dp), protected ::  &
             scale_IR_orig, scale_AR_orig, & ! keep the original calibration values
-            tau_GE0, tau_GE1 ! keep the tau of the first (after-calibrating) GE
+            tau_GE0, tau_GE1, & ! keep the tau of the first (after-calibrating) GE
+            nu_sigma_h, nu_sigma_l, rho, trans_std ! keep the values with or without SS (standard is with SS)
 
 interface params_set
     module procedure params_set_real, params_set_integer, params_set_logical
@@ -96,7 +97,7 @@ subroutine SetDefaultValues()
 ! Some variables might be set that are not explicitly mentioned in the calibration file
     ! Reals
     theta=8.0; psi=0.5_dp; beta=0.98_dp; alpha=0.33_dp; g=0.01_dp; de_ratio=0.66_dp; zeta_mean=1.0; zeta_std=0.02_dp; del_mean=0.06_dp; del_std=0.06_dp
-    pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h=0.211_dp; nu_sigma_l=0.125_dp; trans_std = 0.0996; rho=0.952_dp; n=0.01_dp; tau=0.0; tau_increment=0.02; scale_AR=0.0; scale_IR = 0.0
+    pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h_SS=0.211_dp; nu_sigma_l_SS=0.125_dp; trans_std_SS = 0.0996; rho_SS=0.952_dp; n=0.01_dp; tau=0.0; tau_increment=0.02; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp;
     def_benefits = 0.0
@@ -156,14 +157,22 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) pi1_zeta
             case ('pi1_delta')
                 read (parval,*) pi1_delta
-            case ('rho')
-                read (parval,*) rho
-            case ('nu_sigma_h')
-                read (parval,*) nu_sigma_h
-            case ('nu_sigma_l')
-                read (parval,*) nu_sigma_l
-            case ('trans_std')
-                read (parval,*) trans_std
+            case ('rho','rho_SS')
+                read (parval,*) rho_SS
+            case ('nu_sigma_h','nu_sigma_h_SS')
+                read (parval,*) nu_sigma_h_SS
+            case ('nu_sigma_l','nu_sigma_l_SS')
+                read (parval,*) nu_sigma_l_SS
+            case ('trans_std','trans_std_SS')
+                read (parval,*) trans_std_SS
+            case ('rho_noSS')
+                read (parval,*) rho_noSS
+            case ('nu_sigma_h_noSS')
+                read (parval,*) nu_sigma_h_noSS
+            case ('nu_sigma_l_noSS')
+                read (parval,*) nu_sigma_l_noSS
+            case ('trans_std_noSS')
+                read (parval,*) trans_std_noSS
             case ('nj')
                 read (parval,*) nj
             case ('jr')
@@ -324,6 +333,12 @@ subroutine SetRemainingParams(calib_name)
     tol_simulation_marketclearing = tol_asset_eul*100_dp
     tau_GE0 = tau
     tau_GE1 = tau - tau_increment
+
+    nu_sigma_h = nu_sigma_h_SS
+    nu_sigma_l = nu_sigma_l_SS
+    rho        = rho_SS
+    trans_std  = trans_std_SS
+
     scale_IR_orig= scale_IR
     if (scale_IR .ne. -1.0) scale_IR = 0.0 ! for the first run of a calibration
     scale_AR_orig= scale_AR
@@ -573,6 +588,11 @@ subroutine params_set_thisrun()
     zeta =[zeta_mean-zeta_std_scaled, zeta_mean-zeta_std_scaled, zeta_mean+zeta_std_scaled, zeta_mean+zeta_std_scaled]
     delta=[del_mean + del_std_scaled, del_mean - del_std_scaled, del_mean + del_std_scaled, del_mean - del_std_scaled]
 
+    if (tau == 0.0) then
+        call set_income_params(with_SS=.false.)
+    else
+        call set_income_params(with_SS=.true.)
+    endif
     call set_idiosync_shocks(etagrid, pi_eta, stat_dist_eta, trans_prob, trans_grid, n_eta, nz, ccv)
 
     call set_apmax(ms_guess%k(1), apmax_factor, scale_IR ,apmax_curv)  ! This must be called after set_demographics()
@@ -840,6 +860,22 @@ pure function set_pi_z(pi1_zeta, pi1_delta, n_zeta, nz)
 
 end function set_pi_z
 !-------------------------------------------------------------------------------
+
+subroutine set_income_params(with_SS)
+    logical, intent(in) :: with_SS
+
+    if (with_SS) then
+        nu_sigma_h = nu_sigma_h_SS
+        nu_sigma_l = nu_sigma_l_SS
+        rho = rho_SS
+        trans_std = trans_std_SS
+    else
+        nu_sigma_h = nu_sigma_h_noSS
+        nu_sigma_l = nu_sigma_l_noSS
+        rho = rho_noSS
+        trans_std = trans_std_noSS
+    endif
+end subroutine set_income_params
 
 subroutine CheckParams()
 use omp_lib           ,only: OMP_get_max_threads
