@@ -14,7 +14,7 @@ module params_mod
 !-------------------------------------------------------------------------------------------------
 	real(dp),protected :: theta, psi, beta, alpha, g, de_ratio, zeta_mean, zeta_std, del_mean, del_std,&
 	                      pi1_zeta, pi1_delta, nu_sigma_h_SS, nu_sigma_l_SS, nu_sigma_h_noSS, nu_sigma_l_noSS, trans_std_SS, trans_std_noSS, rho_SS, rho_noSS, n, tau, tau_calib, tau_increment, scale_AR, scale_IR, &
-	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, &
+	                      factor_k, factor_mu, cover_k, cover_mu, k_min, k_max, mu_min, mu_max, apmax_factor, cmin, kappamax, apgrid_curv, &
 	                      apmax_curv, tol_calib, tol_coeffs, tol_asset_eul, tol_simulation_marketclearing, maxstp_ks, maxstp_cal, r_ms_guess, mu_ms_guess
     integer ,protected :: nj, jr, econ_life_start, nap, n_eta, n_trans, n_zeta, n_delta, nk, nmu,&
                           nt, t_scrap, nx_factor, opt_initial_ms_guess, run_n_times, run_counter_start, n_end_params, &
@@ -100,7 +100,7 @@ subroutine SetDefaultValues()
     pi1_zeta=0.7_dp; pi1_delta=.5_dp; nu_sigma_h_SS=0.211_dp; nu_sigma_l_SS=0.125_dp; trans_std_SS = 0.0996; rho_SS=0.952_dp; n=0.01_dp; tau=0.0; tau_increment=0.02; scale_AR=0.0; scale_IR = 0.0
     factor_k=1.1_dp; factor_mu=1.1_dp; cover_k=0.8_dp; cover_mu=0.7_dp; k_min=0.5_dp; k_max=16.0; mu_min=0.0001_dp; mu_max=0.12_dp; apmax_factor=18.0_dp; kappamax=1000.0_dp
     apmax_curv=1.0; tol_calib=1e-4_dp; tol_coeffs=1e-4_dp; tol_asset_eul=1e-8_dp; maxstp_ks=0.6_dp; maxstp_cal=0.2_dp; r_ms_guess=3.0e-3_dp; mu_ms_guess=1.9e-2_dp;
-    def_benefits = 0.0
+    def_benefits = 0.0; apgrid_curv = 1.5_dp
     ! Integers
     nj=80; jr=45; econ_life_start=22; nap=20; n_eta=2; n_trans=1; n_zeta=2; n_delta=2; nk=10; nmu=8; nt=5000; nx_factor=1; t_scrap=nt/10; opt_initial_ms_guess=0
     run_n_times=1; run_counter_start=1; n_end_params=0; lom_k_version=2; lom_mu_version=2
@@ -285,6 +285,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) mu_max
             case ('apmax_factor')
                 read (parval,*) apmax_factor
+            case ('apgrid_curv')
+                read (parval,*) apgrid_curv
             case ('kappamax')
                 read (parval,*) kappamax
             case ('apmax_curv')

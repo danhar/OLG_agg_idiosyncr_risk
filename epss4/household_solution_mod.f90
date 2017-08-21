@@ -254,7 +254,7 @@ end subroutine interp_policies_tomorrow
 
 pure function f_apgrid_j(rfp,yp, xgridp, app_min, apmax, jc)
 ! Create savings grid for generation j, apgrid(:,zc,jc,kc,muc)
-    use params_mod , only: nap, collateral_constraint, cmin, g
+    use params_mod , only: nap, collateral_constraint, cmin, g, apgrid_curv
     use makegrid_mod
 
     real(dp) ,dimension(nap) :: f_apgrid_j
@@ -276,7 +276,7 @@ CC: if (collateral_constraint) then
             apmin = xp_min*.8_dp
         endif
 
-        f_apgrid_j= MakeGrid(apmin,apmax,nap,1.5_dp) !2.0 !,'chebyshev'
+        f_apgrid_j= MakeGrid(apmin,apmax,nap,apgrid_curv) !2.0 !,'chebyshev'
 
     endif CC
 
