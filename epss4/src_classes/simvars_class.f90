@@ -4,6 +4,9 @@
 
 module simvars_class
     ! This derived type collects the aggregate variables over the simulations.
+    ! IMPORTANT NOTE: they way it's constructed, it's very cumbersome to add variables,
+    ! because Simvars is used to initialize the LOMs. For this the variables K and mu would suffice,
+    ! but the whole derived type is read in
     use kinds      ,only: dp
     implicit none
     private
