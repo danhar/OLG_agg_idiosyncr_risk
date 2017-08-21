@@ -6,17 +6,11 @@
 ! The names should not contain "GE0", "GE1", "cal".
 ! This version is for the social security project. 
 
-!calib_ss/baseline_tau095_IES08.txt
-!calib_ss/baseline_tau095.txt
-!calib_ss/tau095_noIR.txt
-!calib_ss/tau095_noIR_EP.txt
-!calib_ss/tau095_noAR.txt
-!calib_ss/baseline_tau124.txt
-calib_ss/baseline_tau02.txt
-!calib_ss/baseline_test.txt
-!calib_ss/test_fast.txt
+!************************************ tau = 0.00 ************************************
+!calib_ss/baseline_tau02.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep2.txt
+calib_ss/base_ep2ext.txt
 !calib_ss/ies15.txt
 !calib_ss/ies15_sharpe.txt
 !calib_ss/ies15_ep.txt
@@ -26,6 +20,18 @@ calib_ss/baseline_tau02.txt
 !calib_ss/norisk.txt
 !calib_ss/base_sharpe_recal.txt
 !calib_ss/base_ep_recal.txt
+
+!************************************ tau = 0.95 ************************************
+!calib_ss/baseline_tau095.txt
+!calib_ss/tau095_noIR.txt
+!calib_ss/tau095_noIR_EP.txt
+!calib_ss/tau095_noAR.txt
+!calib_ss/baseline_tau124.txt
+!calib_ss/baseline_tau095_IES08.txt
+!calib_ss/baseline_test.txt
+!calib_ss/test_fast.txt
+
+!************************************ others ****************************************
 !calib_ss/ies15_sharpe_recal.txt
 !calib_ss/ies15_ep_recal.txt
 !calib_ss/base_tau12.txt
