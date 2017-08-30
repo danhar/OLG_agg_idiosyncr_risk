@@ -22,7 +22,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, &
                                partial_equilibrium, zeta, delta, alpha, check_dynamic_efficiency, &
                                tol_mut=> tol_simulation_marketclearing
-    use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau
+    use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau, f_net_mpk
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_zbrent
@@ -168,11 +168,12 @@ mu:     if (partial_equilibrium) then
 
         if (.not. partial_equilibrium) simvars%K(tc+1) = Knew(tc+1)
 
-        simvars%output(tc)= zeta(zt)*simvars%K(tc)**alpha
-        simvars%stock(tc) = sum(stockst*Phi)/L_N_ratio ! different from K(t+1) since it is in today's per capita terms! Thus no (1+g)(1+n) in denominator.
-        simvars%bonds(tc) = sum((apgridt-stockst)*Phi)/L_N_ratio
-        simvars%invest(tc)   = simvars%stock(tc) + simvars%bonds(tc) -simvars%K(tc)*(1.0-delta(zt))
-        simvars%C(tc)     = sum((xgridt-apgridt)*Phi) / L_N_ratio ! in units of efficient labor
+        simvars%output(tc)     = zeta(zt)*simvars%K(tc)**alpha
+        simvars%stock(tc)      = sum(stockst*Phi)/L_N_ratio ! different from K(t+1) since it is in today's per capita terms! Thus no (1+g)(1+n) in denominator.
+        simvars%bonds(tc)      = sum((apgridt-stockst)*Phi)/L_N_ratio
+        simvars%invest(tc)     = simvars%stock(tc) + simvars%bonds(tc) -simvars%K(tc)*(1.0-delta(zt))
+        simvars%C(tc)          = sum((xgridt-apgridt)*Phi) / L_N_ratio ! in units of efficient labor
+        simvars%net_mpk(tc)    = f_net_mpk(Kt, zeta(zt), delta(zt))
         simvars%r(tc)     = rt
         simvars%wage(tc)  = netwaget
         simvars%pens(tc)  = penst

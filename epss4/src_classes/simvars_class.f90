@@ -17,7 +17,7 @@ module simvars_class
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
         real(dp), dimension(:), allocatable ::    &
                 K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
-                r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
+                net_mpk, r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
                 gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
         logical , dimension(:), allocatable :: err_K, err_mu, dyn_eff_a ! dyn_eff_a=.true. means violation of condition A.
         integer , dimension(:), allocatable :: dyn_eff_b
@@ -61,7 +61,7 @@ contains
         call deallocate_simvars(this)
         allocate(this%z(t), this%Phi_1(t), this%Phi_nx(t), this%err_aggr(t), this%err_income(t), this%eul_err_max(t), this%eul_err_avg(t))
         allocate(this%K(t+1),this%mu(t), this%output(t), this%stock(t), this%bonds(t), this%invest(t), this%C(t), this%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1
-        allocate(this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
+        allocate(this%net_mpk(t),this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
         allocate(this%gini_income(t), this%gini_assets(t), this%gini_stocks(t), this%gini_consumption(t),this%cv_income(t), this%cv_assets(t), this%cv_stocks(t), this%cv_consumption(t))
         allocate(this%B(t), this%err_K(t), this%err_mu(t), this%dyn_eff_a(t), this%dyn_eff_b(t))
 
@@ -95,6 +95,7 @@ contains
         if (allocated(this%r_pf_kappa_med)) deallocate(this%r_pf_kappa_med)
         if (allocated(this%r_pf_median)) deallocate(this%r_pf_median)
         if (allocated(this%rf)) deallocate(this%rf)
+        if (allocated(this%net_mpk)) deallocate(this%net_mpk)
         if (allocated(this%r)) deallocate(this%r)
         if (allocated(this%welf)) deallocate(this%welf)
         if (allocated(this%C)) deallocate(this%C)
@@ -164,6 +165,8 @@ contains
             get = abs(this%eul_err_max(lb:ub))
         case ('eul_err_avg')
             get = abs(this%eul_err_avg(lb:ub))
+        case ('net_mpk')
+            get = this%net_mpk(lb:ub)
         case ('r')
             get = this%r(lb:ub)
         case ('rf')
