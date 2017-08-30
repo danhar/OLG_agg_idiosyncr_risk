@@ -85,7 +85,7 @@ contains
 
             if (calibrating) then
                 recomp_jacobian = 15
-                max_iter = 119        ! recomp_jacobian*6 -1
+                max_iter = 89        ! recomp_jacobian*6 -1
             else
                 recomp_jacobian = 15
                 max_iter = 499
