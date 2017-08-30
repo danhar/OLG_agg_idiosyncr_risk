@@ -12,7 +12,7 @@
 !----------------------------------------------------------------------------------------------------------------------------/ 
 theta           5.705965 coefficient of relative risk aversion
 psi             0.500    elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            0.986751 discount factor
+beta            0.986557 discount factor
 alpha           0.320    capital share
 g               0.018    growth rate of technology
 de_ratio        0.660    debt-equity-ratio. Alternatives: 0.66
