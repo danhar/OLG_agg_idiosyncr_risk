@@ -6,7 +6,7 @@ module simvars_class
     ! This derived type collects the aggregate variables over the simulations.
     ! IMPORTANT NOTE: they way it's constructed, it's very cumbersome to add variables,
     ! because Simvars is used to initialize the LOMs. For this the variables K and mu would suffice,
-    ! but the whole derived type is read in
+    ! but the whole derived type is read in. So when adding new variables, do not write and read them to unformatted!
     use kinds      ,only: dp
     implicit none
     private
@@ -17,7 +17,7 @@ module simvars_class
         integer , dimension(:), allocatable :: z     ! realizations of aggregate shock
         real(dp), dimension(:), allocatable ::    &
                 K, mu, output, stock, bonds, B, invest, C, Phi_1, Phi_nx, err_aggr, err_income, eul_err_max, eul_err_avg, &      ! mu, per capita: k, bonds, consumption
-                net_mpk, r, rf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
+                net_mpk, r, rf, r_pf, r_pf_median, r_pf_kappa_med, wage, pens, tau, welf, bequests, & ! prices
                 gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
         logical , dimension(:), allocatable :: err_K, err_mu, dyn_eff_a ! dyn_eff_a=.true. means violation of condition A.
         integer , dimension(:), allocatable :: dyn_eff_b
@@ -61,7 +61,7 @@ contains
         call deallocate_simvars(this)
         allocate(this%z(t), this%Phi_1(t), this%Phi_nx(t), this%err_aggr(t), this%err_income(t), this%eul_err_max(t), this%eul_err_avg(t))
         allocate(this%K(t+1),this%mu(t), this%output(t), this%stock(t), this%bonds(t), this%invest(t), this%C(t), this%welf(t)) ! Recall that stock and bond in today's per capita terms, that is why only t, not t+1
-        allocate(this%net_mpk(t),this%r(t),this%rf(t+1), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
+        allocate(this%net_mpk(t),this%r(t),this%rf(t+1), this%r_pf(t), this%r_pf_median(t), this%r_pf_kappa_med(t), this%wage(t), this%pens(t), this%tau(t), this%bequests(t))
         allocate(this%gini_income(t), this%gini_assets(t), this%gini_stocks(t), this%gini_consumption(t),this%cv_income(t), this%cv_assets(t), this%cv_stocks(t), this%cv_consumption(t))
         allocate(this%B(t), this%err_K(t), this%err_mu(t), this%dyn_eff_a(t), this%dyn_eff_b(t))
 
@@ -93,6 +93,7 @@ contains
         if (allocated(this%pens)) deallocate(this%pens)
         if (allocated(this%wage)) deallocate(this%wage)
         if (allocated(this%r_pf_kappa_med)) deallocate(this%r_pf_kappa_med)
+        if (allocated(this%r_pf)) deallocate(this%r_pf)
         if (allocated(this%r_pf_median)) deallocate(this%r_pf_median)
         if (allocated(this%rf)) deallocate(this%rf)
         if (allocated(this%net_mpk)) deallocate(this%net_mpk)
@@ -172,6 +173,8 @@ contains
         case ('rf')
             ! if (.not.present(ub_o)) ub = size(this%rf) !better to have all of equal size - more comparable, and e.g. for covariances
             get = this%rf(lb:ub)
+        case ('r_pf')
+            get = this%r_pf(lb:ub)
         case ('rpf_med')
             get = this%r_pf_median(lb:ub)
         case ('rpf_kapm')
@@ -475,6 +478,7 @@ contains
     end function delta
 
     subroutine read_unformatted_array(this, input_path)
+    ! Do not add new variables in tSimvars to be read here, because it's a mess (between saving and reading old results).
         type(tSimvars) ,allocatable ,intent(out) :: this(:)
         character(*) ,intent(in)                 :: input_path
         integer :: array_size, nt, i, io_stat
@@ -536,6 +540,7 @@ contains
     end subroutine read_unformatted_array
 
     subroutine write_unformatted_array(this, input_path)
+        ! Do not add new variables in tSimvars to be written here, because it's a mess (between saving and reading old results).
         ! One can't use standard derived type IO because of the allocatable components.
         class(tSimvars) ,intent(in) :: this(:)
         character(*)    ,intent(in) :: input_path

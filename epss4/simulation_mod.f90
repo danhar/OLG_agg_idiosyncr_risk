@@ -189,15 +189,16 @@ mu:     if (partial_equilibrium) then
         elseif (partial_equilibrium .and.  mut == 0.0) then ! no aggregate risk case
             simvars%rf(tc+1) = f_riskfree_rate(simvars%K(tc+1),mut,pi_z(zt,:))
         endif
-        r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))/(1.0+g)
-
+        ! r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))/(1.0+g)
+        r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))
+        simvars%r_pf(tc) = sum(r_pf*Phi)
         ! The following two medians for portfolio holdings may stop program execution for nx_factor > 8 due to memory limits.
         ! If so, outcomment and set to zero.
         simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
         ! simvars%r_pf_median(tc) = 0.0
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
-        simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))/(1.0+g)
-        ! simvars%r_pf_kappa_med(tc)= 0.0
+        ! simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))
+        simvars%r_pf_kappa_med(tc)= 0.0
 
         if (.not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
@@ -244,7 +245,7 @@ mu:     if (partial_equilibrium) then
                 ! According to Wikipedia article "Algorithms for calculating variance" this alternative is more unstable:
                 !cons_var_lct(jc)    = sum(const(:,:,jc)**2 * weight(:,:,jc)) - cons_lct(jc)**2
                 var_log_cons_lct(jc) = sum((log(const(:,:,jc)) - log_cons_lct(jc))**2 * weight(:,:,jc))
-                return_var_lct(jc)   = sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc))/(1.0+g) - return_lct(jc))**2 * weight(:,:,jc))
+                return_var_lct(jc)   = sum((sign(1.0,apgridt(:,:,jc))*(simvars%rf(tc+1) + kappat(:,:,jc)*simvars%mu(tc)) - return_lct(jc))**2 * weight(:,:,jc))
             enddo
             lc%ap           = lc%ap           + ap_lct          /(nt-t_scrap)
             lc%cons         = lc%cons         + cons_lct        /(nt-t_scrap)

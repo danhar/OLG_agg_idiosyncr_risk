@@ -33,7 +33,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
-    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, net_mpk, r, rf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
+    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, net_mpk, r, rf, r_pf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret, &
                     gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
     type(tStats_logical) :: err_K, err_mu, dyn_eff_a
@@ -75,6 +75,7 @@ contains
         net_mpk%name='net_mpk'; call net_mpk%calc_stats(simvars)
         r%name='r'; call r%calc_stats(simvars)
         rf%name='rf'; call rf%calc_stats(simvars)
+        r_pf%name='r_pf'; call r_pf%calc_stats(simvars)
         r_pf_median%name='rpf_med'; call r_pf_median%calc_stats(simvars)
         r_pf_kappa_med%name='rpf_kapm'; call r_pf_kappa_med%calc_stats(simvars)
         output%name='output'; call output%calc_stats(simvars)
@@ -169,8 +170,11 @@ contains
     call net_mpk%write(21,'net_mpk',prec)
     call r%write(21,'r',prec)
     call rf%write(21,'rf',prec)
-    if (prec == 'long') call r_pf_median%write(21,'rpf_med',prec)
-    if (prec == 'long') call r_pf_kappa_med%write(21,'rpf_kapm',prec)
+    if (prec == 'long') then
+        call r_pf%write(21,'r_pf',prec)
+        call r_pf_median%write(21,'rpf_med',prec)
+        call r_pf_kappa_med%write(21,'rpf_kapm',prec)
+    endif
     call cons%write(21,'cons',prec)   ! in units of efficient labor, so that stationary
     call cons_grow%write(21,'cons_grow',prec)
     call netwage%write(21,'netwage',prec)
