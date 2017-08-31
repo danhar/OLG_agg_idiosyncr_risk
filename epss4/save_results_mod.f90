@@ -292,6 +292,7 @@ contains
     ! Since all arrays follow Fortran's natural storage order (i.e. column-major),
     ! no (implied) do-loops necessary when writing to file.
     ! The following will write all nx in one line, then change zc, then jc, ...
+    use params_mod, only: save_all_to_txt
     integer :: nx, i2
 
 ! The following seems the best format, because it will not produce ****, which can't be read by Matlab
@@ -305,17 +306,24 @@ contains
 !    write(20,302) cons
 !    close(20)
 
-    open(40, file=path//'/apgrid.txt',  status = 'replace')
-    write(40,301) pol%apgrid
-    close(40)
+    if (save_all_to_txt) then
+        open(40, file=path//'/apgrid.txt',  status = 'replace')
+        write(40,301) pol%apgrid
+        close(40)
 
-    open(50, file=path//'/xgrid.txt',   status = 'replace')
-    write(50,301) pol%xgrid
-    close(50)
+        open(50, file=path//'/xgrid.txt',   status = 'replace')
+        write(50,301) pol%xgrid
+        close(50)
 
-    open(60, file=path//'/kappa.txt',   status = 'replace')
-    write(60,301) pol%kappa
-    close(60)
+        open(60, file=path//'/kappa.txt',   status = 'replace')
+        write(60,301) pol%kappa
+        close(60)
+
+        ! The next is important, but also large.
+        call err%write2file(path)
+    else
+        print*, 'Note: not saving complete policies and all errors to txt-file.'
+    endif
 
     open(40, file=path//'/apgrid_mean.txt',  status = 'replace')
     write(40,301) apgrid_mean
@@ -400,8 +408,6 @@ contains
     write(21,*) ' grids%mu  =  '
     write(21,'(<size(grids%mu)>(es13.6,1x))') grids%mu
     close(21)
-
-    call err%write2file(path)
 
     open(unit=21, file=path//'/simvars.txt', status = 'replace')
     do i=1,size(simvars)
