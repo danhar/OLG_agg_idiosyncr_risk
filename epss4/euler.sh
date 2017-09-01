@@ -4,7 +4,7 @@
 # Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.
 #*******************************************************************************
 
-thisrun='102-ies15sharpe_part2_lowtol'
+thisrun='103-baseline_RA4'
 BUILD=Build_Parallel_Optim #Optimmax #Debugmax #Parallel_Debug # Parallel_Optim
 NTHREADS=24  # number of OpenMP threads
 # OMP_STACKSIZE=16M #stack size for each OMP thread: default 4M, recommended 16M, mytest 512M
