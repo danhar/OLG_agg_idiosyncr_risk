@@ -197,8 +197,8 @@ mu:     if (partial_equilibrium) then
         simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
         ! simvars%r_pf_median(tc) = 0.0
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
-        ! simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))
-        simvars%r_pf_kappa_med(tc)= 0.0
+        simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))
+        ! simvars%r_pf_kappa_med(tc)= 0.0
 
         if (.not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
