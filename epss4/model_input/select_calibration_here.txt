@@ -7,7 +7,7 @@
 ! This version is for the social security project. 
 
 !************************************ tau = 0.00 ************************************
-!calib_ss/baseline_tau02.txt
+calib_ss/baseline_tau02.txt
 !calib_ss/base_sharpe.txt
 !calib_ss/base_ep2.txt
 !calib_ss/base_ep2ext.txt
@@ -25,7 +25,7 @@
 !calib_ss/baseline_norisk.txt
 
 !************************************ tau = 0.95 ************************************
-calib_ss/baseline_tau095.txt
+!calib_ss/baseline_tau095.txt
 !calib_ss/tau095_noIR.txt
 !calib_ss/tau095_noIR_EP.txt
 !calib_ss/tau095_noAR.txt
