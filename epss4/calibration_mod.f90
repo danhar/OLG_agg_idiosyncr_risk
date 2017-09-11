@@ -147,7 +147,7 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
         allocate(get_params(n))
 
         select case (targetname)
-        case('nosharpe','no_ep','I_Y','baseline')
+        case('nosharpe','no_ep','I_Y','baseline','base_K_Y_3')
             get_params(1) = beta
             if (n > 1) get_params(2) = del_std
             if (n > 2) get_params(3) = del_mean
@@ -160,6 +160,10 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             if (n > 2) get_params(3) = pi1_delta
             if (n > 3) get_params(4) = theta
             if (n > 4) get_params(5) = beta
+        case('base_no_delstd')
+            get_params(1) = beta
+            if (n > 1) get_params(2) = del_mean
+            if (n > 2) get_params(3) = pi1_delta
         case('no_AR')
             get_params(1) = del_mean
             if (n > 1) get_params(2) = beta

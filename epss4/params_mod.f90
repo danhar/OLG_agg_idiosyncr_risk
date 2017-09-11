@@ -1121,13 +1121,13 @@ use omp_lib           ,only: OMP_get_max_threads
             call critical_stop
     end select
 
-     select case(calib_targets)
+! The following check is important, because every new target file needs to be declared in calibration_mod:get_params. To avoid incorrect use, need to check here!
+    select case(calib_targets)
         case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', 'nosharpe', 'no_ep', 'I_Y', 'no_beta', &
-              'baseline','sharpe_ratio','equity_premium','no_AR')
+              'baseline','sharpe_ratio','equity_premium','no_AR','base_no_delstd','base_K_Y_3')
         ! continue
         case default
-            print*, 'ERROR: calib_targets must take one of the following values:'
-            print*, 'paper, presentation, computation, pc, std_w, del_mean, sharpe, nosharpe, no_ep, I_Y, no_beta,...'
+            print*, 'ERROR: calib_targets must take a value that corresponds to the cases defined in calibration_mod:get_params!'
             call critical_stop
     end select
 
