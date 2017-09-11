@@ -21,7 +21,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
 ! Performs the Krusell-Smith simulation step and records lifecycle statistics
     use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, &
                                partial_equilibrium, zeta, delta, alpha, check_dynamic_efficiency, &
-                               tol_mut=> tol_simulation_marketclearing
+                               tol_mut=> tol_simulation_marketclearing, nx_factor
     use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau, f_net_mpk
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
@@ -192,13 +192,16 @@ mu:     if (partial_equilibrium) then
         ! r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))/(1.0+g)
         r_pf = sign(1.0,apgridt)*(simvars%rf(tc+1) + kappat*simvars%mu(tc))
         simvars%r_pf(tc) = sum(r_pf*Phi)
-        ! The following two medians for portfolio holdings may stop program execution for nx_factor > 8 due to memory limits.
-        ! If so, outcomment and set to zero.
-        simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
-        ! simvars%r_pf_median(tc) = 0.0
-        ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
-        simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))
-        ! simvars%r_pf_kappa_med(tc)= 0.0
+
+        if (nx_factor < 5) then
+            ! The following two medians for portfolio holdings may stop program execution for nx_factor > 8 due to memory limits.
+            simvars%r_pf_median(tc) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
+            ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
+            simvars%r_pf_kappa_med(tc)=(simvars%rf(tc+1) + valnth(pack(kappat,Phi/=0.0), ceiling(size(pack(kappat, Phi/=0.0))/2.0)) *simvars%mu(tc))
+        else
+            simvars%r_pf_median(tc) = 0.0
+            simvars%r_pf_kappa_med(tc)= 0.0
+        endif
 
         if (.not. calc_euler_errors) then
             simvars%eul_err_max(tc)=0.0
