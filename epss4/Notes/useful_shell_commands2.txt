@@ -45,9 +45,11 @@ find . -maxdepth 1 -type d ! -name . -exec du -sh '{}' \; | sort -h
 --------------------------------------------------------------------------------
 
 To copy results manually from Euler to local (because VPN interrupted), do:
-on local bash copy the output from:
-MY_IP=$(hostname -I | cut -f2 -d' '); echo $MY_IP
-then on Euler set
+
+MY_IP=$(hostname -I | cut -f2 -d' '); echo $MY_IP | xclip -selection c
+
+The last part of the command copies the output directly to the clipboard, so it can be pasted with
+ctrl+(Shift+)v, but xclip only works within X windowing (i.e. Linux). Then on Euler set
 thisrun= ... and MY_IP=... and then copy and paste all commands below together in one go:
 
 USERNAME=elessar; path_to_results="/home/$USERNAME/work/Research/EPSocSec/test_results/Euler"; cd $thisrun
