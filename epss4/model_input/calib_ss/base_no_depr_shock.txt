@@ -90,10 +90,10 @@ factor_k        1.66        factor to scale up mean-shock result. Alternatives: 
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
-k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           15.00       max
-mu_min          0.0005      min for expected equity premium
-mu_max          0.12        max
+k_min           0.90        Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           6.00       max
+mu_min          0.0001      min for expected equity premium
+mu_max          0.01        max
 apmax_factor    19.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
