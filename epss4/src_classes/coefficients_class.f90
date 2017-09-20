@@ -259,8 +259,11 @@ contains
 
     pure subroutine save_initial_values(this)
         class(tCoeffs)         ,intent(inout):: this
-        this%k_initial = this%k
-        this%mu_initial = this%mu
+        ! this%mu_initial = this%mu doesn't allow for the case this%mu =0.0,
+        ! so in that case, choose epsilon with the proper sign.
+
+        this%k_initial = sign(1.0,this%k)*max(tiny(this%k),abs(this%k))
+        this%mu_initial = sign(1.0,this%mu)*max(tiny(this%mu),abs(this%mu))
     end subroutine save_initial_values
 !-------------------------------------------------------------------------------
 
