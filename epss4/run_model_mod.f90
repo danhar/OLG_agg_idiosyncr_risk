@@ -76,6 +76,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     else
         print*,'- run_model: mean shock GENERAL equilibrium'
         dir    = 'msge'
+        input_path = 'dummy'
         ms_grids = ms_guess
         ! call ms_grids%read_unformatted('ms')
     endif
@@ -157,6 +158,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     else
         print*,'- run_model: Krusell-Smith GENERAL equilibrium'
         dir    = 'ge'
+        input_path = 'dummy'
         call grids%allocate(nk,nmu)
         call grids%set_params(k_min,k_max,mu_min,mu_max)
         call grids%construct(ms_grids,factor_k,factor_mu,cover_k, cover_mu, nk,nmu)
