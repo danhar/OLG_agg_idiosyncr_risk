@@ -247,6 +247,7 @@ contains
         simvars%bonds(1) = sum((apgrid_ms-stocks_ms)*Phi)/ L_N_ratio
         simvars%invest(1)= simvars%stock(1) + simvars%bonds(1) -simvars%K(1)*(1.0-mean_delta)
         simvars%C(1)    = sum((xgrid_ms-apgrid_ms)*Phi)/L_N_ratio       ! Consumption per worker
+        simvars%net_mpk(1)= f_net_mpk(simvars%K(1), mean_zeta, mean_delta)
         simvars%rf(1)   = f_riskfree_rate(simvars%K(1),simvars%mu(1),stat_dist_z)
         simvars%r(1)    = f_stock_return(simvars%K(1), mean_zeta, mean_delta, simvars%rf(1))
         r_pf = sign(1.0,apgrid_ms)*(simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g)
@@ -289,6 +290,7 @@ contains
 	        simvars%bonds(i+1) = sum((policies%apgrid(:,:,i,:,1,1)-policies%stocks(:,:,i,:,1,1))*Phi)/ L_N_ratio
 	        simvars%invest(i+1)   = simvars%stock(i+1) + simvars%bonds(i+1) -simvars%K(i+1)*(1.0-delta(i))
             simvars%C(i+1)     = sum((policies%xgrid(:,:,i,:,1,1)-policies%apgrid(:,:,i,:,1,1)) *Phi)/ L_N_ratio
+            simvars%net_mpk(i+1)= f_net_mpk(simvars%K(i+1), zeta(i), delta(i))
             simvars%rf(i+1)    = f_riskfree_rate(simvars%K(i+1),simvars%mu(i+1),pi_z(i,:))
             simvars%r(i+1)     = f_stock_return (simvars%K(i+1), zeta(i), delta(i), simvars%rf(i+1))
             r_pf = sign(1.0,policies%apgrid(:,:,i,:,1,1))*(simvars%rf(i+1) + policies%kappa(:,:,i,:,1,1)*simvars%mu(i+1))/(1.0+g)
