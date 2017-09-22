@@ -18,6 +18,8 @@ module policies_class
         procedure :: consumption    ! At the moment, I am not using this anywhere
         procedure :: mean
         procedure :: interpolate
+        procedure :: read_unformatted_kappa
+        procedure :: write_unformatted_kappa
     end type tPolicies
 
 contains
@@ -48,6 +50,57 @@ pure subroutine deallocate_policies(this)
     if (allocated(this%kappa)) deallocate(this%kappa)
     if (allocated(this%apgrid)) deallocate(this%apgrid)
 end subroutine deallocate_policies
+!-------------------------------------------------------------------------------
+
+subroutine read_unformatted_kappa(this, equilibrium_type, input_path)
+    ! After having allocated all policies, read portfolio share kappa only!
+    use params_mod, only: params_set
+    class(tPolicies) ,intent(inout) :: this
+    character(*)   ,intent(in)  :: equilibrium_type, input_path
+    integer :: io_stat
+
+    open(55,file=input_path//'/kappa_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='read')
+    if (io_stat .ne. 0) then
+        print*, 'I/O ERROR opening unformatted file in policies_class:read_unformatted_kappa.'
+        print*, 'Check path: '//input_path
+        !stop 'STOP in in open policies_class:read_unformatted'
+    endif
+
+    read(55,iostat=io_stat) this%kappa
+    if (io_stat .ne. 0) then
+        print*, 'I/O ERROR reading kappa from unformatted file in policies_class:read_unformatted_kappa.'
+        print*, 'Check path: '//input_path
+        !stop 'STOP in in read policiess_class:read_unformatted'
+    endif
+
+    close(55)
+
+end subroutine read_unformatted_kappa
+!-------------------------------------------------------------------------------
+
+subroutine write_unformatted_kappa(this, equilibrium_type, input_path)
+    ! Write portfolio share kappa only!
+    class(tPolicies) ,intent(in) :: this
+    character(*)   ,intent(in) :: equilibrium_type, input_path
+    integer :: io_stat
+
+    open(55,file=input_path//'/kappa_'//equilibrium_type//'.unformatted',form='unformatted',access='stream',iostat=io_stat,action='write')
+    if (io_stat .ne. 0) then
+        print*, 'I/O ERROR opening unformatted file in policies_class:write_unformatted_kappa.'
+        print*, 'Check path: '//input_path
+        !stop 'STOP in in open policies_class:read_unformatted'
+    endif
+
+    write(55,iostat=io_stat) this%kappa
+    if (io_stat .ne. 0) then
+        print*, 'I/O ERROR writing kappa to unformatted file in policies_class:write_unformatted_kappa.'
+        print*, 'Check path: '//input_path
+        !stop 'STOP in in read policiess_class:read_unformatted'
+    endif
+
+    close(55)
+
+end subroutine write_unformatted_kappa
 !-------------------------------------------------------------------------------
 
 pure subroutine calc_kappa(this)

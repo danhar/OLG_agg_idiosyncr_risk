@@ -9,7 +9,7 @@ module mean_shock_mod
     implicit none
 contains
 
-subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path)
+subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xgrid_ms, value, err, output_path, input_path)
     ! Set up environment to use rootfinder for means shock k and mean shock mu,
     ! then pass the function ms_equilibrium as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
@@ -31,7 +31,7 @@ subroutine solve_meanshock(coeffs, grids, policies, simvars, lifecycles, Phi, xg
     type(tLifecycle),intent(out)   :: lifecycles
     real(dp) ,allocatable ,intent(out)   :: Phi(:,:,:), value(:,:,:,:,:,:), xgrid_ms(:,:,:)  ! distribution, valuefunction, mean shock xgrid
     type(tErrors)   ,intent(out)   :: err
-    character(len=*), intent(in)   :: output_path
+    character(len=*), intent(in)   :: output_path, input_path
     type(tPolicies)                :: policies_ms
 	real(dp) ,dimension(:), allocatable  :: xvars, fvals, m_etagrid	! input/output of ms_equilib, passed to sub_broyden. Mean etagrid.
 	real(dp)                       :: mean_zeta, mean_delta, bequests_ms ! mean shocks
@@ -138,7 +138,7 @@ contains
             if (normalize_xvars_to_unity) grid%mu = msvars(2) *grids%mu(1)
         endif
 
-        call olg_backwards_recursion(policies,coeffs, grid, value, errs)
+        call olg_backwards_recursion(policies,coeffs, grid, value, errs, input_path, 'ms')
 
         nx_factor_ms = nx_factor * 20 ! use higher nx_factor than in KS, though it didn't help much
         call InterpolateXgrid(nx_factor_ms, policies, value, fine, v_fine)
@@ -189,7 +189,7 @@ contains
         real(dp)              :: netwage_ms, pens_ms, r_ms, rf_ms
         integer               :: i, nx_factor_ms
 
-        call olg_backwards_recursion(policies,coeffs, grids, value, errs)
+        call olg_backwards_recursion(policies,coeffs, grids, value, errs, input_path, 'ms')
 
         nx_factor_ms = nx_factor * 20 ! use higher nx_factor than in KS, though it didn't help much
         call InterpolateXgrid(nx_factor_ms, policies, value, fine, v_fine)

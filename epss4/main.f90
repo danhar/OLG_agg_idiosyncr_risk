@@ -8,7 +8,7 @@ program EPSS
     use ifport             ,only: system  ! Intel Fortran portability library
 	use params_mod         ,only: SetDefaultValues,ReadCalibration, SetRemainingParams, CheckParams, cal_id, params_set, params_set_thisrun, welfare_decomposition, alt_insurance_calc, surv_rates, debugging,&
 	                              n_end_params, run_n_times, run_counter_start, twosided_experiment, scale_AR, scale_IR, scale_AR_orig, scale_IR_orig, tau_experiment, tau, surv_rates, ccv, dp, calc_euler_errors, &
-	                              tau_increment, tau_calib, tau_GE0
+	                              tau_increment, tau_calib, tau_GE0, stockshare_fixed_orig
 	use calibration_mod    ,only: calibrate
 	use run_model_mod
 
@@ -102,6 +102,7 @@ program EPSS
                     ! The current and following are partial equilibrium, so we don't calc Euler errors.
                     call params_set('check_dynamic_efficiency', .false.)
                     if (calc_euler_errors)   call params_set('calc_euler_errors', .false.)
+                    call params_set('stockshare_fixed', .false.)
                 elseif (rc ==3) then
                     call params_set('ccv', .false.)
                     write(runchar,'(a6)') ',noCCV'

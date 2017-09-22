@@ -17,7 +17,7 @@ contains
 ! -- (internal) function krusellsmith(coeffvec) result(distance)
 ! - subroutine save_intermediate_results(it, distance, coeffs, coeffs_old, Phi, simvars, grids, lifecycles, policies, err, secs, dir, calib_name)
 !-------------------------------------------------------------------------------
-    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_err)
+    subroutine solve_krusellsmith(grids, projectname, calib_name, output_path, input_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_err)
     ! Set up environment to use rootfinder for coefficients of loms (KS),
     ! then pass the function krusell_smith as a function argument to a root finder.
     ! In this version, the function argument is an internal procedure, which is a thread-safe Fortran 2008 feature implemented
@@ -30,7 +30,7 @@ contains
         !use sub_broyden
 
         type(tAggGrids) ,intent(in) :: grids
-        character(len=*),intent(in)    :: projectname, calib_name, output_path
+        character(len=*),intent(in)    :: projectname, calib_name, output_path, input_path
         type(tCoeffs)   ,intent(inout) :: coeffs
         type(tSimvars)  ,intent(inout) :: simvars(:)
         real(dp),allocatable ,intent(inout) :: Phi(:,:,:)
@@ -151,7 +151,7 @@ contains
 
             print '(t2,a43,i3.3)','- krusell_smith: solving for policies,  it = ', it
             if (timing) call timer%start()
-            call olg_backwards_recursion(policies,coeffs, grids, value, err)
+            call olg_backwards_recursion(policies,coeffs, grids, value, err, input_path, 'ge')
             call err%print2stderr
             if (timing) then
                 call timer%stop()

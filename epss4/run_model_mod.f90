@@ -19,7 +19,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     use alternative_insurance_calc_mod ,only: calc_insurance_effect
     use global_constants  ,only: fmt_tau_char
 	use params_mod        ,only: construct_path, set_apmax, SaveParams, cal_id, params_set, & ! procedures
-	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, calc_euler_errors, & ! logicals and characters
+	                             partial_equilibrium, estimate_from_simvars, mean_return_type, welfare_decomposition, good_initial_guess_for_both_tau, calc_euler_errors, stockshare_fixed, & ! logicals and characters
 	                             dp, nk,nmu, nz, nt, ms_guess, factor_k, factor_mu,cover_k, cover_mu, k_min,k_max,mu_min,mu_max,pi_z, seed, scale_AR, tau, tau_increment, tau_GE0, tau_GE1
 
 	character(len=*) ,intent(in)  :: projectname, calib_name
@@ -59,8 +59,15 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
         write(tau_char,fmt_tau_char) tau_GE1
+        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE0 ! to get prices with tau=0.02!!
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%read_unformatted('ms',input_path)
+
+        if (stockshare_fixed) then
+            write(tau_char,fmt_tau_char) tau_GE1 ! to get stockshare policies with tau=0.00 later in household solution!
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
+        endif
+
         if (scale_AR == -1.0) then
             print*,'- run_model: setting mu = 0.0, mean return to type '//mean_return_type
             ms_grids%mu =0.0
@@ -82,7 +89,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
 
     it = 0  ! no Krusell-Smith iterations in Mean shock (but variable still needed for saving results)
     allocate(simvars(1)) ! only one core used for mean shock
-    call solve_meanshock(coeffs, ms_grids, policies, simvars(1), lifecycles, Phi, xgrid_ms, value, err, output_path)
+    call solve_meanshock(coeffs, ms_grids, policies, simvars(1), lifecycles, Phi, xgrid_ms, value, err, output_path, input_path)
     if (err%not_converged) call err%print2stderr(dir)
     welfare = calc_average_welfare(simvars)
 
@@ -93,6 +100,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         write(tau_char,fmt_tau_char) tau
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%write_unformatted('ms',input_path)
+        if (stockshare_fixed) call policies%write_unformatted_kappa('ms',input_path)
     endif
     if (.not. calibrating) call save_and_plot_results(dir, ms_grids, err)
 
@@ -123,8 +131,15 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
         write(tau_char,fmt_tau_char) tau_GE1
+        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE0 ! to get prices with tau=0.02!!
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call read_unformatted_ks(grids, coeffs, simvars,input_path)
+
+        if (stockshare_fixed) then
+            write(tau_char,fmt_tau_char) tau_GE1 ! to get stockshare policies with tau=0.00 later in household solution!
+            input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
+        endif
+
         if (scale_AR == -1.0) then
             ! This is never executed at the moment because of the conditional return in line 85
             print*,'scale_AR = -1.0, i.e. no aggregate risk'
@@ -198,7 +213,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         syserr = system('mkdir '//output_path//' > /dev/null 2>&1') ! Creates directory for output files, suppresses error if dir exists
     endif
 
-    call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, .false.)
+    call solve_krusellsmith(grids, projectname, calib_name, output_path, input_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, .false.)
     welfare = calc_average_welfare(simvars)
 
     if (err%not_converged) then
@@ -209,7 +224,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         print*, '  Calculating Euler equation errors. This might take very long.'
         pe_temp = partial_equilibrium
         call params_set('partial_equilibrium', .true.)
-        call solve_krusellsmith(grids, projectname, calib_name, output_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_errors)
+        call solve_krusellsmith(grids, projectname, calib_name, output_path, input_path, it, coeffs, simvars, Phi, xgrid_ms, policies, value, lifecycles, err, calibrating, calc_euler_errors)
         call params_set('partial_equilibrium', pe_temp)
     endif
 
@@ -219,7 +234,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
     if (.not. partial_equilibrium .and. .not. err%not_converged) then
         write(tau_char,fmt_tau_char) tau
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
-        call save_unformatted(grids, coeffs, simvars,input_path)
+        call save_unformatted(grids, coeffs, simvars, policies, input_path)
     endif
     call save_and_plot_results(dir, grids, err)
     if (present(simvars_o)) simvars_o = simvars
@@ -343,16 +358,19 @@ contains
     end function inverted_mean_return
 !-------------------------------------------------------------------------------
 
-    subroutine save_unformatted(grids, coeffs, simvars,input_path)
+    subroutine save_unformatted(grids, coeffs, simvars, policies, input_path)
         type(tAggGrids) ,intent(in) :: grids
         type(tCoeffs)   ,intent(in) :: coeffs
         type(tSimvars)  ,intent(in) :: simvars(:)
-        character(*)    ,intent(in)  :: input_path
+        type(tPolicies) ,intent(in) :: policies
+        character(*)    ,intent(in) :: input_path
 
         call grids%write_unformatted('ge',input_path)
         call coeffs%write_unformatted(input_path)
 
         call write_unformatted(simvars,input_path)
+
+        if (stockshare_fixed) call policies%write_unformatted_kappa('ge',input_path)
 
     end subroutine save_unformatted
 !-------------------------------------------------------------------------------
@@ -367,6 +385,8 @@ contains
         call coeffs%read_unformatted(input_path)
 
         call read_unformatted(simvars,input_path)
+        ! Don't read kappa here, but instead in household_solution_mod!
+
     end subroutine read_unformatted_ks
 !-------------------------------------------------------------------------------
 

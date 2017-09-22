@@ -22,11 +22,11 @@ contains
 ! - pure subroutine consumption(ap, kappa, xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons_out, evp, error)
 !-------------------------------------------------------------------------------
 
-subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
+subroutine olg_backwards_recursion(p, coeffs, grids, value, err, input_path_o, eq_type_o)
 ! Get the policy functions for the entire state space, i.e. both individual and aggregate states
 ! This is the master subroutine, calling all module procedures below (which are appear in calling order)
 ! It it pure but for the OMP directives
-    use params_mod      ,only: nj, nx, n_trans, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax
+    use params_mod      ,only: nj, nx, n_trans, n_eta, nz, jr,surv, pi_z, pi_eta, cmin, g, beta, theta, gamm, apmax, partial_equilibrium, stockshare_fixed
     use makegrid_mod
 
     type(tPolicies)                  ,intent(out) :: p      ! policies
@@ -34,6 +34,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     type(tAggGrids)                  ,intent(in)  :: grids  ! grids for aggregate states k and mu
     real(dp)            ,allocatable ,intent(out) :: value(:,:,:,:,:,:)  ! could make optional
     type(tErrors)                    ,intent(out) :: err
+    character(len=*) ,optional       ,intent(in)  :: input_path_o, eq_type_o ! for reading unformatted policies if stockshare_fixed
     real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: cons
     real(dp) ,dimension(nx,n_eta,nz)              :: xgridp, consp, vp   ! xgrid, consumption, and value function tomorrow
     real(dp) ,dimension(n_trans,n_eta,nz)         :: yp      ! income tomorrow, for every idiosyncr & aggr state
@@ -41,11 +42,19 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     real(dp)   :: kp, rfp, app_min                      ! tomorrow's capital, equity premium,risk-free rate, min aprime
     real(dp)   :: betatildej, evp                            ! modified discount factor, expected value tomorrow
     integer    :: nk, nmu, jc, muc, kc, zc, xc, ec
+    logical    :: calc_share
 
     nk = size(grids%k)
     nmu= size(grids%mu)
     call p%allocate(nx,nz,nk,nmu)
     allocate(cons(nx,n_eta,nz,nj,nk,nmu), value(nx,n_eta,nz,nj,nk,nmu))
+    if (partial_equilibrium .and. stockshare_fixed .and. present(input_path_o) .and. present(eq_type_o)) then
+        calc_share = .false.
+    else
+        calc_share = .true.
+    endif
+    if (.not. calc_share) call p%read_unformatted_kappa(input_path_o, eq_type_o)
+
     call err%allocate(nk,nmu)
 
     !---------------------------------------------------------------------------
@@ -62,7 +71,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     enddo
     ! Final period policy functions and value function
     p%apgrid(:,:,:,:,:,:) = 0.0
-    p%kappa(:,:,:,:,:,:)  = 0.0
+    if (calc_share) p%kappa(:,:,:,:,:,:)  = 0.0
     p%stocks(:,:,:,:,:,:) = 0.0
     cons(:,:,:,nj,:,:)    = p%xgrid(:,:,:,nj,:,:)
     value(:,:,:,nj,:,:)   = cons(:,:,:,nj,:,:)
@@ -71,7 +80,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err)
     ! Model solution, generations nj-1 to 1
     !---------------------------------------------------------------------------
 !$OMP PARALLEL IF(nk>1) DEFAULT(NONE) &
-!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax, betatildej) &
+!$OMP SHARED(p,value,cons,grids,coeffs,err,nmu,nk,nz,nj,n_eta,nx,beta,g,theta,gamm,surv, pi_eta, pi_z, apmax, betatildej, calc_share) &
 !$OMP PRIVATE(jc,muc,kc,zc,kp,mup,rp,rfp,yp,consp,xgridp,vp,app_min,evp)
 jloop:do jc= nj-1,1,-1
 !$OMP SINGLE
@@ -91,7 +100,7 @@ etaloop:            do ec=1,n_eta
                         p%apgrid(:,ec,zc,jc,kc,muc)= f_apgrid_j(rfp,yp, xgridp, app_min, apmax(ec,zc,jc), jc)
 
 xloop:                  do xc=1,nx
-                            call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err%asset(xc,ec,zc,jc,kc,muc))
+                            if (calc_share) call asset_allocation(xgridp, consp, vp, yp, rfp, rp, p%apgrid(xc,ec,zc,jc,kc,muc), pi_z(zc,:), pi_eta(ec,:), xc, jc, p%kappa(xc,ec,zc,jc,kc,muc), err%asset(xc,ec,zc,jc,kc,muc))
                             p%stocks(xc,ec,zc,jc,kc,muc) = p%apgrid(xc,ec,zc,jc,kc,muc) * p%kappa(xc,ec,zc,jc,kc,muc)
 
                             call consumption(p%apgrid(xc,ec,zc,jc,kc,muc), p%kappa(xc,ec,zc,jc,kc,muc), xgridp, consp, vp, rfp,rp, yp, zc, xc, ec, betatildej, cons(xc,ec,zc,jc,kc,muc), evp, err%cons(:,xc,ec,zc,jc,kc,muc))
