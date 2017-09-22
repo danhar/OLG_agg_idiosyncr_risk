@@ -53,7 +53,7 @@ subroutine olg_backwards_recursion(p, coeffs, grids, value, err, input_path_o, e
     else
         calc_share = .true.
     endif
-    if (.not. calc_share) call p%read_unformatted_kappa(input_path_o, eq_type_o)
+    if (.not. calc_share) call p%read_unformatted_kappa(eq_type_o, input_path_o)
 
     call err%allocate(nk,nmu)
 
