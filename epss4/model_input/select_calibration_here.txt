@@ -23,7 +23,9 @@
 !calib_ss/baseline_noAR.txt
 !calib_ss/baseline_noIR.txt
 !calib_ss/baseline_norisk.txt
-calib_ss/base_no_depr_shock.txt
+!calib_ss/base_no_depr_shock.txt
+!calib_ss/base_sharpe_no_deprshock.txt
+calib_ss/base_zeta.txt
 
 !************************************ tau = 0.95 ************************************
 !calib_ss/baseline_tau095.txt

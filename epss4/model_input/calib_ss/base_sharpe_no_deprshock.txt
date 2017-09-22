@@ -3,23 +3,23 @@
 !*******************************************************************************
 
 ! Calibration file SocSec Project. Change values but not format. Always put explanation (else not read correctly).
-! This calibration is like the baseline, but without depreciation shocks, recal K/Y and rf.
+! This calibration is based on base_sharpe, but without derpeciation shocks and recal K/Y and rf only.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Preferences and technology
 !----------------------------------------------------------------------------------------------------------------------------/ 
-theta           3.0      coefficient of relative risk aversion
+theta          11.070919 coefficient of relative risk aversion
 psi             0.5      elasticity of intertemporal substitution, gamma=(1.0-theta)/(1.0-1.0/psi)
-beta            1.003042 discount factor
+beta            0.986557 discount factor
 alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
 zeta_std        0.029    standard deviation of productivity shocks
-del_mean        0.102419 mean of depreciation shocks
-del_std         0.0      std of depreciation shocks
+del_mean        0.020157 mean of depreciation shocks
+del_std         0.00     std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
-pi1_delta       0.886557 first element in transition matrix for delta, pi_delta(1,1)
+pi1_delta       0.829304 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.9698   autocorrelation of idiosyncr shocks, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_h      0.1549   standard deviation of idiosyncratic shocks in recession, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
 nu_sigma_l      0.0920   standard deviation of idiosyncratic shocks in upswing, without Soc. Sec.   (for n_eta=2, discrete etagrid hard-coded)
@@ -54,12 +54,11 @@ def_contrib     .true.   true=tau exogenous, false=benefits exogenous (not yet f
 partial_equilibrium      .false.     If true, no GE computed, GE values read from file
 collateral_constraint    .false.     smallest a' is zero, i.e. agent cannot borrow for consumption, but for investing in stock. See note (2) at the bottom.
 kappa_in_01              .false.     portfolio share kappa must be in [0,1]. I.e. no short stock and no leverage. If true and collateral_constraint == .true. then we have tight borrowing constraint. See note (3).
-calc_euler_errors        .false.     calculates relative Euler equation errors along the simulation. Very time-intensive.
 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Grids (number of discrete grid points)
 !----------------------------------------------------------------------------------------------------------------------------/
-nap             20       exogenous grid for savings (ap= 'a prime')
+nap             16       exogenous grid for savings (ap= 'a prime')
 n_trans         4        grid for idiosyncratic transitory income shock
 n_eta           4        grid for idiosyncratic stochastic state eta
 n_zeta          2        aggregate productivity shocks
@@ -74,7 +73,7 @@ nx_factor       2        In simulations use a finer xgrid, i.e. interpolate the 
 !----------------------------------------------------------------------------------------------------------------------------/
 ! Numerical options and parameters
 !----------------------------------------------------------------------------------------------------------------------------/
-lom_k_version           1           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
+lom_k_version           2           functional form of law of motion. For k, leave at 2. From 1 to 7: k_z, (k_z k_z**2), (k_z k_z**2 mu_z), (k_z mu_z), (k_z mu_z k_z*mu_z), (k_z mu_z k_z**2 mu_z**2), (k_z mu_z k_z**2 mu_z**2 k_z*mu_z)
 lom_mu_version          1           functional form of law of motion
 loms_in_logs            .true.     Use log(k) instead of k (capital) as first regressor in KS law of motion 
 pooled_regression       .true.     one lom for all z
@@ -91,10 +90,10 @@ factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
 k_min           2.00        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           9.00       max
-mu_min          0.000      min for expected equity premium
-mu_max          0.03        max
-apmax_factor    12.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
+k_max           30.00       max
+mu_min          0.001        min for expected equity premium
+mu_max          0.05        max
+apmax_factor    30.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
 apmax_curv      1.0         determines spacing over generations of apmax in apgrid
@@ -103,7 +102,7 @@ apmax_curv      1.0         determines spacing over generations of apmax in apgr
 tol_asset_eul   1e-5        policyfunctions: stopping value for kappa in asset_allocation (also sets tolerance for market clearing in simulations = 10*tol_asset_eul)
 tol_coeffs      1e-3        stopping value for coeffs (normalized to unity)
 tol_calib       5.0e-3        stopping value for sum(abs(endog_moments - data_moments))
-maxstp_ks       0.3         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
+maxstp_ks       0.6         maximum length of Newton step in Krusell Smith algorithm (between 0 and 1, because coeffs normalized to unity)
 maxstp_cal      0.1         maximum length of Newton step in calibration routine (0.2 if IES=0.5, 0.02 if IES=1.5)
 
 !----------------------------------------------------------------------------------------------------------------------------/

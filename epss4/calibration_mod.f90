@@ -164,6 +164,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             get_params(1) = beta
             if (n > 1) get_params(2) = del_mean
             if (n > 2) get_params(3) = pi1_delta
+        case('cal_zeta')
+            get_params(1) = zeta_std
+            if (n > 1) get_params(2) = del_mean
+            if (n > 2) get_params(3) = beta
+            if (n > 3) get_params(4) = pi1_delta
         case('no_AR')
             get_params(1) = del_mean
             if (n > 1) get_params(2) = beta
@@ -205,6 +210,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             call params_set('beta',param_vec(1))
             if (n > 1) call params_set('del_mean',param_vec(2))
             if (n > 2) call params_set('pi1_delta',param_vec(3))
+        case('cal_zeta')
+            call params_set('zeta_std',param_vec(1))
+            if (n > 1) call params_set('del_mean',param_vec(2))
+            if (n > 2) call params_set('beta',param_vec(3))
+            if (n > 3) call params_set('pi1_delta',param_vec(4))
         case('no_AR')
             call params_set('del_mean',param_vec(1))
             if (n > 1) call params_set('beta',param_vec(2))
@@ -260,6 +270,11 @@ alg:    if (n_end_params == 1 .and. use_brent_1D) then ! Use a bracketing algori
             model_targets(1) = rf%avg_exerr_()
             if (n > 1) model_targets(2) = K_Y%avg_exerr_()
             if (n > 2) model_targets(3) = corr(zeta,r)
+        case('cal_zeta')
+            model_targets(1) = cons_grow%std_()
+            if (n > 1) model_targets(2) = rf%avg_exerr_()
+            if (n > 2) model_targets(3) = K_Y%avg_exerr_()
+            if (n > 3) model_targets(4) = corr(zeta,r)
         case('I_Y')
             model_targets(1) = rf%avg_exerr_()
             if (n > 1) model_targets(2) = cons_grow%std_()
