@@ -251,6 +251,7 @@ contains
         simvars%rf(1)   = f_riskfree_rate(simvars%K(1),simvars%mu(1),stat_dist_z)
         simvars%r(1)    = f_stock_return(simvars%K(1), mean_zeta, mean_delta, simvars%rf(1))
         r_pf = sign(1.0,apgrid_ms)*(simvars%rf(1) + kappa_ms*simvars%mu(1))/(1.0+g)
+        simvars%r_pf(1) = sum(r_pf*Phi)
         simvars%r_pf_median(1) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(1)=(simvars%rf(1) + valnth(pack(kappa_ms,Phi/=0.0), ceiling(size(pack(kappa_ms, Phi/=0.0))/2.0)) *simvars%mu(1))/(1.0+g)
@@ -294,6 +295,7 @@ contains
             simvars%rf(i+1)    = f_riskfree_rate(simvars%K(i+1),simvars%mu(i+1),pi_z(i,:))
             simvars%r(i+1)     = f_stock_return (simvars%K(i+1), zeta(i), delta(i), simvars%rf(i+1))
             r_pf = sign(1.0,policies%apgrid(:,:,i,:,1,1))*(simvars%rf(i+1) + policies%kappa(:,:,i,:,1,1)*simvars%mu(i+1))/(1.0+g)
+            simvars%r_pf(i+1) = sum(r_pf*Phi)
             simvars%r_pf_median(i+1) = valnth(pack(r_pf, Phi/=0.0), ceiling(size(pack(r_pf, Phi/=0.0))/2.0))
             ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
             simvars%r_pf_kappa_med(i+1)=(simvars%rf(i+1) + valnth(pack(policies%kappa(:,:,i,:,1,1),Phi/=0.0), ceiling(size(pack(policies%kappa(:,:,i,:,1,1), Phi/=0.0))/2.0)) *simvars%mu(i+1))/(1.0+g)
