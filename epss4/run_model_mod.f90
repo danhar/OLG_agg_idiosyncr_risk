@@ -59,7 +59,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         print*,'- run_model: mean shock PARTIAL equilibrium'
         dir    = 'mspe'
         write(tau_char,fmt_tau_char) tau_GE1
-        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE0 ! to get prices with tau=0.02!!
+        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE1 !tau_GE0 to get prices with tau=0.02
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call ms_grids%read_unformatted('ms',input_path)
 
@@ -132,7 +132,7 @@ subroutine run_model(projectname, calib_name, welfare, welfare_ins_o, simvars_o,
         print*,'- run_model: Krusell-Smith PARTIAL equilibrium'
         dir    = 'pe'
         write(tau_char,fmt_tau_char) tau_GE1
-        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE0 ! to get prices with tau=0.02!!
+        if (stockshare_fixed) write(tau_char,fmt_tau_char) tau_GE1 !tau_GE0 to get prices with tau=0.02
         input_path = 'model_input/last_results/'//cal_id(calib_name,'base')//'/new/tau'//tau_char
         call read_unformatted_ks(grids, coeffs, simvars,input_path)
 
