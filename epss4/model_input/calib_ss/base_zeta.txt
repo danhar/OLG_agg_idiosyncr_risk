@@ -15,9 +15,9 @@ alpha           0.32     capital share
 g               0.018    growth rate of technology
 de_ratio        0.66     debt-equity-ratio. Alternatives: 0.66
 zeta_mean       1.000    mean of productivity shocks
-zeta_std        0.081200    standard deviation of productivity shocks
-del_mean        0.099522 mean of depreciation shocks
-del_std         0.001     std of depreciation shocks
+zeta_std        0.108251    standard deviation of productivity shocks
+del_mean        0.104263 mean of depreciation shocks
+del_std         0.002     std of depreciation shocks
 pi1_zeta        0.941    first element in transition matrix for zeta, pi_zeta(1,1)
 pi1_delta       0.886557 first element in transition matrix for delta, pi_delta(1,1)
 rho             0.9698   autocorrelation of idiosyncr shocks, without Soc. Sec. (for n_eta=2, discrete etagrid hard-coded)
@@ -46,7 +46,7 @@ ccv             .true.   Turn on/off countercyclical variance of idiosyncratic i
 scale_IR        0.0      scaling factor for idiosyncratic risk, i.e. std(nu) = std(nu) * (1 + scale_IR). Only applied if run_n_times > 1.
 scale_AR        0.0      scaling factor for aggregate risk, i.e. zeta_std_scaled = zeta_std*(1+scale_AR), same for delta_std. Only applied if run_n_times > 1.
 run_n_times      1       Run program n times with this calibration (if n>1 apply scale_AR OR scale_IR each time after first run, i.e. n-1 times total. If (twosided_experiment) run (n-1)*2-1 times total.)
-n_end_params     2       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
+n_end_params     4       Number of 'endogenous parameters'. 0: Do not calibrate!, 1: beta, 2: theta, 3: del_mean, 4: del_std, 5: pi1_delta, 6: zeta_std
 calib_targets 'cal_zeta'   Name of the file in model_input/calibration_targets. Admissible values: 'paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', nosharpe, I_Y, base_K_Y_3
 twosided_experiment .false. If true (and run_n_times>1), the risk experiments are repeated for -1*scale_AR (IR) (i.e. increase and decrease risk around baseline)  
 surv_rates      .false.   false = no survival rates
@@ -85,15 +85,16 @@ save_all_iterations     .false.     during KS iteratins, save all results
 detailed_euler_errs     .false.     turns on/off explicit notification for errors during olg solution
 opt_zbrak               .false.     use NR zbrak to search for sign change inside given brackets in asset_allocation
 save_all_to_txt         .false.     save complete policies and all errors to txt-file. Is large, takes 150 MB space (for each equilibrium).
+good_initial_guess_for_both_tau  .true.  If false, use LOMs converged for tau=0.0% as initial guess for tau=0.02%. If true, read in separate guess for tau=0.02%.
 
 factor_k        1.66        factor to scale up mean-shock result. Alternatives: 1.3, 5, .7
 factor_mu       1.56        factor to scale up mean-shock result. Alternatives: 3, .4
 cover_k         0.85        aggregate grids will cover mean +/-cover_k. Alternatives: 5 .7
 cover_mu        0.80        same. Alteratives .3, .4
-k_min           0.50        Bounds for aggregate grid, if grid is fixed exogenously  
-k_max           15.00       max
-mu_min          0.0005      min for expected equity premium
-mu_max          0.12        max
+k_min           0.90        Bounds for aggregate grid, if grid is fixed exogenously  
+k_max           11.00       max
+mu_min          0.0001      min for expected equity premium
+mu_max          0.01        max
 apmax_factor    19.0        used in fun_setapmax: apmax=k*apmax_factor. Alternatives: 22
 
 kappamax        1000.0      maximum leverage (both when in debt and in positive net assets)
