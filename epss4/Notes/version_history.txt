@@ -8,7 +8,7 @@ most recent and also the current. Within each section, style and chronological o
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
  (A) Current branches 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-105-fix_portf_share: compute an additional PE where shares in stock are kept constant and with new prices.
+106-redistribute_contributions: SS contributions to working pop, like unemployment insurance. Per demand of referee.
 088-gc_age(2): calculate CEV over age (during simulations). Also welfare distribution over cash-on-hand and age. 
                UNFINISHED: So far, expected value for age and cah over simulation is computed and stored in TLifecycle%exp_value and saved in exp_val_tilde.txt (from this I can compute value over age by simply summing). But to 
                get to CEV, I still need to compute the difference to an experiment (and maybe plot).
@@ -651,3 +651,4 @@ For example, simvars should read and write output unformatted also, see  subrout
 102-final_results: results for resubmission
 103-mpk: compute average MPK and portfolio return. Continue results for resubmission
 104-new_experiment: new calib with less depreciation shocks.
+105-fix_portf_share: compute an additional PE where shares in stock are kept constant and with new prices.
