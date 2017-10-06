@@ -22,7 +22,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     use params_mod      ,only: n,g,L_N_ratio,pop_frac,pi_z,etagrid,t_scrap,exogenous_xgrid, &
                                partial_equilibrium, zeta, delta, alpha, check_dynamic_efficiency, &
                                tol_mut=> tol_simulation_marketclearing, nx_factor
-    use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate, f_tau, f_net_mpk
+    use income          ,only: f_netwage, f_transfers, f_pensions, f_stock_return, f_riskfree_rate, f_tau, f_net_mpk
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_zbrent
@@ -42,7 +42,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
     real(dp) ,dimension(:,:,:)   ,allocatable :: Phi_avg, r_pf ! portfolio return
     real(dp) ,dimension(:)       ,allocatable :: ap_lct, stocks_lct, cons_lct, cons_var_lct, return_lct, return_var_lct, log_cons_lct, var_log_cons_lct
     real(dp) ,dimension(:)       ,allocatable :: Knew       ! partial equilibrium: save aggregate stock in t
-    real(dp)  :: Kt, mut, rt, netwaget, penst, w, eul_err_temp(2) ! variables in period t
+    real(dp)  :: Kt, mut, rt, netwaget, transfert, penst, w, eul_err_temp(2) ! variables in period t
     integer   :: tc, i, zt, jc, nmu, nx, n_eta, nj, nt, nk, dyn_eff_b_counter
 
     ! Intel Fortran Compiler XE 13.0 Update 1 (and previous) has a bug on realloc on assignment. If that is corrected, I think I can remove this whole allocation block.
@@ -69,6 +69,7 @@ pure subroutine simulate(policies, value, agg_grid, coeffs, calc_euler_errors, s
 
         ! Prices
         netwaget = f_netwage(Kt, zeta(zt))
+        transfert= f_transfers(Kt, zeta(zt))
         penst    = f_pensions(Kt, zeta(zt))
         rt       = f_stock_return(Kt, zeta(zt), delta(zt), simvars%rf(tc))
 
@@ -108,7 +109,7 @@ tc1:    if (tc == 1) then
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
             ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+            Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,transfert,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
         endif ex
 
 mu:     if (partial_equilibrium) then
@@ -135,7 +136,7 @@ mu:     if (partial_equilibrium) then
 	        if (.not. exogenous_xgrid) then
 		        xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
 		        ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+		        Phi      = TransitionPhi(simvars%rf(tc),rt,netwaget,transfert,penst,simvars%bequests(tc),xgridt,apgridt,stockst,etagrid(:,zt), Phi)
 	        endif
 
 	        apgridt  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
@@ -176,6 +177,7 @@ mu:     if (partial_equilibrium) then
         simvars%net_mpk(tc)    = f_net_mpk(Kt, zeta(zt), delta(zt))
         simvars%r(tc)     = rt
         simvars%wage(tc)  = netwaget
+        simvars%trans(tc) = transfert
         simvars%pens(tc)  = penst
         simvars%tau (tc)  = f_tau(Kt, zeta(zt))
         simvars%welf(tc)  = sum(exp_value_t(:,:,1))
@@ -218,7 +220,7 @@ mu:     if (partial_equilibrium) then
             endif
         endif
 
-        call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, tc)
+        call calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagrid(:,zt), penst, netwaget, transfert, tc)
 
         if (check_dynamic_efficiency .and. .not. partial_equilibrium) then
             dyn_eff_b_counter = dyn_eff_b_counter + 1
@@ -295,7 +297,7 @@ contains
 
             if (.not. exogenous_xgrid) then
                 xgridtt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
-                Phit      = TransitionPhi(simvars%rf(tc),rt,netwaget,penst,simvars%bequests(tc),xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
+                Phit      = TransitionPhi(simvars%rf(tc),rt,netwaget,transfert,penst,simvars%bequests(tc),xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
             else
                 Phit = Phi
             endif
@@ -317,13 +319,13 @@ contains
 end subroutine simulate
 !-------------------------------------------------------------------------------
 
-pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagridt, penst, netwaget, tc)
+pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi, etagridt, penst, netwaget, transfert, tc)
     use statistics  ,only: lorenz_calc
     use params_mod  ,only: t_scrap, jr, ej, trans_grid, trans_prob
     type(tSimvars)             ,intent(inout) :: simvars
     real(dp) ,dimension(:,:,:) ,intent(in)    :: xgridt, apgridt, stockst, Phi
     real(dp) ,dimension(:)     ,intent(in)    :: etagridt
-    real(dp)                   ,intent(in)    :: penst, netwaget
+    real(dp)                   ,intent(in)    :: penst, netwaget, transfert
     integer                    ,intent(in)    :: tc
     real(dp) ,dimension(:), allocatable       :: lorenz_x, lorenz_y
     real(dp) ,dimension(:,:,:) ,allocatable   :: const, assets_t, Phi_trans, income_dist
@@ -366,8 +368,8 @@ pure subroutine calc_inequality_measures(simvars, xgridt, apgridt, stockst, Phi,
                     income_dist(:,ec,jc) = 0.0 !penst
                     Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))/real(n_trans,dp)
                 else
-                    income_dist_a(ec,jc) = netwaget*ej(jc)*etagridt(ec)
-                    income_dist(:,ec,jc) = netwaget*ej(jc)*etagridt(ec)*trans_grid
+                    income_dist_a(ec,jc) = netwaget*ej(jc)*etagridt(ec) + transfert
+                    income_dist(:,ec,jc) = netwaget*ej(jc)*etagridt(ec)*trans_grid + transfert
                     Phi_trans(:,ec,jc) = sum(Phi(:,ec,jc))*trans_prob
                 endif
             enddo
@@ -416,7 +418,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
     use params_mod ,only: beta, gamm, g, theta, jr, surv, ej, etagrid, trans_grid, cmin
     use household_solution_mod ,only: interp_policies_tomorrow, consumption
     use laws_of_motion ,only: Forecast_mu
-    use income ,only: f_stock_return, f_pensions, f_netwage, zeta, delta
+    use income ,only: f_stock_return, f_pensions, f_netwage, f_transfers, zeta, delta
 
     real(dp), dimension(2) :: f_euler_errors
     integer                          ,intent(in) :: zt
@@ -461,7 +463,7 @@ pure function f_euler_errors(zt, rfp, mut,kp,coeffs, grids, policies, value, xgr
                 yp(:,:,zpc) = f_pensions(kp, zeta(zpc))
             else
                 do ec=1,n_eta
-                    yp(:,ec,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(ec,zpc) * trans_grid
+                    yp(:,ec,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(ec,zpc) * trans_grid + f_transfers(kp, zeta(zpc))
                 enddo
             endif
         enddo
@@ -496,7 +498,7 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
     ! Important: Output .true. indicates a violation of the condition!
 
     use params_mod      ,only: n,g,L_N_ratio,pi_z,etagrid,exogenous_xgrid, zeta, delta, tol_mut=> tol_simulation_marketclearing
-    use income          ,only: f_netwage, f_pensions, f_stock_return, f_riskfree_rate
+    use income          ,only: f_netwage, f_transfers, f_pensions, f_stock_return, f_riskfree_rate
     use fun_locate      ,only: f_locate
     use distribution    ,only: TransitionPhi, CheckPhi
     use fun_aggregate_diff
@@ -508,7 +510,7 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
     type(tAggGrids)  ,intent(in)    :: agg_grid
     real(dp) ,dimension(:,:,:,:) ,allocatable :: apgrid_zk, xgrid_zk, stocks_zk    ! policies for given z and K
     real(dp) ,dimension(:,:,:)   ,allocatable :: apgrid_new, xgridt, Phi_new
-    real(dp)  :: Knew, rf_new, mut, rt, bequestst, netwaget, penst, w ! variables in period t
+    real(dp)  :: Knew, rf_new, mut, rt, bequestst, netwaget, transfert, penst, w ! variables in period t
     integer   :: i, zt, nmu, nx, n_eta, nj, nk, nz
     logical   :: r_low, r_high
 
@@ -521,6 +523,7 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
     do zt = 1, nz ! for all shocks tomorrow
         ! Prices
         netwaget = f_netwage(Kt, zeta(zt))
+        transfert= f_transfers(Kt, zeta(zt))
         penst    = f_pensions(Kt, zeta(zt))
         rt       = f_stock_return(Kt, zeta(zt), delta(zt), rf_t)
         bequestst = f_bequests(rf_t, rt, stockst, apgridt, Phi)
@@ -536,7 +539,7 @@ pure logical function dyn_eff_a(rf_t, Kt, stockst, apgridt, policies, agg_grid, 
 ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             xgridt   = xgrid_zk(:,:,:,1)
             ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-            Phi_new  = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+            Phi_new  = TransitionPhi(rf_t,rt,netwaget,transfert,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
         endif ex
 
         ! Find mut that clears bondmarket
@@ -558,7 +561,7 @@ ex:     if (exogenous_xgrid .or. (nmu ==1) ) then
             if (.not. exogenous_xgrid) then
                 xgridt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
                 ! To calc distribution, we need xgridt , along with netwaget etc, of this period (tc), but policy projections of last
-                Phi_new = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
+                Phi_new = TransitionPhi(rf_t,rt,netwaget,transfert,penst,bequestst,xgridt,apgridt,stockst,etagrid(:,zt), Phi)
             endif
             apgrid_new  = (1-w)*apgrid_zk(:,:,:,i) + w*apgrid_zk(:,:,:,i+1)
         else
@@ -613,7 +616,7 @@ contains
 
             if (.not. exogenous_xgrid) then
                 xgridtt   = (1-w)* xgrid_zk(:,:,:,i) + w* xgrid_zk(:,:,:,i+1)
-                Phit      = TransitionPhi(rf_t,rt,netwaget,penst,bequestst,xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
+                Phit      = TransitionPhi(rf_t,rt,netwaget,transfert,penst,bequestst,xgridtt,apgridt,stockst,etagrid(:,zt), Phi)
             else
                 Phit = Phi
             endif

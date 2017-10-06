@@ -22,14 +22,14 @@ contains
 ! - subroutine check_Phi_small(Phi,dir)
 !-------------------------------------------------------------------------------
 
-pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
+pure function TransitionPhi(rf,r,netwage,transfers,pens,bequests,xgrid,apgrid,stocks,etagrid, Phitm_o) result(Phi)
 ! Calculate the transition of Phi
     use fun_locate
     use params_mod     ,only: trans_grid, trans_prob ! transitory income shocks
 
     real(dp) ,dimension(:,:,:) ,allocatable ,target     :: Phi                  ! new distribution
     real(dp) ,dimension(:,:,:) ,intent(in) ,optional:: Phitm_o     ! distribution from t-1 (t minus)
-    real(dp)                   ,intent(in) :: rf, r, netwage, pens, bequests ! today's risk-free rate, risky return, net wage, pensions
+    real(dp)                   ,intent(in) :: rf, r, netwage, transfers, pens, bequests ! today's risk-free rate, risky return, net wage, pensions
     real(dp) ,dimension(:,:,:) ,intent(in) :: apgrid, stocks, xgrid ! optimal policies/ grids at today's aggregate state
     real(dp) ,dimension(:)     ,intent(in) :: etagrid              ! idiosyncratic income shocks today
     real(dp) ,dimension(:,:,:) ,pointer    :: Phitm                ! distribution previous period/ generation (Phi 'T M'inus one)
@@ -50,7 +50,7 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
     Phi         = 0.0
     ! Generation jc=1
     do ec = 1,n_eta
-        y(:,ec)     = netwage*ej(1)*etagrid(ec)*trans_grid
+        y(:,ec)     = netwage*ej(1)*etagrid(ec)*trans_grid + transfers
     enddo
     if (bequests_to_newborn) y = y + bequests * L_N_ratio/pop_frac(1) ! transform from per efficient worker to per efficient capita, then distribute to newborn
     do ec = 1,n_eta ! this loop is necessary because several ix could have same value, or +/- 1, so that Phi would be overwritten
@@ -70,7 +70,7 @@ pure function TransitionPhi(rf,r,netwage,pens,bequests,xgrid,apgrid,stocks,etagr
             y=pens
         else
             do ec=1,n_eta
-                y(:,ec) = netwage*ej(jc)*etagrid(ec)*trans_grid
+                y(:,ec) = netwage*ej(jc)*etagrid(ec)*trans_grid + transfers
             enddo
         endif
         do emc= 1,n_eta

@@ -108,7 +108,7 @@ pure subroutine calc_vars_tomorrow(coeffs,grids,jc,zc,kc,muc,kp,mup,rp,rfp,yp)
             yp(:,:,zpc) = f_pensions(kp, zeta(zpc))
         else
             do epc=1,size(etagrid,1)
-                yp(:,epc,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(epc,zpc) * trans_grid
+                yp(:,epc,zpc) = ej(jc+1) * f_netwage(kp, zeta(zpc)) * etagrid(epc,zpc) * trans_grid + f_transfers(kp, zeta(zpc))
             enddo
         endif
     enddo

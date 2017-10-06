@@ -22,7 +22,7 @@ module params_mod
     logical ,protected :: ccv, surv_rates, def_contrib, partial_equilibrium, twosided_experiment, collateral_constraint, kappa_in_01,&
                           bequests_to_newborn, loms_in_logs, pooled_regression, estimate_from_simvars, exogenous_xgrid, debugging,&
                           save_all_iterations, detailed_euler_errs, save_all_to_txt, normalize_coeffs, opt_zbrak, tau_experiment, welfare_decomposition, alt_insurance_calc, &
-                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency, no_plotting, two_income_processes, stockshare_fixed
+                          good_initial_guess_for_both_tau, calc_euler_errors, check_dynamic_efficiency, no_plotting, two_income_processes, stockshare_fixed, redistribute2workers
     character(len=100) :: calib_targets, mean_return_type
 
 !-------------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ subroutine SetDefaultValues()
     ccv=.true.; surv_rates=.false.; def_contrib=.true.; partial_equilibrium=.false.; twosided_experiment=.false.; collateral_constraint=.false.; kappa_in_01=.false.
     bequests_to_newborn=.true.; loms_in_logs=.true.; pooled_regression=.false.; estimate_from_simvars=.true.; exogenous_xgrid=.true.; debugging=.false.
     save_all_iterations=.false.; detailed_euler_errs=.false.; save_all_to_txt=.false.; normalize_coeffs=.true.; opt_zbrak=.false.; tau_experiment=.false.; welfare_decomposition = .true.; alt_insurance_calc=.false.
-    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.; no_plotting=.false.; two_income_processes = .false.; stockshare_fixed = .false.; stockshare_fixed_orig= .false.
+    good_initial_guess_for_both_tau = .false.; calc_euler_errors=.false.; check_dynamic_efficiency=.false.; no_plotting=.false.; two_income_processes = .false.; stockshare_fixed = .false.; redistribute2workers = .false.; stockshare_fixed_orig= .false.
     ! Character
     calib_targets='baseline'; mean_return_type='Siegel2002'
 end subroutine SetDefaultValues
@@ -232,6 +232,8 @@ subroutine ReadCalibration(calib_name)
                 read (parval,*) kappa_in_01
             case ('stockshare_fixed')
                 read (parval,*) stockshare_fixed
+            case ('redistribute2workers')
+                read (parval,*) redistribute2workers
             case ('nap')
                 read (parval,*) nap
             case ('n_eta')
@@ -1354,6 +1356,7 @@ subroutine SaveParams(projectname, calib_name, cal_iter_o)
     write(21,'(a20,l1)') ' collat_constr   =  ', collateral_constraint
     write(21,'(a20,l1)') ' kappa_in_01     =  ', kappa_in_01
     write(21,'(a20,l1)') ' stockshare_fixed=  ', stockshare_fixed
+    write(21,'(a20,l1)') ' redist2workers  =  ', redistribute2workers
     write(21,'(a20,l1)') ' exogenous_xgrid =  ', exogenous_xgrid
     write(21,'(a19,i2)') ' lom_k_version   = ' , lom_k_version
     write(21,'(a19,i2)') ' lom_mu_version  = ' , lom_mu_version

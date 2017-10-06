@@ -51,11 +51,28 @@ contains
     end function f_grosswage
 
     pure function f_pensions(k,zeta)
-        use params_mod, only : P_L_ratio
+        use params_mod, only : P_L_ratio, redistribute2workers
         real(dp),intent(in) :: k, zeta
         real(dp)            :: f_pensions
-        f_pensions=f_grosswage(k,zeta)*f_tau(k,zeta)/P_L_ratio
+
+        if (redistribute2workers) then
+            f_pensions=0.0
+        else
+            f_pensions=f_grosswage(k,zeta)*f_tau(k,zeta)/P_L_ratio
+        endif
     end function f_pensions
+
+    pure function f_transfers(k,zeta)
+        use params_mod, only : redistribute2workers
+        real(dp),intent(in) :: k, zeta
+        real(dp)            :: f_transfers
+
+        if (redistribute2workers) then
+            f_transfers=f_grosswage(k,zeta)*f_tau(k,zeta)
+        else
+            f_transfers=0.0
+        endif
+    end function f_transfers
 
     pure function f_tau(k,zeta)
         use params_mod, only : def_contrib, P_L_ratio, def_benefits

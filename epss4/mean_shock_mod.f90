@@ -123,7 +123,7 @@ contains
         type(tErrors)   :: errs
         real(dp) ,dimension(:,:,:,:,:,:) ,allocatable :: value, v_fine
         real(dp) ,dimension(:,:,:) ,allocatable :: Phi ! mean shock projections and distribution
-        real(dp)                          :: netwage_ms, pens_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
+        real(dp)                          :: netwage_ms, pens_ms, transfers_ms, r_ms, rf_ms, kp_ms, agg_bond_demand
         integer                           :: i, nx_factor_ms
 
         call grid%allocate(size(grids%k), size(grids%mu))
@@ -147,12 +147,13 @@ contains
 
         ! Prices in mean shock path
         netwage_ms    = f_netwage (grid%k(1), mean_zeta)
+        transfers_ms  = f_transfers(grid%k(1), mean_zeta)
         pens_ms       = f_pensions(grid%k(1), mean_zeta)
         rf_ms         = f_riskfree_rate(grid%k(1),grid%mu(1),stat_dist_z)
         r_ms          = f_stock_return(grid%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,transfers_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
 
         ! Update the guess for bequests (instead of finding a fixed-point in (Phi,bequests)
         ! bequests_ms   = f_bequests(rf_ms, r_ms, stocks_ms, apgrid_ms, Phi) ! This update seemed to create problems for the rootfinder.
@@ -186,7 +187,7 @@ contains
         real(dp) ,dimension(:,:,:)       ,allocatable ,intent(out) :: value_ms, Phi ! mean shock projections and distribution
         type(tPolicies)       :: policies, pol_ms
         real(dp) ,allocatable :: value(:,:,:,:,:,:)
-        real(dp)              :: netwage_ms, pens_ms, r_ms, rf_ms
+        real(dp)              :: netwage_ms, pens_ms, transfers_ms, r_ms, rf_ms
         integer               :: i, nx_factor_ms
 
         call olg_backwards_recursion(policies,coeffs, grids, value, errs, input_path, 'ms')
@@ -204,12 +205,13 @@ contains
 
         ! Prices in mean shock path
         netwage_ms    = f_netwage (grids%k(1), mean_zeta)
+        transfers_ms  = f_transfers(grids%k(1), mean_zeta)
         pens_ms       = f_pensions(grids%k(1), mean_zeta)
         rf_ms         = f_riskfree_rate(grids%k(1),grids%mu(1),stat_dist_z)
         r_ms          = f_stock_return(grids%k(1), mean_zeta, mean_delta, rf_ms)
 
         ! Get distribution in mean shock path
-        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
+        Phi = TransitionPhi(rf_ms,r_ms,netwage_ms,transfers_ms,pens_ms,bequests_ms,policies_ms%xgrid(:,:,1,:,1,1),policies_ms%apgrid(:,:,1,:,1,1),policies_ms%stocks(:,:,1,:,1,1),m_etagrid)
 
     end subroutine get_equilibrium_values
 
@@ -256,6 +258,7 @@ contains
         ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
         simvars%r_pf_kappa_med(1)=(simvars%rf(1) + valnth(pack(kappa_ms,Phi/=0.0), ceiling(size(pack(kappa_ms, Phi/=0.0))/2.0)) *simvars%mu(1))/(1.0+g)
         simvars%wage(1) = f_netwage (simvars%K(1), mean_zeta)
+        simvars%trans(1)= f_transfers(simvars%K(1), mean_zeta)
         simvars%pens(1) = f_pensions(simvars%K(1), mean_zeta)
         simvars%tau(1)  = f_tau     (simvars%K(1), mean_zeta)
         simvars%welf(1) = sum(value_ms(:,:,1)*Phi(:,:,1))
@@ -279,7 +282,7 @@ contains
             simvars%eul_err_avg(1)=eul_err_temp(2)
         endif
 
-        call calc_inequality_measures(simvars, xgrid_ms, apgrid_ms, stocks_ms, Phi, m_etagrid, simvars%pens(1), simvars%wage(1), 1)
+        call calc_inequality_measures(simvars, xgrid_ms, apgrid_ms, stocks_ms, Phi, m_etagrid, simvars%pens(1), simvars%wage(1), simvars%trans(1), 1)
 
         do i= 1,nz  ! can't I just save z and then call simulate_economy?
             simvars%z(i+1)     = i
@@ -300,6 +303,7 @@ contains
             ! The next calculation is neglecting sign(1.0,apgridt), but that would become unnecessarily tedious
             simvars%r_pf_kappa_med(i+1)=(simvars%rf(i+1) + valnth(pack(policies%kappa(:,:,i,:,1,1),Phi/=0.0), ceiling(size(pack(policies%kappa(:,:,i,:,1,1), Phi/=0.0))/2.0)) *simvars%mu(i+1))/(1.0+g)
 	        simvars%wage(i+1)  = f_netwage (simvars%K(i+1), zeta(i))
+            simvars%trans(i+1) = f_transfers(simvars%K(i+1), zeta(i))
 	        simvars%pens(i+1)  = f_pensions(simvars%K(i+1), zeta(i))
 	        simvars%tau (i+1)  = f_tau     (simvars%K(i+1), zeta(i))
 	        simvars%welf(i+1)  = sum(value(:,:,i,1,1,1)*Phi(:,:,1))
@@ -312,7 +316,7 @@ contains
 	        simvars%err_income(i+1) = f_income_diff(simvars%K(i+1), zeta(i), simvars%r(i+1), simvars%rf(i+1), delta(i))
             simvars%eul_err_max(i+1)= 0.0
             simvars%eul_err_avg(i+1)= 0.0
-            call calc_inequality_measures(simvars,policies%xgrid(:,:,i,:,1,1), policies%apgrid(:,:,i,:,1,1), policies%stocks(:,:,i,:,1,1), Phi, etagrid(:,i), simvars%pens(i+1), simvars%wage(i+1), i+1)
+            call calc_inequality_measures(simvars,policies%xgrid(:,:,i,:,1,1), policies%apgrid(:,:,i,:,1,1), policies%stocks(:,:,i,:,1,1), Phi, etagrid(:,i), simvars%pens(i+1), simvars%wage(i+1), simvars%trans(i+1), i+1)
         enddo
 
         simvars%K (nz+2) = simvars%K (1) ! K and rf have one more index in the real simulations.
