@@ -33,7 +33,7 @@ subroutine save_results(Phi, simvars, coeffs, grids, lc, &
 
 !    real(dp),dimension(nx,n_eta,nz,nj,size(pol%apgrid,5),size(pol%apgrid,6)):: cons
     real(dp), dimension(size(pol%apgrid,1),size(pol%apgrid,4)) :: apgrid_mean, stocks_mean, kappa_mean, xgrid_mean !, cons_mean
-    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, pension, tau, net_mpk, r, rf, r_pf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
+    type(tStats) :: K, mu, output, stock, bonds, invest, cons, cons_grow, netwage, transfers, pension, tau, net_mpk, r, rf, r_pf, r_pf_median, r_pf_kappa_med, zeta, delta, I_Y, K_Y, welfare, &
                     Phi_1, Phi_nx, err_aggr,B, err_inc, eul_err_max, eul_err_avg, bequest_rate, ex_ret, &
                     gini_income, gini_assets, gini_stocks, gini_consumption, cv_income, cv_assets, cv_stocks, cv_consumption ! inequality measures
     type(tStats_logical) :: err_K, err_mu, dyn_eff_a
@@ -84,6 +84,7 @@ contains
         invest%name='invest'; call invest%calc_stats(simvars)
         cons%name='cons'; call cons%calc_stats(simvars)
         netwage%name='netwage'; call netwage%calc_stats(simvars)
+        transfers%name='transfers'; call transfers%calc_stats(simvars)
         pension%name='pension'; call pension%calc_stats(simvars)
         tau%name='tau'; call tau%calc_stats(simvars)
         K_Y%name='K_Y'; call K_Y%calc_stats(simvars)
@@ -136,6 +137,7 @@ contains
 !-------------------------------------------------------------------------------
 
     subroutine write_stats(prec)
+    use params_mod, only: redistribute2workers
     character(len=*) ,intent(in) :: prec
     character(:), allocatable :: fmt1
     integer :: nl, show_digits
@@ -178,6 +180,7 @@ contains
     call cons%write(21,'cons',prec)   ! in units of efficient labor, so that stationary
     call cons_grow%write(21,'cons_grow',prec)
     call netwage%write(21,'netwage',prec)
+    if (redistribute2workers) call transfers%write(21,'transfers',prec)
     call pension%write(21,'pension',prec)
     call tau%write(21,'tau',prec)
     call zeta%write(21,'zeta',prec)
@@ -292,7 +295,7 @@ contains
     ! Since all arrays follow Fortran's natural storage order (i.e. column-major),
     ! no (implied) do-loops necessary when writing to file.
     ! The following will write all nx in one line, then change zc, then jc, ...
-    use params_mod, only: save_all_to_txt
+    use params_mod, only: save_all_to_txt, redistribute2workers
     integer :: nx, i2
 
 ! The following seems the best format, because it will not produce ****, which can't be read by Matlab
@@ -428,8 +431,9 @@ contains
         write(21,370) ' net_mpk  ', simvars(i)%net_mpk
         write(21,370) ' r        ', simvars(i)%r
         write(21,371) ' rf       ', simvars(i)%rf
-        write(21,370) ' wage     ', simvars(i)%wage
-        write(21,370) ' pens     ', simvars(i)%pens
+        write(21,370) ' netwage  ', simvars(i)%wage
+        if (redistribute2workers) write(21,370) ' transfer ', simvars(i)%trans
+        write(21,370) ' pension  ', simvars(i)%pens
         write(21,370) ' tau      ', simvars(i)%tau
         write(21,373) ' welf     ', simvars(i)%welf
         write(21,372) ' err_K    ', simvars(i)%err_K
