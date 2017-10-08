@@ -619,11 +619,14 @@ contains
     ! Sets productivity profile, survival rates, and calculates pop ratios
         integer, parameter :: iounit=124
         logical, parameter :: adjust_nj = .true. ! if true, then set nj to life expectancy if surv_rates = .false., else leave nj as it is
+        logical, parameter :: busch_ludwig_lc_estimate = .true.
         logical, save      :: already_adjusted_nj = .false.
         real(dp),allocatable,dimension(:,:) :: age_prod_profile, cond_mort_rates
         real(dp),allocatable,dimension(:)   :: mass_j ! Mass of generation
         real(dp)          :: P, L , Pop ! Pensioners, Labor (efficiency units), Total population
-        integer           :: jc, ju ! counter and upper bound for generation j
+        integer           :: jc, ju, io_stat ! counter and upper bound for generation j
+        character(:),allocatable :: filename
+
 
         if (allocated(surv)) deallocate(surv)
         allocate(surv(nj))
@@ -656,9 +659,27 @@ contains
         if (allocated(age_prod_profile)) deallocate(age_prod_profile)
         allocate(age_prod_profile(2,nj+econ_life_start))
 
-        ! input of age-earnings profiles of Hugget/Ventura/Yaron
-        open(iounit,file='model_input/data/hvyageearn.txt', action='read')
-        read(iounit,*) age_prod_profile
+        ! age-earnings profiles
+        if (busch_ludwig_lc_estimate) then
+            filename = 'blageearn.txt'
+        else ! Hugget/Ventura/Yaron, hvy
+            filename = 'hvyageearn.txt'
+        endif
+
+        open(iounit,file='model_input/data/'//filename,iostat=io_stat,action='read')
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR opening earnings data in params_mod:set_demographics.'
+            print*, 'Check path: model_input/data/'//filename
+            !stop 'STOP in in open params_mod:set_demographics'
+        endif
+
+        read(iounit,*,iostat=io_stat) age_prod_profile
+
+        if (io_stat .ne. 0) then
+            print*, 'I/O ERROR reading earnings data in params_mod:set_demographics.'
+            print*, 'Check path: model_input/data/'//filename
+            !stop 'STOP in in read params_mod:set_demographics.'
+        endif
         close(iounit)
 
         ! Translate productivity profiles into model
