@@ -30,12 +30,15 @@ end
 nx_interp = min([nx*4, 100]); % min so that it doesn't become too large, which is a problem when printing graph on cluster
 Phi_cutoff=0.00001;
 
-scrsz = get(0,'ScreenSize');
 if (visibility=='off')
+    scrsz = [1 1 1920 1080];
+    fig_pos = 'PaperPosition';
     fontsize=12;
     linewidth =1.5;
     markersize = 7;
 else
+    scrsz = get(0,'ScreenSize');
+    fig_pos = 'OuterPosition';
     fontsize=16;
     linewidth =2.5;
     markersize = 9;
@@ -57,7 +60,7 @@ if (nx2 ~= nx) % usually they differ, bc nx_factor makes finer grids for simulat
     xgrid_mean = xgrid_new;
 end
 
-figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 count=0;
 for i=[1,2,3,4] %[1,15,30,45] %[1, 20, 32, 40, 60]
     count=count+1;
@@ -81,7 +84,7 @@ xgrid=(xmin:((xmax-xmin)/(nx_interp-1)):xmax)';
 for j=1:size(Phi_interp,1)
     Phi_interp(j,:)=interp1(xgrid_mean(j,:),Phi(j,:), xgrid,'linear',0);
 end
-figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 surf((1:size(Phi_interp,1)),xgrid,Phi_interp');
 set(gca,'FontSize',fontsize);
 title(['\Phi_{',dir,'}(x,j), for \Phi>',num2str(Phi_cutoff)]);

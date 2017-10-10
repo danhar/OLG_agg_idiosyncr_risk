@@ -29,10 +29,14 @@ j0= 0; %21;
 
 scrsz = get(0,'ScreenSize');
 if (visibility=='off')
+    scrsz = [1 1 1920 1080];
+    fig_pos = 'PaperPosition';
     fontsize=12;
     linewidth =1.5;
     markersize = 7;
 else
+    scrsz = get(0,'ScreenSize');
+    fig_pos = 'OuterPosition';
     fontsize=16;
     linewidth =2.5;
     markersize = 9;
@@ -46,7 +50,7 @@ for j=jplot%[39, 40, 41,42,43,44] % %[40,45,50,57]
     gen_str=num2str(j+j0);
     xgrid=xgridM(j,:);
 
-    figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+    figure(fig_pos,[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
         
     subplot(2,2,1)
     plot(xgrid,cons(j,:),'LineWidth',linewidth);
@@ -95,7 +99,7 @@ for j=jplot%[39, 40, 41,42,43,44] % %[40,45,50,57]
     
     if (plot_bonds)
         bonds=apgrid(j,:)-stocks(j,:);
-        figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/4 scrsz(4)/2])
+        figure(fig_pos,[scrsz(3)/2 1 scrsz(3)/4 scrsz(4)/2],'visible',visibility,'PaperPositionMode','auto')
         plot(xgrid,bonds,'LineWidth',linewidth);
         h=legend(['bonds^{',gen_str,'}(x)'],'Location','SouthEast');
      %   xlabel('x','FontSize',fontsize); ylabel(['stocks^{',gen_str,'}(x)'],'FontSize',fontsize);

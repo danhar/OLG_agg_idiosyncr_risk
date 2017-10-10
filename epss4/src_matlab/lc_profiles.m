@@ -44,14 +44,18 @@ offset = -35;
 agegrid=[j0+1:j0+nj];
 
 if (visibility=='off')
+    scrsz = [1 1 1920 1080];
+    fig_pos = 'PaperPosition';
     fontsize=12;
     linewidth =1.5;
 else
+    scrsz = get(0,'ScreenSize');
+    fig_pos = 'OuterPosition';
     fontsize=16;
     linewidth =2.5;
 end
 
-figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 
 subplot(3,2,1)
 plot(agegrid,kappa_lc,'-o','LineWidth',linewidth);
@@ -112,7 +116,7 @@ print('-depsc', ['graphs/lifecycles']);
 system(['epstopdf graphs/lifecycles.eps']);
 
 
-figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 
 subplot(2,2,1)
 plot(agegrid,cons_lc,'LineWidth',linewidth);
@@ -153,7 +157,7 @@ title('Cross-sectional variance of log consumption');
 print('-depsc', ['graphs/lifecycles2']);
 system(['epstopdf graphs/lifecycles2.eps']);
 
-figure('OuterPosition',[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[scrsz(3)/2 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 
 subplot(2,2,1)
 plot(agegrid,return_lc,'LineWidth',linewidth);

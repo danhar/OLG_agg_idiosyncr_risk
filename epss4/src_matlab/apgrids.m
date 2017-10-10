@@ -9,9 +9,13 @@ close all;
 if (isempty(gplot_all))    
     visibility = 'on ';
     dir = 'FD1_KK/msge';  % 'ge'
+    scrsz = get(0,'ScreenSize');
+    fig_pos = 'OuterPosition';
 else
     visibility = 'off';
     dir = getenv('EPSSDIR');
+    scrsz = [1 1 1920 1080];
+    fig_pos = 'PaperPosition';   
 end
 
 cd('../model_output/')
@@ -19,18 +23,17 @@ cd('../model_output/')
 
 cd(dir)
 apgrid=dlmread('apgrid_mean.txt');
-scrsz = get(0,'ScreenSize');
 
 for j=[1,35]
     gen_str=num2str(j);
-    figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+    figure(fig_pos,[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
     plot(apgrid(j,:),0,'x');
     set(gca,'FontSize',16);
     title(['apgrid for generation ',gen_str,', ',dir]);
     xlabel('ap','FontSize',16);
 end
 
-figure('OuterPosition',[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility)
+figure(fig_pos,[1 1 scrsz(3)/2 scrsz(4)],'visible',visibility,'PaperPositionMode','auto')
 plot(apgrid);
 ylabel('ap','FontSize',16);
 set(gca,'FontSize',16);
