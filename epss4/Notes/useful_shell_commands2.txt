@@ -17,15 +17,14 @@ find /home/isildur/work/Research/EPSocSec/code/epss4/model_input/calib_ss -name 
 --------------------------------------------------------------------------------
 
 To change header in first line
-find . -name "*.f90" -exec sed -i "s/$old/$header/g" {} \;
+find . -name "*.f90" -exec sed -i "s/$old/$new/g" {} \;
 with for example 
 old='! Copyright (C) 2016 Daniel Harenberg - All Rights Reserved'
-header='!*******************************************************************************\n! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.\n!*******************************************************************************\n'
+new='!*******************************************************************************\n! Copyright (c) 2010-2017 Daniel Harenberg - All rights reserved.\n!*******************************************************************************\n'
 
 or to update copyright:
 old='(c) 2010-2016'
 new='(c) 2010-2017'
-find . -name "*.f90" -exec sed -i "s/$old/$new/g" {} \;
 
 --------------------------------------------------------------------------------
  
