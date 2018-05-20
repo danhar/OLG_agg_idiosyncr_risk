@@ -1153,7 +1153,7 @@ use omp_lib           ,only: OMP_get_max_threads
 ! calibration_mod:get_params, set_params, and model_targets! To make sure those have been changed, need to check here!
     select case(calib_targets)
         case('paper', 'presentation', 'computation', 'pc', 'std_w', 'del_mean', 'sharpe', 'nosharpe', 'no_ep', 'I_Y', 'no_beta', &
-              'baseline','sharpe_ratio','equity_premium','no_AR','base_no_delstd','base_K_Y_3','cal_zeta')
+              'baseline','sharpe_ratio','equity_premium','no_AR','base_no_delstd','base_K_Y_3','cal_zeta','base_no_beta')
         ! continue
         case default
             print*, 'ERROR: calib_targets must take a value that corresponds to the cases defined in calibration_mod:get_params, set_params, and model_targets!'
