@@ -1,14 +1,7 @@
-# epss
-Social security project EPSocSec with Alex Ludwig.
+# Fortran code for the article [Idiosyncratic Risk, Aggregate Risk, and the Welfare Effects of Social Security](https://onlinelibrary.wiley.com/doi/10.1111/iere.12365)
+With [Alexander Ludwig](https://alexander-ludwig.com/).
 
-*************************************************************************
-Copyright (c) 2010-2017 Daniel Harenberg - All Rights Reserved
+## Cite as
+Harenberg, D., & Ludwig, A. (2019). Idiosyncratic Risk, Aggregate Risk, and the Welfare Effects of Social Security. International Economic Review, 60(2), 661–692. https://doi.org/10.1111/iere.12365
 
-This copyright applies to all files of the epss repository, hosted on
-https://github.com/danhar/epss:
-* Unauthorized copying of any file or parts of it, via any medium is strictly prohibited.
-* All files and contents are proprietary and confidential.
-
-Excluded from this license are some files in the folder src_utilities.
-In that folder, the licenses are as indicated in each file.
 *************************************************************************
